@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{app.title}">Sổ liên lạc điện tử - Đại học FPT</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+    <header class="brand-header py-3 shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand fs-4 text-decoration-none" th:href="@{/}">
+                <i class="bi bi-mortarboard-fill me-2"></i>FPT <span>Contact Book</span>
+            </a>
+            <span class="badge badge-status">
+                <i class="bi bi-check-circle-fill me-1"></i>v0.0.1
+            </span>
+        </div>
+    </header>
+
+    <main class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card card-custom p-4 text-center">
+                    <div class="my-4">
+                        <i class="bi bi-broadcast text-success display-1"></i>
+                    </div>
+                    <h1 class="h3 fw-bold mb-3" th:text="#{app.welcome}">Hệ thống đang chạy</h1>
+                    <p class="text-muted mb-4" th:text="#{app.status.ready}">Hệ thống sẵn sàng phục vụ</p>
+                    
+                    <div class="alert alert-light border text-start mb-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-cpu text-primary me-2 fs-5"></i>
+                            <span class="fw-semibold">Nền tảng:</span>
+                            <span class="ms-auto badge bg-secondary">Java 21 · Spring Boot 4.1</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-database text-info me-2 fs-5"></i>
+                            <span class="fw-semibold">Cơ sở dữ liệu:</span>
+                            <span class="ms-auto badge bg-secondary">SQL Server</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-shield-check text-success me-2 fs-5"></i>
+                            <span class="fw-semibold">Bảo mật:</span>
+                            <span class="ms-auto badge bg-secondary">Spring Security 7</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <a th:href="@{/login}" class="btn btn-primary-custom px-4 py-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-4 text-muted small">
+        <p class="mb-0">&copy; 2026 Đại học FPT - Sổ liên lạc điện tử</p>
+    </footer>
+
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
