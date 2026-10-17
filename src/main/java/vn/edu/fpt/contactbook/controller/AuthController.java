@@ -23,6 +23,7 @@ public class AuthController {
                 case "locked" -> "auth.login.temporarily-locked";
                 case "disabled" -> "auth.login.disabled";
                 case "norole" -> "auth.login.no-role";
+                case "expired" -> "auth.login.session-expired";
                 default -> "auth.login.error";
             });
         }

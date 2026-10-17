@@ -209,10 +209,38 @@ class LoginIntegrationTest {
     }
 
     @Test
-    @DisplayName("POST /login thiếu CSRF bị 403")
-    void loginWithoutCsrfIsForbidden() throws Exception {
+    @DisplayName("POST /login thiếu CSRF: không đăng nhập, quay lại trang đăng nhập báo hết phiên")
+    void loginWithoutCsrfIsRejected() throws Exception {
         mockMvc.perform(post("/login").param("phone", TestAccounts.ADMIN).param("password", PASSWORD))
-                .andExpect(status().isForbidden());
+                .andExpect(redirectedUrl("/login?error=expired"))
+                .andExpect(unauthenticated());
+    }
+
+    @Test
+    @DisplayName("Form đăng nhập để quá hạn phiên (mã CSRF cũ): báo hết phiên thay vì 403")
+    void staleLoginFormRedirectsToLogin() throws Exception {
+        mockMvc.perform(post("/login").param("phone", TestAccounts.ADMIN).param("password", PASSWORD)
+                        .with(csrf().useInvalidToken()))
+                .andExpect(redirectedUrl("/login?error=expired"))
+                .andExpect(unauthenticated());
+
+        mockMvc.perform(get("/login").param("error", "expired"))
+                .andExpect(content().string(containsString("Phiên làm việc đã hết hạn, vui lòng đăng nhập lại")));
+    }
+
+    @Test
+    @DisplayName("Bấm Đăng xuất sau khi phiên hết hạn: về trang đăng nhập thay vì 403")
+    void staleLogoutRedirectsToLogin() throws Exception {
+        mockMvc.perform(post("/logout").with(csrf().useInvalidToken()))
+                .andExpect(redirectedUrl("/login?error=expired"));
+    }
+
+    @Test
+    @DisplayName("Gửi form khác sau khi phiên hết hạn: về trang đăng nhập thay vì 403")
+    void staleFormAfterSessionExpiryRedirectsToLogin() throws Exception {
+        mockMvc.perform(post("/change-password").with(csrf().useInvalidToken())
+                        .param("currentPassword", PASSWORD))
+                .andExpect(redirectedUrl("/login?error=expired"));
     }
 
     @Test

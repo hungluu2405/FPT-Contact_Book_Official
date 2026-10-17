@@ -18,6 +18,7 @@ import vn.edu.fpt.contactbook.security.LoginAttemptService;
 import vn.edu.fpt.contactbook.security.LoginSuccessHandler;
 import vn.edu.fpt.contactbook.security.MustChangePasswordFilter;
 import vn.edu.fpt.contactbook.security.PhoneAuthenticationProvider;
+import vn.edu.fpt.contactbook.security.SessionExpiredAccessDeniedHandler;
 
 import java.util.Map;
 
@@ -51,6 +52,9 @@ public class SecurityConfig {
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .accessDeniedHandler(new SessionExpiredAccessDeniedHandler())
             )
             .addFilterAfter(new MustChangePasswordFilter(), AuthorizationFilter.class);
 
