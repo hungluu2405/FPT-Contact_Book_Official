@@ -10,8 +10,8 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
+import vn.edu.fpt.contactbook.dto.UserListRow;
 import vn.edu.fpt.contactbook.model.ClassSession;
 import vn.edu.fpt.contactbook.model.Enrollment;
 import vn.edu.fpt.contactbook.model.ParentStudent;
@@ -20,6 +20,8 @@ import vn.edu.fpt.contactbook.model.UserRole;
 import vn.edu.fpt.contactbook.model.enums.ParentRelationship;
 import vn.edu.fpt.contactbook.model.enums.RoleCodes;
 import vn.edu.fpt.contactbook.support.TestDatabaseExtension;
+import vn.edu.fpt.contactbook.util.LikePatterns;
+import vn.edu.fpt.contactbook.util.PhoneUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -71,34 +73,88 @@ class RepositoryQueryTest {
 
         @Test
         void searchByPhoneFragmentIsPaged() {
-            Page<User> page = userRepository.search("090000000", PageRequest.of(0, 2, Sort.by("phone")));
+            Page<UserListRow> page = search("090000000", null, null, null, null, PageRequest.of(0, 2));
 
             assertThat(page.getTotalElements()).isEqualTo(5);
             assertThat(page.getTotalPages()).isEqualTo(3);
-            assertThat(page.getContent()).extracting(User::getPhone).containsExactly(ADMIN_PHONE, "0900000002");
+            assertThat(page.getContent()).hasSize(2).allMatch(row -> row.phone().startsWith("090000000"));
         }
 
         @Test
-        void searchByNameAndEmailIgnoresCase() {
-            assertThat(userRepository.search("TRƯỞNG", PageRequest.of(0, 10)).getContent())
-                    .extracting(User::getPhone)
-                    .containsExactly("0900000002");
-            assertThat(userRepository.search("Student@FPT", PageRequest.of(0, 10)).getContent())
-                    .extracting(User::getPhone)
-                    .containsExactly("0900000004");
+        void searchByNameIgnoresCase() {
+            assertThat(phones(search("TRƯỞNG"))).containsExactly("0900000002");
+        }
+
+        @Test
+        void searchByStudentAndTeacherCode() {
+            assertThat(phones(search("se190001"))).containsExactly("0900000004");
+            assertThat(phones(search("gv002"))).containsExactly("0900000003");
+        }
+
+        @Test
+        void searchByPhoneInOtherFormats() {
+            assertThat(phones(search("+84900000001"))).containsExactly(ADMIN_PHONE);
+        }
+
+        @Test
+        @DisplayName("Ký tự đại diện LIKE (_ % [) trong từ khóa được coi là ký tự thường")
+        void wildcardsInKeywordAreLiteral() {
+            assertThat(search("_").getContent()).isEmpty();
+            assertThat(search("%").getContent()).isEmpty();
+            assertThat(search("[0]").getContent()).isEmpty();
         }
 
         @Test
         void searchWithBlankOrNullKeywordReturnsAll() {
             long total = userRepository.count();
 
-            assertThat(userRepository.search("", PageRequest.of(0, 1)).getTotalElements()).isEqualTo(total);
-            assertThat(userRepository.search(null, PageRequest.of(0, 1)).getTotalElements()).isEqualTo(total);
+            assertThat(search("").getTotalElements()).isEqualTo(total);
+            assertThat(search(null).getTotalElements()).isEqualTo(total);
         }
 
         @Test
         void searchWithoutMatchReturnsEmptyPage() {
-            assertThat(userRepository.search("khong-ton-tai", PageRequest.of(0, 10))).isEmpty();
+            assertThat(search("khong-ton-tai")).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Lọc theo vai trò, bộ môn giảng viên, lớp, trạng thái")
+        void filters() {
+            assertThat(search(null, "TEACHER", null, null, null, PageRequest.of(0, 50)).getTotalElements())
+                    .isEqualTo(5);
+            assertThat(phones(search(null, null, 1L, null, null, PageRequest.of(0, 50))))
+                    .containsExactlyInAnyOrder("0900000002", "0900000003", "0922334455", "0922334456");
+            assertThat(phones(search(null, null, null, 1L, null, PageRequest.of(0, 50))))
+                    .containsExactly("0900000004");
+            assertThat(search(null, null, null, null, false, PageRequest.of(0, 50))).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Phạm vi trưởng bộ môn: chỉ giảng viên thuộc các bộ môn được giao")
+        void scopedToDepartments() {
+            Page<UserListRow> se = userRepository.search(null, null, null, null, null, null,
+                    true, List.of(1L), PageRequest.of(0, 50));
+            Page<UserListRow> ia = userRepository.search(null, null, null, null, null, null,
+                    true, List.of(38L), PageRequest.of(0, 50));
+
+            assertThat(se.getContent()).extracting(UserListRow::teacherCode)
+                    .containsExactlyInAnyOrder("GV001", "GV002", "GV003", "GV004");
+            assertThat(ia).isEmpty();
+        }
+
+        private Page<UserListRow> search(String keyword) {
+            return search(keyword, null, null, null, null, PageRequest.of(0, 50));
+        }
+
+        private Page<UserListRow> search(String keyword, String role, Long departmentId, Long classId,
+                                         Boolean active, PageRequest page) {
+            return userRepository.search(LikePatterns.containsIgnoreCase(keyword),
+                    PhoneUtils.normalize(keyword).orElse(null), role, departmentId, classId, active,
+                    false, List.of(-1L), page);
+        }
+
+        private List<String> phones(Page<UserListRow> page) {
+            return page.getContent().stream().map(UserListRow::phone).toList();
         }
     }
 
