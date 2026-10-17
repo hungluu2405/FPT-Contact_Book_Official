@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{error.500.title} + ' - ' + #{app.title}">Lỗi 500</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="error-body">
+<main class="error-card card card-custom p-5 text-center">
+    <i class="bi bi-exclamation-octagon error-icon"></i>
+    <p class="error-code">500</p>
+    <h1 class="h3" th:text="#{error.500.title}">Lỗi</h1>
+    <p class="text-muted mb-4" th:text="#{error.500.message}">Mô tả lỗi</p>
+    <a class="btn btn-orange btn-lg" th:href="@{/}" th:text="#{common.home}">Về trang chủ</a>
+</main>
+</body>
+</html>

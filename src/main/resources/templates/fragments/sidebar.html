@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!--/* Menu gộp mọi vai trò; TEACHER và HEAD_OF_DEPARTMENT dùng chung một mục nên không lặp. */-->
+<nav th:fragment="sidebar" id="appSidebar" class="app-sidebar collapse d-md-block">
+    <ul class="nav flex-column">
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin}" th:classappend="${activeMenu == 'admin'} ? 'active'">
+                <i class="bi bi-speedometer2"></i><span th:text="#{menu.admin}">Trang quản trị</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasAnyRole('TEACHER', 'HEAD_OF_DEPARTMENT')">
+            <a class="nav-link" th:href="@{/teacher}" th:classappend="${activeMenu == 'teacher'} ? 'active'">
+                <i class="bi bi-easel"></i><span th:text="#{menu.teacher}">Trang giảng viên</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('STUDENT')">
+            <a class="nav-link" th:href="@{/student}" th:classappend="${activeMenu == 'student'} ? 'active'">
+                <i class="bi bi-backpack"></i><span th:text="#{menu.student}">Trang sinh viên</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('PARENT')">
+            <a class="nav-link" th:href="@{/parent}" th:classappend="${activeMenu == 'parent'} ? 'active'">
+                <i class="bi bi-people"></i><span th:text="#{menu.parent}">Trang phụ huynh</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/profile}" th:classappend="${activeMenu == 'profile'} ? 'active'">
+                <i class="bi bi-person-vcard"></i><span th:text="#{menu.profile}">Hồ sơ cá nhân</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/change-password}"
+               th:classappend="${activeMenu == 'password'} ? 'active'">
+                <i class="bi bi-key"></i><span th:text="#{menu.change-password}">Đổi mật khẩu</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>

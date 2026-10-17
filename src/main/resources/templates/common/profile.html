@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{profile.title} + ' - ' + #{app.title}">Hồ sơ cá nhân</title>
+</head>
+<body>
+<section>
+    <h1 class="page-title" th:text="#{profile.title}">Hồ sơ cá nhân</h1>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card card-custom p-4 h-100">
+                <div class="text-center mb-3">
+                    <img th:if="${profile.avatarUrl}" th:src="@{${profile.avatarUrl}}" class="avatar-lg"
+                         th:alt="#{profile.avatar}" alt="Ảnh đại diện">
+                    <div th:unless="${profile.avatarUrl}" class="avatar-lg avatar-placeholder">
+                        <i class="bi bi-person"></i>
+                    </div>
+                </div>
+                <h2 class="h5 mb-3" th:text="#{profile.info}">Thông tin tài khoản</h2>
+                <dl class="profile-info mb-0">
+                    <dt th:text="#{profile.full-name}">Họ và tên</dt>
+                    <dd th:text="${profile.fullName}">Họ tên</dd>
+                    <dt th:text="#{profile.phone}">Số điện thoại</dt>
+                    <dd>
+                        <span th:text="${profile.phone}">0900000000</span>
+                        <small class="d-block text-muted" th:text="#{profile.phone.hint}">Do quản trị viên quản lý.</small>
+                    </dd>
+                    <dt th:text="#{profile.gender}">Giới tính</dt>
+                    <dd th:text="${profile.gender} ? #{'gender.' + ${profile.gender}} : #{profile.empty}">Nam</dd>
+                    <dt th:text="#{profile.date-of-birth}">Ngày sinh</dt>
+                    <dd th:text="${profile.dateOfBirth} ? ${#temporals.format(profile.dateOfBirth, 'dd/MM/yyyy')} : #{profile.empty}">01/01/2000</dd>
+                    <dt th:text="#{profile.last-login}">Đăng nhập gần nhất</dt>
+                    <dd th:text="${profile.lastLoginAt} ? ${#temporals.format(profile.lastLoginAt, 'dd/MM/yyyy HH:mm')} : #{profile.empty}">01/01/2026 08:00</dd>
+                    <dt th:text="#{home.roles}">Vai trò</dt>
+                    <dd>
+                        <span th:each="role : ${profile.roles}" class="d-block">
+                            <span th:text="#{'role.' + ${role.roleCode}}">Vai trò</span>
+                            <span th:if="${role.departmentName}" class="text-muted"
+                                  th:text="'- ' + ${role.departmentName}">Bộ môn</span>
+                        </span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card card-custom p-4">
+                <h2 class="h5 mb-3" th:text="#{profile.edit}">Cập nhật hồ sơ</h2>
+                <form th:action="@{/profile}" th:object="${form}" method="post" enctype="multipart/form-data" novalidate>
+                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                        <p class="mb-0" th:each="err : ${#fields.globalErrors()}" th:text="${err}">Lỗi</p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label" th:text="#{profile.email}">Email</label>
+                        <input type="email" class="form-control" th:field="*{email}" maxlength="150"
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" autocomplete="email">
+                        <div class="invalid-feedback" th:errors="*{email}">Lỗi</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label" th:text="#{profile.address}">Địa chỉ</label>
+                        <input type="text" class="form-control" th:field="*{address}" maxlength="255"
+                               th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'"
+                               autocomplete="street-address">
+                        <div class="invalid-feedback" th:errors="*{address}">Lỗi</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="avatar" class="form-label" th:text="#{profile.avatar}">Ảnh đại diện</label>
+                        <input type="file" id="avatar" name="avatar" class="form-control"
+                               accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                               th:classappend="${avatarError} ? 'is-invalid'"
+                               aria-describedby="avatarHint">
+                        <div class="invalid-feedback" th:if="${avatarError}" th:text="${avatarError}">Lỗi</div>
+                        <div id="avatarHint" class="form-text" th:text="#{profile.avatar.hint}">JPG hoặc PNG, tối đa 2 MB.</div>
+                    </div>
+                    <button type="submit" class="btn btn-orange btn-lg" th:text="#{common.save}">Lưu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

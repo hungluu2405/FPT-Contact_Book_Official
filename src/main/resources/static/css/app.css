@@ -57,3 +57,252 @@ body {
     padding: 0.35rem 0.65rem;
     border-radius: 9999px;
 }
+
+/* ---------- Nút chính màu cam ---------- */
+.btn-orange {
+    background-color: var(--color-orange);
+    border-color: var(--color-orange);
+    color: var(--color-white);
+    font-weight: 600;
+}
+
+.btn-orange:hover,
+.btn-orange:focus {
+    background-color: #EA580C;
+    border-color: #EA580C;
+    color: var(--color-white);
+}
+
+/* ---------- Trang đăng nhập ---------- */
+.login-body {
+    background-color: var(--color-bg);
+    font-size: 1.05rem;
+}
+
+.login-hero {
+    background-color: var(--color-navy);
+    color: var(--color-white);
+    text-align: center;
+    padding: 2.5rem 1.5rem 6rem;
+    border-bottom-left-radius: 2.5rem;
+    border-bottom-right-radius: 2.5rem;
+}
+
+.login-brand {
+    color: var(--color-orange);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 1rem;
+}
+
+.login-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.login-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0;
+}
+
+.login-card-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 0 1rem 2rem;
+    margin-top: -4rem;
+}
+
+.login-card {
+    background-color: var(--color-white);
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(10, 25, 48, 0.12);
+    padding: 2rem 1.5rem;
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-forgot {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    text-align: center;
+    margin: 1.25rem 0 0;
+}
+
+/* ---------- Bố cục chung ---------- */
+.app-body {
+    font-size: 1.05rem;
+}
+
+.app-topbar {
+    background-color: var(--color-navy);
+    color: var(--color-white);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+.app-brand {
+    color: var(--color-white);
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.app-brand:hover {
+    color: var(--color-orange);
+}
+
+.app-menu-toggle {
+    color: var(--color-white);
+    font-size: 1.5rem;
+    padding: 0 0.25rem;
+}
+
+.app-user {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.app-user-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 56px);
+}
+
+.app-sidebar {
+    background-color: var(--color-white);
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.75rem;
+}
+
+.app-sidebar .nav-link {
+    color: var(--color-text);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 0.9rem;
+}
+
+.app-sidebar .nav-link:hover {
+    background-color: var(--color-bg);
+}
+
+.app-sidebar .nav-link.active {
+    background-color: var(--color-orange);
+    color: var(--color-white);
+}
+
+.app-content {
+    flex: 1;
+    padding: 1.5rem 1rem;
+    max-width: 1200px;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .app-shell {
+        flex-direction: row;
+    }
+
+    .app-sidebar {
+        width: 250px;
+        flex-shrink: 0;
+        border-bottom: 0;
+        border-right: 1px solid var(--color-border);
+    }
+
+    .app-content {
+        padding: 2rem;
+    }
+}
+
+.page-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.form-narrow {
+    max-width: 520px;
+}
+
+.role-list li {
+    padding: 0.4rem 0;
+}
+
+.role-badge {
+    background-color: var(--color-navy);
+    margin-right: 0.5rem;
+}
+
+.coming-soon {
+    border-style: dashed;
+}
+
+/* ---------- Hồ sơ ---------- */
+.avatar-lg {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-bg);
+    color: var(--color-muted);
+    font-size: 3rem;
+}
+
+.profile-info dt {
+    color: var(--color-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.profile-info dd {
+    margin-bottom: 0.8rem;
+}
+
+/* ---------- Trang lỗi ---------- */
+.error-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.error-card {
+    max-width: 480px;
+    width: 100%;
+}
+
+.error-icon {
+    color: var(--color-orange);
+    font-size: 3rem;
+}
+
+.error-code {
+    color: var(--color-navy);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0.5rem 0 0;
+}

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!--/* Khung chung: trang con gọi layout(~{::title}, ~{::section}). */-->
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:replace="${title}">Sổ liên lạc điện tử</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="app-body">
+<header th:replace="~{fragments/topbar :: topbar}"></header>
+<div class="app-shell">
+    <nav th:replace="~{fragments/sidebar :: sidebar}"></nav>
+    <main class="app-content">
+        <div th:replace="~{fragments/flash :: flash}"></div>
+        <th:block th:replace="${content}"></th:block>
+    </main>
+</div>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/password-toggle.js}"></script>
+</body>
+</html>

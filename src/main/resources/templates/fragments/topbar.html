@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<header th:fragment="topbar" class="app-topbar">
+    <button class="btn btn-link app-menu-toggle d-md-none" type="button" data-bs-toggle="collapse"
+            data-bs-target="#appSidebar" aria-controls="appSidebar" aria-expanded="false"
+            th:attr="aria-label=#{menu.toggle}">
+        <i class="bi bi-list"></i>
+    </button>
+    <a class="app-brand" th:href="@{/}">
+        <i class="bi bi-mortarboard-fill"></i>
+        <span th:text="#{app.brand}">FPT University</span>
+    </a>
+    <div class="app-user" sec:authorize="isAuthenticated()">
+        <span class="app-user-name">
+            <i class="bi bi-person-circle"></i>
+            <span sec:authentication="principal.fullName">Họ tên</span>
+        </span>
+        <form th:action="@{/logout}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-right"></i>
+                <span th:text="#{auth.logout}">Đăng xuất</span>
+            </button>
+        </form>
+    </div>
+</header>
+</body>
+</html>

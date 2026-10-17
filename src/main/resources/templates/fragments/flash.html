@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="flash">
+    <div th:if="${successMessage}" class="alert alert-success d-flex align-items-center gap-2" role="status">
+        <i class="bi bi-check-circle-fill"></i><span th:text="${successMessage}">Thành công</span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i><span th:text="${errorMessage}">Lỗi</span>
+    </div>
+</div>
+</body>
+</html>
