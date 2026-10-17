@@ -46,6 +46,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
+    static final int PAGE_WINDOW = 2;
+
     private final UserService userService;
     private final UserAccessPolicy accessPolicy;
     private final CatalogLookupService catalogLookupService;
@@ -64,6 +66,9 @@ public class UserController {
         Page<UserSummaryView> users = userService.list(actor, filter, page);
         boolean admin = accessPolicy.isAdmin(actor);
         model.addAttribute("users", users);
+        // Chỉ hiện trang hiện tại ±PAGE_WINDOW để thanh phân trang không dài ra theo số trang.
+        model.addAttribute("pageStart", Math.max(0, users.getNumber() - PAGE_WINDOW));
+        model.addAttribute("pageEnd", Math.min(users.getTotalPages() - 1, users.getNumber() + PAGE_WINDOW));
         model.addAttribute("isAdmin", admin);
         model.addAttribute("roleCodes", UserService.ROLE_ORDER);
         model.addAttribute("departments", admin ? catalogLookupService.departments()

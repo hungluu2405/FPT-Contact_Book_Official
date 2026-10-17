@@ -473,6 +473,28 @@ class UserManagementIntegrationTest {
                         containsString("status=ACTIVE"))));
     }
 
+    @Test
+    @DisplayName("Thanh phân trang chỉ hiện trang hiện tại ±2")
+    void paginationShowsWindowOfPages() throws Exception {
+        for (int i = 0; i < 130; i++) {
+            User user = new User();
+            user.setPhone(String.format("0978000%03d", i));
+            user.setFullName("Người Cửa Sổ " + i);
+            user.setPasswordHash("x");
+            userRepository.save(user);
+        }
+        userRepository.flush();
+
+        String firstPage = mockMvc.perform(get("/admin/users").param("keyword", "Cửa Sổ").with(as(TestAccounts.ADMIN)))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(firstPage).contains("page=2&amp;").doesNotContain("page=3&amp;").doesNotContain("page=6&amp;");
+
+        String middlePage = mockMvc.perform(get("/admin/users").param("keyword", "Cửa Sổ").param("page", "4")
+                        .with(as(TestAccounts.ADMIN)))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(middlePage).contains("page=2&amp;", "page=6&amp;").doesNotContain("page=1&amp;");
+    }
+
     private MockHttpServletRequestBuilder newTeacherHead(String phone, String teacherCode, String email) {
         MockHttpServletRequestBuilder request = post("/admin/users/new").with(as(TestAccounts.ADMIN)).with(csrf())
                 .param("phone", phone).param("fullName", "Giảng viên Mới")

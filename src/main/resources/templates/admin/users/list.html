@@ -102,7 +102,7 @@
                    departmentId=${filter.departmentId}, classId=${filter.classId}, status=${filter.status})}"
                    th:text="#{common.previous}">Trước</a>
             </li>
-            <li class="page-item" th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
+            <li class="page-item" th:each="i : ${#numbers.sequence(pageStart, pageEnd)}"
                 th:classappend="${i == users.number} ? 'active'">
                 <a class="page-link" th:href="@{/admin/users(page=${i}, keyword=${filter.keyword}, role=${filter.role},
                    departmentId=${filter.departmentId}, classId=${filter.classId}, status=${filter.status})}"
