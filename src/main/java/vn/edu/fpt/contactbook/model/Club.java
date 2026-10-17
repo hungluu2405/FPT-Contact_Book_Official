@@ -57,12 +57,12 @@ public class Club {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "advisor_id")
-    private Teacher advisor;
+    private User advisor;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private ClubStatus status;
+    private ClubStatus status = ClubStatus.ACTIVE;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

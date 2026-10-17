@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -22,7 +23,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "class_sessions")
+@Table(
+        name = "class_sessions",
+        uniqueConstraints = @UniqueConstraint(name = "uq_sess_cs_slot", columnNames = {"class_section_id", "session_date", "start_time"})
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -61,7 +65,7 @@ public class ClassSession {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private SessionStatus status;
+    private SessionStatus status = SessionStatus.SCHEDULED;
 
     @Size(max = 255)
     @Column(name = "note", length = 255)

@@ -11,10 +11,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "subjects")
@@ -44,6 +47,8 @@ public class Subject {
     private String name;
 
     @NotNull
+    @Positive
+    @JdbcTypeCode(SqlTypes.TINYINT)
     @Column(name = "credits", nullable = false)
     private Short credits;
 

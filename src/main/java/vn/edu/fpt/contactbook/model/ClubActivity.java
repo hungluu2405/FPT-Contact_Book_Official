@@ -14,6 +14,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -59,13 +60,14 @@ public class ClubActivity {
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
+    @Positive
     @Column(name = "max_participants")
     private Short maxParticipants;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private ClubActivityStatus status;
+    private ClubActivityStatus status = ClubActivityStatus.PLANNED;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

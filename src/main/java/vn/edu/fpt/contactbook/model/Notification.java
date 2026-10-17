@@ -52,7 +52,7 @@ public class Notification {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "priority", nullable = false, length = 20)
-    private NotificationPriority priority;
+    private NotificationPriority priority = NotificationPriority.NORMAL;
 
     @NotNull
     @Enumerated(EnumType.STRING)

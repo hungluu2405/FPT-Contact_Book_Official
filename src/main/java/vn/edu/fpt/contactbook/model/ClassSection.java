@@ -14,6 +14,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,13 +55,14 @@ public class ClassSection {
     @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
 
+    @Positive
     @Column(name = "max_students")
     private Short maxStudents;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private SectionStatus status;
+    private SectionStatus status = SectionStatus.OPEN;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

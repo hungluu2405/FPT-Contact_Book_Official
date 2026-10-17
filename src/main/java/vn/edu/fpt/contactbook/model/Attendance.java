@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -23,7 +24,10 @@ import vn.edu.fpt.contactbook.model.enums.AttendanceStatus;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "attendance")
+@Table(
+        name = "attendance",
+        uniqueConstraints = @UniqueConstraint(name = "uq_attendance", columnNames = {"session_id", "student_id"})
+)
 @Getter
 @Setter
 @NoArgsConstructor

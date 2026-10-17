@@ -9,6 +9,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -19,7 +22,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "grades")
+@Table(
+        name = "grades",
+        uniqueConstraints = @UniqueConstraint(name = "uq_grades", columnNames = {"enrollment_id", "component_id"})
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -40,6 +46,8 @@ public class Grade {
     @JoinColumn(name = "component_id", nullable = false)
     private GradeComponent component;
 
+    @DecimalMin("0")
+    @DecimalMax("10")
     @Column(name = "score", precision = 4, scale = 2)
     private BigDecimal score;
 

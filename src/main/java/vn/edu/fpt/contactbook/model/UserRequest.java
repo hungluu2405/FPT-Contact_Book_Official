@@ -73,7 +73,7 @@ public class UserRequest {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private RequestStatus status;
+    private RequestStatus status = RequestStatus.PENDING;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

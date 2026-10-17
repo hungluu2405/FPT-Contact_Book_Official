@@ -47,5 +47,5 @@ public class Semester {
 
     @NotNull
     @Column(name = "is_current", nullable = false)
-    private boolean current;
+    private boolean current = false;
 }

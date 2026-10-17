@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,10 @@ import vn.edu.fpt.contactbook.model.enums.EnrollmentStatus;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "enrollments")
+@Table(
+        name = "enrollments",
+        uniqueConstraints = @UniqueConstraint(name = "uq_enrollments", columnNames = {"class_section_id", "student_id"})
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -45,7 +49,7 @@ public class Enrollment {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private EnrollmentStatus status;
+    private EnrollmentStatus status = EnrollmentStatus.ENROLLED;
 
     @Column(name = "enrolled_at", nullable = false, updatable = false)
     private LocalDateTime enrolledAt;

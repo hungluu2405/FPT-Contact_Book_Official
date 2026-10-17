@@ -42,11 +42,11 @@ public class ParentStudent {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "relationship", nullable = false, length = 30)
-    private ParentRelationship relationship;
+    private ParentRelationship relationship = ParentRelationship.OTHER;
 
     @NotNull
     @Column(name = "is_primary", nullable = false)
-    private boolean isPrimary;
+    private boolean isPrimary = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

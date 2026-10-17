@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,10 @@ import vn.edu.fpt.contactbook.model.enums.ClubMemberStatus;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "club_members")
+@Table(
+        name = "club_members",
+        uniqueConstraints = @UniqueConstraint(name = "uq_club_members", columnNames = {"club_id", "user_id"})
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -46,12 +50,12 @@ public class ClubMember {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "member_role", nullable = false, length = 20)
-    private ClubMemberRole memberRole;
+    private ClubMemberRole memberRole = ClubMemberRole.MEMBER;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private ClubMemberStatus status;
+    private ClubMemberStatus status = ClubMemberStatus.PENDING;
 
     @Column(name = "joined_at")
     private LocalDateTime joinedAt;

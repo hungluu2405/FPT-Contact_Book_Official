@@ -12,6 +12,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,7 @@ public class User {
 
     @NotBlank
     @Size(max = 10)
+    @Pattern(regexp = "0\\d{9}")
     @Column(name = "phone", nullable = false, length = 10, unique = true)
     private String phone;
 
@@ -73,7 +75,7 @@ public class User {
 
     @NotNull
     @Column(name = "must_change_password", nullable = false)
-    private boolean mustChangePassword = false;
+    private boolean mustChangePassword = true;
 
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;

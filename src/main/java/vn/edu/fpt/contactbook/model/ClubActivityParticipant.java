@@ -42,7 +42,7 @@ public class ClubActivityParticipant {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private ParticipantStatus status;
+    private ParticipantStatus status = ParticipantStatus.REGISTERED;
 
     @Column(name = "registered_at", nullable = false, updatable = false)
     private LocalDateTime registeredAt;
