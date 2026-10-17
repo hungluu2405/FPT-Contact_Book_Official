@@ -19,3 +19,11 @@
 17. Giai đoạn 2: tên vai trò hiển thị lấy từ `messages.properties` theo mã vai trò, vì cột `roles.name` trong dữ liệu mẫu không có dấu.
 18. Giai đoạn 2: email để trống trong hồ sơ được lưu `NULL` (unique index `ux_users_email` chỉ bỏ qua NULL).
 19. Giai đoạn 2: mốc thời gian nghiệp vụ dùng `AppTime` (Asia/Ho_Chi_Minh) thay vì múi giờ mặc định của JVM.
+20. Giai đoạn 3a: phiên đang mở của người bị khóa hoặc bị đặt lại mật khẩu vẫn còn hiệu lực đến khi hết hạn (30 phút không hoạt động); lần đăng nhập kế tiếp mới bị chặn hoặc bị ép đổi mật khẩu.
+21. Giai đoạn 3a: mật khẩu tạm chỉ nằm trong flash attribute (session) cho tới request hiển thị kế tiếp rồi bị xóa; trang hiển thị trả Cache-Control: no-store. Không lưu ở đâu khác để xem lại.
+22. Giai đoạn 3a: `user_roles.department_id` của vai trò TEACHER mặc định lấy bộ môn trong hồ sơ giảng viên; HEAD_OF_DEPARTMENT bắt buộc chọn bộ môn; ADMIN, STUDENT, PARENT để NULL. Sửa bộ môn trong hồ sơ giảng viên không tự đổi `user_roles` (đổi ở màn hình vai trò).
+23. Giai đoạn 3a: phạm vi của trưởng bộ môn tính theo `teachers.department_id` (đúng yêu cầu), nên người có vai trò TEACHER/HEAD nhưng chưa có hồ sơ giảng viên (ví dụ user 15 `0911223344` trong dữ liệu mẫu) không hiện trong danh sách "Giảng viên bộ môn".
+24. Giai đoạn 3a: mã sinh viên, mã giảng viên được bỏ khoảng trắng hai đầu và viết hoa trước khi lưu và kiểm tra trùng.
+25. Giai đoạn 3a: liên kết phụ huynh nhập theo số điện thoại phụ huynh (trang sinh viên) hoặc mã sinh viên (trang phụ huynh) thay vì danh sách chọn, vì danh sách người dùng có thể rất dài.
+26. Giai đoạn 3a: khóa tài khoản và gỡ vai trò chạy với isolation SERIALIZABLE để không mất quản trị viên đang hoạt động cuối cùng khi hai quản trị viên thao tác cùng lúc; nếu SQL Server chọn một bên làm deadlock victim thì bên đó nhận lỗi chung và chỉ cần thử lại.
+27. Giai đoạn 3a: tìm kiếm người dùng theo số điện thoại, họ tên, mã SV/GV (không theo email); ký tự `%`, `_`, `[` trong từ khóa được coi là ký tự thường.
