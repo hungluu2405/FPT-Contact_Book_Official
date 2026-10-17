@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.time.LocalDateTime;
 
@@ -44,7 +45,7 @@ public class ConversationMember {
     @PrePersist
     public void prePersist() {
         if (this.joinedAt == null) {
-            this.joinedAt = LocalDateTime.now();
+            this.joinedAt = AppTime.now();
         }
     }
 }

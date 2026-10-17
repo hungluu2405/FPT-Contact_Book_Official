@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.time.LocalDateTime;
 
@@ -54,7 +55,7 @@ public class Message {
     @PrePersist
     public void prePersist() {
         if (this.sentAt == null) {
-            this.sentAt = LocalDateTime.now();
+            this.sentAt = AppTime.now();
         }
     }
 }

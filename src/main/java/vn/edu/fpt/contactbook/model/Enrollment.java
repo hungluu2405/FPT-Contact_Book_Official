@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.fpt.contactbook.model.enums.EnrollmentStatus;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.time.LocalDateTime;
 
@@ -57,7 +58,7 @@ public class Enrollment {
     @PrePersist
     public void prePersist() {
         if (this.enrolledAt == null) {
-            this.enrolledAt = LocalDateTime.now();
+            this.enrolledAt = AppTime.now();
         }
     }
 }

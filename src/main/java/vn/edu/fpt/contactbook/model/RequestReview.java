@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.fpt.contactbook.model.enums.ReviewDecision;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.time.LocalDateTime;
 
@@ -58,7 +59,7 @@ public class RequestReview {
     @PrePersist
     public void prePersist() {
         if (this.reviewedAt == null) {
-            this.reviewedAt = LocalDateTime.now();
+            this.reviewedAt = AppTime.now();
         }
     }
 }

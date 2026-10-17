@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.fpt.contactbook.model.enums.AttendanceStatus;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.time.LocalDateTime;
 
@@ -71,12 +72,12 @@ public class Attendance {
     @PrePersist
     public void prePersist() {
         if (this.markedAt == null) {
-            this.markedAt = LocalDateTime.now();
+            this.markedAt = AppTime.now();
         }
     }
 
     @PreUpdate
     public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = AppTime.now();
     }
 }

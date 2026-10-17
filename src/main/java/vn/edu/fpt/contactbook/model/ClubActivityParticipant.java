@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.fpt.contactbook.model.enums.ParticipantStatus;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.time.LocalDateTime;
 
@@ -50,7 +51,7 @@ public class ClubActivityParticipant {
     @PrePersist
     public void prePersist() {
         if (this.registeredAt == null) {
-            this.registeredAt = LocalDateTime.now();
+            this.registeredAt = AppTime.now();
         }
     }
 }

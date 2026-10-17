@@ -16,6 +16,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.time.LocalDateTime;
 
@@ -59,7 +60,7 @@ public class StoredFile {
     @PrePersist
     public void prePersist() {
         if (this.uploadedAt == null) {
-            this.uploadedAt = LocalDateTime.now();
+            this.uploadedAt = AppTime.now();
         }
     }
 }
