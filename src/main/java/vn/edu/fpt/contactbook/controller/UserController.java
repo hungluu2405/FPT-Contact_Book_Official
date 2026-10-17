@@ -146,7 +146,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public String lock(@AuthenticationPrincipal AppUserPrincipal actor, @PathVariable Long id,
                        HttpServletRequest request, RedirectAttributes redirectAttributes) {
-        return runAndRedirect(id, redirectAttributes, "Đã khóa tài khoản",
+        return FormErrors.runThenRedirect("/admin/users/" + id, redirectAttributes, "Đã khóa tài khoản",
                 () -> userService.lock(actor, id, request.getRemoteAddr()));
     }
 
@@ -154,7 +154,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public String unlock(@AuthenticationPrincipal AppUserPrincipal actor, @PathVariable Long id,
                          HttpServletRequest request, RedirectAttributes redirectAttributes) {
-        return runAndRedirect(id, redirectAttributes, "Đã mở khóa tài khoản",
+        return FormErrors.runThenRedirect("/admin/users/" + id, redirectAttributes, "Đã mở khóa tài khoản",
                 () -> userService.unlock(actor, id, request.getRemoteAddr()));
     }
 
@@ -166,16 +166,6 @@ public class UserController {
         redirectAttributes.addFlashAttribute("temporaryPassword", reset.temporaryPassword());
         redirectAttributes.addFlashAttribute("successMessage",
                 "Đã đặt lại mật khẩu. Người dùng phải đổi mật khẩu ở lần đăng nhập kế tiếp");
-        return "redirect:/admin/users/" + id;
-    }
-
-    static String runAndRedirect(Long id, RedirectAttributes redirectAttributes, String success, Runnable action) {
-        try {
-            action.run();
-            redirectAttributes.addFlashAttribute("successMessage", success);
-        } catch (BusinessException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
         return "redirect:/admin/users/" + id;
     }
 

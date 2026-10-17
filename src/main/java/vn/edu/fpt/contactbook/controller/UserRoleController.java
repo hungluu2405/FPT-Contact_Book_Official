@@ -69,13 +69,8 @@ public class UserRoleController {
     public String remove(@AuthenticationPrincipal AppUserPrincipal actor, @PathVariable Long id,
                          @PathVariable Long userRoleId, HttpServletRequest request,
                          RedirectAttributes redirectAttributes) {
-        try {
-            userRoleService.remove(actor, id, userRoleId, request.getRemoteAddr());
-            redirectAttributes.addFlashAttribute("successMessage", "Đã gỡ vai trò");
-        } catch (BusinessException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
-        return "redirect:/admin/users/" + id + "/roles";
+        return FormErrors.runThenRedirect("/admin/users/" + id + "/roles", redirectAttributes, "Đã gỡ vai trò",
+                () -> userRoleService.remove(actor, id, userRoleId, request.getRemoteAddr()));
     }
 
     private String view(AppUserPrincipal actor, Long id, Model model) {

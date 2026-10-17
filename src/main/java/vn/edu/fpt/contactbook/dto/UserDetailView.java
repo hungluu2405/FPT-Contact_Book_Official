@@ -22,8 +22,4 @@ public record UserDetailView(Long id, String phone, String fullName, String emai
 
     public record ParentProfile(Long id, String occupation) {
     }
-
-    public boolean hasRole(String roleCode) {
-        return roles.stream().anyMatch(role -> role.roleCode().equals(roleCode));
-    }
 }

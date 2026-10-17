@@ -49,7 +49,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
 
-    @Query(value = "SELECT new vn.edu.fpt.contactbook.dto.UserListRow(u.id, u.phone, u.fullName, u.email, "
+    @Query(value = "SELECT new vn.edu.fpt.contactbook.dto.UserListRow(u.id, u.phone, u.fullName, "
             + "u.active, s.studentCode, t.teacherCode, d.name) " + SEARCH_FROM_WHERE + " ORDER BY u.fullName, u.id",
             countQuery = "SELECT COUNT(u) " + SEARCH_FROM_WHERE)
     Page<UserListRow> search(@Param("keywordPattern") String keywordPattern,

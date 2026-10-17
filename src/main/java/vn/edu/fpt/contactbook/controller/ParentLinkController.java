@@ -130,12 +130,6 @@ public class ParentLinkController {
 
     private static String run(Long id, String mode, RedirectAttributes redirectAttributes, String success,
                               Runnable action) {
-        try {
-            action.run();
-            redirectAttributes.addFlashAttribute("successMessage", success);
-        } catch (BusinessException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
-        return "redirect:/admin/users/" + id + "/" + mode;
+        return FormErrors.runThenRedirect("/admin/users/" + id + "/" + mode, redirectAttributes, success, action);
     }
 }
