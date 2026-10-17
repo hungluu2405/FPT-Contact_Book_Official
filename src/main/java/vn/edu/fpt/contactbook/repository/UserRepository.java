@@ -19,6 +19,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmailIgnoreCase(String email);
 
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+
     /**
      * Tìm người dùng theo từ khóa trên họ tên, số điện thoại hoặc email.
      * Từ khóa null hoặc rỗng thì trả về toàn bộ người dùng.

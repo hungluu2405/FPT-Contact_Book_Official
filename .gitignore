@@ -50,3 +50,6 @@ logs/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+### Uploaded files (app.upload-dir) ###
+uploads/
