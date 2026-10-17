@@ -12,5 +12,6 @@ public interface ClassSessionRepository extends JpaRepository<ClassSession, Long
 
     List<ClassSession> findByClassSectionIdOrderBySessionNoAsc(Long classSectionId);
 
-    List<ClassSession> findByClassSectionIdAndSessionDateBetween(Long classSectionId, LocalDate fromDate, LocalDate toDate);
+    /** Mọi buổi học có ngày nằm trong [fromDate, toDate], tính cả hai đầu. */
+    List<ClassSession> findBySessionDateBetweenOrderBySessionDateAscStartTimeAsc(LocalDate fromDate, LocalDate toDate);
 }
