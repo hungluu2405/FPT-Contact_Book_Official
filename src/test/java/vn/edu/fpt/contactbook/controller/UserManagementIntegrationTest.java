@@ -225,6 +225,22 @@ class UserManagementIntegrationTest {
         }
 
         @Test
+        @DisplayName("Nhập sai kiểu số hoặc ngày: thông báo tiếng Việt, không lộ lỗi chuyển kiểu của Java")
+        void typeMismatchShowsVietnameseMessage() throws Exception {
+            mockMvc.perform(post("/admin/users/new").with(as(TestAccounts.ADMIN)).with(csrf())
+                            .param("phone", "0911000116").param("fullName", "Sai kiểu").param("roles", "STUDENT")
+                            .param("profile.studentCode", "SE998").param("profile.majorId", "1")
+                            .param("profile.enrollmentYear", "99999").param("dateOfBirth", "31-12-2000"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(allOf(
+                            containsString("Vui lòng nhập số hợp lệ"),
+                            containsString("Ngày không hợp lệ"),
+                            not(containsString("Failed to convert")),
+                            not(containsString("java.lang")))));
+            assertThat(userRepository.findByPhone("0911000116")).isEmpty();
+        }
+
+        @Test
         @DisplayName("Lớp khác ngành của sinh viên bị từ chối")
         void classMustMatchMajor() throws Exception {
             mockMvc.perform(post("/admin/users/new").with(as(TestAccounts.ADMIN)).with(csrf())
