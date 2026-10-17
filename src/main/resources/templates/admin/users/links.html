@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="(${mode == 'parents'} ? #{user.links.parents} : #{user.links.children}) + ' - ' + ${user.fullName}">Liên kết</title>
+</head>
+<body>
+<!--/* mode = parents: trang của sinh viên (thêm theo SĐT phụ huynh); children: trang của phụ huynh (thêm theo mã SV). */-->
+<section th:with="parentsMode=${mode == 'parents'}">
+    <a th:href="@{/admin/users/{id}(id=${user.id})}" class="d-inline-block mb-2"><i class="bi bi-arrow-left"></i>
+        <span th:text="${user.fullName}">Họ tên</span></a>
+    <h1 class="page-title" th:text="(${parentsMode} ? #{user.links.parents} : #{user.links.children}) + ': ' + ${user.fullName}">Liên kết</h1>
+
+    <div class="card card-custom p-4 mb-4">
+        <p th:if="${#lists.isEmpty(links)}" class="text-muted mb-0" th:text="#{user.links.none}">Chưa có</p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2 px-0"
+                th:each="link : ${links}">
+                <span>
+                    <a th:href="@{/admin/users/{id}(id=${link.userId})}" th:text="${link.fullName}">Tên</a>
+                    <span class="text-muted" th:text="${link.studentCode} ? '(' + ${link.studentCode} + ')' : ${link.phone}">SĐT</span>
+                    <span class="text-muted" th:text="'· ' + #{'relationship.' + ${link.relationship}}">Cha</span>
+                    <span th:if="${link.primary}" class="badge text-bg-warning" th:text="#{user.links.primary}">Chính</span>
+                </span>
+                <span class="d-flex gap-2">
+                    <form th:if="${parentsMode and !link.primary}" method="post"
+                          th:action="@{/admin/users/{id}/parents/{pid}/primary(id=${user.id}, pid=${link.profileId})}">
+                        <button type="submit" class="btn btn-sm btn-outline-primary" th:text="#{user.links.make-primary}">Đặt chính</button>
+                    </form>
+                    <form method="post" th:attr="data-confirm=#{user.links.remove.confirm}"
+                          th:action="${parentsMode}
+                              ? @{/admin/users/{id}/parents/{pid}/remove(id=${user.id}, pid=${link.profileId})}
+                              : @{/admin/users/{id}/children/{sid}/remove(id=${user.id}, sid=${link.profileId})}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{user.links.remove}">Gỡ</button>
+                    </form>
+                </span>
+            </li>
+        </ul>
+    </div>
+
+    <form class="card card-custom p-4" th:object="${form}" method="post" novalidate
+          th:action="${parentsMode} ? @{/admin/users/{id}/parents(id=${user.id})} : @{/admin/users/{id}/children(id=${user.id})}">
+        <h2 class="h5 mb-3" th:text="#{user.links.add}">Thêm liên kết</h2>
+        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+            <p class="mb-0" th:each="err : ${#fields.globalErrors()}" th:text="${err}">Lỗi</p>
+        </div>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="otherKey" class="form-label"
+                       th:text="${parentsMode} ? #{user.links.parent-phone} : #{user.links.student-code}">Khóa</label>
+                <input type="text" class="form-control" th:field="*{otherKey}"
+                       th:attr="inputmode=${parentsMode} ? 'tel' : null"
+                       th:classappend="${#fields.hasErrors('otherKey')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{otherKey}">Lỗi</div>
+            </div>
+            <div class="col-md-4">
+                <label for="relationship" class="form-label" th:text="#{user.links.relationship}">Quan hệ</label>
+                <select class="form-select" th:field="*{relationship}">
+                    <option th:each="r : ${relationships}" th:value="${r}" th:text="#{'relationship.' + ${r}}">Cha</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" th:field="*{primary}">
+                    <label class="form-check-label" for="primary1" th:text="#{user.links.primary}">Phụ huynh chính</label>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-orange btn-lg mt-3" th:text="#{user.links.add}">Thêm</button>
+    </form>
+</section>
+</body>
+</html>

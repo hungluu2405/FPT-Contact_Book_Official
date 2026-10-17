@@ -9,6 +9,17 @@
                 <i class="bi bi-speedometer2"></i><span th:text="#{menu.admin}">Trang quản trị</span>
             </a>
         </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/users}" th:classappend="${activeMenu == 'users'} ? 'active'">
+                <i class="bi bi-people-fill"></i><span th:text="#{menu.users}">Người dùng</span>
+            </a>
+        </li>
+        <!--/* Cùng trang danh sách, UserService giới hạn vào giảng viên bộ môn của trưởng bộ môn. */-->
+        <li class="nav-item" sec:authorize="hasRole('HEAD_OF_DEPARTMENT') and !hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/users}" th:classappend="${activeMenu == 'users'} ? 'active'">
+                <i class="bi bi-person-video3"></i><span th:text="#{menu.department-teachers}">Giảng viên bộ môn</span>
+            </a>
+        </li>
         <li class="nav-item" sec:authorize="hasAnyRole('TEACHER', 'HEAD_OF_DEPARTMENT')">
             <a class="nav-link" th:href="@{/teacher}" th:classappend="${activeMenu == 'teacher'} ? 'active'">
                 <i class="bi bi-easel"></i><span th:text="#{menu.teacher}">Trang giảng viên</span>

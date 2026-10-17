@@ -2,6 +2,7 @@ package vn.edu.fpt.contactbook.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -34,6 +35,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/login", "/css/**", "/js/**", "/webjars/**", "/images/**", "/error",
                         "/favicon.ico").permitAll()
+                // Danh sách và chi tiết người dùng mở cho trưởng bộ môn (phạm vi bộ môn kiểm tra ở UserService);
+                // \d+ để /admin/users/new không lọt vào đây. Mọi URL /admin còn lại chỉ ADMIN.
+                .requestMatchers(HttpMethod.GET, "/admin/users", "/admin/users/{id:\\d+}")
+                    .hasAnyRole(RoleCodes.ADMIN, RoleCodes.HEAD_OF_DEPARTMENT)
                 .requestMatchers("/admin/**").hasRole(RoleCodes.ADMIN)
                 .requestMatchers("/teacher/**").hasAnyRole(RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT)
                 .requestMatchers("/student/**").hasRole(RoleCodes.STUDENT)

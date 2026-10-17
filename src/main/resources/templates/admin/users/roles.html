@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{user.roles.manage} + ' - ' + ${user.fullName}">Vai trò</title>
+</head>
+<body>
+<section>
+    <a th:href="@{/admin/users/{id}(id=${user.id})}" class="d-inline-block mb-2"><i class="bi bi-arrow-left"></i>
+        <span th:text="${user.fullName}">Họ tên</span></a>
+    <h1 class="page-title" th:text="#{user.roles.manage} + ': ' + ${user.fullName}">Vai trò</h1>
+
+    <div class="card card-custom p-4 mb-4">
+        <h2 class="h5 mb-3" th:text="#{user.roles.current}">Vai trò hiện có</h2>
+        <p th:if="${#lists.isEmpty(user.roles)}" class="text-muted mb-0" th:text="#{user.roles.none}">Chưa có</p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center px-0" th:each="role : ${user.roles}">
+                <span>
+                    <span class="badge rounded-pill role-badge" th:text="#{'role.' + ${role.roleCode}}">Vai trò</span>
+                    <span th:if="${role.departmentName}" class="text-muted"
+                          th:text="${role.departmentName} + ' (' + ${role.departmentCode} + ')'">Bộ môn</span>
+                </span>
+                <form th:action="@{/admin/users/{id}/roles/{rid}/remove(id=${user.id}, rid=${role.id})}" method="post"
+                      th:attr="data-confirm=#{user.roles.remove.confirm}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{user.roles.remove}">Gỡ</button>
+                </form>
+            </li>
+        </ul>
+        <p class="small text-muted mt-2 mb-0" th:text="#{user.roles.remove.note}">Gỡ vai trò không xóa hồ sơ.</p>
+    </div>
+
+    <form th:action="@{/admin/users/{id}/roles(id=${user.id})}" th:object="${form}" method="post" novalidate>
+        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+            <p class="mb-0" th:each="err : ${#fields.globalErrors()}" th:text="${err}">Lỗi</p>
+        </div>
+        <div class="card card-custom p-4 mb-3">
+            <h2 class="h5 mb-3" th:text="#{user.roles.add}">Thêm vai trò</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="roleCode" class="form-label" th:text="#{user.filter.role} + ' *'">Vai trò</label>
+                    <select class="form-select" th:field="*{roleCode}" data-role-select
+                            th:classappend="${#fields.hasErrors('roleCode')} ? 'is-invalid'">
+                        <option value="" th:text="#{user.choose}">Chọn</option>
+                        <option th:each="code : ${roleCodes}" th:value="${code}" th:text="#{'role.' + ${code}}">Vai trò</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{roleCode}">Lỗi</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="departmentId" class="form-label" th:text="#{user.department}">Bộ môn</label>
+                    <select class="form-select" th:field="*{departmentId}"
+                            th:classappend="${#fields.hasErrors('departmentId')} ? 'is-invalid'">
+                        <option value="" th:text="#{user.roles.department.none}">Không</option>
+                        <option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.code} + ' - ' + ${d.name}">SE</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{departmentId}">Lỗi</div>
+                    <div class="form-text" th:text="#{user.roles.department.hint}">Gợi ý</div>
+                </div>
+            </div>
+        </div>
+
+        <!--/* Chỉ hiện khối hồ sơ người dùng còn thiếu, khi chọn vai trò tương ứng. */-->
+        <div th:replace="~{admin/users/profile-fields :: fields(
+                showStudent=${user.student == null},
+                showTeacher=${user.teacher == null},
+                showParent=${user.parent == null},
+                byRole=true)}"></div>
+
+        <button type="submit" class="btn btn-orange btn-lg" th:text="#{user.roles.add}">Thêm vai trò</button>
+    </form>
+    <script th:src="@{/js/user-form.js}"></script>
+</section>
+</body>
+</html>

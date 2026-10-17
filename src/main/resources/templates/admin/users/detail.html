@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${user.fullName} + ' - ' + #{app.title}">Người dùng</title>
+</head>
+<body>
+<section>
+    <a th:href="@{/admin/users}" class="d-inline-block mb-2"><i class="bi bi-arrow-left"></i>
+        <span th:text="#{user.back-to-list}">Danh sách</span></a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="page-title mb-0">
+            <span th:text="${user.fullName}">Họ tên</span>
+            <span th:if="${user.active}" class="badge text-bg-success fs-6 align-middle" th:text="#{user.status.active}">Đang hoạt động</span>
+            <span th:unless="${user.active}" class="badge text-bg-secondary fs-6 align-middle" th:text="#{user.status.locked}">Đã khóa</span>
+        </h1>
+    </div>
+
+    <!--/* Mật khẩu tạm chỉ có trong flash của đúng một lần hiển thị; trang trả về Cache-Control: no-store. */-->
+    <div th:if="${temporaryPassword}" class="alert alert-warning" role="alert">
+        <p class="mb-1 fw-semibold" th:text="#{user.temp-password.title}">Mật khẩu tạm</p>
+        <p class="mb-1"><code class="fs-4 temp-password" th:text="${temporaryPassword}">abc</code></p>
+        <p class="mb-0 small" th:text="#{user.temp-password.note}">Chỉ hiện một lần.</p>
+    </div>
+
+    <div sec:authorize="hasRole('ADMIN')" class="d-flex flex-wrap gap-2 mb-3">
+        <a class="btn btn-outline-primary" th:href="@{/admin/users/{id}/edit(id=${user.id})}">
+            <i class="bi bi-pencil"></i> <span th:text="#{common.edit}">Sửa</span></a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/users/{id}/roles(id=${user.id})}">
+            <i class="bi bi-person-badge"></i> <span th:text="#{user.roles.manage}">Vai trò</span></a>
+        <a th:if="${user.student}" class="btn btn-outline-primary" th:href="@{/admin/users/{id}/parents(id=${user.id})}">
+            <i class="bi bi-people"></i> <span th:text="#{user.links.parents}">Phụ huynh</span></a>
+        <a th:if="${user.parent}" class="btn btn-outline-primary" th:href="@{/admin/users/{id}/children(id=${user.id})}">
+            <i class="bi bi-people"></i> <span th:text="#{user.links.children}">Con</span></a>
+        <form th:action="@{/admin/users/{id}/reset-password(id=${user.id})}" method="post"
+              th:attr="data-confirm=#{user.reset.confirm}">
+            <button type="submit" class="btn btn-outline-warning"><i class="bi bi-key"></i>
+                <span th:text="#{user.reset}">Đặt lại mật khẩu</span></button>
+        </form>
+        <form th:if="${user.active and !isSelf}" th:action="@{/admin/users/{id}/lock(id=${user.id})}" method="post"
+              th:attr="data-confirm=#{user.lock.confirm}">
+            <button type="submit" class="btn btn-outline-danger"><i class="bi bi-lock"></i>
+                <span th:text="#{user.lock}">Khóa</span></button>
+        </form>
+        <form th:unless="${user.active}" th:action="@{/admin/users/{id}/unlock(id=${user.id})}" method="post"
+              th:attr="data-confirm=#{user.unlock.confirm}">
+            <button type="submit" class="btn btn-outline-success"><i class="bi bi-unlock"></i>
+                <span th:text="#{user.unlock}">Mở khóa</span></button>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card card-custom p-4 h-100">
+                <h2 class="h5 mb-3" th:text="#{user.section.personal}">Thông tin cá nhân</h2>
+                <dl class="profile-info mb-0">
+                    <dt th:text="#{profile.phone}">Số điện thoại</dt><dd th:text="${user.phone}">0900000000</dd>
+                    <dt th:text="#{profile.email}">Email</dt><dd th:text="${user.email} ?: #{profile.empty}">email</dd>
+                    <dt th:text="#{profile.gender}">Giới tính</dt>
+                    <dd th:text="${user.gender} ? #{'gender.' + ${user.gender}} : #{profile.empty}">Nam</dd>
+                    <dt th:text="#{profile.date-of-birth}">Ngày sinh</dt>
+                    <dd th:text="${user.dateOfBirth} ? ${#temporals.format(user.dateOfBirth, 'dd/MM/yyyy')} : #{profile.empty}">01/01/2000</dd>
+                    <dt th:text="#{profile.address}">Địa chỉ</dt><dd th:text="${user.address} ?: #{profile.empty}">Địa chỉ</dd>
+                    <dt th:text="#{profile.last-login}">Đăng nhập gần nhất</dt>
+                    <dd th:text="${user.lastLoginAt} ? ${#temporals.format(user.lastLoginAt, 'dd/MM/yyyy HH:mm')} : #{profile.empty}">-</dd>
+                    <dt th:text="#{user.must-change}">Phải đổi mật khẩu</dt>
+                    <dd th:text="${user.mustChangePassword} ? #{common.yes} : #{common.no}">Không</dd>
+                </dl>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card card-custom p-4 mb-4">
+                <h2 class="h5 mb-3" th:text="#{home.roles}">Vai trò</h2>
+                <p th:if="${#lists.isEmpty(user.roles)}" class="text-muted mb-0" th:text="#{user.roles.none}">Chưa có</p>
+                <ul class="list-unstyled mb-0 role-list">
+                    <li th:each="role : ${user.roles}">
+                        <span class="badge rounded-pill role-badge" th:text="#{'role.' + ${role.roleCode}}">Vai trò</span>
+                        <span th:if="${role.departmentName}" class="text-muted"
+                              th:text="${role.departmentName} + ' (' + ${role.departmentCode} + ')'">Bộ môn</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="card card-custom p-4 mb-4" th:if="${user.student}">
+                <h2 class="h5 mb-3" th:text="#{user.section.student}">Hồ sơ sinh viên</h2>
+                <dl class="profile-info mb-0">
+                    <dt th:text="#{user.student-code}">Mã SV</dt><dd th:text="${user.student.studentCode}">SE</dd>
+                    <dt th:text="#{user.major}">Ngành</dt><dd th:text="${user.student.majorName}">Ngành</dd>
+                    <dt th:text="#{user.class}">Lớp</dt><dd th:text="${user.student.classCode} ?: #{user.no-class}">Lớp</dd>
+                    <dt th:text="#{user.enrollment-year}">Năm nhập học</dt><dd th:text="${user.student.enrollmentYear}">2024</dd>
+                    <dt th:text="#{user.student-status}">Trạng thái</dt>
+                    <dd th:text="#{'student-status.' + ${user.student.status}}">Đang học</dd>
+                </dl>
+            </div>
+            <div class="card card-custom p-4 mb-4" th:if="${user.teacher}">
+                <h2 class="h5 mb-3" th:text="#{user.section.teacher}">Hồ sơ giảng viên</h2>
+                <dl class="profile-info mb-0">
+                    <dt th:text="#{user.teacher-code}">Mã GV</dt><dd th:text="${user.teacher.teacherCode}">GV</dd>
+                    <dt th:text="#{user.department}">Bộ môn</dt><dd th:text="${user.teacher.departmentName}">Bộ môn</dd>
+                    <dt th:text="#{user.academic-title}">Học hàm học vị</dt>
+                    <dd th:text="${user.teacher.academicTitle} ?: #{profile.empty}">ThS.</dd>
+                </dl>
+            </div>
+            <div class="card card-custom p-4 mb-4" th:if="${user.parent}">
+                <h2 class="h5 mb-3" th:text="#{user.section.parent}">Hồ sơ phụ huynh</h2>
+                <dl class="profile-info mb-0">
+                    <dt th:text="#{user.occupation}">Nghề nghiệp</dt>
+                    <dd th:text="${user.parent.occupation} ?: #{profile.empty}">Nghề</dd>
+                </dl>
+            </div>
+            <div class="card card-custom p-4 mb-4" th:if="${user.student}">
+                <h2 class="h5 mb-3" th:text="#{user.links.parents}">Phụ huynh</h2>
+                <p th:if="${#lists.isEmpty(user.parents)}" class="text-muted mb-0" th:text="#{user.links.none}">Chưa có</p>
+                <ul class="list-unstyled mb-0">
+                    <li th:each="link : ${user.parents}">
+                        <a th:href="@{/admin/users/{id}(id=${link.userId})}" th:text="${link.fullName}">Phụ huynh</a>
+                        <span class="text-muted" th:text="'· ' + #{'relationship.' + ${link.relationship}}">Cha</span>
+                        <span th:if="${link.primary}" class="badge text-bg-warning" th:text="#{user.links.primary}">Chính</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="card card-custom p-4" th:if="${user.parent}">
+                <h2 class="h5 mb-3" th:text="#{user.links.children}">Con</h2>
+                <p th:if="${#lists.isEmpty(user.children)}" class="text-muted mb-0" th:text="#{user.links.none}">Chưa có</p>
+                <ul class="list-unstyled mb-0">
+                    <li th:each="link : ${user.children}">
+                        <a th:href="@{/admin/users/{id}(id=${link.userId})}" th:text="${link.fullName}">Sinh viên</a>
+                        <span class="text-muted" th:text="'(' + ${link.studentCode} + ') · ' + #{'relationship.' + ${link.relationship}}">SE</span>
+                        <span th:if="${link.primary}" class="badge text-bg-warning" th:text="#{user.links.primary}">Chính</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
