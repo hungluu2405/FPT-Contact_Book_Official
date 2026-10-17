@@ -41,11 +41,13 @@ public class TestDatabaseExtension implements BeforeAllCallback {
         String databaseName = TestDatabaseGuard.extractDatabaseName(url);
         TestDatabaseGuard.check(url, databaseName);
 
+        String username = env("TEST_DB_USERNAME", DEFAULT_USERNAME);
+        String password = env("TEST_DB_PASSWORD", "");
+
         List<String> batches = SqlScriptLoader.load(SCRIPT, databaseName);
         String masterUrl = url.replaceAll("(?i)(;database(Name)?=)[^;]*", "$1master");
 
-        try (Connection connection = DriverManager.getConnection(
-                masterUrl, env("TEST_DB_USERNAME", DEFAULT_USERNAME), env("TEST_DB_PASSWORD", ""));
+        try (Connection connection = DriverManager.getConnection(masterUrl, username, password);
              Statement statement = connection.createStatement()) {
             dropIfExists(statement, url, databaseName);
             for (String batch : batches) {
@@ -56,6 +58,11 @@ public class TestDatabaseExtension implements BeforeAllCallback {
             throw new IllegalStateException("Không tạo được database test " + databaseName, e);
         }
         log.info("Recreated test database {} from {} ({} batches)", databaseName, SCRIPT, batches.size());
+
+        // Spring dùng đúng URL vừa qua rào chắn; system property thắng application-test.properties.
+        System.setProperty("spring.datasource.url", url);
+        System.setProperty("spring.datasource.username", username);
+        System.setProperty("spring.datasource.password", password);
     }
 
     private static void dropIfExists(Statement statement, String url, String databaseName) throws SQLException {
