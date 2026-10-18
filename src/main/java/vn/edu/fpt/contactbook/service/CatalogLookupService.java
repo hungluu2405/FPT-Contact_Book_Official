@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.contactbook.dto.OptionView;
 import vn.edu.fpt.contactbook.repository.DepartmentRepository;
+import vn.edu.fpt.contactbook.repository.FacultyRepository;
 import vn.edu.fpt.contactbook.repository.MajorRepository;
 import vn.edu.fpt.contactbook.repository.SchoolClassRepository;
 
@@ -12,16 +13,23 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Danh mục nhỏ cho các ô chọn trên form (bộ môn, ngành, lớp).
+ * Danh mục nhỏ cho các ô chọn trên form (khoa, bộ môn, ngành, lớp).
  */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CatalogLookupService {
 
+    private final FacultyRepository facultyRepository;
     private final DepartmentRepository departmentRepository;
     private final MajorRepository majorRepository;
     private final SchoolClassRepository schoolClassRepository;
+
+    public List<OptionView> faculties() {
+        return facultyRepository.findAllByOrderByCodeAsc().stream()
+                .map(f -> new OptionView(f.getId(), f.getCode(), f.getName(), null))
+                .toList();
+    }
 
     public List<OptionView> departments() {
         return departmentRepository.findAllByOrderByCodeAsc().stream()

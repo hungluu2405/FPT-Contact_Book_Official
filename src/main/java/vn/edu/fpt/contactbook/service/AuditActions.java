@@ -20,7 +20,34 @@ public final class AuditActions {
     public static final String UNLINK_PARENT = "UNLINK_PARENT";
     public static final String IMPORT_USERS = "IMPORT_USERS";
 
+    public static final String CREATE_FACULTY = "CREATE_FACULTY";
+    public static final String UPDATE_FACULTY = "UPDATE_FACULTY";
+    public static final String CREATE_DEPARTMENT = "CREATE_DEPARTMENT";
+    public static final String UPDATE_DEPARTMENT = "UPDATE_DEPARTMENT";
+    public static final String CREATE_MAJOR = "CREATE_MAJOR";
+    public static final String UPDATE_MAJOR = "UPDATE_MAJOR";
+    public static final String CREATE_CLASS = "CREATE_CLASS";
+    public static final String UPDATE_CLASS = "UPDATE_CLASS";
+    public static final String CREATE_SUBJECT = "CREATE_SUBJECT";
+    public static final String UPDATE_SUBJECT = "UPDATE_SUBJECT";
+    public static final String CREATE_GRADE_COMPONENT = "CREATE_GRADE_COMPONENT";
+    public static final String UPDATE_GRADE_COMPONENT = "UPDATE_GRADE_COMPONENT";
+    public static final String DELETE_GRADE_COMPONENT = "DELETE_GRADE_COMPONENT";
+    public static final String CREATE_SEMESTER = "CREATE_SEMESTER";
+    public static final String UPDATE_SEMESTER = "UPDATE_SEMESTER";
+    public static final String SET_CURRENT_SEMESTER = "SET_CURRENT_SEMESTER";
+    public static final String CREATE_ROOM = "CREATE_ROOM";
+    public static final String UPDATE_ROOM = "UPDATE_ROOM";
+
     public static final String ENTITY_USER = "User";
+    public static final String ENTITY_FACULTY = "Faculty";
+    public static final String ENTITY_DEPARTMENT = "Department";
+    public static final String ENTITY_MAJOR = "Major";
+    public static final String ENTITY_CLASS = "SchoolClass";
+    public static final String ENTITY_SUBJECT = "Subject";
+    public static final String ENTITY_GRADE_COMPONENT = "GradeComponent";
+    public static final String ENTITY_SEMESTER = "Semester";
+    public static final String ENTITY_ROOM = "Room";
 
     private AuditActions() {
     }

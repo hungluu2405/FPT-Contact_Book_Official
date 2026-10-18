@@ -6,4 +6,6 @@ import vn.edu.fpt.contactbook.model.ClassSection;
 
 @Repository
 public interface ClassSectionRepository extends JpaRepository<ClassSection, Long> {
+
+    boolean existsBySubjectId(Long subjectId);
 }

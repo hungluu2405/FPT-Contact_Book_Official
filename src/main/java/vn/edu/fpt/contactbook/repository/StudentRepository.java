@@ -24,6 +24,8 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     boolean existsByStudentCodeAndIdNot(String studentCode, Long id);
 
+    boolean existsBySchoolClassId(Long classId);
+
     /** Khóa dòng sinh viên để hai thao tác đặt phụ huynh chính không chạy chồng nhau. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM Student s WHERE s.id = :id")

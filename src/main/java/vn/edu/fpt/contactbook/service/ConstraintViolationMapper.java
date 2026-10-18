@@ -7,22 +7,36 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Đổi lỗi UNIQUE của SQL Server (thường do hai người thao tác cùng lúc, lọt qua bước kiểm tra trước)
- * thành lỗi tiếng Việt gắn với ô trên form. Không đưa nội dung lỗi SQL ra ngoài.
+ * Đổi lỗi UNIQUE, CHECK, FOREIGN KEY của SQL Server (thường do hai người thao tác cùng lúc, lọt qua bước
+ * kiểm tra trước) thành lỗi tiếng Việt gắn với ô trên form. Không đưa nội dung lỗi SQL ra ngoài.
  */
 public final class ConstraintViolationMapper {
 
     /** Tên ràng buộc trong database/fpt_contact_book.sql → (ô trên form, thông báo). */
-    private static final Map<String, String[]> CONSTRAINTS = Map.of(
-            "uq_users_phone", new String[]{"phone", UserMessages.PHONE_TAKEN},
-            "ux_users_email", new String[]{"email", UserMessages.EMAIL_TAKEN},
-            "uq_students_code", new String[]{"profile.studentCode", UserMessages.STUDENT_CODE_TAKEN},
-            "uq_teachers_code", new String[]{"profile.teacherCode", UserMessages.TEACHER_CODE_TAKEN},
-            "uq_user_roles", new String[]{"roleCode", UserMessages.ROLE_ALREADY_ASSIGNED},
-            "uq_students_user", new String[]{null, UserMessages.PROFILE_EXISTS},
-            "uq_teachers_user", new String[]{null, UserMessages.PROFILE_EXISTS},
-            "uq_parents_user", new String[]{null, UserMessages.PROFILE_EXISTS},
-            "pk_parent_student", new String[]{"otherKey", UserMessages.LINK_EXISTS});
+    private static final Map<String, String[]> CONSTRAINTS = Map.ofEntries(
+            Map.entry("uq_users_phone", new String[]{"phone", UserMessages.PHONE_TAKEN}),
+            Map.entry("ux_users_email", new String[]{"email", UserMessages.EMAIL_TAKEN}),
+            Map.entry("uq_students_code", new String[]{"profile.studentCode", UserMessages.STUDENT_CODE_TAKEN}),
+            Map.entry("uq_teachers_code", new String[]{"profile.teacherCode", UserMessages.TEACHER_CODE_TAKEN}),
+            Map.entry("uq_user_roles", new String[]{"roleCode", UserMessages.ROLE_ALREADY_ASSIGNED}),
+            Map.entry("uq_students_user", new String[]{null, UserMessages.PROFILE_EXISTS}),
+            Map.entry("uq_teachers_user", new String[]{null, UserMessages.PROFILE_EXISTS}),
+            Map.entry("uq_parents_user", new String[]{null, UserMessages.PROFILE_EXISTS}),
+            Map.entry("pk_parent_student", new String[]{"otherKey", UserMessages.LINK_EXISTS}),
+            Map.entry("uq_faculties_code", new String[]{"code", CatalogMessages.FACULTY_CODE_TAKEN}),
+            Map.entry("uq_departments_code", new String[]{"code", CatalogMessages.DEPARTMENT_CODE_TAKEN}),
+            Map.entry("uq_majors_code", new String[]{"code", CatalogMessages.MAJOR_CODE_TAKEN}),
+            Map.entry("uq_classes_code", new String[]{"code", CatalogMessages.CLASS_CODE_TAKEN}),
+            Map.entry("uq_subjects_code", new String[]{"code", CatalogMessages.SUBJECT_CODE_TAKEN}),
+            Map.entry("uq_semesters_code", new String[]{"code", CatalogMessages.SEMESTER_CODE_TAKEN}),
+            Map.entry("uq_rooms_code", new String[]{"code", CatalogMessages.ROOM_CODE_TAKEN}),
+            Map.entry("uq_grade_components", new String[]{"name", CatalogMessages.COMPONENT_NAME_TAKEN}),
+            Map.entry("ux_semesters_current", new String[]{null, CatalogMessages.CURRENT_SEMESTER_CONFLICT}),
+            Map.entry("ck_subjects_credits", new String[]{"credits", CatalogMessages.CREDITS_RANGE}),
+            Map.entry("ck_gc_weight", new String[]{"weight", CatalogMessages.WEIGHT_RANGE}),
+            Map.entry("ck_semesters_dates", new String[]{"endDate", CatalogMessages.SEMESTER_DATES}),
+            Map.entry("ck_rooms_capacity", new String[]{"capacity", CatalogMessages.ROOM_CAPACITY}),
+            Map.entry("fk_grades_component", new String[]{null, CatalogMessages.COMPONENT_HAS_GRADES}));
 
     private ConstraintViolationMapper() {
     }
@@ -31,7 +45,8 @@ public final class ConstraintViolationMapper {
     public static RuntimeException map(DataIntegrityViolationException exception) {
         String message = fullMessage(exception).toLowerCase(Locale.ROOT);
         for (Map.Entry<String, String[]> entry : CONSTRAINTS.entrySet()) {
-            if (message.contains("'" + entry.getKey() + "'")) {
+            // UNIQUE báo tên trong dấu '...', còn CHECK và FOREIGN KEY báo trong dấu "...".
+            if (message.contains("'" + entry.getKey() + "'") || message.contains("\"" + entry.getKey() + "\"")) {
                 String[] target = entry.getValue();
                 return new BusinessException(target[1], target[0]);
             }
