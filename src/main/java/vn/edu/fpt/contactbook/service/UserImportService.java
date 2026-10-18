@@ -5,8 +5,6 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.contactbook.dto.CreatedUser;
@@ -15,7 +13,6 @@ import vn.edu.fpt.contactbook.dto.ImportedUser;
 import vn.edu.fpt.contactbook.dto.RoleProfileForm;
 import vn.edu.fpt.contactbook.dto.UserForm;
 import vn.edu.fpt.contactbook.dto.UserImportResult;
-import vn.edu.fpt.contactbook.exception.BusinessException;
 import vn.edu.fpt.contactbook.model.Department;
 import vn.edu.fpt.contactbook.model.Major;
 import vn.edu.fpt.contactbook.model.SchoolClass;
@@ -28,8 +25,6 @@ import vn.edu.fpt.contactbook.security.AppUserPrincipal;
 import vn.edu.fpt.contactbook.util.ExcelUtils;
 import vn.edu.fpt.contactbook.util.PhoneUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.time.DateTimeException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -51,8 +46,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserImportService {
 
-    public static final int MAX_ROWS = 500;
-    public static final int MAX_BYTES = 2 * 1024 * 1024;
+    public static final int MAX_ROWS = ExcelImportReader.MAX_ROWS;
+    public static final int MAX_BYTES = ExcelImportReader.MAX_BYTES;
     /** Số điện thoại của dòng ví dụ trong file mẫu; dòng này phải được xóa trước khi nhập. */
     public static final String EXAMPLE_PHONE = "0900000000";
 
@@ -104,63 +99,12 @@ public class UserImportService {
     }
 
     List<ParsedRow> read(UserImportType type, String fileName, byte[] content, List<ImportRowError> headerErrors) {
-        if (fileName == null || !fileName.toLowerCase(Locale.ROOT).endsWith(".xlsx")) {
-            throw new BusinessException("Chỉ nhận file Excel .xlsx");
-        }
-        if (content == null || content.length == 0) {
-            throw new BusinessException("File tải lên rỗng");
-        }
-        if (content.length > MAX_BYTES) {
-            throw new BusinessException("File nhập tối đa 2 MB");
-        }
-        try (XSSFWorkbook workbook = open(content)) {
-            Sheet sheet = workbook.getSheetAt(0);
-            checkHeader(type, sheet.getRow(0), headerErrors);
-            if (!headerErrors.isEmpty()) {
-                return List.of();
-            }
-            Catalog catalog = loadCatalog();
-            List<ParsedRow> rows = new ArrayList<>();
-            int columnCount = type.columns().size();
-            for (int index = 1; index <= sheet.getLastRowNum(); index++) {
-                Row row = sheet.getRow(index);
-                if (ExcelUtils.isBlankRow(row, columnCount)) {
-                    continue;
-                }
-                if (rows.size() == MAX_ROWS) {
-                    throw new BusinessException("File có quá " + MAX_ROWS + " dòng dữ liệu, hãy chia thành nhiều file");
-                }
-                rows.add(parse(type, row, catalog));
-            }
-            if (rows.isEmpty()) {
-                throw new BusinessException("File không có dòng dữ liệu nào");
-            }
-            return rows;
-        } catch (IOException e) {
-            throw new BusinessException("Không đọc được file Excel");
-        }
-    }
-
-    /** Mở .xlsx với cơ chế chống file độc hại mặc định của POI; file không phải .xlsx thật thì báo lỗi thân thiện. */
-    private static XSSFWorkbook open(byte[] content) {
-        try {
-            return new XSSFWorkbook(new ByteArrayInputStream(content));
-        } catch (IOException | RuntimeException e) {
-            throw new BusinessException("Chỉ nhận file Excel .xlsx (không mở được file)");
-        }
-    }
-
-    private static void checkHeader(UserImportType type, Row header, List<ImportRowError> errors) {
-        List<ImportColumn> columns = type.columns();
-        for (int i = 0; i < columns.size(); i++) {
-            String expected = columns.get(i).header();
-            String actual = header == null ? null : ExcelUtils.text(header.getCell(i));
-            if (actual == null || !actual.equalsIgnoreCase(expected)) {
-                errors.add(new ImportRowError(1, expected, "Tiêu đề cột phải là \"" + expected + "\""
-                        + (actual == null ? " (đang trống)" : " (đang là \"" + actual + "\")")
-                        + ". Hãy dùng file mẫu " + type.label().toLowerCase(Locale.ROOT)));
-            }
-        }
+        List<String> headers = type.columns().stream().map(ImportColumn::header).toList();
+        return ExcelImportReader.read(fileName, content, headers, type.label().toLowerCase(Locale.ROOT), headerErrors,
+                () -> {
+                    Catalog catalog = loadCatalog();
+                    return row -> parse(type, row, catalog);
+                });
     }
 
     private ParsedRow parse(UserImportType type, Row row, Catalog catalog) {
