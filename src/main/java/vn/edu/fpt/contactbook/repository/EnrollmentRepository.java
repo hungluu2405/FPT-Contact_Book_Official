@@ -50,6 +50,30 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     boolean existsByClassSectionId(Long classSectionId);
 
+    /**
+     * Các lớp học phần KHÁC có chung sinh viên đang ENROLLED với lớp sectionId: mỗi phần tử là
+     * [classSectionId, số sinh viên chung]. Dùng để kiểm tra trùng lịch của sinh viên.
+     */
+    @Query("""
+            SELECT other.classSection.id, COUNT(DISTINCT other.student.id)
+            FROM Enrollment mine, Enrollment other
+            WHERE mine.classSection.id = :sectionId
+              AND mine.status = vn.edu.fpt.contactbook.model.enums.EnrollmentStatus.ENROLLED
+              AND other.student = mine.student
+              AND other.status = vn.edu.fpt.contactbook.model.enums.EnrollmentStatus.ENROLLED
+              AND other.classSection.id <> :sectionId
+            GROUP BY other.classSection.id
+            """)
+    List<Object[]> countSharedStudents(@Param("sectionId") Long sectionId);
+
+    /** Các lớp học phần của học kỳ mà sinh viên đang ENROLLED (thời khóa biểu, lịch thi). */
+    @Query("""
+            SELECT e.classSection.id FROM Enrollment e
+            WHERE e.student.id = :studentId AND e.classSection.semester.id = :semesterId
+              AND e.status = vn.edu.fpt.contactbook.model.enums.EnrollmentStatus.ENROLLED
+            """)
+    List<Long> findEnrolledSectionIds(@Param("studentId") Long studentId, @Param("semesterId") Long semesterId);
+
     Optional<Enrollment> findByClassSectionIdAndStudentId(Long classSectionId, Long studentId);
 
     List<Enrollment> findByClassSectionIdAndStudentIdIn(Long classSectionId, Collection<Long> studentIds);

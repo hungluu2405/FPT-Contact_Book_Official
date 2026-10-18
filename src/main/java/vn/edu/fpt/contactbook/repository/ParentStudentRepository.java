@@ -15,6 +15,8 @@ public interface ParentStudentRepository extends JpaRepository<ParentStudent, Pa
     @EntityGraph(attributePaths = {"student", "student.user"})
     List<ParentStudent> findByIdParentId(Long parentId);
 
+    boolean existsByIdParentIdAndIdStudentId(Long parentId, Long studentId);
+
     /** Các phụ huynh đã liên kết của một sinh viên (theo students.id). */
     @EntityGraph(attributePaths = {"parent", "parent.user"})
     List<ParentStudent> findByIdStudentId(Long studentId);

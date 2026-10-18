@@ -1,12 +1,14 @@
 package vn.edu.fpt.contactbook.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.contactbook.dto.OptionView;
 import vn.edu.fpt.contactbook.repository.DepartmentRepository;
 import vn.edu.fpt.contactbook.repository.FacultyRepository;
 import vn.edu.fpt.contactbook.repository.MajorRepository;
+import vn.edu.fpt.contactbook.repository.RoomRepository;
 import vn.edu.fpt.contactbook.repository.SchoolClassRepository;
 import vn.edu.fpt.contactbook.repository.SemesterRepository;
 import vn.edu.fpt.contactbook.repository.SubjectRepository;
@@ -16,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Danh mục nhỏ cho các ô chọn trên form (khoa, bộ môn, ngành, lớp, học kỳ, môn học, giảng viên).
+ * Danh mục nhỏ cho các ô chọn trên form (khoa, bộ môn, ngành, lớp, học kỳ, môn học, giảng viên, phòng).
  */
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class CatalogLookupService {
     private final SemesterRepository semesterRepository;
     private final SubjectRepository subjectRepository;
     private final TeacherRepository teacherRepository;
+    private final RoomRepository roomRepository;
 
     public List<OptionView> faculties() {
         return facultyRepository.findAllByOrderByCodeAsc().stream()
@@ -78,6 +81,14 @@ public class CatalogLookupService {
         return teacherRepository.findAllByOrderByTeacherCodeAsc().stream()
                 .map(t -> new OptionView(t.getId(), t.getTeacherCode(), t.getUser().getFullName(),
                         t.getDepartment().getId()))
+                .toList();
+    }
+
+    /** Phòng học: name là tên phòng kèm tòa nhà nếu có. */
+    public List<OptionView> rooms() {
+        return roomRepository.findAll(Sort.by("code")).stream()
+                .map(r -> new OptionView(r.getId(), r.getCode(),
+                        r.getBuilding() == null ? r.getName() : r.getName() + " (" + r.getBuilding() + ")", null))
                 .toList();
     }
 }

@@ -46,6 +46,14 @@ public final class AuditActions {
     public static final String ENROLL_CLASS = "ENROLL_CLASS";
     public static final String IMPORT_ENROLLMENTS = "IMPORT_ENROLLMENTS";
 
+    public static final String CREATE_SESSION = "CREATE_SESSION";
+    public static final String UPDATE_SESSION = "UPDATE_SESSION";
+    public static final String CANCEL_SESSION = "CANCEL_SESSION";
+    public static final String CREATE_WEEKLY_SESSIONS = "CREATE_WEEKLY_SESSIONS";
+    public static final String CREATE_EXAM = "CREATE_EXAM";
+    public static final String UPDATE_EXAM = "UPDATE_EXAM";
+    public static final String DELETE_EXAM = "DELETE_EXAM";
+
     public static final String ENTITY_USER = "User";
     public static final String ENTITY_FACULTY = "Faculty";
     public static final String ENTITY_DEPARTMENT = "Department";
@@ -56,6 +64,8 @@ public final class AuditActions {
     public static final String ENTITY_SEMESTER = "Semester";
     public static final String ENTITY_ROOM = "Room";
     public static final String ENTITY_CLASS_SECTION = "ClassSection";
+    public static final String ENTITY_CLASS_SESSION = "ClassSession";
+    public static final String ENTITY_EXAM = "Exam";
 
     private AuditActions() {
     }
