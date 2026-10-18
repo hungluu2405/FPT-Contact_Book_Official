@@ -36,7 +36,9 @@ public final class ConstraintViolationMapper {
             Map.entry("ck_gc_weight", new String[]{"weight", CatalogMessages.WEIGHT_RANGE}),
             Map.entry("ck_semesters_dates", new String[]{"endDate", CatalogMessages.SEMESTER_DATES}),
             Map.entry("ck_rooms_capacity", new String[]{"capacity", CatalogMessages.ROOM_CAPACITY}),
-            Map.entry("fk_grades_component", new String[]{null, CatalogMessages.COMPONENT_HAS_GRADES}));
+            Map.entry("fk_grades_component", new String[]{null, CatalogMessages.COMPONENT_HAS_GRADES}),
+            Map.entry("uq_enrollments", new String[]{null, SectionMessages.ALREADY_ENROLLED}),
+            Map.entry("ck_cs_max", new String[]{"maxStudents", SectionMessages.MAX_STUDENTS_RANGE}));
 
     private ConstraintViolationMapper() {
     }

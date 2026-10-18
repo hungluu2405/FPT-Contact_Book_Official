@@ -52,7 +52,8 @@ public class Enrollment {
     @Column(name = "status", nullable = false, length = 20)
     private EnrollmentStatus status = EnrollmentStatus.ENROLLED;
 
-    @Column(name = "enrolled_at", nullable = false, updatable = false)
+    /** Ghi danh lại sinh viên đã DROPPED thì cập nhật thời điểm này (ASSUMPTIONS). */
+    @Column(name = "enrolled_at", nullable = false)
     private LocalDateTime enrolledAt;
 
     @PrePersist

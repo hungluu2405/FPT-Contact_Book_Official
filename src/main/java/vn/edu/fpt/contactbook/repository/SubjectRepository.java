@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import vn.edu.fpt.contactbook.model.Subject;
 
 import java.util.Collection;
+import java.util.List;
 
 @Repository
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
@@ -35,6 +36,9 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
                          @Param("scoped") boolean scoped,
                          @Param("scopeDepartmentIds") Collection<Long> scopeDepartmentIds,
                          Pageable pageable);
+
+    @EntityGraph(attributePaths = {"department"})
+    List<Subject> findAllByOrderByCodeAsc();
 
     boolean existsByCode(String code);
 

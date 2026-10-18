@@ -16,11 +16,18 @@ public final class LikePatterns {
         if (keyword == null || keyword.isBlank()) {
             return null;
         }
-        String escaped = keyword.strip().toLowerCase(Locale.ROOT)
-                .replace("\\", "\\\\")
+        return "%" + escape(keyword.strip().toLowerCase(Locale.ROOT)) + "%";
+    }
+
+    /** Mẫu LIKE "bắt đầu bằng" prefix (giữ nguyên hoa thường), escape như containsIgnoreCase. */
+    public static String startsWith(String prefix) {
+        return escape(prefix) + "%";
+    }
+
+    private static String escape(String value) {
+        return value.replace("\\", "\\\\")
                 .replace("%", "\\%")
                 .replace("_", "\\_")
                 .replace("[", "\\[");
-        return "%" + escaped + "%";
     }
 }

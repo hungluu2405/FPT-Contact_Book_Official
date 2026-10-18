@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.contactbook.model.Semester;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,6 +26,8 @@ public interface SemesterRepository extends JpaRepository<Semester, Long> {
 
     /** Index ux_semesters_current bảo đảm có nhiều nhất một học kỳ hiện tại. */
     Optional<Semester> findByCurrentTrue();
+
+    List<Semester> findAllByOrderByStartDateDesc();
 
     boolean existsByCode(String code);
 
