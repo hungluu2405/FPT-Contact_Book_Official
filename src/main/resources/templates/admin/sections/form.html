@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="(${id} ? #{section.edit} : #{section.new}) + ' - ' + #{app.title}">Lớp học phần</title>
+</head>
+<body>
+<section>
+    <a th:replace="~{fragments/catalog :: back('/admin/sections', #{section.list})}"></a>
+    <h1 class="page-title" th:text="${id} ? #{section.edit} : #{section.new}">Thêm lớp học phần</h1>
+
+    <form th:action="${id} ? @{/admin/sections/{id}/edit(id=${id})} : @{/admin/sections/new}" th:object="${form}"
+          method="post" novalidate id="sectionForm">
+        <div th:replace="~{fragments/catalog :: globalErrors}"></div>
+        <div class="card card-custom p-4">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="subjectId" class="form-label" th:text="#{section.subject} + ' *'">Nhãn</label>
+                    <select class="form-select" th:field="*{subjectId}" data-subject-select
+                            th:classappend="${#fields.hasErrors('subjectId')} ? 'is-invalid'">
+                        <option value="" th:text="#{user.choose}">-- Chọn --</option>
+                        <option th:each="o : ${subjects}" th:value="${o.id}" th:attr="data-department=${o.groupId}"
+                                th:text="${o.code} + ' - ' + ${o.name}">Lựa chọn</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{subjectId}">Lỗi</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="semesterId" class="form-label" th:text="#{section.semester} + ' *'">Học kỳ</label>
+                    <select class="form-select" th:field="*{semesterId}"
+                            th:classappend="${#fields.hasErrors('semesterId')} ? 'is-invalid'">
+                        <option value="" th:text="#{user.choose}">-- Chọn --</option>
+                        <option th:each="s : ${semesters}" th:value="${s.id}" th:text="${s.code} + ' - ' + ${s.name}">FA26</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{semesterId}">Lỗi</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="teacherId" class="form-label" th:text="#{section.teacher} + ' *'">Nhãn</label>
+                    <select class="form-select" th:field="*{teacherId}" data-teacher-select
+                            th:classappend="${#fields.hasErrors('teacherId')} ? 'is-invalid'">
+                        <option value="" th:text="#{user.choose}">-- Chọn --</option>
+                        <option th:each="o : ${teachers}" th:value="${o.id}" th:attr="data-department=${o.groupId}"
+                                th:text="${o.code} + ' - ' + ${o.name}">Lựa chọn</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{teacherId}">Lỗi</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="code" class="form-label" th:text="#{catalog.code}">Mã</label>
+                    <div class="input-group has-validation">
+                        <input type="text" class="form-control text-uppercase" th:field="*{code}" maxlength="50"
+                               th:classappend="${#fields.hasErrors('code')} ? 'is-invalid'">
+                        <button type="submit" name="action" value="suggest" class="btn btn-outline-primary"
+                                formnovalidate th:text="#{section.code.suggest}">Đề xuất mã</button>
+                        <div class="invalid-feedback" th:errors="*{code}">Lỗi</div>
+                    </div>
+                    <div class="form-text" th:text="#{section.code.hint}">Để trống thì hệ thống tự đề xuất.</div>
+                </div>
+                <div class="col-md-3">
+                    <label for="maxStudents" class="form-label" th:text="#{section.max-students}">Sĩ số tối đa</label>
+                    <input type="number" class="form-control" th:field="*{maxStudents}" min="1" max="32767" step="1"
+                           th:classappend="${#fields.hasErrors('maxStudents')} ? 'is-invalid'">
+                    <div class="form-text" th:text="#{section.max-students.hint}">Để trống là không giới hạn.</div>
+                    <div class="invalid-feedback" th:errors="*{maxStudents}">Lỗi</div>
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label" th:text="#{section.status} + ' *'">Trạng thái</label>
+                    <select class="form-select" th:field="*{status}"
+                            th:classappend="${#fields.hasErrors('status')} ? 'is-invalid'">
+                        <option th:each="st : ${statuses}" th:value="${st}" th:text="#{'section-status.' + ${st}}">Đang mở</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{status}">Lỗi</div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="~{fragments/catalog :: buttons(${id} ? '/admin/sections/' + ${id} : '/admin/sections')}"></div>
+    </form>
+    <script th:src="@{/js/section-form.js}"></script>
+</section>
+</body>
+</html>

@@ -39,8 +39,9 @@ public class SecurityConfig {
                 // \d+ để /admin/users/new không lọt vào đây. Mọi URL /admin còn lại chỉ ADMIN.
                 .requestMatchers(HttpMethod.GET, "/admin/users", "/admin/users/{id:\\d+}")
                     .hasAnyRole(RoleCodes.ADMIN, RoleCodes.HEAD_OF_DEPARTMENT)
-                // Môn học và đầu điểm mở cho trưởng bộ môn; phạm vi bộ môn kiểm tra ở SubjectService.
-                .requestMatchers("/admin/subjects", "/admin/subjects/**")
+                // Môn học, đầu điểm, lớp học phần mở cho trưởng bộ môn; phạm vi bộ môn kiểm tra ở service.
+                // Ghi danh (/admin/sections/{id}/enrollments/**) chỉ ADMIN qua @PreAuthorize của EnrollmentController.
+                .requestMatchers("/admin/subjects", "/admin/subjects/**", "/admin/sections", "/admin/sections/**")
                     .hasAnyRole(RoleCodes.ADMIN, RoleCodes.HEAD_OF_DEPARTMENT)
                 .requestMatchers("/admin/**").hasRole(RoleCodes.ADMIN)
                 .requestMatchers("/teacher/**").hasAnyRole(RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT)

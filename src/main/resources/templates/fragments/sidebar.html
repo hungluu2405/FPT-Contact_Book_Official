@@ -47,6 +47,11 @@
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/sections}" th:classappend="${activeMenu == 'catalog-sections'} ? 'active'">
+                <i class="bi bi-collection"></i><span th:text="#{menu.catalog.sections}">Lớp học phần</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
             <a class="nav-link" th:href="@{/admin/catalog/semesters}" th:classappend="${activeMenu == 'catalog-semesters'} ? 'active'">
                 <i class="bi bi-calendar-range"></i><span th:text="#{menu.catalog.semesters}">Học kỳ</span>
             </a>
@@ -56,10 +61,15 @@
                 <i class="bi bi-door-open"></i><span th:text="#{menu.catalog.rooms}">Phòng học</span>
             </a>
         </li>
-        <!--/* Trưởng bộ môn chỉ quản lý môn học thuộc bộ môn mình (SubjectService). */-->
+        <!--/* Trưởng bộ môn chỉ quản lý môn học, lớp học phần thuộc bộ môn mình (SubjectService, ClassSectionService). */-->
         <li class="nav-item" sec:authorize="hasRole('HEAD_OF_DEPARTMENT') and !hasRole('ADMIN')">
             <a class="nav-link" th:href="@{/admin/subjects}" th:classappend="${activeMenu == 'catalog-subjects'} ? 'active'">
                 <i class="bi bi-journal-bookmark"></i><span th:text="#{menu.catalog.subjects}">Môn học</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('HEAD_OF_DEPARTMENT') and !hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/sections}" th:classappend="${activeMenu == 'catalog-sections'} ? 'active'">
+                <i class="bi bi-collection"></i><span th:text="#{menu.catalog.sections}">Lớp học phần</span>
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasAnyRole('TEACHER', 'HEAD_OF_DEPARTMENT')">

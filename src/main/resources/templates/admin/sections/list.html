@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{section.list} + ' - ' + #{app.title}">Lớp học phần</title>
+</head>
+<body>
+<section>
+    <div th:replace="~{fragments/catalog :: header(#{section.list}, '/admin/sections/new')}"></div>
+
+    <form class="card card-custom p-3 mb-3" th:action="@{/admin/sections}" method="get">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label for="keyword" class="form-label" th:text="#{user.filter.keyword}">Từ khóa</label>
+                <input type="search" class="form-control" id="keyword" name="keyword" th:value="${filter.keyword}"
+                       th:placeholder="#{section.filter.keyword}">
+            </div>
+            <div class="col-6 col-md-3">
+                <label for="semesterId" class="form-label" th:text="#{section.semester}">Học kỳ</label>
+                <select class="form-select" id="semesterId" name="semesterId">
+                    <option value="" th:text="#{user.filter.all}">Tất cả</option>
+                    <option th:each="s : ${semesters}" th:value="${s.id}" th:selected="${s.id == filter.semesterId}"
+                            th:text="${s.code}">FA26</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label for="status" class="form-label" th:text="#{section.status}">Trạng thái</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="" th:text="#{user.filter.all}">Tất cả</option>
+                    <option th:each="st : ${statuses}" th:value="${st}" th:selected="${st == filter.status}"
+                            th:text="#{'section-status.' + ${st}}">Đang mở</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i>
+                    <span th:text="#{common.search}">Tìm kiếm</span></button>
+                <a class="btn btn-outline-secondary" th:href="@{/admin/sections}" th:text="#{common.reset}">Đặt lại</a>
+            </div>
+        </div>
+    </form>
+    <p th:replace="~{fragments/catalog :: count(${items})}"></p>
+
+    <div class="card card-custom table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+            <tr>
+                <th th:text="#{catalog.code}">Mã</th>
+                <th th:text="#{section.subject}">Môn học</th>
+                <th th:text="#{section.semester}">Học kỳ</th>
+                <th th:text="#{section.teacher}">Giảng viên</th>
+                <th th:text="#{section.capacity}">Sĩ số</th>
+                <th th:text="#{section.status}">Trạng thái</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${items.content}">
+                <td><a th:href="@{/admin/sections/{id}(id=${item.id})}" th:text="${item.code}">PRJ301-FA26-01</a></td>
+                <td th:text="${item.subjectCode} + ' - ' + ${item.subjectName}">PRJ301</td>
+                <td th:text="${item.semesterCode}">FA26</td>
+                <td th:text="${item.teacherName}">Giảng viên</td>
+                <td th:text="${item.enrolledCount} + ' / ' + (${item.maxStudents} ?: #{section.unlimited})">0 / 40</td>
+                <td><span class="badge" th:classappend="${item.open()} ? 'text-bg-success' : 'text-bg-secondary'"
+                          th:text="#{'section-status.' + ${item.status}}">Đang mở</span></td>
+            </tr>
+            <tr th:if="${items.empty}">
+                <td colspan="6" class="text-center text-muted py-4" th:text="#{catalog.empty}">Không có dữ liệu</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+</section>
+</body>
+</html>
