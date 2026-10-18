@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import vn.edu.fpt.contactbook.dto.UserListRow;
+import vn.edu.fpt.contactbook.model.ClassSection;
 import vn.edu.fpt.contactbook.model.ClassSession;
 import vn.edu.fpt.contactbook.model.Department;
 import vn.edu.fpt.contactbook.model.Enrollment;
@@ -20,11 +21,14 @@ import vn.edu.fpt.contactbook.model.ParentStudent;
 import vn.edu.fpt.contactbook.model.Room;
 import vn.edu.fpt.contactbook.model.SchoolClass;
 import vn.edu.fpt.contactbook.model.Semester;
+import vn.edu.fpt.contactbook.model.Student;
 import vn.edu.fpt.contactbook.model.Subject;
 import vn.edu.fpt.contactbook.model.User;
 import vn.edu.fpt.contactbook.model.UserRole;
+import vn.edu.fpt.contactbook.model.enums.EnrollmentStatus;
 import vn.edu.fpt.contactbook.model.enums.ParentRelationship;
 import vn.edu.fpt.contactbook.model.enums.RoleCodes;
+import vn.edu.fpt.contactbook.model.enums.SectionStatus;
 import vn.edu.fpt.contactbook.support.TestDatabaseExtension;
 import vn.edu.fpt.contactbook.util.LikePatterns;
 import vn.edu.fpt.contactbook.util.PhoneUtils;
@@ -393,6 +397,61 @@ class RepositoryQueryTest {
             assertThat(subjectRepository.existsByCode("PRJ301")).isTrue();
             assertThat(subjectRepository.existsByCodeAndIdNot("PRJ301", 1L)).isFalse();
             assertThat(subjectRepository.existsByCodeAndIdNot("PRJ301", 31L)).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Lớp học phần và ghi danh (Giai đoạn 4b)")
+    class SectionQueries {
+
+        @Autowired
+        private ClassSectionRepository classSectionRepository;
+        @Autowired
+        private EnrollmentRepository enrollmentRepository;
+        @Autowired
+        private StudentRepository studentRepository;
+
+        @Test
+        void searchScopedAndFiltered() {
+            assertThat(classSectionRepository.search(null, null, null, true, List.of(1L), PageRequest.of(0, 20)))
+                    .extracting(ClassSection::getCode)
+                    .containsExactly("SWP391-01-SP27", "PRJ301-SE1901-FA26", "PRN211_FA26_01", "SWP391_FA26_01");
+            assertThat(classSectionRepository.search(null, null, null, true, List.of(38L), PageRequest.of(0, 20)))
+                    .isEmpty();
+            assertThat(classSectionRepository.search(LikePatterns.containsIgnoreCase("java web"), 1L,
+                    SectionStatus.OPEN, false, List.of(-1L), PageRequest.of(0, 20)))
+                    .extracting(ClassSection::getCode).containsExactly("PRJ301-SE1901-FA26");
+        }
+
+        @Test
+        void codesByPrefix() {
+            assertThat(classSectionRepository.findCodesLike(LikePatterns.startsWith("SWP391_")))
+                    .containsExactly("SWP391_FA26_01");
+            assertThat(classSectionRepository.findCodesLike(LikePatterns.startsWith("SWP391-"))).hasSize(1);
+        }
+
+        @Test
+        void lockAndCounts() {
+            assertThat(classSectionRepository.findByIdForUpdate(27L)).isPresent();
+            assertThat(enrollmentRepository.countByClassSectionIdAndStatus(27L, EnrollmentStatus.ENROLLED))
+                    .isEqualTo(2);
+            assertThat(enrollmentRepository.countBySections(List.of(1L, 27L, 28L), EnrollmentStatus.ENROLLED))
+                    .extracting(row -> row[0] + "=" + row[1]).containsExactlyInAnyOrder("1=1", "27=2", "28=2");
+            assertThat(enrollmentRepository.findPageBySection(27L, null, PageRequest.of(0, 20)))
+                    .extracting(e -> e.getStudent().getStudentCode()).containsExactly("SE180101", "SE180102");
+        }
+
+        @Test
+        @DisplayName("Ứng viên ghi danh: SV đang học chưa có trong lớp; SV đã DROPPED vẫn hiện")
+        void candidates() {
+            assertThat(studentRepository.findCandidates(null, 27L, PageRequest.of(0, 20)))
+                    .extracting(Student::getStudentCode).containsExactly("SE180201", "SE190001");
+
+            Enrollment enrollment = enrollmentRepository.findByClassSectionIdAndStudentId(27L, 2L).orElseThrow();
+            enrollment.setStatus(EnrollmentStatus.DROPPED);
+            enrollmentRepository.flush();
+            assertThat(studentRepository.findCandidates(LikePatterns.containsIgnoreCase("se1801"), 27L,
+                    PageRequest.of(0, 20))).extracting(Student::getStudentCode).containsExactly("SE180101");
         }
     }
 }

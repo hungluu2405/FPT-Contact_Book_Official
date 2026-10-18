@@ -28,7 +28,8 @@ class ConstraintViolationMapperTest {
             "Violation of UNIQUE KEY constraint 'uq_subjects_code'.|code|Mã môn học đã tồn tại",
             "Violation of UNIQUE KEY constraint 'uq_semesters_code'.|code|Mã học kỳ đã tồn tại",
             "Violation of UNIQUE KEY constraint 'uq_rooms_code'.|code|Mã phòng đã tồn tại",
-            "Violation of UNIQUE KEY constraint 'uq_grade_components'.|name|Môn học đã có đầu điểm cùng tên"
+            "Violation of UNIQUE KEY constraint 'uq_grade_components'.|name|Môn học đã có đầu điểm cùng tên",
+            "Violation of UNIQUE KEY constraint 'uq_enrollments'.||Sinh viên đã có trong lớp học phần"
     })
     void mapsKnownConstraintToField(String sqlMessage, String field, String message) {
         RuntimeException mapped = ConstraintViolationMapper.map(
@@ -61,7 +62,8 @@ class ConstraintViolationMapperTest {
             "The INSERT statement conflicted with the CHECK constraint \"ck_subjects_credits\".|credits|Số tín chỉ phải từ 1 đến 20",
             "The UPDATE statement conflicted with the CHECK constraint \"ck_gc_weight\".|weight|Trọng số phải lớn hơn 0 và không quá 100",
             "The INSERT statement conflicted with the CHECK constraint \"ck_semesters_dates\".|endDate|Ngày kết thúc phải sau ngày bắt đầu",
-            "The INSERT statement conflicted with the CHECK constraint \"ck_rooms_capacity\".|capacity|Sức chứa phải lớn hơn 0"
+            "The INSERT statement conflicted with the CHECK constraint \"ck_rooms_capacity\".|capacity|Sức chứa phải lớn hơn 0",
+            "The UPDATE statement conflicted with the CHECK constraint \"ck_cs_max\".|maxStudents|Sĩ số tối đa phải từ 1 đến 32767"
     })
     void mapsCheckConstraintInDoubleQuotes(String sqlMessage, String field, String message) {
         RuntimeException mapped = ConstraintViolationMapper.map(

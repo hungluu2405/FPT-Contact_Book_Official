@@ -28,4 +28,14 @@ class LikePatternsTest {
     void blankKeywordMeansNoFilter(String keyword) {
         assertThat(LikePatterns.containsIgnoreCase(keyword)).isNull();
     }
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+            "PRJ301-FA26-|PRJ301-FA26-%",
+            "SE_1%|SE\\_1\\%%",
+            "A[B|A\\[B%"
+    })
+    void startsWithKeepsCaseAndEscapes(String prefix, String expected) {
+        assertThat(LikePatterns.startsWith(prefix)).isEqualTo(expected);
+    }
 }
