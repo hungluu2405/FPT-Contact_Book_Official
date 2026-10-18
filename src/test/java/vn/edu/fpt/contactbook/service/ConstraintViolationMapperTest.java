@@ -29,7 +29,9 @@ class ConstraintViolationMapperTest {
             "Violation of UNIQUE KEY constraint 'uq_semesters_code'.|code|Mã học kỳ đã tồn tại",
             "Violation of UNIQUE KEY constraint 'uq_rooms_code'.|code|Mã phòng đã tồn tại",
             "Violation of UNIQUE KEY constraint 'uq_grade_components'.|name|Môn học đã có đầu điểm cùng tên",
-            "Violation of UNIQUE KEY constraint 'uq_enrollments'.||Sinh viên đã có trong lớp học phần"
+            "Violation of UNIQUE KEY constraint 'uq_enrollments'.||Sinh viên đã có trong lớp học phần",
+            "Violation of UNIQUE KEY constraint 'uq_sess_cs_slot'.||Lớp đã có buổi học (kể cả buổi đã hủy) bắt đầu đúng ngày giờ này, vui lòng chọn giờ bắt đầu khác",
+            "Cannot insert duplicate key row in object 'dbo.class_sessions' with unique index 'ux_sess_room_slot'.||Phòng đã có buổi học khác bắt đầu cùng ngày giờ, vui lòng chọn phòng hoặc giờ khác"
     })
     void mapsKnownConstraintToField(String sqlMessage, String field, String message) {
         RuntimeException mapped = ConstraintViolationMapper.map(

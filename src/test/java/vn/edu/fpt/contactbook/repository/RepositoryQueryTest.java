@@ -454,4 +454,67 @@ class RepositoryQueryTest {
                     PageRequest.of(0, 20))).extracting(Student::getStudentCode).containsExactly("SE180101");
         }
     }
+
+    @Nested
+    @DisplayName("Buổi học, lịch thi, xem lịch (Giai đoạn 5a)")
+    class ScheduleQueries {
+
+        @Autowired
+        private ClassSessionRepository classSessionRepository;
+        @Autowired
+        private ExamRepository examRepository;
+        @Autowired
+        private EnrollmentRepository enrollmentRepository;
+        @Autowired
+        private ClassSectionRepository classSectionRepository;
+        @Autowired
+        private AttendanceRepository attendanceRepository;
+
+        private static final LocalDate FROM = LocalDate.of(2026, 10, 5);
+        private static final LocalDate TO = LocalDate.of(2026, 10, 21);
+
+        @Test
+        @DisplayName("Xung đột theo phòng, theo giảng viên, theo lớp chung sinh viên; tham số null bị bỏ qua")
+        void possibleConflicts() {
+            assertThat(classSessionRepository.findPossibleConflicts(1L, FROM, TO, 14L, null, List.of(-1L)))
+                    .extracting(ClassSession::getId).containsExactlyInAnyOrder(41L, 42L, 43L, 44L, 45L, 46L);
+            assertThat(classSessionRepository.findPossibleConflicts(1L, FROM, TO, null, 8L, List.of(-1L)))
+                    .hasSize(6);
+            assertThat(classSessionRepository.findPossibleConflicts(1L, FROM, TO, null, null, List.of(27L)))
+                    .hasSize(6);
+            assertThat(classSessionRepository.findPossibleConflicts(1L, FROM, TO, null, null, List.of(-1L)))
+                    .isEmpty();
+            assertThat(classSessionRepository.findPossibleConflicts(27L, FROM, TO, 14L, 8L, List.of(27L)))
+                    .as("chính lớp không tính ở truy vấn này").isEmpty();
+        }
+
+        @Test
+        void sharedStudentsAndSectionIds() {
+            assertThat(enrollmentRepository.countSharedStudents(27L))
+                    .extracting(row -> row[0] + "=" + row[1]).containsExactlyInAnyOrder("28=1", "37=2");
+            assertThat(enrollmentRepository.findEnrolledSectionIds(1L, 1L)).containsExactly(1L);
+            assertThat(classSectionRepository.findIdsByTeacherAndSemester(8L, 1L)).containsExactly(27L);
+        }
+
+        @Test
+        @DisplayName("Buổi của lớp học phần đã hủy không còn chặn phòng, giảng viên, sinh viên (finding 2)")
+        void cancelledSectionDoesNotBlock() {
+            ClassSection prn211 = classSectionRepository.findById(27L).orElseThrow();
+            prn211.setStatus(SectionStatus.CANCELLED);
+            classSectionRepository.flush();
+
+            assertThat(classSessionRepository.findPossibleConflicts(1L, FROM, TO, 14L, 8L, List.of(27L))).isEmpty();
+        }
+
+        @Test
+        void sessionHelpers() {
+            assertThat(classSessionRepository.findMaxSessionNo(27L)).isEqualTo((short) 6);
+            assertThat(classSessionRepository.findMaxSessionNo(37L)).isNull();
+            assertThat(attendanceRepository.findSessionIdsWithAttendance(27L)).containsExactlyInAnyOrder(41L, 42L,
+                    43L, 45L);
+            assertThat(classSessionRepository.findForSections(List.of(27L), LocalDate.of(2026, 10, 12),
+                    LocalDate.of(2026, 10, 18))).extracting(ClassSession::getId).containsExactly(43L, 44L);
+            assertThat(examRepository.findPossibleConflicts(FROM, TO, null, null, List.of(-1L))).isEmpty();
+        }
+    }
 }
