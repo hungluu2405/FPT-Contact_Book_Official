@@ -33,3 +33,11 @@
 31. Giai đoạn 3b: dòng ví dụ của file mẫu dùng số điện thoại 0900000000; nếu chưa xóa mà vẫn nhập thì báo lỗi ở dòng đó thay vì tạo tài khoản ảo.
 32. Giai đoạn 3b: ô số điện thoại kiểu số mà Excel đã bỏ số 0 đầu (còn 9 chữ số) được thêm lại số 0; ngày nhận ô kiểu ngày hoặc chữ d/M/yyyy; trạng thái nhận nhãn tiếng Việt (Đang học, Bảo lưu, Đã tốt nghiệp, Thôi học) hoặc mã (STUDYING...).
 33. Giai đoạn 3b: nhập thành công thì trình duyệt tải về file kết quả có mật khẩu tạm; file chỉ tạo trong bộ nhớ, không lưu trên server, không ghi vào log hay audit.
+34. Giai đoạn 4a: danh mục (khoa, bộ môn, ngành, lớp hành chính, môn học, học kỳ, phòng học) chỉ có thêm, sửa, xem; không có chức năng xóa vì SRS FR-ORG chỉ yêu cầu thêm, sửa và các bảng không có cờ trạng thái để ẩn. Riêng đầu điểm được xóa khi chưa có điểm.
+35. Giai đoạn 4a: tổng trọng số đầu điểm khác 100% chỉ hiện cảnh báo ở trang môn học; giai đoạn Điểm số sẽ chặn nhập và công bố điểm khi tổng khác 100%.
+36. Giai đoạn 4a: mã danh mục được bỏ khoảng trắng hai đầu và viết hoa trước khi lưu và kiểm tra trùng (giống mã SV/GV ở giả định 24). Tên đầu điểm chỉ bỏ khoảng trắng hai đầu, kiểm tra trùng trong môn không phân biệt hoa thường.
+37. Giai đoạn 4a: giảng viên chủ nhiệm của lớp nhập bằng mã giảng viên (như cách nhập phụ huynh ở giả định 25), để trống là chưa có.
+38. Giai đoạn 4a: niên khóa của lớp nhận số từ 2000 đến 2100 (script không có CHECK); số tín chỉ từ 1 đến 20; sức chứa phòng để trống hoặc từ 1 đến 32767 (SMALLINT).
+39. Giai đoạn 4a: điểm tối đa của đầu điểm phải lớn hơn 0 và không quá 10, tối đa 2 chữ số thập phân; script không có CHECK cho cột này nên chỉ kiểm tra ở service. Trọng số lớn hơn 0, không quá 100, tối đa 2 chữ số thập phân (ck_gc_weight, DECIMAL(5,2)).
+40. Giai đoạn 4a: trưởng bộ môn mở môn ngoài bộ môn mình, hoặc môn không tồn tại, bằng URL trực tiếp đều nhận 403 (không phân biệt để tránh dò id); quản trị viên nhận 404 với môn không tồn tại. Gửi bộ môn ngoài phạm vi trong form thêm/sửa môn cũng nhận 403.
+41. Giai đoạn 4a: "Đặt làm học kỳ hiện tại" với học kỳ đã là hiện tại thì không làm gì và không ghi audit. Học kỳ mới tạo luôn chưa là học kỳ hiện tại; cờ chỉ đổi qua thao tác này.
