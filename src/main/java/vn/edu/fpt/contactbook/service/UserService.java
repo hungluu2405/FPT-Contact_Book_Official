@@ -148,43 +148,56 @@ public class UserService {
     }
 
     /**
+     * Mọi kiểm tra nghiệp vụ trước khi tạo một người dùng mới (số điện thoại, email, vai trò, hồ sơ, trùng
+     * với dữ liệu đã có). Chỉ đọc; trả về lỗi theo tên ô của UserForm, rỗng nếu hợp lệ.
+     * Dùng chung cho tạo tay và nhập Excel để chỉ có một bộ kiểm tra.
+     */
+    @Transactional(readOnly = true)
+    public Map<String, String> checkNewUser(UserForm form) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        checkPhone(form.getPhone(), null, errors);
+        checkEmail(form.getEmail(), null, errors);
+        checkFullName(form.getFullName(), errors);
+
+        Set<String> roleCodes = roleCodes(form);
+        if (roleCodes.isEmpty()) {
+            errors.putIfAbsent("roles", "Vui lòng chọn ít nhất một vai trò");
+        } else if (!ROLE_ORDER.containsAll(roleCodes)) {
+            errors.putIfAbsent("roles", "Vai trò không hợp lệ");
+        }
+        if (roleCodes.contains(RoleCodes.HEAD_OF_DEPARTMENT)
+                && roleProfiles.department(form.getHeadDepartmentId()) == null) {
+            errors.putIfAbsent("headDepartmentId", "Vui lòng chọn bộ môn cho vai trò trưởng bộ môn");
+        }
+        RoleProfileForm profile = form.getProfile();
+        RoleProfiles.normalize(profile);
+        if (roleCodes.stream().anyMatch(RoleProfiles::needsStudent)) {
+            roleProfiles.checkStudent(profile, null, errors);
+        }
+        if (roleCodes.stream().anyMatch(RoleProfiles::needsTeacher)) {
+            roleProfiles.checkTeacher(profile, null, errors);
+        }
+        return errors;
+    }
+
+    /**
      * Tạo người dùng kèm vai trò và hồ sơ; trả về mật khẩu tạm để tầng web hiện một lần.
      * Mật khẩu tạm không được ghi vào log hay audit.
      */
     @Transactional
     public CreatedUser create(AppUserPrincipal actor, UserForm form, String ipAddress) {
         accessPolicy.requireAdmin(actor);
-        Map<String, String> errors = new LinkedHashMap<>();
-        String phone = checkPhone(form.getPhone(), null, errors);
-        String email = checkEmail(form.getEmail(), null, errors);
-        checkFullName(form.getFullName(), errors);
+        throwIfAny(checkNewUser(form));
 
-        Set<String> roleCodes = form.getRoles() == null ? Set.of() : new LinkedHashSet<>(form.getRoles());
-        if (roleCodes.isEmpty()) {
-            errors.putIfAbsent("roles", "Vui lòng chọn ít nhất một vai trò");
-        } else if (!ROLE_ORDER.containsAll(roleCodes)) {
-            errors.putIfAbsent("roles", "Vai trò không hợp lệ");
-        }
+        String phone = PhoneUtils.normalize(form.getPhone()).orElseThrow();
+        String email = blankToNull(form.getEmail());
+        Set<String> roleCodes = roleCodes(form);
         boolean needsStudent = roleCodes.stream().anyMatch(RoleProfiles::needsStudent);
         boolean needsTeacher = roleCodes.stream().anyMatch(RoleProfiles::needsTeacher);
         boolean needsParent = roleCodes.stream().anyMatch(RoleProfiles::needsParent);
-
-        Department headDepartment = null;
-        if (roleCodes.contains(RoleCodes.HEAD_OF_DEPARTMENT)) {
-            headDepartment = roleProfiles.department(form.getHeadDepartmentId());
-            if (headDepartment == null) {
-                errors.putIfAbsent("headDepartmentId", "Vui lòng chọn bộ môn cho vai trò trưởng bộ môn");
-            }
-        }
+        Department headDepartment = roleCodes.contains(RoleCodes.HEAD_OF_DEPARTMENT)
+                ? roleProfiles.department(form.getHeadDepartmentId()) : null;
         RoleProfileForm profile = form.getProfile();
-        RoleProfiles.normalize(profile);
-        if (needsStudent) {
-            roleProfiles.checkStudent(profile, null, errors);
-        }
-        if (needsTeacher) {
-            roleProfiles.checkTeacher(profile, null, errors);
-        }
-        throwIfAny(errors);
 
         String temporaryPassword = passwordGenerator.generate();
         User user = new User();
@@ -389,8 +402,16 @@ public class UserService {
         }
     }
 
+    private static Set<String> roleCodes(UserForm form) {
+        return form.getRoles() == null ? Set.of() : new LinkedHashSet<>(form.getRoles());
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.strip();
+    }
+
     private String checkEmail(String raw, Long existingUserId, Map<String, String> errors) {
-        String email = raw == null || raw.isBlank() ? null : raw.strip();
+        String email = blankToNull(raw);
         if (email != null && (existingUserId == null
                 ? userRepository.existsByEmailIgnoreCase(email)
                 : userRepository.existsByEmailIgnoreCaseAndIdNot(email, existingUserId))) {
