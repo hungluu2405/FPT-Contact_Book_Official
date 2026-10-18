@@ -33,6 +33,7 @@ import vn.edu.fpt.contactbook.security.SecurityContextRefresher;
 import vn.edu.fpt.contactbook.service.CatalogLookupService;
 import vn.edu.fpt.contactbook.service.UserAccessPolicy;
 import vn.edu.fpt.contactbook.service.UserService;
+import vn.edu.fpt.contactbook.util.PageUtils;
 import vn.edu.fpt.contactbook.util.PhoneUtils;
 
 import java.util.List;
@@ -45,8 +46,6 @@ import java.util.List;
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
 public class UserController {
-
-    static final int PAGE_WINDOW = 2;
 
     private final UserService userService;
     private final UserAccessPolicy accessPolicy;
@@ -66,9 +65,9 @@ public class UserController {
         Page<UserSummaryView> users = userService.list(actor, filter, page);
         boolean admin = accessPolicy.isAdmin(actor);
         model.addAttribute("users", users);
-        // Chỉ hiện trang hiện tại ±PAGE_WINDOW để thanh phân trang không dài ra theo số trang.
-        model.addAttribute("pageStart", Math.max(0, users.getNumber() - PAGE_WINDOW));
-        model.addAttribute("pageEnd", Math.min(users.getTotalPages() - 1, users.getNumber() + PAGE_WINDOW));
+        model.addAttribute("pager", PageUtils.pager(users, "/admin/users", PageUtils.params(
+                "keyword", filter.getKeyword(), "role", filter.getRole(), "departmentId", filter.getDepartmentId(),
+                "classId", filter.getClassId(), "status", filter.getStatus())));
         model.addAttribute("isAdmin", admin);
         model.addAttribute("roleCodes", UserService.ROLE_ORDER);
         model.addAttribute("departments", admin ? catalogLookupService.departments()

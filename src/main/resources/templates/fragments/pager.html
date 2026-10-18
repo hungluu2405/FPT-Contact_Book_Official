@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Phân trang dùng chung: pager là PagerView do controller tạo bằng PageUtils, giữ bộ lọc khi chuyển trang. */-->
+<nav th:fragment="pager(pager)" th:if="${pager.totalPages > 1}" class="mt-3" aria-label="Phân trang">
+    <ul class="pagination flex-wrap">
+        <li class="page-item" th:classappend="${pager.first()} ? 'disabled'">
+            <a class="page-link" th:href="@{${pager.url(pager.number - 1)}}" th:text="#{common.previous}">Trước</a>
+        </li>
+        <li class="page-item" th:each="i : ${#numbers.sequence(pager.start, pager.end)}"
+            th:classappend="${i == pager.number} ? 'active'">
+            <a class="page-link" th:href="@{${pager.url(i)}}" th:text="${i + 1}">1</a>
+        </li>
+        <li class="page-item" th:classappend="${pager.last()} ? 'disabled'">
+            <a class="page-link" th:href="@{${pager.url(pager.number + 1)}}" th:text="#{common.next}">Sau</a>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>

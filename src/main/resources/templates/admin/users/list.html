@@ -99,27 +99,7 @@
         </table>
     </div>
 
-    <!--/* Giữ bộ lọc khi chuyển trang. */-->
-    <nav th:if="${users.totalPages > 1}" class="mt-3" aria-label="Phân trang">
-        <ul class="pagination flex-wrap">
-            <li class="page-item" th:classappend="${users.first} ? 'disabled'">
-                <a class="page-link" th:href="@{/admin/users(page=${users.number - 1}, keyword=${filter.keyword}, role=${filter.role},
-                   departmentId=${filter.departmentId}, classId=${filter.classId}, status=${filter.status})}"
-                   th:text="#{common.previous}">Trước</a>
-            </li>
-            <li class="page-item" th:each="i : ${#numbers.sequence(pageStart, pageEnd)}"
-                th:classappend="${i == users.number} ? 'active'">
-                <a class="page-link" th:href="@{/admin/users(page=${i}, keyword=${filter.keyword}, role=${filter.role},
-                   departmentId=${filter.departmentId}, classId=${filter.classId}, status=${filter.status})}"
-                   th:text="${i + 1}">1</a>
-            </li>
-            <li class="page-item" th:classappend="${users.last} ? 'disabled'">
-                <a class="page-link" th:href="@{/admin/users(page=${users.number + 1}, keyword=${filter.keyword}, role=${filter.role},
-                   departmentId=${filter.departmentId}, classId=${filter.classId}, status=${filter.status})}"
-                   th:text="#{common.next}">Sau</a>
-            </li>
-        </ul>
-    </nav>
+    <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
 </section>
 </body>
 </html>
