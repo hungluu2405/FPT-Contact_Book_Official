@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${item.code} + ' - ' + ${item.name} + ' - ' + #{app.title}">Danh mục</title>
+</head>
+<body>
+<section>
+    <a th:replace="~{fragments/catalog :: back('/admin/subjects', #{subject.list})}"></a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="page-title mb-0" th:text="${item.code} + ' - ' + ${item.name}">Chi tiết</h1>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" th:href="@{/admin/subjects/{id}/edit(id=${item.id})}">
+                <i class="bi bi-pencil"></i> <span th:text="#{common.edit}">Sửa</span></a>
+        </div>
+    </div>
+
+    <div class="card card-custom p-4 mb-3">
+        <dl class="profile-info mb-0">
+            <dt th:text="#{catalog.code}">Nhãn</dt><dd th:text="${item.code}">Giá trị</dd>
+            <dt th:text="#{catalog.name}">Nhãn</dt><dd th:text="${item.name}">Giá trị</dd>
+            <dt th:text="#{subject.credits}">Nhãn</dt><dd th:text="${item.credits}">Giá trị</dd>
+            <dt th:text="#{catalog.department}">Nhãn</dt><dd th:text="${item.departmentCode} + ' - ' + ${item.departmentName}">Giá trị</dd>
+            <dt th:text="#{catalog.description}">Nhãn</dt><dd th:text="${item.description} ?: #{profile.empty}">Giá trị</dd>
+        </dl>
+    </div>
+
+    <div class="card card-custom p-4">
+        <h2 class="h5 mb-3" th:text="#{component.title}">Đầu điểm</h2>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th th:text="#{component.name}">Tên</th>
+                    <th class="text-end" th:text="#{component.weight}">Trọng số (%)</th>
+                    <th class="text-end" th:text="#{component.max-score}">Điểm tối đa</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${summary.components}">
+                    <td th:text="${c.name}">Assignment</td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(c.weight, 1, 'POINT', 2, 'COMMA')}">20,00</td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(c.maxScore, 1, 'POINT', 2, 'COMMA')}">10,00</td>
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-2">
+                            <a class="btn btn-sm btn-outline-primary"
+                               th:href="@{/admin/subjects/{id}/components/{cid}/edit(id=${item.id},cid=${c.id})}"
+                               th:text="#{common.edit}">Sửa</a>
+                            <form th:unless="${c.hasGrades}" method="post"
+                                  th:action="@{/admin/subjects/{id}/components/{cid}/delete(id=${item.id},cid=${c.id})}"
+                                  th:attr="data-confirm=#{component.delete.confirm(${c.name})}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Xóa</button>
+                            </form>
+                            <span th:if="${c.hasGrades}" class="small text-muted align-self-center"
+                                  th:text="#{component.has-grades}">Đã có điểm</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(summary.components)}">
+                    <td colspan="4" class="text-center text-muted py-3" th:text="#{component.empty}">Chưa có đầu điểm</td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr class="fw-semibold">
+                    <td th:text="#{component.total}">Tổng trọng số</td>
+                    <td class="text-end" id="totalWeight"
+                        th:text="${#numbers.formatDecimal(summary.totalWeight, 1, 'POINT', 2, 'COMMA')} + '%'">100,00%</td>
+                    <td colspan="2"></td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div th:unless="${summary.complete}" class="alert alert-warning mb-3" role="alert" id="weightWarning">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="#{component.total.warning(${#numbers.formatDecimal(summary.totalWeight, 1, 'POINT', 2, 'COMMA')})}">Tổng trọng số khác 100%.</span>
+        </div>
+
+        <h3 class="h6 mt-2" th:text="#{component.add}">Thêm đầu điểm</h3>
+        <form th:action="@{/admin/subjects/{id}/components(id=${item.id})}" th:object="${componentForm}" method="post"
+              novalidate>
+            <div th:replace="~{fragments/catalog :: globalErrors}"></div>
+            <div class="row g-3 align-items-start">
+                <div th:replace="~{fragments/catalog :: text('name', #{component.name}, 100, true, 'col-md-5')}"></div>
+                <div th:replace="~{fragments/catalog :: number('weight', #{component.weight}, '0.01', '100', '0.01', true, 'col-md-3')}"></div>
+                <div th:replace="~{fragments/catalog :: number('maxScore', #{component.max-score}, '0.01', '10', '0.01', true, 'col-md-2')}"></div>
+                <div class="col-md-2 d-flex align-items-end pt-md-4">
+                    <button type="submit" class="btn btn-orange w-100"><i class="bi bi-plus-lg"></i>
+                        <span th:text="#{component.add.submit}">Thêm</span></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{component.edit} + ' - ' + #{app.title}">Danh mục</title>
+</head>
+<body>
+<section>
+    <a th:replace="~{fragments/catalog :: back('/admin/subjects/' + ${item.id}, ${item.code} + ' - ' + ${item.name})}"></a>
+    <h1 class="page-title" th:text="#{component.edit}">Sửa đầu điểm</h1>
+
+    <form th:action="@{/admin/subjects/{id}/components/{cid}/edit(id=${item.id},cid=${componentId})}"
+          th:object="${componentForm}" method="post" novalidate>
+        <div th:replace="~{fragments/catalog :: globalErrors}"></div>
+        <div class="card card-custom p-4">
+            <div class="row g-3">
+                <div th:replace="~{fragments/catalog :: text('name', #{component.name}, 100, true, 'col-md-6')}"></div>
+                <div th:replace="~{fragments/catalog :: number('weight', #{component.weight}, '0.01', '100', '0.01', true, 'col-md-3')}"></div>
+                <div th:replace="~{fragments/catalog :: number('maxScore', #{component.max-score}, '0.01', '10', '0.01', true, 'col-md-3')}"></div>
+            </div>
+        </div>
+        <div th:replace="~{fragments/catalog :: buttons('/admin/subjects/' + ${item.id})}"></div>
+    </form>
+</section>
+</body>
+</html>

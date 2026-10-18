@@ -20,6 +20,48 @@
                 <i class="bi bi-person-video3"></i><span th:text="#{menu.department-teachers}">Giảng viên bộ môn</span>
             </a>
         </li>
+        <li class="nav-heading" sec:authorize="hasRole('ADMIN')" th:text="#{menu.catalog}">Danh mục</li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/catalog/faculties}" th:classappend="${activeMenu == 'catalog-faculties'} ? 'active'">
+                <i class="bi bi-bank"></i><span th:text="#{menu.catalog.faculties}">Khoa</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/catalog/departments}" th:classappend="${activeMenu == 'catalog-departments'} ? 'active'">
+                <i class="bi bi-diagram-3"></i><span th:text="#{menu.catalog.departments}">Bộ môn</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/catalog/majors}" th:classappend="${activeMenu == 'catalog-majors'} ? 'active'">
+                <i class="bi bi-mortarboard"></i><span th:text="#{menu.catalog.majors}">Ngành</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/catalog/classes}" th:classappend="${activeMenu == 'catalog-classes'} ? 'active'">
+                <i class="bi bi-people"></i><span th:text="#{menu.catalog.classes}">Lớp hành chính</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/subjects}" th:classappend="${activeMenu == 'catalog-subjects'} ? 'active'">
+                <i class="bi bi-journal-bookmark"></i><span th:text="#{menu.catalog.subjects}">Môn học</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/catalog/semesters}" th:classappend="${activeMenu == 'catalog-semesters'} ? 'active'">
+                <i class="bi bi-calendar-range"></i><span th:text="#{menu.catalog.semesters}">Học kỳ</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/catalog/rooms}" th:classappend="${activeMenu == 'catalog-rooms'} ? 'active'">
+                <i class="bi bi-door-open"></i><span th:text="#{menu.catalog.rooms}">Phòng học</span>
+            </a>
+        </li>
+        <!--/* Trưởng bộ môn chỉ quản lý môn học thuộc bộ môn mình (SubjectService). */-->
+        <li class="nav-item" sec:authorize="hasRole('HEAD_OF_DEPARTMENT') and !hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/subjects}" th:classappend="${activeMenu == 'catalog-subjects'} ? 'active'">
+                <i class="bi bi-journal-bookmark"></i><span th:text="#{menu.catalog.subjects}">Môn học</span>
+            </a>
+        </li>
         <li class="nav-item" sec:authorize="hasAnyRole('TEACHER', 'HEAD_OF_DEPARTMENT')">
             <a class="nav-link" th:href="@{/teacher}" th:classappend="${activeMenu == 'teacher'} ? 'active'">
                 <i class="bi bi-easel"></i><span th:text="#{menu.teacher}">Trang giảng viên</span>

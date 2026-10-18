@@ -208,6 +208,16 @@ body {
     color: var(--color-white);
 }
 
+/* Tiêu đề nhóm menu (ví dụ "Danh mục"). */
+.app-sidebar .nav-heading {
+    color: var(--color-navy);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.9rem 0.9rem 0.3rem;
+    text-transform: uppercase;
+}
+
 .app-content {
     flex: 1;
     padding: 1.5rem 1rem;

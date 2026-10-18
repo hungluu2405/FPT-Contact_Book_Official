@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="(${id} ? #{class.edit} : #{class.new}) + ' - ' + #{app.title}">Danh mục</title>
+</head>
+<body>
+<section>
+    <a th:replace="~{fragments/catalog :: back('/admin/catalog/classes', #{class.list})}"></a>
+    <h1 class="page-title" th:text="${id} ? #{class.edit} : #{class.new}">Thêm</h1>
+
+    <form th:action="${id} ? @{/admin/catalog/classes/{id}/edit(id=${id})} : @{/admin/catalog/classes/new}" th:object="${form}"
+          method="post" novalidate>
+        <div th:replace="~{fragments/catalog :: globalErrors}"></div>
+        <div class="card card-custom p-4">
+            <div class="row g-3">
+                <div th:replace="~{fragments/catalog :: selectField('majorId', #{catalog.major}, ${groups}, true, 'col-12')}"></div>
+                <div th:replace="~{fragments/catalog :: code('col-md-4')}"></div>
+                <div th:replace="~{fragments/catalog :: text('name', #{catalog.name}, 150, true, 'col-md-8')}"></div>
+                <div th:replace="~{fragments/catalog :: number('intakeYear', #{class.intake-year}, '2000', '2100', '1', true, 'col-md-4')}"></div>
+                <div th:replace="~{fragments/catalog :: text('homeroomTeacherCode', #{class.homeroom-code}, 20, false, 'col-md-8')}"></div>
+                <p class="form-text col-12 mt-0" th:text="#{class.homeroom-code.hint}">Để trống nếu chưa có.</p>
+            </div>
+        </div>
+        <div th:replace="~{fragments/catalog :: buttons(${id} ? '/admin/catalog/classes/' + ${id} : '/admin/catalog/classes')}"></div>
+    </form>
+</section>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{semester.list} + ' - ' + #{app.title}">Danh mục</title>
+</head>
+<body>
+<section>
+    <div th:replace="~{fragments/catalog :: header(#{semester.list}, '/admin/catalog/semesters/new')}"></div>
+    <form th:replace="~{fragments/catalog :: search('/admin/catalog/semesters', #{catalog.filter.code-name}, '', null)}"></form>
+    <p th:replace="~{fragments/catalog :: count(${items})}"></p>
+
+    <div class="card card-custom table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+            <tr>
+                <th th:text="#{catalog.code}">Cột</th>
+                <th th:text="#{catalog.name}">Cột</th>
+                <th th:text="#{semester.start-date}">Cột</th>
+                <th th:text="#{semester.end-date}">Cột</th>
+                <th th:text="#{semester.status}">Cột</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${items.content}">
+                <td><a th:href="@{/admin/catalog/semesters/{id}(id=${item.id})}" th:text="${item.code}">Mã</a></td>
+                <td th:text="${item.name}">Tên</td>
+                <td th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')}">01/01/2026</td>
+                <td th:text="${#temporals.format(item.endDate, 'dd/MM/yyyy')}">01/05/2026</td>
+                <td>
+                    <span th:if="${item.current}" class="badge text-bg-success" th:text="#{semester.current}">Hiện tại</span>
+                    <form th:unless="${item.current}" th:action="@{/admin/catalog/semesters/{id}/set-current(id=${item.id})}"
+                          method="post" th:attr="data-confirm=#{semester.set-current.confirm(${item.code})}">
+                        <button type="submit" class="btn btn-sm btn-outline-primary" th:text="#{semester.set-current}">Đặt làm hiện tại</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${items.empty}">
+                <td th:colspan="5" class="text-center text-muted py-4" th:text="#{catalog.empty}">Không có dữ liệu</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+</section>
+</body>
+</html>

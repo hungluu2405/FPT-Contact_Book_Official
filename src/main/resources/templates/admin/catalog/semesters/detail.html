@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${item.code} + ' - ' + ${item.name} + ' - ' + #{app.title}">Danh mục</title>
+</head>
+<body>
+<section>
+    <a th:replace="~{fragments/catalog :: back('/admin/catalog/semesters', #{semester.list})}"></a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="page-title mb-0" th:text="${item.code} + ' - ' + ${item.name}">Chi tiết</h1>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" th:href="@{/admin/catalog/semesters/{id}/edit(id=${item.id})}">
+                <i class="bi bi-pencil"></i> <span th:text="#{common.edit}">Sửa</span></a>
+            <form th:unless="${item.current}" th:action="@{/admin/catalog/semesters/{id}/set-current(id=${item.id})}"
+                  method="post" th:attr="data-confirm=#{semester.set-current.confirm(${item.code})}">
+                <button type="submit" class="btn btn-outline-primary" th:text="#{semester.set-current}">Đặt làm hiện tại</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card card-custom p-4 mb-3">
+        <dl class="profile-info mb-0">
+            <dt th:text="#{catalog.code}">Nhãn</dt><dd th:text="${item.code}">Giá trị</dd>
+            <dt th:text="#{catalog.name}">Nhãn</dt><dd th:text="${item.name}">Giá trị</dd>
+            <dt th:text="#{semester.start-date}">Nhãn</dt><dd th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')}">Giá trị</dd>
+            <dt th:text="#{semester.end-date}">Nhãn</dt><dd th:text="${#temporals.format(item.endDate, 'dd/MM/yyyy')}">Giá trị</dd>
+            <dt th:text="#{semester.status}">Trạng thái</dt><dd><span th:if="${item.current}" class="badge text-bg-success" th:text="#{semester.current}">Hiện tại</span><span th:unless="${item.current}" th:text="#{semester.not-current}">Không</span></dd>
+        </dl>
+    </div>
+</section>
+</body>
+</html>

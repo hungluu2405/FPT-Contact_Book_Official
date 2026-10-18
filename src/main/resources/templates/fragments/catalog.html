@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Bố cục dùng chung cho các màn hình danh mục. Ô nhập dùng trong form có th:object (field là tên thuộc tính).
+     Tên fragment không trùng tên thẻ HTML (select, textarea...), nếu không Thymeleaf sẽ chọn nhầm thẻ. */-->
+
+<!--/* Tiêu đề danh sách và nút thêm mới (newUrl = null thì không có nút). */-->
+<div th:fragment="header(title, newUrl)" class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="page-title mb-0" th:text="${title}">Danh mục</h1>
+    <a th:if="${newUrl}" class="btn btn-orange" th:href="@{${newUrl}}">
+        <i class="bi bi-plus-lg"></i> <span th:text="#{catalog.new}">Thêm mới</span>
+    </a>
+</div>
+
+<!--/* Ô tìm kiếm theo từ khóa và (nếu groups != null) lọc theo nhóm; giá trị lấy từ ${filter}. */-->
+<form th:fragment="search(action, placeholder, groupLabel, groups)" class="card card-custom p-3 mb-3"
+      th:action="@{${action}}" method="get">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-5">
+            <label for="keyword" class="form-label" th:text="#{user.filter.keyword}">Từ khóa</label>
+            <input type="search" class="form-control" id="keyword" name="keyword" th:value="${filter.keyword}"
+                   th:placeholder="${placeholder}">
+        </div>
+        <div class="col-md-4" th:if="${groups != null}">
+            <label for="groupId" class="form-label" th:text="${groupLabel}">Nhóm</label>
+            <select class="form-select" id="groupId" name="groupId">
+                <option value="" th:text="#{user.filter.all}">Tất cả</option>
+                <option th:each="g : ${groups}" th:value="${g.id}" th:selected="${g.id == filter.groupId}"
+                        th:text="${g.code} + ' - ' + ${g.name}">SE</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i>
+                <span th:text="#{common.search}">Tìm kiếm</span></button>
+            <a class="btn btn-outline-secondary" th:href="@{${action}}" th:text="#{common.reset}">Đặt lại</a>
+        </div>
+    </div>
+</form>
+
+<!--/* Số dòng tìm được. */-->
+<p th:fragment="count(page)" class="text-muted" th:text="#{catalog.count(${page.totalElements})}">0 mục</p>
+
+<!--/* Lỗi chung của form (không gắn với ô nào). */-->
+<div th:fragment="globalErrors" th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+    <p class="mb-0" th:each="err : ${#fields.globalErrors()}" th:text="${err}">Lỗi</p>
+</div>
+
+<div th:fragment="text(field, label, maxlength, required, cols)" th:class="${cols}">
+    <label th:for="${field}" class="form-label" th:text="${label} + (${required} ? ' *' : '')">Nhãn</label>
+    <input type="text" class="form-control" th:field="*{__${field}__}" th:attr="maxlength=${maxlength}"
+           th:classappend="${#fields.hasErrors(field)} ? 'is-invalid'">
+    <div class="invalid-feedback" th:errors="*{__${field}__}">Lỗi</div>
+</div>
+
+<div th:fragment="code(cols)" th:class="${cols}">
+    <label for="code" class="form-label" th:text="#{catalog.code} + ' *'">Mã</label>
+    <input type="text" class="form-control text-uppercase" th:field="*{code}" maxlength="20"
+           th:classappend="${#fields.hasErrors('code')} ? 'is-invalid'">
+    <div class="form-text" th:text="#{catalog.code.hint}">Mã được viết hoa.</div>
+    <div class="invalid-feedback" th:errors="*{code}">Lỗi</div>
+</div>
+
+<div th:fragment="textareaField(field, label, maxlength, cols)" th:class="${cols}">
+    <label th:for="${field}" class="form-label" th:text="${label}">Nhãn</label>
+    <textarea class="form-control" rows="3" th:field="*{__${field}__}" th:attr="maxlength=${maxlength}"
+              th:classappend="${#fields.hasErrors(field)} ? 'is-invalid'"></textarea>
+    <div class="invalid-feedback" th:errors="*{__${field}__}">Lỗi</div>
+</div>
+
+<!--/* step: "1" cho số nguyên, "0.01" cho số có 2 chữ số thập phân. */-->
+<div th:fragment="number(field, label, min, max, step, required, cols)" th:class="${cols}">
+    <label th:for="${field}" class="form-label" th:text="${label} + (${required} ? ' *' : '')">Nhãn</label>
+    <input type="number" class="form-control" th:field="*{__${field}__}" inputmode="decimal"
+           th:attr="min=${min},max=${max},step=${step}"
+           th:classappend="${#fields.hasErrors(field)} ? 'is-invalid'">
+    <div class="invalid-feedback" th:errors="*{__${field}__}">Lỗi</div>
+</div>
+
+<div th:fragment="date(field, label, required, cols)" th:class="${cols}">
+    <label th:for="${field}" class="form-label" th:text="${label} + (${required} ? ' *' : '')">Nhãn</label>
+    <input type="date" class="form-control" th:field="*{__${field}__}"
+           th:classappend="${#fields.hasErrors(field)} ? 'is-invalid'">
+    <div class="invalid-feedback" th:errors="*{__${field}__}">Lỗi</div>
+</div>
+
+<!--/* options: danh sách OptionView. */-->
+<div th:fragment="selectField(field, label, options, required, cols)" th:class="${cols}">
+    <label th:for="${field}" class="form-label" th:text="${label} + (${required} ? ' *' : '')">Nhãn</label>
+    <select class="form-select" th:field="*{__${field}__}"
+            th:classappend="${#fields.hasErrors(field)} ? 'is-invalid'">
+        <option value="" th:text="#{user.choose}">-- Chọn --</option>
+        <option th:each="o : ${options}" th:value="${o.id}" th:text="${o.code} + ' - ' + ${o.name}">SE</option>
+    </select>
+    <div class="invalid-feedback" th:errors="*{__${field}__}">Lỗi</div>
+</div>
+
+<!--/* Nút lưu và hủy cuối form. */-->
+<div th:fragment="buttons(cancelUrl)" class="d-flex flex-wrap gap-2 mt-3">
+    <button type="submit" class="btn btn-orange"><i class="bi bi-check-lg"></i>
+        <span th:text="#{common.save}">Lưu</span></button>
+    <a class="btn btn-outline-secondary" th:href="@{${cancelUrl}}" th:text="#{common.cancel}">Hủy</a>
+</div>
+
+<!--/* Liên kết quay lại danh sách. */-->
+<a th:fragment="back(url, label)" th:href="@{${url}}" class="d-inline-block mb-2"><i class="bi bi-arrow-left"></i>
+    <span th:text="${label}">Danh sách</span></a>
+</body>
+</html>

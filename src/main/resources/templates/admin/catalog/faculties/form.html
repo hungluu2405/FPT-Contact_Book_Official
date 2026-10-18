@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="(${id} ? #{faculty.edit} : #{faculty.new}) + ' - ' + #{app.title}">Danh mục</title>
+</head>
+<body>
+<section>
+    <a th:replace="~{fragments/catalog :: back('/admin/catalog/faculties', #{faculty.list})}"></a>
+    <h1 class="page-title" th:text="${id} ? #{faculty.edit} : #{faculty.new}">Thêm</h1>
+
+    <form th:action="${id} ? @{/admin/catalog/faculties/{id}/edit(id=${id})} : @{/admin/catalog/faculties/new}" th:object="${form}"
+          method="post" novalidate>
+        <div th:replace="~{fragments/catalog :: globalErrors}"></div>
+        <div class="card card-custom p-4">
+            <div class="row g-3">
+                <div th:replace="~{fragments/catalog :: code('col-md-4')}"></div>
+                <div th:replace="~{fragments/catalog :: text('name', #{catalog.name}, 150, true, 'col-md-8')}"></div>
+                <div th:replace="~{fragments/catalog :: textareaField('description', #{catalog.description}, 500, 'col-12')}"></div>
+            </div>
+        </div>
+        <div th:replace="~{fragments/catalog :: buttons(${id} ? '/admin/catalog/faculties/' + ${id} : '/admin/catalog/faculties')}"></div>
+    </form>
+</section>
+</body>
+</html>

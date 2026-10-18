@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{room.list} + ' - ' + #{app.title}">Danh mục</title>
+</head>
+<body>
+<section>
+    <div th:replace="~{fragments/catalog :: header(#{room.list}, '/admin/catalog/rooms/new')}"></div>
+    <form th:replace="~{fragments/catalog :: search('/admin/catalog/rooms', #{room.filter}, '', null)}"></form>
+    <p th:replace="~{fragments/catalog :: count(${items})}"></p>
+
+    <div class="card card-custom table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+            <tr>
+                <th th:text="#{catalog.code}">Cột</th>
+                <th th:text="#{catalog.name}">Cột</th>
+                <th th:text="#{room.building}">Cột</th>
+                <th th:text="#{room.capacity}">Cột</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${items.content}">
+                <td><a th:href="@{/admin/catalog/rooms/{id}(id=${item.id})}" th:text="${item.code}">Mã</a></td>
+                <td th:text="${item.name}">Tên</td>
+                <td th:text="${item.building}">Tòa</td>
+                <td th:text="${item.capacity}">40</td>
+            </tr>
+            <tr th:if="${items.empty}">
+                <td th:colspan="4" class="text-center text-muted py-4" th:text="#{catalog.empty}">Không có dữ liệu</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+</section>
+</body>
+</html>
