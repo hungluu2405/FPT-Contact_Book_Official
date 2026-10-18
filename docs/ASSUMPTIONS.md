@@ -27,3 +27,9 @@
 25. Giai đoạn 3a: liên kết phụ huynh nhập theo số điện thoại phụ huynh (trang sinh viên) hoặc mã sinh viên (trang phụ huynh) thay vì danh sách chọn, vì danh sách người dùng có thể rất dài.
 26. Giai đoạn 3a: khóa tài khoản và gỡ vai trò chạy với isolation SERIALIZABLE để không mất quản trị viên đang hoạt động cuối cùng khi hai quản trị viên thao tác cùng lúc; nếu SQL Server chọn một bên làm deadlock victim thì bên đó nhận lỗi chung và chỉ cần thử lại.
 27. Giai đoạn 3a: tìm kiếm người dùng theo số điện thoại, họ tên, mã SV/GV (không theo email); ký tự `%`, `_`, `[` trong từ khóa được coi là ký tự thường.
+28. Giai đoạn 3b: nhập Excel theo phương án "có lỗi thì không ghi dòng nào": kiểm tra toàn bộ file trước; chỉ khi không có lỗi mới tạo tất cả người dùng trong một transaction. Vi phạm unique phát hiện ở database lúc tạo (thao tác đồng thời) làm rollback toàn bộ.
+29. Giai đoạn 3b: tối đa 500 dòng dữ liệu (không tính dòng trống) và tối đa 2 MB mỗi file; chỉ nhận .xlsx. Nhập file lớn sẽ chậm vì mỗi mật khẩu tạm phải băm BCrypt (khoảng 70 ms một người).
+30. Giai đoạn 3b: nhập giảng viên chỉ gán vai trò TEACHER (bộ môn lấy theo cột Mã bộ môn); HEAD_OF_DEPARTMENT không gán qua Excel mà gán tay ở màn hình vai trò.
+31. Giai đoạn 3b: dòng ví dụ của file mẫu dùng số điện thoại 0900000000; nếu chưa xóa mà vẫn nhập thì báo lỗi ở dòng đó thay vì tạo tài khoản ảo.
+32. Giai đoạn 3b: ô số điện thoại kiểu số mà Excel đã bỏ số 0 đầu (còn 9 chữ số) được thêm lại số 0; ngày nhận ô kiểu ngày hoặc chữ d/M/yyyy; trạng thái nhận nhãn tiếng Việt (Đang học, Bảo lưu, Đã tốt nghiệp, Thôi học) hoặc mã (STUDYING...).
+33. Giai đoạn 3b: nhập thành công thì trình duyệt tải về file kết quả có mật khẩu tạm; file chỉ tạo trong bộ nhớ, không lưu trên server, không ghi vào log hay audit.
