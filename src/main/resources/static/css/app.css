@@ -320,3 +320,23 @@ body {
     letter-spacing: 0.08em;
     user-select: all;
 }
+
+/* Thời khóa biểu: buổi hủy gạch ngang, buổi bù viền xanh, ngày hôm nay nổi bật. */
+.schedule-item {
+    background-color: var(--color-bg);
+    border-left: 4px solid var(--color-navy);
+}
+
+.schedule-item.schedule-makeup {
+    border-left-color: #0dcaf0;
+}
+
+.schedule-item.schedule-cancelled {
+    border-left-color: #dc3545;
+    opacity: 0.7;
+    text-decoration: line-through;
+}
+
+.schedule-today {
+    border-width: 2px;
+}

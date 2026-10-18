@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${pageTitle} + ' - ' + #{app.title}">Lịch</title>
+</head>
+<body>
+<section>
+    <h1 class="page-title" th:text="${pageTitle}">Lịch thi</h1>
+    <p th:if="${noChildren}" class="alert alert-info" th:text="#{schedule.no-children}">Chưa liên kết con.</p>
+    <th:block th:unless="${noChildren}">
+        <form th:replace="~{fragments/schedule :: toolbar(${baseUrl}, 'list')}"></form>
+        <p><a th:href="@{${scheduleUrl}(semesterId=${semester.id()})}"><i class="bi bi-calendar-week"></i>
+            <span th:text="#{schedule.back-to-schedule}">Thời khóa biểu</span></a></p>
+        <div th:replace="~{fragments/schedule :: exams(${items})}"></div>
+        <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+    </th:block>
+    <script th:src="@{/js/child-select.js}"></script>
+</section>
+</body>
+</html>

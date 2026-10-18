@@ -77,14 +77,44 @@
                 <i class="bi bi-easel"></i><span th:text="#{menu.teacher}">Trang giảng viên</span>
             </a>
         </li>
+        <li class="nav-item" sec:authorize="hasAnyRole('TEACHER', 'HEAD_OF_DEPARTMENT')">
+            <a class="nav-link" th:href="@{/teacher/schedule}" th:classappend="${activeMenu == 'teacher-schedule'} ? 'active'">
+                <i class="bi bi-calendar-week"></i><span th:text="#{menu.teacher.schedule}">Lịch dạy</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasAnyRole('TEACHER', 'HEAD_OF_DEPARTMENT')">
+            <a class="nav-link" th:href="@{/teacher/exams}" th:classappend="${activeMenu == 'teacher-exams'} ? 'active'">
+                <i class="bi bi-clipboard-check"></i><span th:text="#{menu.exams}">Lịch thi</span>
+            </a>
+        </li>
         <li class="nav-item" sec:authorize="hasRole('STUDENT')">
             <a class="nav-link" th:href="@{/student}" th:classappend="${activeMenu == 'student'} ? 'active'">
                 <i class="bi bi-backpack"></i><span th:text="#{menu.student}">Trang sinh viên</span>
             </a>
         </li>
+        <li class="nav-item" sec:authorize="hasRole('STUDENT')">
+            <a class="nav-link" th:href="@{/student/schedule}" th:classappend="${activeMenu == 'student-schedule'} ? 'active'">
+                <i class="bi bi-calendar-week"></i><span th:text="#{menu.schedule}">Thời khóa biểu</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('STUDENT')">
+            <a class="nav-link" th:href="@{/student/exams}" th:classappend="${activeMenu == 'student-exams'} ? 'active'">
+                <i class="bi bi-clipboard-check"></i><span th:text="#{menu.exams}">Lịch thi</span>
+            </a>
+        </li>
         <li class="nav-item" sec:authorize="hasRole('PARENT')">
             <a class="nav-link" th:href="@{/parent}" th:classappend="${activeMenu == 'parent'} ? 'active'">
                 <i class="bi bi-people"></i><span th:text="#{menu.parent}">Trang phụ huynh</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('PARENT')">
+            <a class="nav-link" th:href="@{/parent/schedule}" th:classappend="${activeMenu == 'parent-schedule'} ? 'active'">
+                <i class="bi bi-calendar-week"></i><span th:text="#{menu.parent.schedule}">Thời khóa biểu của con</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('PARENT')">
+            <a class="nav-link" th:href="@{/parent/exams}" th:classappend="${activeMenu == 'parent-exams'} ? 'active'">
+                <i class="bi bi-clipboard-check"></i><span th:text="#{menu.parent.exams}">Lịch thi của con</span>
             </a>
         </li>
         <li class="nav-item">

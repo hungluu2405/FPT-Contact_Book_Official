@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${pageTitle} + ' - ' + #{app.title}">Lịch</title>
+</head>
+<body>
+<section>
+    <h1 class="page-title" th:text="${pageTitle}">Thời khóa biểu</h1>
+    <p th:if="${noChildren}" class="alert alert-info" th:text="#{schedule.no-children}">Chưa liên kết con.</p>
+    <th:block th:unless="${noChildren}">
+        <form th:replace="~{fragments/schedule :: toolbar(${baseUrl}, ${view})}"></form>
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item"><a class="nav-link" th:classappend="${view == 'week'} ? 'active'"
+                                    th:href="@{${baseUrl}(semesterId=${semester.id()}, view='week')}" th:text="#{schedule.view.week}">Theo tuần</a></li>
+            <li class="nav-item"><a class="nav-link" th:classappend="${view == 'list'} ? 'active'"
+                                    th:href="@{${baseUrl}(semesterId=${semester.id()}, view='list')}" th:text="#{schedule.view.list}">Danh sách</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{${examsUrl}(semesterId=${semester.id()})}" th:text="#{schedule.exams}">Lịch thi</a></li>
+        </ul>
+        <!--/* th:replace chạy trước th:if nên điều kiện phải nằm ở thẻ bao ngoài. */-->
+        <th:block th:if="${view == 'week'}">
+            <div th:replace="~{fragments/schedule :: week(${week}, ${baseUrl})}"></div>
+        </th:block>
+        <th:block th:if="${view == 'list'}">
+            <div th:replace="~{fragments/schedule :: list(${items})}"></div>
+            <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+        </th:block>
+    </th:block>
+    <script th:src="@{/js/child-select.js}"></script>
+</section>
+</body>
+</html>

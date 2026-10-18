@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.contactbook.dto.ClassSectionForm;
 import vn.edu.fpt.contactbook.dto.ClassSectionView;
-import vn.edu.fpt.contactbook.dto.EnrollmentRow;
 import vn.edu.fpt.contactbook.dto.OptionView;
 import vn.edu.fpt.contactbook.dto.SectionFilter;
 import vn.edu.fpt.contactbook.exception.BusinessException;
@@ -31,7 +30,8 @@ import vn.edu.fpt.contactbook.model.enums.SectionStatus;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
 import vn.edu.fpt.contactbook.service.CatalogLookupService;
 import vn.edu.fpt.contactbook.service.ClassSectionService;
-import vn.edu.fpt.contactbook.service.EnrollmentService;
+import vn.edu.fpt.contactbook.service.SectionDetailService;
+import vn.edu.fpt.contactbook.service.SectionDetailService.SectionDetail;
 import vn.edu.fpt.contactbook.service.SubjectAccessPolicy;
 import vn.edu.fpt.contactbook.util.PageUtils;
 
@@ -54,7 +54,7 @@ public class ClassSectionController {
     private static final String SUGGEST = "suggest";
 
     private final ClassSectionService classSectionService;
-    private final EnrollmentService enrollmentService;
+    private final SectionDetailService sectionDetailService;
     private final SubjectAccessPolicy accessPolicy;
     private final CatalogLookupService catalogLookupService;
 
@@ -105,28 +105,37 @@ public class ClassSectionController {
     }
 
     /**
-     * Chi tiết lớp và danh sách sinh viên (lọc theo trạng thái, mặc định đang học). ADMIN thấy thêm khối
+     * Chi tiết lớp, buổi học (phân trang riêng bằng sessionPage), lịch thi và danh sách sinh viên (lọc theo
+     * trạng thái, mặc định đang học). ADMIN thấy thêm khối
      * ghi danh: tìm sinh viên theo mã/tên (q), ghi danh cả lớp hành chính, nhập Excel.
      */
     @GetMapping("/{id:\\d+}")
     public String detail(@AuthenticationPrincipal AppUserPrincipal actor, @PathVariable Long id,
                          @RequestParam(required = false) String status, @RequestParam(required = false) String q,
-                         @RequestParam(defaultValue = "0") int page, Model model) {
-        ClassSectionView section = classSectionService.detail(actor, id);
+                         @RequestParam(defaultValue = "0") int page,
+                         @RequestParam(defaultValue = "0") int sessionPage,
+                         @RequestParam(defaultValue = "0") int examPage, Model model) {
         EnrollmentStatus statusFilter = "ALL".equals(status) ? null
                 : status == null ? EnrollmentStatus.ENROLLED : parseStatus(status);
-        Page<EnrollmentRow> students = enrollmentService.enrollments(actor, id, statusFilter, page);
-        model.addAttribute("item", section);
-        model.addAttribute("students", students);
+        SectionDetail detail = sectionDetailService.load(actor, id, statusFilter, page, sessionPage, examPage, q);
+        String path = BASE + "/" + id;
+        model.addAttribute("item", detail.section());
+        model.addAttribute("students", detail.students());
         model.addAttribute("statusFilter", statusFilter == null ? "ALL" : statusFilter.name());
         model.addAttribute("enrollmentStatuses", EnrollmentStatus.values());
-        model.addAttribute("pager", PageUtils.pager(students, BASE + "/" + id,
-                PageUtils.params("status", status, "q", q)));
-        boolean admin = accessPolicy.isAdmin(actor);
-        model.addAttribute("canEnroll", admin);
-        if (admin) {
+        // Mỗi danh sách phân trang riêng và giữ số trang của hai danh sách kia.
+        model.addAttribute("pager", PageUtils.pager(detail.students(), path,
+                PageUtils.params("status", status, "q", q, "sessionPage", sessionPage, "examPage", examPage)));
+        model.addAttribute("sessions", detail.sessions());
+        model.addAttribute("sessionPager", PageUtils.pager(detail.sessions(), path,
+                PageUtils.params("status", status, "q", q, "page", page, "examPage", examPage), "sessionPage"));
+        model.addAttribute("exams", detail.exams());
+        model.addAttribute("examPager", PageUtils.pager(detail.exams(), path,
+                PageUtils.params("status", status, "q", q, "page", page, "sessionPage", sessionPage), "examPage"));
+        model.addAttribute("canEnroll", detail.canEnroll());
+        if (detail.canEnroll()) {
             model.addAttribute("q", q);
-            model.addAttribute("candidates", q == null ? List.of() : enrollmentService.candidates(actor, id, q));
+            model.addAttribute("candidates", detail.candidates());
             model.addAttribute("classes", catalogLookupService.classes());
         }
         model.addAttribute("activeMenu", MENU);

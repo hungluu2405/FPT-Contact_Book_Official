@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Fragment lịch dùng chung: bảng xung đột (form quản lý), lưới tuần, danh sách buổi, danh sách lịch thi. */-->
+
+<!--/* conflicts: danh sách ScheduleConflict; không hiện gì nếu null. */-->
+<div th:fragment="conflicts(conflicts)" th:if="${conflicts}" class="card card-custom border-danger p-4 mb-3" id="conflicts">
+    <h2 class="h5 text-danger" th:text="#{schedule.conflicts(${#lists.size(conflicts)})}">Có xung đột</h2>
+    <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+            <thead>
+            <tr>
+                <th th:text="#{schedule.date}">Ngày</th>
+                <th th:text="#{schedule.time}">Giờ</th>
+                <th th:text="#{schedule.conflict.type}">Loại</th>
+                <th th:text="#{schedule.conflict.detail}">Trùng với</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${conflicts}">
+                <td th:text="${#temporals.format(c.date, 'dd/MM/yyyy')}">01/09/2026</td>
+                <td th:text="${#temporals.format(c.startTime, 'HH:mm')} + '–' + ${#temporals.format(c.endTime, 'HH:mm')}">07:30–09:45</td>
+                <td th:text="#{'schedule.conflict.' + ${c.type}}">Phòng</td>
+                <td th:text="${c.detail}">Chi tiết</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--/* Chọn học kỳ, chế độ xem (tuần/danh sách) và (phụ huynh) chọn con. baseUrl là đường dẫn trang lịch. */-->
+<form th:fragment="toolbar(baseUrl, view)" class="card card-custom p-3 mb-3" th:action="@{${baseUrl}}" method="get">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4" th:if="${children != null}">
+            <label for="childSelect" class="form-label" th:text="#{schedule.child}">Con</label>
+            <select id="childSelect" class="form-select" data-child-select th:attr="data-url-template=${childUrlTemplate}">
+                <option th:each="c : ${children}" th:value="${c.id}" th:selected="${c.id == studentId}"
+                        th:text="${c.code} + ' - ' + ${c.name}">SE190001</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="semesterId" class="form-label" th:text="#{section.semester}">Học kỳ</label>
+            <select id="semesterId" name="semesterId" class="form-select">
+                <option th:each="s : ${semesters}" th:value="${s.id}" th:selected="${s.id == semester.id()}"
+                        th:text="${s.code} + ' - ' + ${s.name}">FA26</option>
+            </select>
+        </div>
+        <input type="hidden" name="view" th:value="${view}">
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary" th:text="#{schedule.show}">Xem</button>
+        </div>
+    </div>
+</form>
+
+<!--/* Lưới một tuần: mỗi ngày một cột (xếp dọc trên màn hình nhỏ). */-->
+<div th:fragment="week(week, baseUrl)">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 class="h5 mb-0" th:text="#{schedule.week(${#temporals.format(week.weekStart, 'dd/MM/yyyy')}, ${#temporals.format(week.weekEnd, 'dd/MM/yyyy')})}">Tuần</h2>
+        <div class="btn-group" role="group" aria-label="Chuyển tuần">
+            <a class="btn btn-outline-secondary" th:href="@{${baseUrl}(semesterId=${semester.id()}, view='week', week=${week.previous})}"
+               th:text="#{schedule.previous-week}">Tuần trước</a>
+            <a class="btn btn-outline-secondary" th:href="@{${baseUrl}(semesterId=${semester.id()}, view='week', week=${today})}"
+               th:text="#{schedule.today}">Hôm nay</a>
+            <a class="btn btn-outline-secondary" th:href="@{${baseUrl}(semesterId=${semester.id()}, view='week', week=${week.next})}"
+               th:text="#{schedule.next-week}">Tuần sau</a>
+        </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-7 g-2 schedule-week">
+        <div class="col" th:each="day : ${week.days}">
+            <div class="card card-custom h-100 p-2" th:classappend="${day.today()} ? 'border-warning schedule-today'">
+                <div class="fw-semibold mb-2">
+                    <span th:text="#{'weekday.' + ${day.date().dayOfWeek}}">Thứ Hai</span>
+                    <span class="text-muted small" th:text="${#temporals.format(day.date(), 'dd/MM/yyyy')}">01/09/2026</span>
+                </div>
+                <div th:each="s : ${day.items()}" class="schedule-item mb-2 p-2 rounded"
+                     th:classappend="${s.cancelled()} ? 'schedule-cancelled' : (${s.makeup()} ? 'schedule-makeup' : '')">
+                    <div class="fw-semibold" th:text="${#temporals.format(s.startTime, 'HH:mm')} + '–' + ${#temporals.format(s.endTime, 'HH:mm')}">07:30–09:45</div>
+                    <div th:text="${s.subjectCode} + ' - ' + ${s.subjectName}">PRJ301</div>
+                    <div class="small text-muted" th:text="${s.sectionCode}">PRJ301-FA26-01</div>
+                    <div class="small"><i class="bi bi-geo-alt"></i> <span th:text="${s.roomCode} ?: #{schedule.no-room}">R101</span></div>
+                    <div class="small"><i class="bi bi-person"></i> <span th:text="${s.teacherName}">Giảng viên</span></div>
+                    <span th:if="${s.cancelled()}" class="badge text-bg-danger" th:text="#{'session-status.CANCELLED'}">Đã hủy</span>
+                    <span th:if="${s.makeup()}" class="badge text-bg-info" th:text="#{'session-status.MAKEUP'}">Học bù</span>
+                </div>
+                <div th:if="${#lists.isEmpty(day.items())}" class="small text-muted" th:text="#{schedule.no-session}">Không có buổi</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--/* Danh sách buổi của học kỳ (phân trang). */-->
+<div th:fragment="list(items)" class="card card-custom table-responsive">
+    <table class="table align-middle mb-0">
+        <thead>
+        <tr>
+            <th th:text="#{schedule.date}">Ngày</th>
+            <th th:text="#{schedule.time}">Giờ</th>
+            <th th:text="#{section.subject}">Môn</th>
+            <th th:text="#{schedule.room}">Phòng</th>
+            <th th:text="#{section.teacher}">Giảng viên</th>
+            <th th:text="#{section.status}">Trạng thái</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${items.content}" th:classappend="${s.cancelled()} ? 'text-decoration-line-through text-muted'">
+            <td th:text="#{'weekday.' + ${s.date.dayOfWeek}} + ', ' + ${#temporals.format(s.date, 'dd/MM/yyyy')}">Thứ Hai, 01/09/2026</td>
+            <td th:text="${#temporals.format(s.startTime, 'HH:mm')} + '–' + ${#temporals.format(s.endTime, 'HH:mm')}">07:30–09:45</td>
+            <td th:text="${s.subjectCode} + ' (' + ${s.sectionCode} + ')'">PRJ301</td>
+            <td th:text="${s.roomCode} ?: #{schedule.no-room}">R101</td>
+            <td th:text="${s.teacherName}">Giảng viên</td>
+            <td th:text="#{'session-status.' + ${s.status}}">Đã lên lịch</td>
+        </tr>
+        <tr th:if="${items.empty}">
+            <td colspan="6" class="text-center text-muted py-4" th:text="#{schedule.empty}">Không có buổi học</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--/* Danh sách lịch thi (phân trang). */-->
+<div th:fragment="exams(items)" class="card card-custom table-responsive">
+    <table class="table align-middle mb-0">
+        <thead>
+        <tr>
+            <th th:text="#{schedule.date}">Ngày</th>
+            <th th:text="#{schedule.time}">Giờ</th>
+            <th th:text="#{section.subject}">Môn</th>
+            <th th:text="#{exam.type}">Loại</th>
+            <th th:text="#{schedule.room}">Phòng</th>
+            <th th:text="#{schedule.note}">Ghi chú</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="x : ${items.content}">
+            <td th:text="${#temporals.format(x.date, 'dd/MM/yyyy')}">01/12/2026</td>
+            <td th:text="${#temporals.format(x.startTime, 'HH:mm')} + '–' + ${#temporals.format(x.endTime, 'HH:mm')}">07:30–09:00</td>
+            <td th:text="${x.subjectCode} + ' - ' + ${x.subjectName} + ' (' + ${x.sectionCode} + ')'">PRJ301</td>
+            <td th:text="#{'exam-type.' + ${x.examType}}">Cuối kỳ</td>
+            <td th:text="${x.roomCode} ?: #{schedule.no-room}">R101</td>
+            <td th:text="${x.note}">Ghi chú</td>
+        </tr>
+        <tr th:if="${items.empty}">
+            <td colspan="6" class="text-center text-muted py-4" th:text="#{exam.empty}">Chưa có lịch thi</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

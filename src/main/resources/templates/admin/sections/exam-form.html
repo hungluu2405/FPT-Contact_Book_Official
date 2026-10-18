@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="(${examId} ? #{exam.edit} : #{exam.new}) + ' - ' + #{app.title}">Lịch</title>
+</head>
+<body>
+<section>
+    <a th:replace="~{fragments/catalog :: back('/admin/sections/' + ${item.id}, ${item.code})}"></a>
+    <h1 class="page-title" th:text="(${examId} ? #{exam.edit} : #{exam.new}) + ': ' + ${item.code}">Lịch thi</h1>
+    <div th:replace="~{fragments/schedule :: conflicts(${conflicts})}"></div>
+
+    <form th:action="${examId} ? @{/admin/sections/{id}/exams/{eid}/edit(id=${item.id},eid=${examId})} : @{/admin/sections/{id}/exams/new(id=${item.id})}"
+          th:object="${form}" method="post" novalidate>
+        <div th:replace="~{fragments/catalog :: globalErrors}"></div>
+        <div class="card card-custom p-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="examType" class="form-label" th:text="#{exam.type} + ' *'">Loại thi</label>
+                    <select class="form-select" th:field="*{examType}"
+                            th:classappend="${#fields.hasErrors('examType')} ? 'is-invalid'">
+                        <option value="" th:text="#{user.choose}">-- Chọn --</option>
+                        <option th:each="t : ${examTypes}" th:value="${t}" th:text="#{'exam-type.' + ${t}}">Cuối kỳ</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{examType}">Lỗi</div>
+                </div>
+                <div th:replace="~{fragments/catalog :: date('examDate', #{schedule.date}, true, 'col-md-4')}"></div>
+                <div class="col-md-4">
+                    <label for="startTime" class="form-label" th:text="#{schedule.start-time} + ' *'">Giờ</label>
+                    <input type="time" class="form-control" th:field="*{startTime}"
+                           th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{startTime}">Lỗi</div>
+                </div>
+                <div class="col-md-4">
+                    <label for="endTime" class="form-label" th:text="#{schedule.end-time} + ' *'">Giờ</label>
+                    <input type="time" class="form-control" th:field="*{endTime}"
+                           th:classappend="${#fields.hasErrors('endTime')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{endTime}">Lỗi</div>
+                </div>
+                <div class="col-md-4">
+                    <label for="roomId" class="form-label" th:text="#{schedule.room}">Phòng</label>
+                    <select class="form-select" th:field="*{roomId}"
+                            th:classappend="${#fields.hasErrors('roomId')} ? 'is-invalid'">
+                        <option value="" th:text="#{schedule.no-room}">Chưa xếp phòng</option>
+                        <option th:each="o : ${rooms}" th:value="${o.id}" th:text="${o.code} + ' - ' + ${o.name}">R101</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{roomId}">Lỗi</div>
+                </div>
+                <div th:replace="~{fragments/catalog :: text('note', #{schedule.note}, 255, false, 'col-md-8')}"></div>
+            </div>
+        </div>
+        <div th:replace="~{fragments/catalog :: buttons('/admin/sections/' + ${item.id})}"></div>
+    </form>
+</section>
+</body>
+</html>
