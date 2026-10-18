@@ -8,9 +8,14 @@
 <section>
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h1 class="page-title mb-0" th:text="${isAdmin} ? #{user.list.title} : #{user.list.title.head}">Người dùng</h1>
-        <a sec:authorize="hasRole('ADMIN')" class="btn btn-orange" th:href="@{/admin/users/new}">
-            <i class="bi bi-person-plus"></i> <span th:text="#{user.new}">Thêm người dùng</span>
-        </a>
+        <div sec:authorize="hasRole('ADMIN')" class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" th:href="@{/admin/users/import}">
+                <i class="bi bi-file-earmark-spreadsheet"></i> <span th:text="#{user.import.button}">Nhập từ Excel</span>
+            </a>
+            <a class="btn btn-orange" th:href="@{/admin/users/new}">
+                <i class="bi bi-person-plus"></i> <span th:text="#{user.new}">Thêm người dùng</span>
+            </a>
+        </div>
     </div>
 
     <form class="card card-custom p-3 mb-3" th:action="@{/admin/users}" method="get" th:object="${filter}">

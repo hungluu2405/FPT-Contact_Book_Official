@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{user.import.title} + ' - ' + #{app.title}">Nhập từ Excel</title>
+</head>
+<body>
+<section>
+    <a th:href="@{/admin/users}" class="d-inline-block mb-2"><i class="bi bi-arrow-left"></i>
+        <span th:text="#{user.back-to-list}">Danh sách người dùng</span></a>
+    <h1 class="page-title" th:text="#{user.import.title}">Nhập người dùng từ Excel</h1>
+
+    <div class="alert alert-warning d-flex gap-2" role="alert">
+        <i class="bi bi-shield-lock-fill"></i>
+        <span th:text="#{user.import.password-warning}">File kết quả chứa mật khẩu tạm, cần bảo quản.</span>
+    </div>
+
+    <div class="card card-custom p-4 mb-4">
+        <h2 class="h5 mb-3" th:text="#{user.import.step1}">1. Tải file mẫu</h2>
+        <p class="text-muted" th:text="#{user.import.template-hint(${maxRows})}">Hướng dẫn</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a th:each="t : ${types}" class="btn btn-outline-primary"
+               th:href="@{/admin/users/import/template(type=${t})}">
+                <i class="bi bi-file-earmark-arrow-down"></i>
+                <span th:text="#{user.import.template(${t.label()})}">Tải file mẫu</span>
+            </a>
+        </div>
+    </div>
+
+    <form class="card card-custom p-4 mb-4" th:action="@{/admin/users/import}" method="post"
+          enctype="multipart/form-data" novalidate>
+        <h2 class="h5 mb-3" th:text="#{user.import.step2}">2. Tải file lên</h2>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="type" class="form-label" th:text="#{user.import.type}">Loại</label>
+                <select id="type" name="type" class="form-select">
+                    <option th:each="t : ${types}" th:value="${t}" th:text="${t.label()}"
+                            th:selected="${t == type}">Sinh viên</option>
+                </select>
+            </div>
+            <div class="col-md-8">
+                <label for="file" class="form-label" th:text="#{user.import.file}">File Excel (.xlsx)</label>
+                <input type="file" id="file" name="file" class="form-control" required
+                       accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+            </div>
+        </div>
+        <p class="form-text mt-2" th:text="#{user.import.all-or-nothing}">Có lỗi thì không tạo người nào.</p>
+        <button type="submit" class="btn btn-orange btn-lg mt-2">
+            <i class="bi bi-upload"></i> <span th:text="#{user.import.submit}">Nhập</span>
+        </button>
+    </form>
+
+    <div th:if="${importErrors}" class="card card-custom p-4">
+        <h2 class="h5 text-danger" th:text="#{user.import.errors(${#lists.size(importErrors)})}">Lỗi</h2>
+        <p class="text-muted" th:text="#{user.import.errors.hint}">Không người dùng nào được tạo.</p>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle mb-0">
+                <thead>
+                <tr>
+                    <th th:text="#{user.import.row}">Dòng</th>
+                    <th th:text="#{user.import.column}">Cột</th>
+                    <th th:text="#{user.import.reason}">Lý do</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="error : ${importErrors}">
+                    <td th:text="${error.rowNumber}">2</td>
+                    <td th:text="${error.column}">Số điện thoại</td>
+                    <td th:text="${error.message}">Lý do</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</body>
+</html>
