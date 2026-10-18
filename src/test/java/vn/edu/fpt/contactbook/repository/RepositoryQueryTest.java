@@ -13,8 +13,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import vn.edu.fpt.contactbook.dto.UserListRow;
 import vn.edu.fpt.contactbook.model.ClassSession;
+import vn.edu.fpt.contactbook.model.Department;
 import vn.edu.fpt.contactbook.model.Enrollment;
+import vn.edu.fpt.contactbook.model.Faculty;
 import vn.edu.fpt.contactbook.model.ParentStudent;
+import vn.edu.fpt.contactbook.model.Room;
+import vn.edu.fpt.contactbook.model.SchoolClass;
+import vn.edu.fpt.contactbook.model.Semester;
+import vn.edu.fpt.contactbook.model.Subject;
 import vn.edu.fpt.contactbook.model.User;
 import vn.edu.fpt.contactbook.model.UserRole;
 import vn.edu.fpt.contactbook.model.enums.ParentRelationship;
@@ -298,6 +304,95 @@ class RepositoryQueryTest {
         void byDateRangeWithoutSessionsReturnsEmpty() {
             assertThat(classSessionRepository.findBySessionDateBetweenOrderBySessionDateAscStartTimeAsc(
                     LocalDate.of(2030, 1, 1), LocalDate.of(2030, 1, 31))).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("Danh mục (Giai đoạn 4a)")
+    class CatalogQueries {
+
+        @Autowired
+        private FacultyRepository facultyRepository;
+        @Autowired
+        private DepartmentRepository departmentRepository;
+        @Autowired
+        private SchoolClassRepository schoolClassRepository;
+        @Autowired
+        private SubjectRepository subjectRepository;
+        @Autowired
+        private SemesterRepository semesterRepository;
+        @Autowired
+        private RoomRepository roomRepository;
+        @Autowired
+        private GradeRepository gradeRepository;
+        @Autowired
+        private StudentRepository studentRepository;
+        @Autowired
+        private ClassSectionRepository classSectionRepository;
+        @Autowired
+        private TeacherRepository teacherRepository;
+
+        @Test
+        void searchByKeywordOnCodeOrName() {
+            assertThat(facultyRepository.search(LikePatterns.containsIgnoreCase("it"), PageRequest.of(0, 20)))
+                    .extracting(Faculty::getCode).contains("IT");
+            assertThat(facultyRepository.search(null, PageRequest.of(0, 20)).getTotalElements()).isEqualTo(2);
+            assertThat(roomRepository.search(LikePatterns.containsIgnoreCase("lab"), PageRequest.of(0, 20)))
+                    .extracting(Room::getCode).containsExactly("LAB-401");
+        }
+
+        @Test
+        @DisplayName("Ký tự đại diện trong từ khóa được coi là ký tự thường")
+        void wildcardsAreLiteral() {
+            assertThat(roomRepository.search(LikePatterns.containsIgnoreCase("_"), PageRequest.of(0, 20))).isEmpty();
+            assertThat(roomRepository.search(LikePatterns.containsIgnoreCase("-"), PageRequest.of(0, 20)))
+                    .extracting(Room::getCode).contains("BE-301", "LAB-401").doesNotContain("R101");
+        }
+
+        @Test
+        void filterByGroup() {
+            Page<Department> itDepartments = departmentRepository.search(null, 1L, PageRequest.of(0, 20));
+            assertThat(itDepartments).extracting(Department::getCode).containsExactly("AI", "IA", "SE");
+            assertThat(itDepartments.getContent().getFirst().getFaculty().getCode()).isEqualTo("IT");
+
+            assertThat(schoolClassRepository.search(null, 1L, PageRequest.of(0, 20)))
+                    .extracting(SchoolClass::getCode).containsExactly("SE1801", "SE1802", "SE1901");
+        }
+
+        @Test
+        @DisplayName("Môn học: lọc theo phạm vi bộ môn của trưởng bộ môn")
+        void subjectSearchScoped() {
+            assertThat(subjectRepository.search(null, null, true, List.of(1L), PageRequest.of(0, 20)))
+                    .extracting(Subject::getCode).containsExactly("PRJ301", "PRN211", "SWP391");
+            assertThat(subjectRepository.search(null, null, true, List.of(38L), PageRequest.of(0, 20))).isEmpty();
+            assertThat(subjectRepository.search(LikePatterns.containsIgnoreCase("swp"), null, false, List.of(-1L),
+                    PageRequest.of(0, 20))).extracting(Subject::getCode).containsExactly("SWP391");
+        }
+
+        @Test
+        void currentSemesterAndOrdering() {
+            assertThat(semesterRepository.findByCurrentTrue()).get().extracting(Semester::getCode).isEqualTo("FA26");
+            assertThat(semesterRepository.search(null, PageRequest.of(0, 20)))
+                    .extracting(Semester::getCode).containsExactly("SP27", "FA26", "SU26");
+        }
+
+        @Test
+        void usageChecks() {
+            assertThat(gradeRepository.findComponentIdsWithGrades(31L)).containsExactlyInAnyOrder(10L, 14L);
+            assertThat(gradeRepository.findComponentIdsWithGrades(1L)).isEmpty();
+            assertThat(gradeRepository.existsByComponentId(10L)).isTrue();
+            assertThat(gradeRepository.existsByComponentId(11L)).isFalse();
+            assertThat(studentRepository.existsBySchoolClassId(1L)).isTrue();
+            assertThat(classSectionRepository.existsBySubjectId(1L)).isTrue();
+            assertThat(teacherRepository.findByTeacherCode("GV001")).get()
+                    .extracting(teacher -> teacher.getUser().getId()).isEqualTo(2L);
+        }
+
+        @Test
+        void codeExistence() {
+            assertThat(subjectRepository.existsByCode("PRJ301")).isTrue();
+            assertThat(subjectRepository.existsByCodeAndIdNot("PRJ301", 1L)).isFalse();
+            assertThat(subjectRepository.existsByCodeAndIdNot("PRJ301", 31L)).isTrue();
         }
     }
 }
