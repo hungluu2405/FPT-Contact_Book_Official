@@ -95,7 +95,7 @@ public class UserService {
                 LikePatterns.containsIgnoreCase(keyword),
                 PhoneUtils.normalize(keyword).orElse(null),
                 roleCode, filter.getDepartmentId(), filter.getClassId(), active,
-                scoped, scoped ? scope : List.of(-1L), pageable);
+                scoped, scoped ? scope : CatalogSupport.NO_IDS, pageable);
 
         List<Long> ids = rows.getContent().stream().map(UserListRow::id).toList();
         Map<Long, List<RoleAssignmentView>> rolesByUser = ids.isEmpty() ? Map.of()

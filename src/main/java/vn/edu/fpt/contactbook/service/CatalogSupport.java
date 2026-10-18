@@ -4,6 +4,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import vn.edu.fpt.contactbook.exception.BusinessException;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -13,6 +14,11 @@ import java.util.Map;
 final class CatalogSupport {
 
     static final int PAGE_SIZE = 20;
+    /**
+     * Thay cho danh sách rỗng trong mệnh đề IN của JPQL (SQL Server không nhận IN ()); không có bản ghi nào mang
+     * id -1.
+     */
+    static final List<Long> NO_IDS = List.of(-1L);
 
     private CatalogSupport() {
     }

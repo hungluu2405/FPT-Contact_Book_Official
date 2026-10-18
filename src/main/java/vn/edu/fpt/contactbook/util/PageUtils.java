@@ -18,9 +18,14 @@ public final class PageUtils {
     }
 
     public static PagerView pager(Page<?> page, String path, Map<String, ?> params) {
+        return pager(page, path, params, "page");
+    }
+
+    /** Như pager(page, path, params) với tên tham số số trang tùy chọn. */
+    public static PagerView pager(Page<?> page, String path, Map<String, ?> params, String pageParam) {
         int start = Math.max(0, page.getNumber() - WINDOW);
         int end = Math.max(start, Math.min(page.getTotalPages() - 1, page.getNumber() + WINDOW));
-        return new PagerView(page.getNumber(), page.getTotalPages(), start, end, path, params);
+        return new PagerView(page.getNumber(), page.getTotalPages(), start, end, path, params, pageParam);
     }
 
     /** Bộ lọc dạng tên, giá trị, tên, giá trị...; giá trị được phép null (Map.of không nhận null). */

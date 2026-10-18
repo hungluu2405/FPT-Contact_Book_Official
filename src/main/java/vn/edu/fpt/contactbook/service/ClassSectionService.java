@@ -60,8 +60,8 @@ public class ClassSectionService {
     public Page<ClassSectionView> list(AppUserPrincipal actor, SectionFilter filter, int page) {
         accessPolicy.requireCanManage(actor);
         boolean scoped = !accessPolicy.isAdmin(actor);
-        // Danh sách IN không được rỗng nên ADMIN (không lọc phạm vi) truyền một id giả.
-        Set<Long> scope = scoped ? accessPolicy.headDepartmentIds(actor) : Set.of(-1L);
+        // ADMIN không lọc phạm vi; vẫn phải truyền một danh sách IN không rỗng.
+        Collection<Long> scope = scoped ? accessPolicy.headDepartmentIds(actor) : CatalogSupport.NO_IDS;
         Page<ClassSection> sections = classSectionRepository.search(
                 LikePatterns.containsIgnoreCase(filter.getKeyword()), filter.getSemesterId(), filter.getStatus(),
                 scoped, scope, CatalogSupport.page(page));

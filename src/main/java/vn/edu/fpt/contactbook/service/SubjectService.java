@@ -18,10 +18,10 @@ import vn.edu.fpt.contactbook.repository.SubjectRepository;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
 import vn.edu.fpt.contactbook.util.LikePatterns;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Danh mục môn học (SRS FR-ORG-03). ADMIN mọi môn; HEAD_OF_DEPARTMENT chỉ môn thuộc bộ môn mình
@@ -44,8 +44,8 @@ public class SubjectService {
     public Page<SubjectView> list(AppUserPrincipal actor, CatalogFilter filter, int page) {
         accessPolicy.requireCanManage(actor);
         boolean scoped = !accessPolicy.isAdmin(actor);
-        // Danh sách IN không được rỗng nên ADMIN (không lọc phạm vi) truyền một id giả.
-        Set<Long> scope = scoped ? accessPolicy.headDepartmentIds(actor) : Set.of(-1L);
+        // ADMIN không lọc phạm vi; vẫn phải truyền một danh sách IN không rỗng.
+        Collection<Long> scope = scoped ? accessPolicy.headDepartmentIds(actor) : CatalogSupport.NO_IDS;
         return subjectRepository.search(LikePatterns.containsIgnoreCase(filter.getKeyword()), filter.getGroupId(),
                 scoped, scope, CatalogSupport.page(page)).map(SubjectService::toView);
     }
