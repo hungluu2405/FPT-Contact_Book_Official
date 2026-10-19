@@ -108,7 +108,7 @@ public class ClassSessionService {
                     form.getStartTime(), form.getEndTime(), SessionStatus.MAKEUP);
             session.setNote(note);
             classSessionRepository.saveAndFlush(session);
-            notifier.makeupSessionAdded(session);
+            notifier.makeupSessionAdded(actor.getUserId(), session);
             auditService.log(actor.getUserId(), AuditActions.CREATE_SESSION, AuditActions.ENTITY_CLASS_SESSION,
                     session.getId(), detail(section, session), ipAddress);
             return session.getId();
@@ -159,11 +159,11 @@ public class ClassSessionService {
             session.setRoom(room);
             session.setNote(note);
             classSessionRepository.flush();
+            // Đổi giờ: một thông báo (đã ghi phòng mới); chỉ đổi phòng thì báo đổi phòng.
             if (timeChanged) {
-                notifier.sessionRescheduled(session, previousDate, previousStart, previousEnd);
-            }
-            if (roomChanged) {
-                notifier.sessionRoomChanged(session, previousRoom);
+                notifier.sessionRescheduled(actor.getUserId(), session, previousDate, previousStart, previousEnd);
+            } else if (roomChanged) {
+                notifier.sessionRoomChanged(actor.getUserId(), session, previousRoom);
             }
             auditService.log(actor.getUserId(), AuditActions.UPDATE_SESSION, AuditActions.ENTITY_CLASS_SESSION,
                     sessionId, detail(section, session), ipAddress);
@@ -185,7 +185,7 @@ public class ClassSessionService {
             }
             session.setStatus(SessionStatus.CANCELLED);
             classSessionRepository.flush();
-            notifier.sessionCancelled(session);
+            notifier.sessionCancelled(actor.getUserId(), session);
             auditService.log(actor.getUserId(), AuditActions.CANCEL_SESSION, AuditActions.ENTITY_CLASS_SESSION,
                     sessionId, detail(section, session), ipAddress);
             return null;

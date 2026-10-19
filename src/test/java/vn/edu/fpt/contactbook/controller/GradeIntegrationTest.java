@@ -107,9 +107,10 @@ class GradeIntegrationTest {
                 assertThat(g.getPublishedBy().getId()).isEqualTo(TestAccounts.TEACHER_HEAD_ID);
                 assertThat(g.getPublishedAt()).isNotNull();
             });
-            AuditLog audit = lastAudit();
-            assertThat(audit.getAction()).isEqualTo(AuditActions.PUBLISH_GRADE);
+            AuditLog audit = lastAudit(AuditActions.PUBLISH_GRADE);
             assertThat(audit.getDetail()).contains("count=3");
+            // Công bố xong gửi thông báo cho SV + PH, ghi thêm audit SEND_NOTIFICATION (giai đoạn 6a).
+            assertThat(lastAudit().getAction()).isEqualTo(AuditActions.SEND_NOTIFICATION);
 
             mockMvc.perform(get("/student/grades").with(as(TestAccounts.STUDENT)))
                     .andExpect(content().string(allOf(containsString("8,2"), not(containsString("Chưa đủ điểm")))));
@@ -327,6 +328,11 @@ class GradeIntegrationTest {
         section.setSemester(semesterRepository.findById(1L).orElseThrow());
         section.setTeacher(teacherRepository.findById(2L).orElseThrow());
         return classSectionRepository.saveAndFlush(section).getId();
+    }
+
+    private AuditLog lastAudit(String action) {
+        return auditLogRepository.findAll().stream().filter(a -> action.equals(a.getAction()))
+                .max(Comparator.comparing(AuditLog::getId)).orElseThrow();
     }
 
     private AuditLog lastAudit() {

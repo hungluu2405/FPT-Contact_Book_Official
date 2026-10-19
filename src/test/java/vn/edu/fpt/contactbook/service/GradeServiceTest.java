@@ -25,6 +25,8 @@ import vn.edu.fpt.contactbook.model.GradeComponent;
 import vn.edu.fpt.contactbook.model.Teacher;
 import vn.edu.fpt.contactbook.model.User;
 import vn.edu.fpt.contactbook.model.enums.EnrollmentStatus;
+import vn.edu.fpt.contactbook.model.enums.NotificationPriority;
+import vn.edu.fpt.contactbook.model.enums.NotificationTargetType;
 import vn.edu.fpt.contactbook.model.enums.RoleCodes;
 import vn.edu.fpt.contactbook.model.enums.SectionStatus;
 import vn.edu.fpt.contactbook.model.enums.StudentStatus;
@@ -55,6 +57,8 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -86,6 +90,8 @@ class GradeServiceTest {
     @Mock DepartmentRepository departmentRepository;
     @Mock UserRepository userRepository;
     @Mock AuditLogRepository auditLogRepository;
+    @Mock NotificationService notificationService;
+    @Mock NotificationAudience audience;
 
     private GradeService service;
     private ClassSection section;
@@ -106,7 +112,7 @@ class GradeServiceTest {
                 auditService);
         service = new GradeService(new AttendanceScope(teacherRepository, classSectionRepository, classSectionService,
                 userAccessPolicy), classSectionRepository, enrollmentRepository, gradeComponentRepository,
-                gradeRepository, userRepository, auditService);
+                gradeRepository, userRepository, auditService, notificationService, audience);
 
         Department se = CatalogTestData.department(1L, "SE");
         Teacher gv002 = CatalogTestData.teacher(2L, "GV002", se);
@@ -300,6 +306,9 @@ class GradeServiceTest {
             AuditLog audit = singleAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.PUBLISH_GRADE);
             assertThat(audit.getDetail()).contains("count=2");
+            verify(audience).studentsAndParents(Set.of(1L, 2L));
+            verify(notificationService).sendAutomatic(eq(2L), contains("Đã công bố điểm"), any(),
+                    eq(NotificationPriority.NORMAL), eq(NotificationTargetType.CLASS_SECTION), eq(10L), any());
         }
 
         @Test

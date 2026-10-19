@@ -240,7 +240,7 @@ class ClassSessionServiceTest {
             verify(classSessionRepository).saveAndFlush(saved.capture());
             assertThat(saved.getValue().getStatus()).isEqualTo(SessionStatus.MAKEUP);
             assertThat(saved.getValue().getSessionNo()).isEqualTo((short) 5);
-            verify(notifier).makeupSessionAdded(saved.getValue());
+            verify(notifier).makeupSessionAdded(1L, saved.getValue());
         }
 
         @Test
@@ -281,8 +281,8 @@ class ClassSessionServiceTest {
             service.update(ADMIN, 10L, 41L, roomOnly, "127.0.0.1");
             assertThat(attended.getRoom()).isSameAs(r101);
             assertThat(attended.getNote()).isEqualTo("Đổi phòng");
-            verify(notifier).sessionRoomChanged(attended, null);
-            verify(notifier, never()).sessionRescheduled(any(), any(), any(), any());
+            verify(notifier).sessionRoomChanged(1L, attended, null);
+            verify(notifier, never()).sessionRescheduled(any(), any(), any(), any(), any());
         }
 
         @Test
@@ -307,14 +307,15 @@ class ClassSessionServiceTest {
         }
 
         @Test
-        @DisplayName("Đổi giờ buổi chưa điểm danh → báo đổi giờ kèm giờ cũ")
+        @DisplayName("Đổi giờ (kèm đổi phòng) buổi chưa điểm danh → MỘT thông báo đổi giờ kèm giờ cũ, không báo đổi phòng riêng")
         void rescheduleNotifies() {
             ClassSession session = existing(SessionStatus.SCHEDULED);
 
-            service.update(ADMIN, 10L, 41L, single(session.getSessionDate(), "13:00", "15:15", null), "127.0.0.1");
+            service.update(ADMIN, 10L, 41L, single(session.getSessionDate(), "13:00", "15:15", 1L), "127.0.0.1");
 
-            verify(notifier).sessionRescheduled(session, LocalDate.of(2026, 10, 19), LocalTime.of(7, 30),
+            verify(notifier).sessionRescheduled(1L, session, LocalDate.of(2026, 10, 19), LocalTime.of(7, 30),
                     LocalTime.of(9, 45));
+            verify(notifier, never()).sessionRoomChanged(any(), any(), any());
         }
 
         @Test
@@ -326,7 +327,7 @@ class ClassSessionServiceTest {
 
             assertThat(session.getStatus()).isEqualTo(SessionStatus.CANCELLED);
             verify(classSessionRepository, never()).delete(any());
-            verify(notifier).sessionCancelled(session);
+            verify(notifier).sessionCancelled(1L, session);
             assertThatThrownBy(() -> service.cancel(ADMIN, 10L, 41L, "127.0.0.1"))
                     .hasMessage(ScheduleMessages.SESSION_ALREADY_CANCELLED);
 

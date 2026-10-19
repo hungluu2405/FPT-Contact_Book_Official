@@ -17,6 +17,8 @@ import vn.edu.fpt.contactbook.model.Grade;
 import vn.edu.fpt.contactbook.model.GradeComponent;
 import vn.edu.fpt.contactbook.model.User;
 import vn.edu.fpt.contactbook.model.enums.EnrollmentStatus;
+import vn.edu.fpt.contactbook.model.enums.NotificationPriority;
+import vn.edu.fpt.contactbook.model.enums.NotificationTargetType;
 import vn.edu.fpt.contactbook.model.enums.SectionStatus;
 import vn.edu.fpt.contactbook.repository.ClassSectionRepository;
 import vn.edu.fpt.contactbook.repository.EnrollmentRepository;
@@ -32,9 +34,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -61,6 +65,8 @@ public class GradeService {
     private final GradeRepository gradeRepository;
     private final UserRepository userRepository;
     private final AuditService auditService;
+    private final NotificationService notificationService;
+    private final NotificationAudience audience;
 
     /** Dữ liệu bảng điểm đọc trong một transaction; grades theo khóa GradeSheet.key(enrollmentId, componentId). */
     record Loaded(ClassSection section, List<GradeComponent> components, List<Enrollment> enrollments,
@@ -174,6 +180,14 @@ public class GradeService {
             gradeRepository.flush();
             auditService.log(actor.getUserId(), AuditActions.PUBLISH_GRADE, AuditActions.ENTITY_CLASS_SECTION,
                     sectionId, "section=" + section.getCode() + ", count=" + grades.size(), ipAddress);
+            // Báo cho sinh viên có ô vừa được công bố và phụ huynh đã liên kết, trong cùng transaction.
+            Set<Long> studentIds = grades.stream().map(g -> g.getEnrollment().getStudent().getId())
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            notificationService.sendAutomatic(actor.getUserId(), "[" + section.getCode() + "] Đã công bố điểm",
+                    "Điểm môn " + section.getSubject().getCode() + " - " + section.getSubject().getName()
+                            + " (lớp " + section.getCode() + ") vừa được công bố. Xem chi tiết ở mục Điểm.",
+                    NotificationPriority.NORMAL, NotificationTargetType.CLASS_SECTION, sectionId,
+                    audience.studentsAndParents(studentIds));
             return grades.size();
         });
     }

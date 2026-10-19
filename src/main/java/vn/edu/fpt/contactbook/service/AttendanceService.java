@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.contactbook.dto.AttendanceForm;
 import vn.edu.fpt.contactbook.dto.AttendanceSaveResult;
 import vn.edu.fpt.contactbook.dto.AttendanceSheet;
+import vn.edu.fpt.contactbook.dto.AttendanceSummary;
 import vn.edu.fpt.contactbook.exception.BusinessException;
 import vn.edu.fpt.contactbook.exception.NotFoundException;
 import vn.edu.fpt.contactbook.model.Attendance;
@@ -18,6 +19,8 @@ import vn.edu.fpt.contactbook.model.Student;
 import vn.edu.fpt.contactbook.model.User;
 import vn.edu.fpt.contactbook.model.enums.AttendanceStatus;
 import vn.edu.fpt.contactbook.model.enums.EnrollmentStatus;
+import vn.edu.fpt.contactbook.model.enums.NotificationPriority;
+import vn.edu.fpt.contactbook.model.enums.NotificationTargetType;
 import vn.edu.fpt.contactbook.model.enums.SectionStatus;
 import vn.edu.fpt.contactbook.model.enums.SessionStatus;
 import vn.edu.fpt.contactbook.repository.AttendanceRepository;
@@ -59,6 +62,9 @@ public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final UserRepository userRepository;
     private final AuditService auditService;
+    private final AttendanceRule rule;
+    private final NotificationService notificationService;
+    private final NotificationAudience audience;
 
     @Transactional(readOnly = true)
     public AttendanceSheet sheet(AppUserPrincipal actor, Access access, Long sectionId, Long sessionId) {
@@ -97,11 +103,13 @@ public class AttendanceService {
             List<Student> students = enrolled(sectionId).stream().map(Enrollment::getStudent).toList();
             Map<Long, AttendanceStatus> statuses = requireStatuses(students, form.getStatuses());
             User marker = userRepository.getReferenceById(actor.getUserId());
+            Map<Long, AttendanceSummary> before = summaries(section, students);
             AttendanceSaveResult result = existing.isEmpty()
                     ? markFirstTime(actor, section, session, students, statuses, marker, ipAddress)
                     : adjust(actor, section, session, students, statuses, existing, form.getReason(), marker,
                     ipAddress);
             attendanceRepository.flush();
+            notifyNewWarnings(actor, section, students, before);
             return result;
         } catch (DataIntegrityViolationException e) {
             throw ConstraintViolationMapper.map(e);
@@ -175,6 +183,45 @@ public class AttendanceService {
     }
 
     private record Change(Attendance row, Student student, AttendanceStatus oldStatus, String oldNote) {
+    }
+
+    /** Tổng hợp chuyên cần hiện tại của từng sinh viên (students.id) trong lớp (AttendanceRule). */
+    private Map<Long, AttendanceSummary> summaries(ClassSection section, List<Student> students) {
+        if (students.isEmpty()) {
+            return Map.of();
+        }
+        long total = classSessionRepository.countByClassSectionIdAndStatusNot(section.getId(),
+                SessionStatus.CANCELLED);
+        Map<Long, Map<AttendanceStatus, Long>> counts = AttendanceViewService.group(
+                attendanceRepository.countByStudentAndStatus(section.getId(),
+                        students.stream().map(Student::getId).toList()));
+        return students.stream().collect(Collectors.toMap(Student::getId,
+                s -> rule.summarize(counts.getOrDefault(s.getId(), Map.of()), total)));
+    }
+
+    /**
+     * Báo sinh viên và phụ huynh khi tỷ lệ vắng VỪA vượt ngưỡng sau lần lưu này (trước không bị cảnh báo, sau bị
+     * cảnh báo); đã vượt từ trước thì không gửi lặp. Gửi trong cùng transaction, người gửi là người điểm danh.
+     */
+    private void notifyNewWarnings(AppUserPrincipal actor, ClassSection section, List<Student> students,
+                                   Map<Long, AttendanceSummary> before) {
+        Map<Long, AttendanceSummary> after = summaries(section, students);
+        for (Student student : students) {
+            AttendanceSummary was = before.get(student.getId());
+            AttendanceSummary now = after.get(student.getId());
+            if ((was != null && was.warning()) || now == null || !now.warning()) {
+                continue;
+            }
+            notificationService.sendAutomatic(actor.getUserId(),
+                    "[" + section.getCode() + "] Cảnh báo vắng vượt " + rule.thresholdPercent() + "%",
+                    "Sinh viên " + student.getUser().getFullName() + " (" + student.getStudentCode() + ") đã vắng "
+                            + now.absent() + "/" + now.totalSessions() + " buổi ("
+                            + now.absentRate().toPlainString().replace('.', ',') + "%) môn "
+                            + section.getSubject().getCode() + " - " + section.getSubject().getName() + " (lớp "
+                            + section.getCode() + "), vượt ngưỡng " + rule.thresholdPercent() + "%.",
+                    NotificationPriority.URGENT, NotificationTargetType.USER, student.getUser().getId(),
+                    audience.studentsAndParents(List.of(student.getId())));
+        }
     }
 
     /**

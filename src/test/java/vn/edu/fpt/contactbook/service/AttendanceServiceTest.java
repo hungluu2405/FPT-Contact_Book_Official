@@ -27,6 +27,8 @@ import vn.edu.fpt.contactbook.model.Teacher;
 import vn.edu.fpt.contactbook.model.User;
 import vn.edu.fpt.contactbook.model.enums.AttendanceStatus;
 import vn.edu.fpt.contactbook.model.enums.EnrollmentStatus;
+import vn.edu.fpt.contactbook.model.enums.NotificationPriority;
+import vn.edu.fpt.contactbook.model.enums.NotificationTargetType;
 import vn.edu.fpt.contactbook.model.enums.RoleCodes;
 import vn.edu.fpt.contactbook.model.enums.SectionStatus;
 import vn.edu.fpt.contactbook.model.enums.SessionStatus;
@@ -58,7 +60,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -93,6 +98,8 @@ class AttendanceServiceTest {
     @Mock DepartmentRepository departmentRepository;
     @Mock UserRepository userRepository;
     @Mock AuditLogRepository auditLogRepository;
+    @Mock NotificationService notificationService;
+    @Mock NotificationAudience audience;
 
     private AttendanceService service;
     private ClassSection section;
@@ -113,7 +120,8 @@ class AttendanceServiceTest {
         AttendanceScope scope = new AttendanceScope(teacherRepository, classSectionRepository, classSectionService,
                 userAccessPolicy);
         service = new AttendanceService(scope, classSectionRepository, classSessionRepository, enrollmentRepository,
-                attendanceRepository, userRepository, auditService);
+                attendanceRepository, userRepository, auditService, new AttendanceRule(20), notificationService,
+                audience);
 
         Department se = CatalogTestData.department(1L, "SE");
         Semester fa26 = CatalogTestData.semester(1L, "FA26");
@@ -423,6 +431,60 @@ class AttendanceServiceTest {
                     "127.0.0.1");
 
             verify(auditLogRepository, times(2)).save(any(AuditLog.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("Cảnh báo vắng vượt ngưỡng (20%, 10 buổi chưa hủy)")
+    class AbsenceWarning {
+
+        @BeforeEach
+        void tenSessions() {
+            s1.getUser().setId(44L);
+            when(classSessionRepository.countByClassSectionIdAndStatusNot(10L, SessionStatus.CANCELLED))
+                    .thenReturn(10L);
+            when(audience.studentsAndParents(List.of(1L))).thenReturn(Set.of(44L, 55L));
+        }
+
+        @Test
+        @DisplayName("Trước 2/10 (20%, chưa cảnh báo), sau 3/10 (30%) → gửi SV và PH một thông báo")
+        void notifiesWhenCrossing() {
+            when(attendanceRepository.countByStudentAndStatus(anyLong(), anyCollection())).thenReturn(
+                    List.<Object[]>of(new Object[]{1L, AttendanceStatus.ABSENT_UNEXCUSED, 2L}),
+                    List.<Object[]>of(new Object[]{1L, AttendanceStatus.ABSENT_UNEXCUSED, 3L}));
+
+            service.save(TEACHER, Access.TEACHER, 10L, 100L, form(Map.of(1L, AttendanceStatus.ABSENT_UNEXCUSED,
+                    2L, AttendanceStatus.PRESENT), null), "127.0.0.1");
+
+            verify(notificationService).sendAutomatic(eq(3L), contains("Cảnh báo vắng vượt 20%"),
+                    contains("đã vắng 3/10 buổi (30,0%)"), eq(NotificationPriority.URGENT),
+                    eq(NotificationTargetType.USER), eq(44L), eq(Set.of(44L, 55L)));
+        }
+
+        @Test
+        @DisplayName("Đã vượt từ trước (3/10 → 4/10) → không gửi lặp")
+        void noRepeatWhenAlreadyWarned() {
+            when(attendanceRepository.countByStudentAndStatus(anyLong(), anyCollection())).thenReturn(
+                    List.<Object[]>of(new Object[]{1L, AttendanceStatus.ABSENT_EXCUSED, 3L}),
+                    List.<Object[]>of(new Object[]{1L, AttendanceStatus.ABSENT_EXCUSED, 4L}));
+
+            service.save(TEACHER, Access.TEACHER, 10L, 100L, form(Map.of(1L, AttendanceStatus.ABSENT_EXCUSED,
+                    2L, AttendanceStatus.PRESENT), null), "127.0.0.1");
+
+            verify(notificationService, never()).sendAutomatic(any(), any(), any(), any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("Sau lần lưu vừa đúng ngưỡng (1/10 → 2/10 = 20%) → chưa gửi")
+        void noNotificationAtThreshold() {
+            when(attendanceRepository.countByStudentAndStatus(anyLong(), anyCollection())).thenReturn(
+                    List.<Object[]>of(new Object[]{1L, AttendanceStatus.ABSENT_UNEXCUSED, 1L}),
+                    List.<Object[]>of(new Object[]{1L, AttendanceStatus.ABSENT_UNEXCUSED, 2L}));
+
+            service.save(TEACHER, Access.TEACHER, 10L, 100L, form(Map.of(1L, AttendanceStatus.ABSENT_UNEXCUSED,
+                    2L, AttendanceStatus.PRESENT), null), "127.0.0.1");
+
+            verify(notificationService, never()).sendAutomatic(any(), any(), any(), any(), any(), any(), any());
         }
     }
 

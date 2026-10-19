@@ -35,7 +35,8 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
               AND g.enrollment.status <> vn.edu.fpt.contactbook.model.enums.EnrollmentStatus.DROPPED
             """;
 
-    /** Các ô sẽ được công bố (PUBLISHABLE_WHERE). */
+    /** Các ô sẽ được công bố (PUBLISHABLE_WHERE), kèm dòng ghi danh để biết sinh viên cần báo. */
+    @EntityGraph(attributePaths = {"enrollment"})
     @Query("SELECT g FROM Grade g " + PUBLISHABLE_WHERE)
     List<Grade> findPublishable(@Param("sectionId") Long sectionId);
 

@@ -125,11 +125,14 @@ class AttendanceIntegrationTest {
             Attendance row = attendanceRepository.findBySessionId(1L).getFirst();
             assertThat(row.getStatus()).isEqualTo(AttendanceStatus.ABSENT_EXCUSED);
             assertThat(row.getNote()).isEqualTo("Có giấy khám bệnh");
-            AuditLog audit = lastAudit();
-            assertThat(audit.getAction()).isEqualTo(AuditActions.ADJUST_ATTENDANCE);
+            AuditLog audit = lastAudit(AuditActions.ADJUST_ATTENDANCE);
             assertThat(audit.getEntityId()).isEqualTo(row.getId());
             assertThat(audit.getDetail()).contains("student=SE190001", "status=PRESENT -> ABSENT_EXCUSED",
                     "reason=Có giấy khám bệnh");
+            // Lớp 1 chỉ có 1 buổi: vắng 1/1 vừa vượt ngưỡng 20% → cảnh báo gửi SV + PH (giai đoạn 6a).
+            assertThat(lastAudit().getAction()).isEqualTo(AuditActions.SEND_NOTIFICATION);
+            assertThat(lastAudit().getDetail()).isEqualTo("target=USER:" + TestAccounts.STUDENT_ID
+                    + ", recipients=2, automatic=true");
         }
 
         @Test
@@ -187,16 +190,19 @@ class AttendanceIntegrationTest {
         @Test
         @DisplayName("ADMIN điều chỉnh buổi đã điểm danh: audit có giá trị cũ và mới cho đúng sinh viên bị đổi")
         void adminAdjusts() throws Exception {
-            long before = auditLogRepository.count();
+            long adjustAuditsBefore = auditCount(AuditActions.ADJUST_ATTENDANCE);
+            long notificationAuditsBefore = auditCount(AuditActions.SEND_NOTIFICATION);
 
             mockMvc.perform(post("/admin/sections/27/sessions/41/attendance").with(csrf())
                             .param("statuses[2]", "ABSENT_EXCUSED").param("statuses[3]", "PRESENT")
                             .param("reason", "Có minh chứng đi viện").with(as(TestAccounts.ADMIN)))
                     .andExpect(redirectedUrl("/admin/sections/27/attendance"));
 
-            assertThat(auditLogRepository.count()).isEqualTo(before + 1);
-            AuditLog audit = lastAudit();
-            assertThat(audit.getAction()).isEqualTo(AuditActions.ADJUST_ATTENDANCE);
+            // Đúng một audit điều chỉnh (chỉ SE180101 bị đổi); SE180101 vắng 1/6 → 2/6 vừa vượt 20% nên có thêm
+            // đúng một thông báo cảnh báo (giai đoạn 6a).
+            assertThat(auditCount(AuditActions.ADJUST_ATTENDANCE)).isEqualTo(adjustAuditsBefore + 1);
+            assertThat(auditCount(AuditActions.SEND_NOTIFICATION)).isEqualTo(notificationAuditsBefore + 1);
+            AuditLog audit = lastAudit(AuditActions.ADJUST_ATTENDANCE);
             assertThat(audit.getUser().getId()).isEqualTo(TestAccounts.ADMIN_ID);
             assertThat(audit.getDetail()).contains("student=SE180101", "status=PRESENT -> ABSENT_EXCUSED",
                     "oldNote=Đúng giờ", "reason=Có minh chứng đi viện");
@@ -367,6 +373,15 @@ class AttendanceIntegrationTest {
         section.setSemester(semesterRepository.findById(1L).orElseThrow());
         section.setTeacher(teacherRepository.findById(2L).orElseThrow());
         return classSectionRepository.saveAndFlush(section).getId();
+    }
+
+    private AuditLog lastAudit(String action) {
+        return auditLogRepository.findAll().stream().filter(a -> action.equals(a.getAction()))
+                .max(Comparator.comparing(AuditLog::getId)).orElseThrow();
+    }
+
+    private long auditCount(String action) {
+        return auditLogRepository.findAll().stream().filter(a -> action.equals(a.getAction())).count();
     }
 
     private AuditLog lastAudit() {

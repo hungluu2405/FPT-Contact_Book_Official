@@ -154,7 +154,7 @@ public class AttendanceViewService {
     }
 
     /** [khóa, AttendanceStatus, count] → khóa → (trạng thái → count). */
-    private static Map<Long, Map<AttendanceStatus, Long>> group(List<Object[]> rows) {
+    static Map<Long, Map<AttendanceStatus, Long>> group(List<Object[]> rows) {
         Map<Long, Map<AttendanceStatus, Long>> result = new HashMap<>();
         for (Object[] row : rows) {
             result.computeIfAbsent((Long) row[0], key -> new EnumMap<>(AttendanceStatus.class))
