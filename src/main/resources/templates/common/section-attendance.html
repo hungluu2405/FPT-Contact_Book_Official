@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{attendance.stats} + ': ' + ${item.code} + ' - ' + #{app.title}">Điểm danh</title>
+</head>
+<body>
+<section>
+    <!--/* Dùng cho giảng viên (baseUrl /teacher/sections/{id}) và ADMIN, trưởng bộ môn (baseUrl /admin/sections/{id}). */-->
+    <a th:replace="~{fragments/catalog :: back(${backUrl}, #{common.back})}"></a>
+    <h1 class="page-title" th:text="#{attendance.stats} + ': ' + ${item.code}">Điểm danh</h1>
+    <p class="text-muted" th:text="${item.subjectCode} + ' - ' + ${item.subjectName} + ' · ' + ${item.semesterCode}">PRJ301</p>
+
+    <div class="card card-custom p-4 mb-3" id="sessions">
+        <h2 class="h5 mb-3" th:text="#{session.title}">Buổi học</h2>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                <tr>
+                    <th th:text="#{session.no}">Buổi</th>
+                    <th th:text="#{schedule.date}">Ngày</th>
+                    <th th:text="#{schedule.time}">Giờ</th>
+                    <th th:text="#{schedule.room}">Phòng</th>
+                    <th th:text="#{section.status}">Trạng thái</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="s : ${sessions.content}" th:classappend="${s.cancelled()} ? 'text-muted'">
+                    <td th:text="${s.sessionNo}">1</td>
+                    <td th:text="#{'weekday.' + ${s.date.dayOfWeek}} + ', ' + ${#temporals.format(s.date, 'dd/MM/yyyy')}">Thứ Hai, 01/09/2026</td>
+                    <td th:text="${#temporals.format(s.startTime, 'HH:mm')} + '–' + ${#temporals.format(s.endTime, 'HH:mm')}">07:30–09:45</td>
+                    <td th:text="${s.roomCode} ?: #{schedule.no-room}">R101</td>
+                    <td>
+                        <span class="badge" th:classappend="${s.cancelled()} ? 'text-bg-danger' : 'text-bg-secondary'"
+                              th:text="#{'session-status.' + ${s.status}}">Đã lên lịch</span>
+                        <span th:if="${s.hasAttendance()}" class="badge text-bg-success" th:text="#{attendance.marked}">Đã điểm danh</span>
+                    </td>
+                    <td class="text-end">
+                        <th:block th:unless="${s.cancelled() or s.date.isAfter(today) or item.status.name() == 'CANCELLED'}">
+                            <!--/* Giảng viên: điểm danh hoặc điều chỉnh; ADMIN: điều chỉnh buổi đã điểm danh; trưởng bộ môn: xem. */-->
+                            <a th:if="${s.hasAttendance() ? canAdjust : canMarkNew}"
+                               class="btn btn-sm btn-primary"
+                               th:href="@{${baseUrl} + '/sessions/' + ${s.id} + '/attendance'}"
+                               th:text="${s.hasAttendance()} ? #{attendance.adjust} : #{attendance.mark}">Điểm danh</a>
+                            <a th:if="${!canAdjust and s.hasAttendance()}" class="btn btn-sm btn-outline-primary"
+                               th:href="@{${baseUrl} + '/sessions/' + ${s.id} + '/attendance'}"
+                               th:text="#{attendance.view}">Xem</a>
+                        </th:block>
+                        <span th:if="${!s.cancelled() and s.date.isAfter(today)}" class="small text-muted"
+                              th:text="#{attendance.not-started}">Chưa diễn ra</span>
+                    </td>
+                </tr>
+                <tr th:if="${sessions.empty}">
+                    <td colspan="6" class="text-center text-muted py-4" th:text="#{schedule.empty}">Chưa có buổi học</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <nav th:replace="~{fragments/pager :: pager(${sessionPager})}"></nav>
+    </div>
+
+    <div class="card card-custom p-4 mb-3" id="students">
+        <h2 class="h5 mb-3" th:text="#{attendance.by-student(${totalSessions})}">Thống kê theo sinh viên</h2>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                <tr>
+                    <th th:text="#{attendance.student-code}">Mã SV</th>
+                    <th th:text="#{attendance.student}">Sinh viên</th>
+                    <th:block th:replace="~{fragments/attendance :: headers}"></th:block>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${students.content}" th:classappend="${r.summary.warning} ? 'table-danger'">
+                    <td th:text="${r.studentCode}">SE190001</td>
+                    <td th:text="${r.fullName}">Nguyễn Văn A</td>
+                    <th:block th:replace="~{fragments/attendance :: cells(${r.summary}, ${threshold})}"></th:block>
+                </tr>
+                <tr th:if="${students.empty}">
+                    <td colspan="8" class="text-center text-muted py-4" th:text="#{attendance.no-students}">Chưa có sinh viên</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <nav th:replace="~{fragments/pager :: pager(${studentPager})}"></nav>
+        <p th:replace="~{fragments/attendance :: formula(${threshold})}"></p>
+    </div>
+</section>
+</body>
+</html>

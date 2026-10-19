@@ -13,8 +13,12 @@
             <span class="badge fs-6 align-middle" th:classappend="${item.open()} ? 'text-bg-success' : 'text-bg-secondary'"
                   th:text="#{'section-status.' + ${item.status}}">Đang mở</span>
         </h1>
-        <a class="btn btn-outline-primary" th:href="@{/admin/sections/{id}/edit(id=${item.id})}">
-            <i class="bi bi-pencil"></i> <span th:text="#{common.edit}">Sửa</span></a>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" th:href="@{/admin/sections/{id}/attendance(id=${item.id})}">
+                <i class="bi bi-person-check"></i> <span th:text="#{attendance.stats}">Thống kê điểm danh</span></a>
+            <a class="btn btn-outline-primary" th:href="@{/admin/sections/{id}/edit(id=${item.id})}">
+                <i class="bi bi-pencil"></i> <span th:text="#{common.edit}">Sửa</span></a>
+        </div>
     </div>
 
     <div class="card card-custom p-4 mb-3">
@@ -71,8 +75,9 @@
                                   th:attr="data-confirm=#{session.cancel.confirm(${s.sessionNo})}">
                                 <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{session.cancel}">Hủy buổi</button>
                             </form>
-                            <span th:if="${s.hasAttendance()}" class="small text-muted align-self-center"
-                                  th:text="#{session.has-attendance}">Đã điểm danh</span>
+                            <a th:if="${s.hasAttendance()}" class="btn btn-sm btn-outline-success"
+                               th:href="@{/admin/sections/{id}/sessions/{sid}/attendance(id=${item.id},sid=${s.id})}"
+                               th:text="#{session.has-attendance}">Đã điểm danh</a>
                         </div>
                     </td>
                 </tr>

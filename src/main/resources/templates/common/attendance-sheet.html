@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{attendance.sheet(${sheet.sessionNo})} + ' - ' + #{app.title}">Điểm danh</title>
+</head>
+<body>
+<section>
+    <!--/* baseUrl: trang để quay về; actionUrl: URL của chính bảng này. canSave = false là chỉ xem (trưởng bộ môn). */-->
+    <a th:replace="~{fragments/catalog :: back(${baseUrl}, ${sheet.sectionCode})}"></a>
+    <h1 class="page-title" th:text="#{attendance.sheet(${sheet.sessionNo})} + ': ' + ${sheet.sectionCode}">Điểm danh</h1>
+    <p class="text-muted">
+        <span th:text="${sheet.subjectCode} + ' - ' + ${sheet.subjectName}">PRJ301</span> ·
+        <span th:text="#{'weekday.' + ${sheet.date.dayOfWeek}} + ', ' + ${#temporals.format(sheet.date, 'dd/MM/yyyy')}">Thứ Hai</span> ·
+        <span th:text="${#temporals.format(sheet.startTime, 'HH:mm')} + '–' + ${#temporals.format(sheet.endTime, 'HH:mm')}">07:30</span> ·
+        <span th:text="${sheet.roomCode} ?: #{schedule.no-room}">R101</span>
+    </p>
+
+    <p th:unless="${canSave}" class="alert alert-info" th:text="#{attendance.read-only}">Chỉ xem.</p>
+    <p th:if="${canSave and sheet.marked}" class="alert alert-warning" th:text="#{attendance.reason.hint}">Đã điểm danh.</p>
+    <p th:if="${canSave and !sheet.marked}" class="text-muted" th:text="#{attendance.first-time.hint}">Chọn trạng thái.</p>
+
+    <form th:action="@{${actionUrl}}" method="post" th:object="${form}" novalidate>
+        <div th:replace="~{fragments/catalog :: globalErrors}"></div>
+        <div class="card card-custom p-4">
+            <div class="d-flex justify-content-end mb-3" th:if="${canSave and !#lists.isEmpty(sheet.rows)}">
+                <button type="button" class="btn btn-outline-success" data-all-present>
+                    <i class="bi bi-check2-all"></i> <span th:text="#{attendance.all-present}">Tất cả có mặt</span></button>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th th:text="#{attendance.student-code}">Mã SV</th>
+                        <th th:text="#{attendance.student}">Sinh viên</th>
+                        <th th:text="#{attendance.title}">Điểm danh</th>
+                        <th th:text="#{attendance.note}">Ghi chú</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${sheet.rows}">
+                        <td th:text="${row.studentCode}">SE190001</td>
+                        <td th:text="${row.fullName}">Nguyễn Văn A</td>
+                        <td>
+                            <div th:if="${canSave}" class="d-flex flex-wrap gap-3" role="radiogroup"
+                                 th:attr="aria-label=${row.fullName}">
+                                <div class="form-check" th:each="st : ${statuses}">
+                                    <input class="form-check-input" type="radio"
+                                           th:id="'st-' + ${row.studentId} + '-' + ${st}"
+                                           th:name="'statuses[' + ${row.studentId} + ']'" th:value="${st}"
+                                           th:checked="${form.statuses[row.studentId] == st}">
+                                    <label class="form-check-label" th:for="'st-' + ${row.studentId} + '-' + ${st}"
+                                           th:text="#{'attendance-status.' + ${st}}">Có mặt</label>
+                                </div>
+                            </div>
+                            <th:block th:unless="${canSave}"><span th:replace="~{fragments/attendance :: status(${row.status})}"></span></th:block>
+                        </td>
+                        <td class="small" th:text="${row.note}">Ghi chú</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(sheet.rows)}">
+                        <td colspan="4" class="text-center text-muted py-4" th:text="#{attendance.no-students}">Chưa có sinh viên</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-3" th:if="${canSave and sheet.marked}">
+                <label for="reason" class="form-label" th:text="#{attendance.reason} + ' *'">Lý do</label>
+                <input type="text" class="form-control" th:field="*{reason}" maxlength="255"
+                       th:classappend="${#fields.hasErrors('reason')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{reason}">Lỗi</div>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            <button th:if="${canSave and !#lists.isEmpty(sheet.rows)}" type="submit" class="btn btn-orange btn-lg">
+                <i class="bi bi-save"></i> <span th:text="#{attendance.save}">Lưu điểm danh</span></button>
+            <a class="btn btn-outline-secondary btn-lg" th:href="@{${baseUrl}}" th:text="#{common.back}">Quay lại</a>
+        </div>
+    </form>
+    <script th:src="@{/js/attendance.js}"></script>
+</section>
+</body>
+</html>

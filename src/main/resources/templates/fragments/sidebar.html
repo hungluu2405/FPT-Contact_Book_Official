@@ -83,6 +83,11 @@
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasAnyRole('TEACHER', 'HEAD_OF_DEPARTMENT')">
+            <a class="nav-link" th:href="@{/teacher/sections}" th:classappend="${activeMenu == 'teacher-sections'} ? 'active'">
+                <i class="bi bi-person-check"></i><span th:text="#{menu.teacher.sections}">Lớp giảng dạy</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasAnyRole('TEACHER', 'HEAD_OF_DEPARTMENT')">
             <a class="nav-link" th:href="@{/teacher/exams}" th:classappend="${activeMenu == 'teacher-exams'} ? 'active'">
                 <i class="bi bi-clipboard-check"></i><span th:text="#{menu.exams}">Lịch thi</span>
             </a>
@@ -102,6 +107,11 @@
                 <i class="bi bi-clipboard-check"></i><span th:text="#{menu.exams}">Lịch thi</span>
             </a>
         </li>
+        <li class="nav-item" sec:authorize="hasRole('STUDENT')">
+            <a class="nav-link" th:href="@{/student/attendance}" th:classappend="${activeMenu == 'student-attendance'} ? 'active'">
+                <i class="bi bi-person-check"></i><span th:text="#{menu.attendance}">Điểm danh</span>
+            </a>
+        </li>
         <li class="nav-item" sec:authorize="hasRole('PARENT')">
             <a class="nav-link" th:href="@{/parent}" th:classappend="${activeMenu == 'parent'} ? 'active'">
                 <i class="bi bi-people"></i><span th:text="#{menu.parent}">Trang phụ huynh</span>
@@ -115,6 +125,11 @@
         <li class="nav-item" sec:authorize="hasRole('PARENT')">
             <a class="nav-link" th:href="@{/parent/exams}" th:classappend="${activeMenu == 'parent-exams'} ? 'active'">
                 <i class="bi bi-clipboard-check"></i><span th:text="#{menu.parent.exams}">Lịch thi của con</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('PARENT')">
+            <a class="nav-link" th:href="@{/parent/attendance}" th:classappend="${activeMenu == 'parent-attendance'} ? 'active'">
+                <i class="bi bi-person-check"></i><span th:text="#{menu.parent.attendance}">Điểm danh của con</span>
             </a>
         </li>
         <li class="nav-item">

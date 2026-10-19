@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Fragment điểm danh dùng chung: nhãn trạng thái, các ô tổng hợp (AttendanceSummary) trong bảng thống kê. */-->
+
+<!--/* Nhãn một trạng thái điểm danh; status null là chưa điểm danh. */-->
+<span th:fragment="status(status)" class="badge"
+      th:classappend="${status == null ? 'text-bg-light' : (status.name() == 'PRESENT' ? 'text-bg-success' : (status.name() == 'LATE' ? 'text-bg-warning' : (status.name() == 'ABSENT_EXCUSED' ? 'text-bg-info' : 'text-bg-danger')))}"
+      th:text="${status == null} ? #{attendance.not-marked} : #{'attendance-status.' + ${status}}">Có mặt</span>
+
+<!--/* Các ô số liệu của một dòng: có mặt, muộn, vắng có phép, vắng không phép, chuyên cần, tỷ lệ vắng kèm cảnh báo. */-->
+<th:block th:fragment="cells(s, threshold)">
+    <td class="text-center" th:text="${s.present}">0</td>
+    <td class="text-center" th:text="${s.late}">0</td>
+    <td class="text-center" th:text="${s.absentExcused}">0</td>
+    <td class="text-center" th:text="${s.absentUnexcused}">0</td>
+    <td class="text-center">
+        <span th:text="${s.attendanceRate} != null ? ${#numbers.formatDecimal(s.attendanceRate, 1, 1, 'COMMA')} + '%' : '—'">100%</span>
+        <div class="small text-muted" th:text="#{attendance.marked-of(${s.markedSessions()}, ${s.totalSessions})}">đã điểm danh 0/0</div>
+    </td>
+    <td class="text-center" th:classappend="${s.warning} ? 'text-danger fw-bold'">
+        <span th:text="${#numbers.formatDecimal(s.absentRate, 1, 1, 'COMMA')} + '%'">0%</span>
+        <div th:if="${s.warning}"><span class="badge text-bg-danger"><i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="#{attendance.warning(${threshold})}">Vắng quá 20%</span></span></div>
+    </td>
+</th:block>
+
+<!--/* Tiêu đề các cột của fragment cells. */-->
+<th:block th:fragment="headers">
+    <th class="text-center" th:text="#{attendance-status.PRESENT}">Có mặt</th>
+    <th class="text-center" th:text="#{attendance-status.LATE}">Đi muộn</th>
+    <th class="text-center" th:text="#{attendance-status.ABSENT_EXCUSED}">Vắng có phép</th>
+    <th class="text-center" th:text="#{attendance-status.ABSENT_UNEXCUSED}">Vắng không phép</th>
+    <th class="text-center" th:text="#{attendance.rate}">Chuyên cần</th>
+    <th class="text-center" th:text="#{attendance.absent-rate}">Tỷ lệ vắng</th>
+</th:block>
+
+<!--/* Ghi chú công thức dưới bảng thống kê. */-->
+<p th:fragment="formula(threshold)" class="small text-muted mt-2 mb-0" th:text="#{attendance.formula(${threshold})}">Công thức</p>
+</body>
+</html>
