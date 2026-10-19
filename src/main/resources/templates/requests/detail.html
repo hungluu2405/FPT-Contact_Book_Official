@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${item.title} + ' - ' + #{app.title}">Đơn</title>
+</head>
+<body>
+<section>
+    <!--/* Chi tiết đơn cho mọi đường truy cập; baseUrl là danh sách của đường đó. Nút hủy chỉ khi canCancel,
+         form duyệt chỉ khi canReview (service đã tính và vẫn kiểm tra lại khi gửi). */-->
+    <a th:replace="~{fragments/catalog :: back(${baseUrl}, ${backLabel})}"></a>
+    <div class="card card-custom p-4 mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+            <h1 class="h4 mb-0" th:text="${item.title}">Tiêu đề</h1>
+            <span class="fs-6" th:replace="~{fragments/requests :: status(${item.status})}"></span>
+        </div>
+        <dl class="row mb-0">
+            <dt class="col-sm-3" th:text="#{request.type}">Loại đơn</dt>
+            <dd class="col-sm-9" th:text="#{'request-type.' + ${item.type}}">Xin nghỉ</dd>
+            <dt class="col-sm-3" th:text="#{request.student}">Sinh viên</dt>
+            <dd class="col-sm-9" th:text="${item.studentName} + ' (' + ${item.studentCode} + ')'">Nguyễn Văn A</dd>
+            <dt class="col-sm-3" th:text="#{request.requester}">Người gửi</dt>
+            <dd class="col-sm-9">
+                <span th:text="${item.requesterName}">Người gửi</span>
+                <span th:if="${item.sentByParent}" class="badge text-bg-light border" th:text="#{request.sent-by-parent}">Phụ huynh gửi thay</span>
+            </dd>
+            <th:block th:if="${item.fromDate != null}">
+                <dt class="col-sm-3" th:text="#{request.dates}">Thời gian nghỉ</dt>
+                <dd class="col-sm-9"><span th:replace="~{fragments/requests :: dates(${item.fromDate}, ${item.toDate})}"></span></dd>
+                <dt class="col-sm-3" th:text="#{request.section}">Lớp học phần</dt>
+                <dd class="col-sm-9" th:text="${item.sectionLabel} ?: #{request.section.all}">Tất cả các lớp</dd>
+            </th:block>
+            <dt class="col-sm-3" th:text="#{request.reviewer}">Người duyệt</dt>
+            <dd class="col-sm-9" th:text="${item.reviewerName} ?: #{request.reviewer.admin}">Phòng quản trị</dd>
+            <dt class="col-sm-3" th:text="#{request.created-at}">Ngày gửi</dt>
+            <dd class="col-sm-9" th:text="${#temporals.format(item.createdAt, 'dd/MM/yyyy HH:mm')}">01/10/2026 08:00</dd>
+            <dt class="col-sm-3" th:text="#{request.reason}">Lý do</dt>
+            <dd class="col-sm-9 text-pre-line" th:text="${item.reason}">Lý do</dd>
+        </dl>
+        <div th:unless="${#lists.isEmpty(item.files)}" class="mt-3">
+            <h2 class="h6" th:text="#{request.files}">Tệp minh chứng</h2>
+            <ul class="list-unstyled mb-0">
+                <li th:each="f : ${item.files}">
+                    <a th:href="@{/requests/{id}/files/{fid}(id=${item.id},fid=${f.id})}">
+                        <i class="bi bi-paperclip"></i> <span th:text="${f.fileName}">minh-chung.pdf</span></a>
+                    <small class="text-muted" th:if="${f.sizeBytes != null}"
+                           th:text="#{notification.file-size(${(f.sizeBytes + 1023) / 1024})}">(12 KB)</small>
+                </li>
+            </ul>
+        </div>
+        <form th:if="${item.canCancel}" th:action="@{${baseUrl} + '/' + ${item.id} + '/cancel'}" method="post"
+              class="mt-3" th:attr="data-confirm=#{request.cancel.confirm}">
+            <button type="submit" class="btn btn-outline-danger btn-lg"><i class="bi bi-x-circle"></i>
+                <span th:text="#{request.cancel}">Hủy đơn</span></button>
+        </form>
+    </div>
+
+    <div th:if="${item.canReview}" class="card card-custom p-4 mb-3">
+        <h2 class="h5" th:text="#{request.review}">Duyệt đơn</h2>
+        <p th:if="${item.type.name() == 'LEAVE'}" class="text-muted" th:text="#{request.review.hint}">Duyệt sẽ chuyển vắng không phép thành có phép.</p>
+        <form th:action="@{${baseUrl} + '/' + ${item.id} + '/review'}" method="post">
+            <label for="comment" class="form-label" th:text="#{request.comment}">Ghi chú</label>
+            <textarea id="comment" name="comment" class="form-control mb-1" rows="3" maxlength="500"
+                      th:text="${reviewComment}"></textarea>
+            <div class="form-text mb-3" th:text="#{request.comment.hint}">Bắt buộc khi từ chối.</div>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="submit" name="decision" value="APPROVED" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> <span th:text="#{request.approve}">Duyệt</span></button>
+                <button type="submit" name="decision" value="REJECTED" class="btn btn-outline-danger btn-lg">
+                    <i class="bi bi-x-circle"></i> <span th:text="#{request.reject}">Từ chối</span></button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card card-custom p-4">
+        <h2 class="h5" th:text="#{request.history}">Lịch sử duyệt</h2>
+        <p th:if="${#lists.isEmpty(item.reviews)}" class="text-muted mb-0" th:text="#{request.history.empty}">Chưa có.</p>
+        <ul class="list-group list-group-flush" th:unless="${#lists.isEmpty(item.reviews)}">
+            <li class="list-group-item px-0" th:each="r : ${item.reviews}">
+                <span class="badge" th:classappend="${r.decision.name() == 'APPROVED'} ? 'text-bg-success' : 'text-bg-danger'"
+                      th:text="#{'request-status.' + ${r.decision}}">Đã duyệt</span>
+                <span th:text="${r.reviewerName}">Người duyệt</span> ·
+                <small class="text-muted" th:text="${#temporals.format(r.reviewedAt, 'dd/MM/yyyy HH:mm')}">01/10/2026</small>
+                <div class="text-pre-line mt-1" th:if="${r.comment}" th:text="${r.comment}">Ghi chú</div>
+            </li>
+        </ul>
+        <p th:if="${item.status.name() == 'CANCELLED'}" class="text-muted mt-2 mb-0"
+           th:text="#{request.cancelled-at(${#temporals.format(item.updatedAt, 'dd/MM/yyyy HH:mm')})}">Đã hủy lúc</p>
+    </div>
+</section>
+</body>
+</html>

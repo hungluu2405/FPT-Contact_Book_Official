@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{request.new-other} + ' - ' + #{app.title}">Gửi đơn khác</title>
+</head>
+<body>
+<section>
+    <!--/* Đơn khác của sinh viên (bảng điểm, xác nhận sinh viên, khác), do ADMIN xử lý. */-->
+    <a th:replace="~{fragments/catalog :: back(${baseUrl}, #{request.back})}"></a>
+    <h1 class="page-title" th:text="#{request.new-other}">Gửi đơn khác</h1>
+    <form th:action="@{${baseUrl} + '/new-other'}" th:object="${form}" method="post" enctype="multipart/form-data" novalidate>
+        <div th:replace="~{fragments/catalog :: globalErrors}"></div>
+        <div class="card card-custom p-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="requestType" class="form-label" th:text="#{request.type} + ' *'">Loại đơn</label>
+                    <select class="form-select" th:field="*{requestType}"
+                            th:classappend="${#fields.hasErrors('requestType')} ? 'is-invalid'">
+                        <option value="" th:text="#{user.choose}">-- Chọn --</option>
+                        <option th:each="t : ${types}" th:value="${t}" th:text="#{'request-type.' + ${t}}">Xin bảng điểm</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{requestType}">Lỗi</div>
+                </div>
+                <div th:replace="~{fragments/catalog :: text('title', #{request.title}, 200, true, 'col-md-8')}"></div>
+                <div class="col-12">
+                    <label for="reason" class="form-label" th:text="#{request.reason} + ' *'">Lý do</label>
+                    <textarea class="form-control" rows="5" th:field="*{reason}" maxlength="1000"
+                              th:classappend="${#fields.hasErrors('reason')} ? 'is-invalid'"></textarea>
+                    <div class="invalid-feedback" th:errors="*{reason}">Lỗi</div>
+                </div>
+                <div class="col-12">
+                    <label for="files" class="form-label" th:text="#{request.files.optional}">Tệp đính kèm (không bắt buộc)</label>
+                    <input type="file" id="files" name="files" class="form-control" multiple
+                           accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx">
+                    <div class="form-text" th:text="#{notification.files.hint}">Tối đa 5 tệp.</div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="submit" class="btn btn-orange btn-lg"><i class="bi bi-send"></i>
+                <span th:text="#{request.send}">Gửi đơn</span></button>
+            <a class="btn btn-outline-secondary btn-lg" th:href="@{${baseUrl}}" th:text="#{common.cancel}">Hủy</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

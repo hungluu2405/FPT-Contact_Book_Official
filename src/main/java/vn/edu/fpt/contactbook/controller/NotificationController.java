@@ -151,8 +151,11 @@ public class NotificationController {
         return "notifications/form";
     }
 
-    /** Bỏ phần tệp rỗng trình duyệt gửi khi không chọn tệp; tệp còn lại kiểm tra ở service. */
-    private static List<AttachmentUpload> uploads(List<MultipartFile> files) throws IOException {
+    /**
+     * Bỏ phần tệp rỗng trình duyệt gửi khi không chọn tệp; tệp còn lại kiểm tra ở service. Dùng chung cho form đơn
+     * từ.
+     */
+    static List<AttachmentUpload> uploads(List<MultipartFile> files) throws IOException {
         List<AttachmentUpload> uploads = new ArrayList<>();
         if (files != null) {
             for (MultipartFile file : files) {

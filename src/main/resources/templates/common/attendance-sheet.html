@@ -40,7 +40,11 @@
                     <tbody>
                     <tr th:each="row : ${sheet.rows}">
                         <td th:text="${row.studentCode}">SE190001</td>
-                        <td th:text="${row.fullName}">Nguyễn Văn A</td>
+                        <td>
+                            <span th:text="${row.fullName}">Nguyễn Văn A</span>
+                            <span th:if="${row.approvedLeave}" class="badge text-bg-info ms-1"
+                                  th:text="#{attendance.approved-leave}">Có đơn nghỉ được duyệt</span>
+                        </td>
                         <td>
                             <div th:if="${canSave}" class="d-flex flex-wrap gap-3" role="radiogroup"
                                  th:attr="aria-label=${row.fullName}">

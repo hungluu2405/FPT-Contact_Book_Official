@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Nhãn trạng thái đơn (màu theo trạng thái). */-->
+<span th:fragment="status(status)" class="badge"
+      th:classappend="${status.name() == 'PENDING'} ? 'text-bg-warning' : (${status.name() == 'APPROVED'} ? 'text-bg-success' : (${status.name() == 'REJECTED'} ? 'text-bg-danger' : 'text-bg-secondary'))"
+      th:text="#{'request-status.' + ${status}}">Chờ duyệt</span>
+
+<!--/* Khoảng ngày nghỉ, "—" với đơn khác. */-->
+<span th:fragment="dates(from, to)"
+      th:text="${from != null} ? ${#temporals.format(from, 'dd/MM/yyyy')} + ' – ' + ${#temporals.format(to, 'dd/MM/yyyy')} : '—'">01/10/2026 – 02/10/2026</span>
+</body>
+</html>
