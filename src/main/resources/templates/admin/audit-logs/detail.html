@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{audit.detail} + ' - ' + #{app.title}">Chi tiết nhật ký</title>
+</head>
+<body>
+<section>
+    <a class="btn btn-link px-0 mb-2" th:href="@{/admin/audit-logs}">
+        <i class="bi bi-arrow-left"></i> <span th:text="#{common.back}">Quay lại</span></a>
+    <h1 class="page-title" th:text="#{audit.detail} + ' #' + ${item.id}">Chi tiết nhật ký</h1>
+    <!--/* Chỉ đọc: không có nút sửa hay xóa. detail hiện bằng th:text (đã escape). */-->
+    <div class="card card-custom p-4">
+        <dl class="row mb-0">
+            <dt class="col-sm-3" th:text="#{audit.time}">Thời gian</dt>
+            <dd class="col-sm-9" th:text="${#temporals.format(item.createdAt, 'dd/MM/yyyy HH:mm:ss')}">19/10/2026 08:00:00</dd>
+            <dt class="col-sm-3" th:text="#{audit.actor}">Người thực hiện</dt>
+            <dd class="col-sm-9" th:text="${item.userId != null} ? ${item.userName} + ' (' + ${item.userPhone} + ')' : #{audit.no-user}">Quản trị viên</dd>
+            <dt class="col-sm-3" th:text="#{audit.action}">Hành động</dt>
+            <dd class="col-sm-9" th:text="${item.action}">LOGIN</dd>
+            <dt class="col-sm-3" th:text="#{audit.entity}">Đối tượng</dt>
+            <dd class="col-sm-9" th:text="${item.entityType} != null ? ${item.entityType} + (${item.entityId} != null ? ' #' + ${item.entityId} : '') : '—'">User #1</dd>
+            <dt class="col-sm-3" th:text="#{audit.ip}">Địa chỉ IP</dt>
+            <dd class="col-sm-9" th:text="${item.ipAddress} ?: '—'">127.0.0.1</dd>
+            <dt class="col-sm-3" th:text="#{audit.content}">Chi tiết</dt>
+            <dd class="col-sm-9 audit-detail" th:text="${item.detail} ?: '—'">reason=BAD_CREDENTIALS</dd>
+        </dl>
+    </div>
+</section>
+</body>
+</html>

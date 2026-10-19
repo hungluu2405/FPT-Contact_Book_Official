@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{menu.audit-logs} + ' - ' + #{app.title}">Nhật ký hệ thống</title>
+</head>
+<body>
+<section>
+    <h1 class="page-title" th:text="#{menu.audit-logs}">Nhật ký hệ thống</h1>
+    <!--/* Chỉ đọc: trang này không có nút sửa hay xóa. */-->
+    <form class="card card-custom p-3 mb-3" th:action="@{/admin/audit-logs}" th:object="${filter}" method="get">
+        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+            <div th:each="e : ${#fields.globalErrors()}" th:text="${e}">Lỗi</div>
+        </div>
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label for="keyword" class="form-label" th:text="#{audit.actor}">Người thực hiện</label>
+                <input id="keyword" type="search" class="form-control" th:field="*{keyword}"
+                       th:placeholder="#{audit.actor.placeholder}">
+            </div>
+            <div class="col-md-3">
+                <label for="action" class="form-label" th:text="#{audit.action}">Hành động</label>
+                <select id="action" class="form-select" th:field="*{action}">
+                    <option value="" th:text="#{report.all}">Tất cả</option>
+                    <option th:each="a : ${actions}" th:value="${a}" th:text="${a}">LOGIN</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="entityType" class="form-label" th:text="#{audit.entity}">Đối tượng</label>
+                <select id="entityType" class="form-select" th:field="*{entityType}">
+                    <option value="" th:text="#{report.all}">Tất cả</option>
+                    <option th:each="t : ${entityTypes}" th:value="${t}" th:text="${t}">User</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="from" class="form-label" th:text="#{audit.from}">Từ ngày</label>
+                <input id="from" type="date" class="form-control" th:field="*{from}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('from')}" th:errors="*{from}">Lỗi</div>
+            </div>
+            <div class="col-md-2">
+                <label for="to" class="form-label" th:text="#{audit.to}">Đến ngày</label>
+                <input id="to" type="date" class="form-control" th:field="*{to}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('to')}" th:errors="*{to}">Lỗi</div>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary" th:text="#{common.search}">Tìm kiếm</button>
+                <a class="btn btn-outline-secondary" th:href="@{/admin/audit-logs}" th:text="#{common.reset}">Đặt lại</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="card card-custom p-4">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                <tr>
+                    <th th:text="#{audit.time}">Thời gian</th>
+                    <th th:text="#{audit.actor}">Người thực hiện</th>
+                    <th th:text="#{audit.action}">Hành động</th>
+                    <th th:text="#{audit.entity}">Đối tượng</th>
+                    <th th:text="#{audit.ip}">Địa chỉ IP</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${items.content}">
+                    <td class="text-nowrap" th:text="${#temporals.format(a.createdAt, 'dd/MM/yyyy HH:mm')}">19/10/2026 08:00</td>
+                    <td>
+                        <span th:if="${a.userId != null}" th:text="${a.userName}">Quản trị viên</span>
+                        <div th:if="${a.userId != null}" class="small text-muted" th:text="${a.userPhone}">0900000001</div>
+                        <span th:if="${a.userId == null}" class="text-muted" th:text="#{audit.no-user}">Không gắn tài khoản</span>
+                    </td>
+                    <td><span class="badge text-bg-secondary" th:text="${a.action}">LOGIN</span></td>
+                    <td th:text="${a.entityType} != null ? ${a.entityType} + (${a.entityId} != null ? ' #' + ${a.entityId} : '') : '—'">User #1</td>
+                    <td th:text="${a.ipAddress} ?: '—'">127.0.0.1</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/admin/audit-logs/{id}(id=${a.id})}"
+                           th:text="#{audit.view}">Xem</a>
+                    </td>
+                </tr>
+                <tr th:if="${items.empty}">
+                    <td colspan="6" class="text-center text-muted py-4" th:text="#{audit.none}">Không có dòng nhật ký</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+    </div>
+</section>
+</body>
+</html>
