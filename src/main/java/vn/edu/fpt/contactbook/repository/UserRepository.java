@@ -1,8 +1,10 @@
 package vn.edu.fpt.contactbook.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -40,6 +42,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """;
 
     Optional<User> findByPhone(String phone);
+
+    /** Khóa dòng người dùng; tin nhắn dùng để hai yêu cầu "tìm hoặc tạo" hội thoại của cùng một cặp chạy lần lượt. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.id = :id")
+    Optional<User> findByIdForUpdate(@Param("id") Long id);
 
     boolean existsByPhone(String phone);
 

@@ -70,6 +70,8 @@ public final class AuditActions {
     public static final String REJECT_REQUEST = "REJECT_REQUEST";
     public static final String EXCUSE_ATTENDANCE = "EXCUSE_ATTENDANCE";
 
+    public static final String DELETE_MESSAGE = "DELETE_MESSAGE";
+
     public static final String ENTITY_USER = "User";
     public static final String ENTITY_FACULTY = "Faculty";
     public static final String ENTITY_DEPARTMENT = "Department";
@@ -86,6 +88,7 @@ public final class AuditActions {
     public static final String ENTITY_GRADE = "Grade";
     public static final String ENTITY_NOTIFICATION = "Notification";
     public static final String ENTITY_REQUEST = "Request";
+    public static final String ENTITY_MESSAGE = "Message";
 
     private AuditActions() {
     }

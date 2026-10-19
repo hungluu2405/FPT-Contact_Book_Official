@@ -18,6 +18,7 @@ import lombok.Setter;
 import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "messages")
@@ -55,7 +56,7 @@ public class Message {
     @PrePersist
     public void prePersist() {
         if (this.sentAt == null) {
-            this.sentAt = AppTime.now();
+            this.sentAt = AppTime.now().truncatedTo(ChronoUnit.SECONDS);
         }
     }
 }
