@@ -45,7 +45,11 @@ public final class ConstraintViolationMapper {
             Map.entry("ck_exams_time", new String[]{"endTime", ScheduleMessages.END_AFTER_START}),
             Map.entry("uq_attendance", new String[]{null, AttendanceMessages.CONCURRENT_CHANGE}),
             Map.entry("uq_grades", new String[]{null, GradeMessages.CONCURRENT_CHANGE}),
-            Map.entry("ck_grades_score", new String[]{null, GradeMessages.SCORE_RANGE_DB}));
+            Map.entry("ck_grades_score", new String[]{null, GradeMessages.SCORE_RANGE_DB}),
+            Map.entry("uq_clubs_code", new String[]{"code", ClubMessages.CODE_TAKEN}),
+            Map.entry("uq_club_members", new String[]{null, ClubMessages.ALREADY_PENDING}),
+            Map.entry("ck_ca_time", new String[]{"endTime", ClubMessages.END_AFTER_START}),
+            Map.entry("ck_ca_max", new String[]{"maxParticipants", ClubMessages.MAX_RANGE}));
 
     private ConstraintViolationMapper() {
     }

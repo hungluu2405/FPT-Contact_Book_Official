@@ -72,6 +72,20 @@ public final class AuditActions {
 
     public static final String DELETE_MESSAGE = "DELETE_MESSAGE";
 
+    public static final String CREATE_CLUB = "CREATE_CLUB";
+    public static final String UPDATE_CLUB = "UPDATE_CLUB";
+    public static final String DEACTIVATE_CLUB = "DEACTIVATE_CLUB";
+    public static final String ACTIVATE_CLUB = "ACTIVATE_CLUB";
+    public static final String ASSIGN_CLUB_PRESIDENT = "ASSIGN_CLUB_PRESIDENT";
+    public static final String APPROVE_CLUB_MEMBER = "APPROVE_CLUB_MEMBER";
+    public static final String REJECT_CLUB_MEMBER = "REJECT_CLUB_MEMBER";
+    public static final String CHANGE_CLUB_ROLE = "CHANGE_CLUB_ROLE";
+    public static final String LEAVE_CLUB = "LEAVE_CLUB";
+    public static final String CREATE_CLUB_ACTIVITY = "CREATE_CLUB_ACTIVITY";
+    public static final String UPDATE_CLUB_ACTIVITY = "UPDATE_CLUB_ACTIVITY";
+    public static final String CANCEL_CLUB_ACTIVITY = "CANCEL_CLUB_ACTIVITY";
+    public static final String MARK_CLUB_ATTENDANCE = "MARK_CLUB_ATTENDANCE";
+
     public static final String ENTITY_USER = "User";
     public static final String ENTITY_FACULTY = "Faculty";
     public static final String ENTITY_DEPARTMENT = "Department";
@@ -89,6 +103,9 @@ public final class AuditActions {
     public static final String ENTITY_NOTIFICATION = "Notification";
     public static final String ENTITY_REQUEST = "Request";
     public static final String ENTITY_MESSAGE = "Message";
+    public static final String ENTITY_CLUB = "Club";
+    public static final String ENTITY_CLUB_MEMBER = "ClubMember";
+    public static final String ENTITY_CLUB_ACTIVITY = "ClubActivity";
 
     private AuditActions() {
     }
