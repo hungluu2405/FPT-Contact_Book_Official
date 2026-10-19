@@ -51,6 +51,17 @@ class ClubRuleTest {
             assertThat(ClubRule.state(activity, START)).isEqualTo(ClubActivityStatus.CANCELLED);
             assertThat(ClubRule.state(activity, END.plusDays(1))).isEqualTo(ClubActivityStatus.CANCELLED);
         }
+
+        @Test
+        @DisplayName("Bản nhận cột rời (báo cáo CLB) cho cùng kết quả với bản nhận entity")
+        void fromColumns() {
+            for (ClubActivityStatus stored : ClubActivityStatus.values()) {
+                ClubActivity activity = activity(stored);
+                for (LocalDateTime now : new LocalDateTime[]{START.minusSeconds(1), START, END.minusSeconds(1), END}) {
+                    assertThat(ClubRule.state(stored, START, END, now)).isEqualTo(ClubRule.state(activity, now));
+                }
+            }
+        }
     }
 
     @Nested
