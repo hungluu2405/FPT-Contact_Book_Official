@@ -143,6 +143,23 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" th:href="@{/notifications}" th:classappend="${activeMenu == 'notifications'} ? 'active'">
+                <i class="bi bi-bell"></i><span th:text="#{menu.notifications}">Thông báo</span>
+                <span th:if="${unreadNotifications != null and unreadNotifications > 0}"
+                      class="badge rounded-pill text-bg-danger ms-auto" th:text="${unreadNotifications}">3</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'HEAD_OF_DEPARTMENT', 'TEACHER')">
+            <a class="nav-link" th:href="@{/notifications/new}" th:classappend="${activeMenu == 'notifications-new'} ? 'active'">
+                <i class="bi bi-send"></i><span th:text="#{menu.notifications.new}">Gửi thông báo</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'HEAD_OF_DEPARTMENT', 'TEACHER')">
+            <a class="nav-link" th:href="@{/notifications/sent}" th:classappend="${activeMenu == 'notifications-sent'} ? 'active'">
+                <i class="bi bi-envelope-check"></i><span th:text="#{menu.notifications.sent}">Đã gửi</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" th:href="@{/profile}" th:classappend="${activeMenu == 'profile'} ? 'active'">
                 <i class="bi bi-person-vcard"></i><span th:text="#{menu.profile}">Hồ sơ cá nhân</span>
             </a>

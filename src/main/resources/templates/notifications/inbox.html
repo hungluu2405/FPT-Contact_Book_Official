@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{menu.notifications} + ' - ' + #{app.title}">Thông báo</title>
+</head>
+<body>
+<section>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="page-title mb-0" th:text="#{menu.notifications}">Thông báo</h1>
+        <form th:action="@{/notifications/read-all}" method="post" th:if="${unreadNotifications != null and unreadNotifications > 0}">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-check2-all"></i> <span th:text="#{notification.read-all}">Đánh dấu tất cả đã đọc</span></button>
+        </form>
+    </div>
+    <div class="card card-custom">
+        <div class="list-group list-group-flush">
+            <a th:each="n : ${items.content}" th:href="@{/notifications/{id}(id=${n.id})}"
+               class="list-group-item list-group-item-action py-3"
+               th:classappend="${!n.read} ? 'notification-unread'">
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+                    <span>
+                        <span th:replace="~{fragments/notifications :: priority(${n.priority})}"></span>
+                        <span th:classappend="${!n.read} ? 'fw-bold'" th:text="${n.title}">Tiêu đề</span>
+                    </span>
+                    <small class="text-muted" th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}">01/10/2026 08:00</small>
+                </div>
+                <small class="text-muted" th:text="#{notification.from(${n.senderName})}">Từ: Người gửi</small>
+                <span th:unless="${n.read}" class="badge text-bg-primary ms-1" th:text="#{notification.unread}">Chưa đọc</span>
+            </a>
+            <div th:if="${items.empty}" class="list-group-item text-center text-muted py-4" th:text="#{notification.empty}">Chưa có thông báo</div>
+        </div>
+    </div>
+    <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+</section>
+</body>
+</html>

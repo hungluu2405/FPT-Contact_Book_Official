@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{menu.notifications.new} + ' - ' + #{app.title}">Gửi thông báo</title>
+</head>
+<body>
+<section>
+    <!--/* Chỉ liệt kê phạm vi và nơi nhận người gửi được phép; service vẫn kiểm tra lại mọi giá trị. */-->
+    <h1 class="page-title" th:text="#{menu.notifications.new}">Gửi thông báo</h1>
+    <form th:action="@{/notifications/new}" th:object="${form}" method="post" enctype="multipart/form-data" novalidate>
+        <div th:replace="~{fragments/catalog :: globalErrors}"></div>
+        <div class="card card-custom p-4">
+            <div class="row g-3">
+                <div th:replace="~{fragments/catalog :: text('title', #{notification.title}, 200, true, 'col-12')}"></div>
+                <div class="col-12">
+                    <label for="content" class="form-label" th:text="#{notification.content} + ' *'">Nội dung</label>
+                    <textarea class="form-control" rows="6" th:field="*{content}"
+                              th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"></textarea>
+                    <div class="invalid-feedback" th:errors="*{content}">Lỗi</div>
+                </div>
+                <div class="col-md-4">
+                    <label for="priority" class="form-label" th:text="#{notification.priority} + ' *'">Mức độ</label>
+                    <select class="form-select" th:field="*{priority}"
+                            th:classappend="${#fields.hasErrors('priority')} ? 'is-invalid'">
+                        <option th:each="p : ${priorities}" th:value="${p}" th:text="#{'notification-priority.' + ${p}}">Thường</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{priority}">Lỗi</div>
+                </div>
+                <div class="col-md-4">
+                    <label for="targetType" class="form-label" th:text="#{notification.target} + ' *'">Phạm vi</label>
+                    <select class="form-select" th:field="*{targetType}" id="targetType" data-target-type-select
+                            th:classappend="${#fields.hasErrors('targetType')} ? 'is-invalid'">
+                        <option value="" th:text="#{user.choose}">-- Chọn --</option>
+                        <option th:each="t : ${options.types}" th:value="${t}" th:text="#{'notification-target.' + ${t}}">Lớp học phần</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{targetType}">Lỗi</div>
+                </div>
+                <div class="col-md-4 target-ROLE" th:if="${!#lists.isEmpty(options.roles)}">
+                    <label for="roleId" class="form-label" th:text="#{notification-target.ROLE}">Vai trò</label>
+                    <select class="form-select" th:field="*{roleId}" th:classappend="${#fields.hasErrors('roleId')} ? 'is-invalid'">
+                        <option value="" th:text="#{user.choose}">-- Chọn --</option>
+                        <option th:each="o : ${options.roles}" th:value="${o.id}" th:text="#{'role.' + ${o.code}}">Sinh viên</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{roleId}">Lỗi</div>
+                </div>
+                <th:block th:if="${!#lists.isEmpty(options.departments)}">
+                    <div th:replace="~{fragments/catalog :: selectField('departmentId', #{notification-target.DEPARTMENT}, ${options.departments}, false, 'col-md-4 target-DEPARTMENT')}"></div>
+                </th:block>
+                <th:block th:if="${!#lists.isEmpty(options.classes)}">
+                    <div th:replace="~{fragments/catalog :: selectField('classId', #{notification-target.CLASS}, ${options.classes}, false, 'col-md-4 target-CLASS')}"></div>
+                </th:block>
+                <th:block th:if="${!#lists.isEmpty(options.sections)}">
+                    <div th:replace="~{fragments/catalog :: selectField('sectionId', #{notification-target.CLASS_SECTION}, ${options.sections}, false, 'col-md-4 target-CLASS_SECTION')}"></div>
+                </th:block>
+                <div class="col-md-4 target-USER" th:if="${options.allows('USER')}">
+                    <label for="recipientPhone" class="form-label" th:text="#{notification.recipient-phone}">Số điện thoại người nhận</label>
+                    <input type="tel" class="form-control" th:field="*{recipientPhone}" maxlength="20"
+                           th:classappend="${#fields.hasErrors('recipientPhone')} ? 'is-invalid'">
+                    <div class="form-text" th:text="#{notification.recipient-phone.hint}">Chỉ gửi được cho người trong phạm vi của bạn.</div>
+                    <div class="invalid-feedback" th:errors="*{recipientPhone}">Lỗi</div>
+                </div>
+                <div class="col-12">
+                    <label for="files" class="form-label" th:text="#{notification.files}">Tệp đính kèm</label>
+                    <input type="file" id="files" name="files" class="form-control" multiple
+                           accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx">
+                    <div class="form-text" th:text="#{notification.files.hint}">Tối đa 5 tệp.</div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="submit" class="btn btn-orange btn-lg"><i class="bi bi-send"></i>
+                <span th:text="#{notification.send}">Gửi</span></button>
+            <a class="btn btn-outline-secondary btn-lg" th:href="@{/notifications}" th:text="#{common.cancel}">Hủy</a>
+        </div>
+    </form>
+    <script th:src="@{/js/notification-form.js}"></script>
+</section>
+</body>
+</html>

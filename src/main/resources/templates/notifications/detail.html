@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${item.title} + ' - ' + #{app.title}">Thông báo</title>
+</head>
+<body>
+<section>
+    <!--/* Nội dung chỉ hiển thị bằng th:text (không th:utext); xuống dòng nhờ CSS white-space: pre-line. */-->
+    <th:block th:if="${item.sender}">
+        <a th:replace="~{fragments/catalog :: back('/notifications/sent', #{menu.notifications.sent})}"></a>
+    </th:block>
+    <th:block th:unless="${item.sender}">
+        <a th:replace="~{fragments/catalog :: back('/notifications', #{menu.notifications})}"></a>
+    </th:block>
+    <div class="card card-custom p-4 mb-3">
+        <h1 class="h4 mb-2">
+            <span th:replace="~{fragments/notifications :: priority(${item.priority})}"></span>
+            <span th:text="${item.title}">Tiêu đề</span>
+        </h1>
+        <p class="text-muted small mb-3">
+            <span th:text="#{notification.from(${item.senderName})}">Từ</span> ·
+            <span th:text="${#temporals.format(item.createdAt, 'dd/MM/yyyy HH:mm')}">01/10/2026</span> ·
+            <span th:text="#{'notification-target.' + ${item.targetType}} + (${item.targetLabel} != null ? ': ' + ${item.targetLabel} : '')">Lớp học phần</span>
+        </p>
+        <div class="text-pre-line notification-content" th:text="${item.content}">Nội dung</div>
+        <div th:unless="${#lists.isEmpty(item.files)}" class="mt-3">
+            <h2 class="h6" th:text="#{notification.files}">Tệp đính kèm</h2>
+            <ul class="list-unstyled mb-0">
+                <li th:each="f : ${item.files}">
+                    <a th:href="@{/notifications/{id}/files/{fid}(id=${item.id},fid=${f.id})}">
+                        <i class="bi bi-paperclip"></i> <span th:text="${f.fileName}">tep.pdf</span></a>
+                    <small class="text-muted" th:if="${f.sizeBytes != null}"
+                           th:text="#{notification.file-size(${(f.sizeBytes + 1023) / 1024})}">(12 KB)</small>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div th:if="${item.sender}" class="card card-custom p-4">
+        <h2 class="h5" th:text="#{notification.stats}">Thống kê đã đọc</h2>
+        <p class="fs-5 mb-3" th:text="#{notification.stats.value(${item.readCount}, ${item.recipientCount}, ${item.readPercent()})}">0 / 0 (0%)</p>
+        <ul class="nav nav-pills mb-3">
+            <li class="nav-item"><a class="nav-link" th:classappend="${readFilter == 'all'} ? 'active'"
+                                    th:href="@{/notifications/{id}(id=${item.id})}" th:text="#{notification.filter.all}">Tất cả</a></li>
+            <li class="nav-item"><a class="nav-link" th:classappend="${readFilter == 'true'} ? 'active'"
+                                    th:href="@{/notifications/{id}(id=${item.id},read=true)}" th:text="#{notification.filter.read}">Đã đọc</a></li>
+            <li class="nav-item"><a class="nav-link" th:classappend="${readFilter == 'false'} ? 'active'"
+                                    th:href="@{/notifications/{id}(id=${item.id},read=false)}" th:text="#{notification.filter.unread}">Chưa đọc</a></li>
+        </ul>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                <tr>
+                    <th th:text="#{notification.recipient}">Người nhận</th>
+                    <th th:text="#{notification.read-status}">Trạng thái</th>
+                    <th th:text="#{notification.read-at}">Thời điểm đọc</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${item.recipients.content}">
+                    <td th:text="${r.fullName}">Nguyễn Văn A</td>
+                    <td><span class="badge" th:classappend="${r.read} ? 'text-bg-success' : 'text-bg-secondary'"
+                              th:text="${r.read} ? #{notification.filter.read} : #{notification.filter.unread}">Đã đọc</span></td>
+                    <td th:text="${r.readAt} != null ? ${#temporals.format(r.readAt, 'dd/MM/yyyy HH:mm')} : '—'">—</td>
+                </tr>
+                <tr th:if="${item.recipients.empty}">
+                    <td colspan="3" class="text-center text-muted py-4" th:text="#{notification.no-recipients}">Không có</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Nhãn mức độ thông báo: thường không hiện nhãn; quan trọng màu cam; khẩn màu đỏ. */-->
+<span th:fragment="priority(priority)" th:unless="${priority.name() == 'NORMAL'}" class="badge me-1"
+      th:classappend="${priority.name() == 'URGENT'} ? 'text-bg-danger' : 'text-bg-warning'"
+      th:text="#{'notification-priority.' + ${priority}}">Quan trọng</span>
+</body>
+</html>

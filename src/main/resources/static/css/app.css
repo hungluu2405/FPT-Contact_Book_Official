@@ -340,3 +340,28 @@ body {
 .schedule-today {
     border-width: 2px;
 }
+
+/* Thông báo: nội dung giữ xuống dòng (hiển thị bằng th:text), chuông trên thanh trên, dòng chưa đọc. */
+.text-pre-line {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.app-bell {
+    position: relative;
+    color: var(--color-white);
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+    text-decoration: none;
+}
+
+.app-bell .badge {
+    position: absolute;
+    top: -0.4rem;
+    right: -0.7rem;
+    font-size: 0.7rem;
+}
+
+.notification-unread {
+    border-left: 4px solid var(--color-orange);
+}
