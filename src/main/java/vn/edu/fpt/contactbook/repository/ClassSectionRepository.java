@@ -59,6 +59,16 @@ public interface ClassSectionRepository extends JpaRepository<ClassSection, Long
     @Query("SELECT c FROM ClassSection c WHERE c.id = :id")
     Optional<ClassSection> findByIdForUpdate(@Param("id") Long id);
 
+    /** Lớp học phần để chọn đích gửi thông báo, mới nhất trước: của một giảng viên / thuộc các bộ môn / tất cả. */
+    @EntityGraph(attributePaths = {"subject", "semester"})
+    List<ClassSection> findByTeacherIdOrderBySemesterStartDateDescCodeAsc(Long teacherId);
+
+    @EntityGraph(attributePaths = {"subject", "semester"})
+    List<ClassSection> findBySubjectDepartmentIdInOrderBySemesterStartDateDescCodeAsc(Collection<Long> departmentIds);
+
+    @EntityGraph(attributePaths = {"subject", "semester"})
+    List<ClassSection> findAllByOrderBySemesterStartDateDescCodeAsc();
+
     boolean existsByCode(String code);
 
     boolean existsByCodeAndIdNot(String code, Long id);

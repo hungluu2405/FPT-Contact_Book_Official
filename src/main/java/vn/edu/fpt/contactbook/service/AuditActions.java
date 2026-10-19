@@ -62,6 +62,8 @@ public final class AuditActions {
     public static final String PUBLISH_GRADE = "PUBLISH_GRADE";
     public static final String ADJUST_GRADE = "ADJUST_GRADE";
 
+    public static final String SEND_NOTIFICATION = "SEND_NOTIFICATION";
+
     public static final String ENTITY_USER = "User";
     public static final String ENTITY_FACULTY = "Faculty";
     public static final String ENTITY_DEPARTMENT = "Department";
@@ -76,6 +78,7 @@ public final class AuditActions {
     public static final String ENTITY_EXAM = "Exam";
     public static final String ENTITY_ATTENDANCE = "Attendance";
     public static final String ENTITY_GRADE = "Grade";
+    public static final String ENTITY_NOTIFICATION = "Notification";
 
     private AuditActions() {
     }
