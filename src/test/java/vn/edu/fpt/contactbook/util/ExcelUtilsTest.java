@@ -98,6 +98,35 @@ class ExcelUtilsTest {
         assertThat(ExcelUtils.text(text(decomposed))).isEqualTo("Nữ");
     }
 
+    @Test
+    @DisplayName("Số thập phân: ô số đọc đúng giá trị dù định dạng ô làm tròn, ô chữ nhận dấu chấm và dấu phẩy")
+    void decimalCells() {
+        Cell numeric = row.createCell(nextColumn++);
+        numeric.setCellValue(8.25);
+        CellStyle noDecimals = workbook.createCellStyle();
+        noDecimals.setDataFormat(workbook.createDataFormat().getFormat("0"));
+        numeric.setCellStyle(noDecimals);
+
+        assertThat(ExcelUtils.decimal(numeric)).isEqualByComparingTo("8.25");
+        assertThat(ExcelUtils.decimal(text("7,5"))).isEqualByComparingTo("7.5");
+        assertThat(ExcelUtils.decimal(text(" 9.75 "))).isEqualByComparingTo("9.75");
+        assertThat(ExcelUtils.decimal(null)).isNull();
+        assertThat(ExcelUtils.decimal(row.createCell(nextColumn++))).isNull();
+        assertThat(ExcelUtils.decimal(text("   "))).isNull();
+    }
+
+    @Test
+    @DisplayName("Số thập phân: chữ không phải số hoặc ô ngày bị từ chối")
+    void decimalRejectsNonNumbers() {
+        assertThatThrownBy(() -> ExcelUtils.decimal(text("tám"))).isInstanceOf(NumberFormatException.class);
+        Cell date = row.createCell(nextColumn++);
+        date.setCellValue(LocalDate.of(2026, 9, 1));
+        CellStyle dateStyle = workbook.createCellStyle();
+        dateStyle.setDataFormat(workbook.createDataFormat().getFormat("dd/mm/yyyy"));
+        date.setCellStyle(dateStyle);
+        assertThatThrownBy(() -> ExcelUtils.decimal(date)).isInstanceOf(NumberFormatException.class);
+    }
+
     private Cell text(String value) {
         Cell cell = row.createCell(nextColumn++);
         cell.setCellValue(value);
