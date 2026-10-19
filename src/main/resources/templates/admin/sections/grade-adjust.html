@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{grade.adjust} + ' - ' + #{app.title}">Điều chỉnh điểm</title>
+</head>
+<body>
+<section>
+    <a th:replace="~{fragments/catalog :: back('/admin/sections/' + ${sectionId} + '/grades', #{grade.sheet})}"></a>
+    <h1 class="page-title" th:text="#{grade.adjust} + ': ' + ${grade.studentCode} + ' - ' + ${grade.componentName}">Điều chỉnh điểm</h1>
+    <div class="card card-custom p-4 mb-3">
+        <dl class="profile-info mb-0">
+            <dt th:text="#{attendance.section}">Lớp học phần</dt><dd th:text="${grade.sectionCode}">PRJ301</dd>
+            <dt th:text="#{attendance.student}">Sinh viên</dt><dd th:text="${grade.studentCode} + ' - ' + ${grade.fullName}">SE190001</dd>
+            <dt th:text="#{grade.component}">Đầu điểm</dt><dd th:text="${grade.componentName}">Final</dd>
+            <dt th:text="#{grade.current}">Điểm hiện tại</dt>
+            <dd><span th:replace="~{fragments/grades :: score(${grade.score})}"></span>
+                <span class="text-muted" th:text="'/ ' + ${grade.maxScore.stripTrailingZeros().toPlainString()}">/ 10</span></dd>
+            <dt th:text="#{attendance.note}">Ghi chú</dt><dd th:text="${grade.note} ?: '—'">Ghi chú</dd>
+        </dl>
+    </div>
+    <p class="alert alert-warning" th:text="#{grade.adjust.hint}">Điểm đã công bố; điều chỉnh được ghi nhật ký.</p>
+    <form th:action="@{/admin/sections/{id}/grades/{gid}/adjust(id=${sectionId},gid=${grade.gradeId})}"
+          th:object="${form}" method="post" novalidate>
+        <div th:replace="~{fragments/catalog :: globalErrors}"></div>
+        <div class="card card-custom p-4">
+            <div class="row g-3">
+                <div th:replace="~{fragments/catalog :: text('score', #{grade.new-score}, 6, true, 'col-md-3')}"></div>
+                <div th:replace="~{fragments/catalog :: text('reason', #{grade.adjust.reason}, 255, true, 'col-md-9')}"></div>
+            </div>
+        </div>
+        <div th:replace="~{fragments/catalog :: buttons('/admin/sections/' + ${sectionId} + '/grades')}"></div>
+    </form>
+</section>
+</body>
+</html>

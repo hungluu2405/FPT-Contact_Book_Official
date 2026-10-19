@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{grade.import} + ': ' + ${sheet.section.code} + ' - ' + #{app.title}">Nhập điểm</title>
+</head>
+<body>
+<section>
+    <a th:replace="~{fragments/catalog :: back('/teacher/sections/' + ${sheet.section.id} + '/grades', #{grade.sheet})}"></a>
+    <h1 class="page-title" th:text="#{grade.import} + ': ' + ${sheet.section.code}">Nhập điểm từ Excel</h1>
+    <div th:replace="~{fragments/grades :: weightWarning(${sheet})}"></div>
+
+    <div class="card card-custom p-4 mb-3">
+        <h2 class="h5" th:text="#{user.import.step1}">1. Tải file mẫu</h2>
+        <p class="text-muted" th:text="#{grade.import.template-hint(${maxRows})}">Cột Mã SV và các đầu điểm.</p>
+        <a class="btn btn-outline-primary" th:href="@{/teacher/sections/{id}/grades/import/template(id=${sheet.section.id})}">
+            <i class="bi bi-download"></i> <span th:text="#{enrollment.import.template}">Tải file mẫu</span></a>
+    </div>
+
+    <form class="card card-custom p-4 mb-4" th:action="@{/teacher/sections/{id}/grades/import(id=${sheet.section.id})}"
+          method="post" enctype="multipart/form-data" novalidate>
+        <h2 class="h5" th:text="#{user.import.step2}">2. Tải file lên</h2>
+        <label for="file" class="form-label" th:text="#{user.import.file}">File Excel (.xlsx)</label>
+        <input type="file" id="file" name="file" class="form-control" required
+               accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+        <p class="form-text mt-2" th:text="#{grade.import.all-or-nothing}">Có lỗi thì không ghi ô nào.</p>
+        <button type="submit" class="btn btn-orange btn-lg mt-2" th:disabled="${!sheet.weightsComplete}">
+            <i class="bi bi-upload"></i> <span th:text="#{user.import.submit}">Kiểm tra và nhập</span>
+        </button>
+    </form>
+
+    <div th:if="${importErrors}" class="card card-custom p-4">
+        <h2 class="h5 text-danger" th:text="#{grade.import.errors(${#lists.size(importErrors)})}">Lỗi</h2>
+        <p class="text-muted" th:text="#{user.import.errors.hint}">Sửa lỗi rồi tải lên lại.</p>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle mb-0">
+                <thead>
+                <tr>
+                    <th th:text="#{user.import.row}">Dòng</th>
+                    <th th:text="#{user.import.column}">Cột</th>
+                    <th th:text="#{user.import.reason}">Lý do</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="error : ${importErrors}">
+                    <td th:text="${error.rowNumber}">2</td>
+                    <td th:text="${error.column}">Mã SV</td>
+                    <td th:text="${error.message}">Lý do</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</body>
+</html>

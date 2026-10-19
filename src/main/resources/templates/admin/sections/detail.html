@@ -14,6 +14,8 @@
                   th:text="#{'section-status.' + ${item.status}}">Đang mở</span>
         </h1>
         <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" th:href="@{/admin/sections/{id}/grades(id=${item.id})}">
+                <i class="bi bi-journal-check"></i> <span th:text="#{grade.sheet}">Bảng điểm</span></a>
             <a class="btn btn-outline-primary" th:href="@{/admin/sections/{id}/attendance(id=${item.id})}">
                 <i class="bi bi-person-check"></i> <span th:text="#{attendance.stats}">Thống kê điểm danh</span></a>
             <a class="btn btn-outline-primary" th:href="@{/admin/sections/{id}/edit(id=${item.id})}">

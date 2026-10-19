@@ -41,6 +41,8 @@
                     <td class="text-end">
                         <a class="btn btn-sm btn-primary" th:href="@{/teacher/sections/{id}(id=${s.id})}">
                             <i class="bi bi-person-check"></i> <span th:text="#{attendance.title}">Điểm danh</span></a>
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/teacher/sections/{id}/grades(id=${s.id})}">
+                            <i class="bi bi-journal-check"></i> <span th:text="#{grade.entry}">Nhập điểm</span></a>
                     </td>
                 </tr>
                 <tr th:if="${items.empty}">

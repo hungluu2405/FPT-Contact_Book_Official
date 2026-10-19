@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Fragment điểm số dùng chung: tiêu đề cột đầu điểm, hiển thị điểm, điểm trung bình, cảnh báo trọng số. */-->
+
+<!--/* Tiêu đề một cột đầu điểm: tên, trọng số, điểm tối đa. */-->
+<th:block th:fragment="componentHeaders(components)">
+    <th class="text-center" th:each="c : ${components}">
+        <div th:text="${c.name}">Assignment</div>
+        <div class="small text-muted fw-normal"
+             th:text="#{grade.component.meta(${c.weight.stripTrailingZeros().toPlainString()}, ${c.maxScore.stripTrailingZeros().toPlainString()})}">20% · /10</div>
+    </th>
+</th:block>
+
+<!--/* Một điểm (dấu phẩy thập phân); null là "—". */-->
+<span th:fragment="score(value)" th:text="${value == null} ? '—' : ${#strings.replace(value.stripTrailingZeros().toPlainString(), '.', ',')}">8,5</span>
+
+<!--/* Điểm trung bình môn; null là "Chưa đủ điểm". */-->
+<th:block th:fragment="average(value)">
+    <strong th:if="${value != null}" th:text="${#numbers.formatDecimal(value, 1, 1, 'COMMA')}">8,3</strong>
+    <span th:if="${value == null}" class="badge text-bg-light" th:text="#{grade.incomplete}">Chưa đủ điểm</span>
+</th:block>
+
+<!--/* Cảnh báo khi tổng trọng số khác 100% (chặn nhập và công bố). */-->
+<div th:fragment="weightWarning(sheet)" th:unless="${sheet.weightsComplete}" class="alert alert-warning" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span th:text="#{grade.weights.incomplete(${sheet.totalWeight.stripTrailingZeros().toPlainString()})}">Tổng trọng số chưa đủ 100%</span>
+</div>
+
+<!--/* Ghi chú công thức dưới bảng điểm. */-->
+<p th:fragment="formula" class="small text-muted mt-2 mb-0" th:text="#{grade.formula}">Công thức</p>
+</body>
+</html>

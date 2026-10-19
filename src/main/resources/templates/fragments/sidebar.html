@@ -108,6 +108,11 @@
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasRole('STUDENT')">
+            <a class="nav-link" th:href="@{/student/grades}" th:classappend="${activeMenu == 'student-grades'} ? 'active'">
+                <i class="bi bi-journal-check"></i><span th:text="#{menu.grades}">Điểm</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('STUDENT')">
             <a class="nav-link" th:href="@{/student/attendance}" th:classappend="${activeMenu == 'student-attendance'} ? 'active'">
                 <i class="bi bi-person-check"></i><span th:text="#{menu.attendance}">Điểm danh</span>
             </a>
@@ -125,6 +130,11 @@
         <li class="nav-item" sec:authorize="hasRole('PARENT')">
             <a class="nav-link" th:href="@{/parent/exams}" th:classappend="${activeMenu == 'parent-exams'} ? 'active'">
                 <i class="bi bi-clipboard-check"></i><span th:text="#{menu.parent.exams}">Lịch thi của con</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('PARENT')">
+            <a class="nav-link" th:href="@{/parent/grades}" th:classappend="${activeMenu == 'parent-grades'} ? 'active'">
+                <i class="bi bi-journal-check"></i><span th:text="#{menu.parent.grades}">Điểm của con</span>
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasRole('PARENT')">
