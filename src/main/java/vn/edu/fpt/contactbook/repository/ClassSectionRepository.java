@@ -40,6 +40,10 @@ public interface ClassSectionRepository extends JpaRepository<ClassSection, Long
     @Query("SELECT c.id FROM ClassSection c WHERE c.teacher.id = :teacherId AND c.semester.id = :semesterId")
     List<Long> findIdsByTeacherAndSemester(@Param("teacherId") Long teacherId, @Param("semesterId") Long semesterId);
 
+    /** Lớp học phần của học kỳ do một giảng viên dạy, phân trang (trang "Lớp giảng dạy"). */
+    @EntityGraph(attributePaths = {"subject", "semester"})
+    Page<ClassSection> findByTeacherIdAndSemesterIdOrderByCodeAsc(Long teacherId, Long semesterId, Pageable pageable);
+
     @EntityGraph(attributePaths = {"subject", "semester", "teacher", "teacher.user"})
     @Query(value = "SELECT c " + SEARCH_FROM_WHERE + " ORDER BY c.semester.startDate DESC, c.code",
             countQuery = "SELECT COUNT(c) " + SEARCH_FROM_WHERE)

@@ -137,7 +137,7 @@ public class ScheduleViewService {
         return ids.isEmpty() ? CatalogSupport.NO_IDS : ids;
     }
 
-    private Semester resolveSemester(Long semesterId) {
+    Semester resolveSemester(Long semesterId) {
         if (semesterId != null) {
             return semesterRepository.findById(semesterId)
                     .orElseThrow(() -> new NotFoundException(CatalogMessages.SEMESTER_NOT_FOUND));
@@ -147,7 +147,7 @@ public class ScheduleViewService {
                 .orElseThrow(() -> new NotFoundException(CatalogMessages.SEMESTER_NOT_FOUND));
     }
 
-    private static SemesterView toView(Semester semester) {
+    static SemesterView toView(Semester semester) {
         return new SemesterView(semester.getId(), semester.getCode(), semester.getName(), semester.getStartDate(),
                 semester.getEndDate(), semester.isCurrent());
     }

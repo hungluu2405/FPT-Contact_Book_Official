@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.contactbook.model.ClassSession;
+import vn.edu.fpt.contactbook.model.enums.SessionStatus;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -28,6 +29,18 @@ public interface ClassSessionRepository extends JpaRepository<ClassSession, Long
     /** Buổi của chính lớp trong khoảng ngày, mọi trạng thái (uq_sess_cs_slot tính cả buổi đã hủy). */
     List<ClassSession> findByClassSectionIdAndSessionDateBetween(Long classSectionId, LocalDate fromDate,
                                                                  LocalDate toDate);
+
+    /** Số buổi của lớp không ở trạng thái status (mẫu số tỷ lệ vắng: buổi chưa hủy). */
+    long countByClassSectionIdAndStatusNot(Long classSectionId, SessionStatus status);
+
+    /** Số buổi chưa hủy của nhiều lớp một lần: mỗi phần tử là [classSectionId, count]. */
+    @Query("""
+            SELECT s.classSection.id, COUNT(s) FROM ClassSession s
+            WHERE s.classSection.id IN :sectionIds
+              AND s.status <> vn.edu.fpt.contactbook.model.enums.SessionStatus.CANCELLED
+            GROUP BY s.classSection.id
+            """)
+    List<Object[]> countActiveBySections(@Param("sectionIds") Collection<Long> sectionIds);
 
     @Query("SELECT MAX(s.sessionNo) FROM ClassSession s WHERE s.classSection.id = :sectionId")
     Short findMaxSessionNo(@Param("sectionId") Long sectionId);

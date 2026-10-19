@@ -76,5 +76,20 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     Optional<Enrollment> findByClassSectionIdAndStudentId(Long classSectionId, Long studentId);
 
+    /** Sinh viên của lớp theo một trạng thái, sắp theo mã sinh viên (bảng điểm danh của một buổi). */
+    @EntityGraph(attributePaths = {"student", "student.user"})
+    List<Enrollment> findByClassSectionIdAndStatusOrderByStudentStudentCodeAsc(Long classSectionId,
+                                                                             EnrollmentStatus status);
+
+    /** Các lớp học phần của học kỳ mà sinh viên đang học hoặc đã học xong (không tính DROPPED), theo mã môn. */
+    @EntityGraph(attributePaths = {"classSection", "classSection.subject"})
+    @Query("""
+            SELECT e FROM Enrollment e
+            WHERE e.student.id = :studentId AND e.classSection.semester.id = :semesterId
+              AND e.status <> vn.edu.fpt.contactbook.model.enums.EnrollmentStatus.DROPPED
+            ORDER BY e.classSection.subject.code, e.classSection.code
+            """)
+    List<Enrollment> findAttendedInSemester(@Param("studentId") Long studentId, @Param("semesterId") Long semesterId);
+
     List<Enrollment> findByClassSectionIdAndStudentIdIn(Long classSectionId, Collection<Long> studentIds);
 }

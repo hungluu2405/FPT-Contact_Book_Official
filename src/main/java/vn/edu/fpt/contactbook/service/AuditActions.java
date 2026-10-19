@@ -54,6 +54,9 @@ public final class AuditActions {
     public static final String UPDATE_EXAM = "UPDATE_EXAM";
     public static final String DELETE_EXAM = "DELETE_EXAM";
 
+    public static final String MARK_ATTENDANCE = "MARK_ATTENDANCE";
+    public static final String ADJUST_ATTENDANCE = "ADJUST_ATTENDANCE";
+
     public static final String ENTITY_USER = "User";
     public static final String ENTITY_FACULTY = "Faculty";
     public static final String ENTITY_DEPARTMENT = "Department";
@@ -66,6 +69,7 @@ public final class AuditActions {
     public static final String ENTITY_CLASS_SECTION = "ClassSection";
     public static final String ENTITY_CLASS_SESSION = "ClassSession";
     public static final String ENTITY_EXAM = "Exam";
+    public static final String ENTITY_ATTENDANCE = "Attendance";
 
     private AuditActions() {
     }

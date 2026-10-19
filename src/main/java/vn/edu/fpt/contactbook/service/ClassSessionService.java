@@ -66,9 +66,14 @@ public class ClassSessionService {
         Set<Long> withAttendance = attendanceRepository.findSessionIdsWithAttendance(sectionId);
         return classSessionRepository.findByClassSectionIdOrderBySessionDateAscStartTimeAsc(sectionId,
                         CatalogSupport.page(page))
-                .map(s -> new SessionView(s.getId(), s.getSessionNo(), s.getSessionDate(), s.getStartTime(),
-                        s.getEndTime(), s.getRoom() == null ? null : s.getRoom().getCode(), s.getStatus(),
-                        s.getNote(), withAttendance.contains(s.getId())));
+                .map(s -> toView(s, withAttendance));
+    }
+
+    /** withAttendance: id các buổi đã có điểm danh của lớp (AttendanceRepository.findSessionIdsWithAttendance). */
+    static SessionView toView(ClassSession s, Set<Long> withAttendance) {
+        return new SessionView(s.getId(), s.getSessionNo(), s.getSessionDate(), s.getStartTime(), s.getEndTime(),
+                s.getRoom() == null ? null : s.getRoom().getCode(), s.getStatus(), s.getNote(),
+                withAttendance.contains(s.getId()));
     }
 
     @Transactional(readOnly = true)
