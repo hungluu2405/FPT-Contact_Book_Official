@@ -105,7 +105,7 @@ class AttendanceViewServiceTest {
                 enrollmentRepository, classSessionRepository, examRepository);
         service = new AttendanceViewService(new AttendanceScope(teacherRepository, classSectionRepository,
                 classSectionService, userAccessPolicy), new AttendanceRule(20), scheduleViewService,
-                teacherRepository, studentRepository, classSectionRepository, classSessionRepository,
+                teacherRepository, classSectionRepository, classSessionRepository,
                 enrollmentRepository, attendanceRepository);
 
         Department se = CatalogTestData.department(1L, "SE");

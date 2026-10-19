@@ -16,6 +16,7 @@ import vn.edu.fpt.contactbook.model.ClassSection;
 import vn.edu.fpt.contactbook.model.ClassSession;
 import vn.edu.fpt.contactbook.model.Parent;
 import vn.edu.fpt.contactbook.model.Semester;
+import vn.edu.fpt.contactbook.model.Student;
 import vn.edu.fpt.contactbook.repository.ClassSectionRepository;
 import vn.edu.fpt.contactbook.repository.ClassSessionRepository;
 import vn.edu.fpt.contactbook.repository.EnrollmentRepository;
@@ -119,6 +120,23 @@ public class ScheduleViewService {
         if (studentId == null || !parentStudentRepository.existsByIdParentIdAndIdStudentId(parent.getId(), studentId)) {
             throw new AccessDeniedException("Student is not linked to this parent");
         }
+    }
+
+    /**
+     * students.id mà actor được xem: STUDENT là hồ sơ của chính mình (studentId trong request bị bỏ qua, không có hồ
+     * sơ → 403); PARENT là con đã liên kết (requireChild). TEACHER không xem theo sinh viên.
+     */
+    Long studentId(AppUserPrincipal actor, Audience audience, Long studentId) {
+        return switch (audience) {
+            case STUDENT -> studentRepository.findByUserId(actor.getUserId())
+                    .map(Student::getId)
+                    .orElseThrow(() -> new AccessDeniedException("No student profile"));
+            case PARENT -> {
+                requireChild(actor, studentId);
+                yield studentId;
+            }
+            case TEACHER -> throw new AccessDeniedException("Teachers view data per class section");
+        };
     }
 
     private List<Long> sections(AppUserPrincipal actor, Audience audience, Long studentId, Semester semester) {

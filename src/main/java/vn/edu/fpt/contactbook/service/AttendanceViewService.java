@@ -25,7 +25,6 @@ import vn.edu.fpt.contactbook.repository.AttendanceRepository;
 import vn.edu.fpt.contactbook.repository.ClassSectionRepository;
 import vn.edu.fpt.contactbook.repository.ClassSessionRepository;
 import vn.edu.fpt.contactbook.repository.EnrollmentRepository;
-import vn.edu.fpt.contactbook.repository.StudentRepository;
 import vn.edu.fpt.contactbook.repository.TeacherRepository;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
 import vn.edu.fpt.contactbook.service.AttendanceScope.Access;
@@ -53,7 +52,6 @@ public class AttendanceViewService {
     private final AttendanceRule rule;
     private final ScheduleViewService scheduleViewService;
     private final TeacherRepository teacherRepository;
-    private final StudentRepository studentRepository;
     private final ClassSectionRepository classSectionRepository;
     private final ClassSessionRepository classSessionRepository;
     private final EnrollmentRepository enrollmentRepository;
@@ -108,7 +106,7 @@ public class AttendanceViewService {
     /** Điểm danh theo môn trong học kỳ: các lớp sinh viên đang học hoặc đã học xong (không tính lớp đã rút). */
     public InSemester<List<StudentAttendanceRow>> student(AppUserPrincipal actor, Audience audience, Long studentId,
                                                           Long semesterId) {
-        Long id = studentId(actor, audience, studentId);
+        Long id = scheduleViewService.studentId(actor, audience, studentId);
         Semester semester = scheduleViewService.resolveSemester(semesterId);
         List<ClassSection> sections = enrollmentRepository.findAttendedInSemester(id, semester.getId()).stream()
                 .map(Enrollment::getClassSection).toList();
@@ -130,7 +128,7 @@ public class AttendanceViewService {
     /** Lịch sử từng buổi của một môn; sinh viên phải đang học hoặc đã học xong lớp này, nếu không → 403. */
     public StudentHistory history(AppUserPrincipal actor, Audience audience, Long studentId, Long sectionId,
                                   int page) {
-        Long id = studentId(actor, audience, studentId);
+        Long id = scheduleViewService.studentId(actor, audience, studentId);
         ClassSection section = enrollmentRepository.findByClassSectionIdAndStudentId(sectionId, id)
                 .filter(e -> e.getStatus() != EnrollmentStatus.DROPPED)
                 .map(Enrollment::getClassSection)
@@ -155,20 +153,6 @@ public class AttendanceViewService {
         return new StudentHistory(toStudentRow(section, rule.summarize(counts, total)), items);
     }
 
-    /** STUDENT: hồ sơ sinh viên của chính mình (không có → 403); PARENT: con đã liên kết. */
-    private Long studentId(AppUserPrincipal actor, Audience audience, Long studentId) {
-        return switch (audience) {
-            case STUDENT -> studentRepository.findByUserId(actor.getUserId())
-                    .map(Student::getId)
-                    .orElseThrow(() -> new AccessDeniedException("No student profile"));
-            case PARENT -> {
-                scheduleViewService.requireChild(actor, studentId);
-                yield studentId;
-            }
-            case TEACHER -> throw new AccessDeniedException("Teachers view attendance per class section");
-        };
-    }
-
     /** [khóa, AttendanceStatus, count] → khóa → (trạng thái → count). */
     private static Map<Long, Map<AttendanceStatus, Long>> group(List<Object[]> rows) {
         Map<Long, Map<AttendanceStatus, Long>> result = new HashMap<>();
@@ -179,7 +163,7 @@ public class AttendanceViewService {
         return result;
     }
 
-    private static TeacherSectionView toSectionView(ClassSection section) {
+    static TeacherSectionView toSectionView(ClassSection section) {
         return new TeacherSectionView(section.getId(), section.getCode(), section.getSubject().getCode(),
                 section.getSubject().getName(), section.getSemester().getCode(), section.getStatus());
     }
