@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{club.manage.activities} + ' - ' + ${detail.club.name} + ' - ' + #{app.title}">Hoạt động</title>
+</head>
+<body>
+<section th:with="club=${detail.club}">
+    <a th:replace="~{fragments/catalog :: back('/clubs/' + ${club.id}, ${club.name})}"></a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="page-title mb-0" th:text="#{club.manage.activities}">Quản lý hoạt động</h1>
+        <a th:if="${club.status.name() == 'ACTIVE'}" class="btn btn-orange"
+           th:href="@{/clubs/{id}/activities/new(id=${club.id})}">
+            <i class="bi bi-plus-lg"></i> <span th:text="#{activity.new}">Tạo hoạt động</span></a>
+    </div>
+    <div th:if="${club.status.name() == 'INACTIVE'}" class="alert alert-secondary" th:text="#{club.inactive-note}">Ngừng hoạt động</div>
+    <div class="card card-custom">
+        <div class="list-group list-group-flush">
+            <th:block th:each="a : ${items.content}"><div th:replace="~{fragments/clubs :: activityCard(${a})}"></div></th:block>
+            <div th:if="${items.empty}" class="list-group-item text-center text-muted py-4" th:text="#{activity.empty}">Chưa có hoạt động.</div>
+        </div>
+    </div>
+    <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+</section>
+</body>
+</html>

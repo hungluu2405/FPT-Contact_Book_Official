@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Phần dùng chung của các màn hình câu lạc bộ. */-->
+
+<!--/* Logo CLB (ảnh tải lên) hoặc biểu tượng mặc định. */-->
+<span th:fragment="logo(url, size)" class="club-logo d-inline-flex align-items-center justify-content-center"
+      th:style="'width:' + ${size} + 'px;height:' + ${size} + 'px'">
+    <img th:if="${url}" th:src="@{${url}}" alt="" class="w-100 h-100">
+    <i th:unless="${url}" class="bi bi-people-fill"></i>
+</span>
+
+<span th:fragment="clubStatus(status)" class="badge"
+      th:classappend="${status.name() == 'ACTIVE'} ? 'text-bg-success' : 'text-bg-secondary'"
+      th:text="#{'club.status.' + ${status}}">Đang hoạt động</span>
+
+<!--/* Trạng thái hoạt động tính theo thời gian (ActivityView.state). */-->
+<span th:fragment="activityState(state)" class="badge"
+      th:classappend="${state.name() == 'PLANNED'} ? 'text-bg-primary' : (${state.name() == 'ONGOING'} ? 'text-bg-warning' : (${state.name() == 'DONE'} ? 'text-bg-secondary' : 'text-bg-danger'))"
+      th:text="#{'activity.state.' + ${state}}">Sắp diễn ra</span>
+
+<!--/* Một hoạt động: thời gian, địa điểm, sĩ số, trạng thái và các nút theo cờ can*. */-->
+<div th:fragment="activityCard(a)" class="list-group-item py-3">
+    <div class="d-flex flex-wrap justify-content-between gap-2">
+        <div>
+            <div class="fw-semibold" th:text="${a.title}">Tiêu đề</div>
+            <div class="small text-muted">
+                <i class="bi bi-clock"></i>
+                <span th:text="${#temporals.format(a.startTime, 'dd/MM/yyyy HH:mm')} + ' – ' + ${#temporals.format(a.endTime, 'dd/MM/yyyy HH:mm')}">01/11/2026 08:00</span>
+                <span th:if="${a.location}"> · <i class="bi bi-geo-alt"></i> <span th:text="${a.location}">Phòng</span></span>
+            </div>
+            <div class="small">
+                <span th:text="#{activity.taken} + ': ' + ${a.taken} + ' / ' + (${a.maxParticipants} ?: #{activity.unlimited})">1 / 30</span>
+                <span th:if="${a.myStatus}" class="badge text-bg-light border ms-1"
+                      th:text="#{'participant.status.' + ${a.myStatus}}">Đã đăng ký</span>
+            </div>
+            <p th:if="${a.description}" class="small mb-0 mt-1 text-pre-line" th:text="${a.description}">Mô tả</p>
+        </div>
+        <div class="text-end">
+            <span th:replace="~{fragments/clubs :: activityState(${a.state})}"></span>
+            <div class="d-flex flex-wrap gap-1 justify-content-end mt-2">
+                <form th:if="${a.canRegister}" method="post"
+                      th:action="@{/clubs/{c}/activities/{id}/register(c=${a.clubId}, id=${a.id})}">
+                    <button type="submit" class="btn btn-sm btn-primary" th:text="#{activity.register}">Đăng ký</button>
+                </form>
+                <form th:if="${a.canUnregister}" method="post" th:attr="data-confirm=#{activity.unregister.confirm}"
+                      th:action="@{/clubs/{c}/activities/{id}/unregister(c=${a.clubId}, id=${a.id})}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{activity.unregister}">Hủy đăng ký</button>
+                </form>
+                <a th:if="${a.canEdit}" class="btn btn-sm btn-outline-secondary"
+                   th:href="@{/clubs/{c}/activities/{id}/edit(c=${a.clubId}, id=${a.id})}" th:text="#{common.edit}">Sửa</a>
+                <form th:if="${a.canEdit}" method="post" th:attr="data-confirm=#{activity.cancel.confirm}"
+                      th:action="@{/clubs/{c}/activities/{id}/cancel(c=${a.clubId}, id=${a.id})}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{activity.cancel}">Hủy</button>
+                </form>
+                <a th:if="${a.canMarkAttendance}" class="btn btn-sm btn-outline-primary"
+                   th:href="@{/clubs/{c}/activities/{id}/attendance(c=${a.clubId}, id=${a.id})}"
+                   th:text="#{activity.attendance}">Ghi nhận tham dự</a>
+            </div>
+            <div th:if="${a.state.name() == 'PLANNED' and a.maxParticipants != null and a.taken >= a.maxParticipants and a.myStatus == null}"
+                 class="small text-danger mt-1" th:text="#{activity.full}">Đã đủ số lượng</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

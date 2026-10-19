@@ -411,3 +411,22 @@ body {
 .conversation-time {
     opacity: 0.75;
 }
+
+/* Câu lạc bộ: logo vuông bo góc, ảnh không méo; biểu tượng mặc định khi chưa có logo. */
+.club-logo {
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-navy);
+    font-size: 1.5rem;
+}
+
+.club-logo img {
+    object-fit: cover;
+}
+
+.club-card:hover {
+    border-color: var(--color-orange);
+}

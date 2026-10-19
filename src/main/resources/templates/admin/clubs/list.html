@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{club.admin.list} + ' - ' + #{app.title}">Quản lý câu lạc bộ</title>
+</head>
+<body>
+<section>
+    <div th:replace="~{fragments/catalog :: header(#{club.admin.list}, '/admin/clubs/new')}"></div>
+    <form class="card card-custom p-3 mb-3" th:action="@{/admin/clubs}" method="get">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label for="keyword" class="form-label" th:text="#{user.filter.keyword}">Từ khóa</label>
+                <input type="search" class="form-control" id="keyword" name="keyword" th:value="${filter.keyword}"
+                       th:placeholder="#{club.search}">
+            </div>
+            <div class="col-md-4">
+                <label for="status" class="form-label" th:text="#{club.status}">Trạng thái</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="" th:text="#{user.filter.all}">Tất cả</option>
+                    <option th:each="s : ${statuses}" th:value="${s}" th:selected="${s == filter.status}"
+                            th:text="#{'club.status.' + ${s}}">Đang hoạt động</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i>
+                    <span th:text="#{common.search}">Tìm kiếm</span></button>
+                <a class="btn btn-outline-secondary" th:href="@{/admin/clubs}" th:text="#{common.reset}">Đặt lại</a>
+            </div>
+        </div>
+    </form>
+    <p th:replace="~{fragments/catalog :: count(${items})}"></p>
+
+    <div class="card card-custom table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+            <tr>
+                <th th:text="#{club.code}">Mã</th>
+                <th th:text="#{club.name}">Tên</th>
+                <th th:text="#{club.president}">Chủ nhiệm</th>
+                <th th:text="#{club.advisor}">Phụ trách</th>
+                <th th:text="#{club.members}">Thành viên</th>
+                <th th:text="#{club.status}">Trạng thái</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${items.content}">
+                <td><a th:href="@{/admin/clubs/{id}(id=${item.id})}" th:text="${item.code}">F-CODE</a></td>
+                <td th:text="${item.name}">Tên</td>
+                <td th:text="${item.presidentName} ?: #{club.president.none}">Chủ nhiệm</td>
+                <td th:text="${item.advisorName} ?: #{club.advisor.none}">GV</td>
+                <td th:text="${item.memberCount}">3</td>
+                <td><span th:replace="~{fragments/clubs :: clubStatus(${item.status})}"></span></td>
+            </tr>
+            <tr th:if="${items.empty}">
+                <td colspan="6" class="text-center text-muted py-4" th:text="#{catalog.empty}">Không có dữ liệu</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+</section>
+</body>
+</html>

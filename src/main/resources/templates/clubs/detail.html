@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${detail.club.name} + ' - ' + #{app.title}">Câu lạc bộ</title>
+</head>
+<body>
+<section th:with="club=${detail.club}">
+    <a th:replace="~{fragments/catalog :: back('/clubs', #{club.list})}"></a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div class="d-flex align-items-center gap-3">
+            <span th:replace="~{fragments/clubs :: logo(${club.logoUrl}, 72)}"></span>
+            <div>
+                <h1 class="page-title mb-0" th:text="${club.name}">Tên CLB</h1>
+                <span class="text-muted" th:text="${club.code} + ' · ' + #{club.members.count(${club.memberCount})}">F-CODE</span>
+                <th:block th:if="${club.status.name() == 'INACTIVE'}"><span th:replace="~{fragments/clubs :: clubStatus(${club.status})}"></span></th:block>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <form th:if="${detail.canJoin}" method="post" th:action="@{/clubs/{id}/join(id=${club.id})}">
+                <button type="submit" class="btn btn-orange"
+                        th:text="${detail.myStatus == null} ? #{club.join} : #{club.join.again}">Gửi yêu cầu tham gia</button>
+            </form>
+            <span th:if="${detail.myStatus != null}" class="badge text-bg-light border align-self-center fs-6"
+                  th:text="#{club.my.status(${detail.myStatus.name() == 'ACTIVE'} ? #{'club.role.' + ${detail.myRole}} : #{'club.member-status.' + ${detail.myStatus}})}">Trạng thái</span>
+            <form th:if="${detail.canLeave}" method="post" th:action="@{/clubs/{id}/leave(id=${club.id})}"
+                  th:attr="data-confirm=#{club.leave.confirm}">
+                <button type="submit" class="btn btn-outline-danger" th:text="#{club.leave}">Rời câu lạc bộ</button>
+            </form>
+            <a th:if="${detail.canManageMembers}" class="btn btn-outline-primary"
+               th:href="@{/clubs/{id}/members(id=${club.id})}" th:text="#{club.manage.members}">Quản lý thành viên</a>
+            <a th:if="${detail.canManageActivities}" class="btn btn-outline-primary"
+               th:href="@{/clubs/{id}/activities(id=${club.id})}" th:text="#{club.manage.activities}">Quản lý hoạt động</a>
+            <a sec:authorize="hasRole('ADMIN')" class="btn btn-outline-secondary"
+               th:href="@{/admin/clubs/{id}(id=${club.id})}" th:text="#{menu.clubs.admin}">Quản lý CLB</a>
+        </div>
+    </div>
+    <div th:if="${club.status.name() == 'INACTIVE'}" class="alert alert-secondary" th:text="#{club.inactive-note}">Ngừng hoạt động</div>
+
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card card-custom p-4 mb-3">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4" th:text="#{club.president}">Chủ nhiệm</dt>
+                    <dd class="col-sm-8" th:text="${club.presidentName} ?: #{club.president.none}">Tên</dd>
+                    <dt class="col-sm-4" th:text="#{club.advisor}">Phụ trách</dt>
+                    <dd class="col-sm-8" th:text="${club.advisorName} ?: #{club.advisor.none}">GV</dd>
+                    <dt class="col-sm-4" th:text="#{club.founded}">Ngày thành lập</dt>
+                    <dd class="col-sm-8" th:text="${club.foundedDate} ? ${#temporals.format(club.foundedDate, 'dd/MM/yyyy')} : '—'">01/01/2020</dd>
+                </dl>
+                <p th:if="${club.description}" class="mt-3 mb-0 text-pre-line" th:text="${club.description}">Mô tả</p>
+            </div>
+            <div class="card card-custom">
+                <div class="card-header fw-semibold" th:text="#{activity.upcoming}">Hoạt động sắp tới</div>
+                <div class="list-group list-group-flush">
+                    <th:block th:each="a : ${activities}"><div th:replace="~{fragments/clubs :: activityCard(${a})}"></div></th:block>
+                    <div th:if="${activities.empty}" class="list-group-item text-center text-muted py-4"
+                         th:text="#{activity.upcoming.empty}">Chưa có hoạt động sắp tới.</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card card-custom">
+                <div class="card-header fw-semibold" th:text="#{club.members}">Thành viên</div>
+                <ul class="list-group list-group-flush">
+                    <li th:each="m : ${members.content}" class="list-group-item d-flex justify-content-between">
+                        <span th:text="${m.fullName}">Tên</span>
+                        <span class="badge text-bg-light border" th:text="#{'club.role.' + ${m.role}}">Thành viên</span>
+                    </li>
+                    <li th:if="${members.empty}" class="list-group-item text-center text-muted" th:text="#{club.members.empty}">Chưa có thành viên.</li>
+                </ul>
+            </div>
+            <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+        </div>
+    </div>
+</section>
+</body>
+</html>

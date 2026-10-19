@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{activity.attendance} + ' - ' + ${sheet.activity.title} + ' - ' + #{app.title}">Ghi nhận tham dự</title>
+</head>
+<body>
+<section th:with="a=${sheet.activity}">
+    <a th:replace="~{fragments/catalog :: back('/clubs/' + ${a.clubId} + '/activities', #{club.manage.activities})}"></a>
+    <h1 class="page-title" th:text="#{activity.attendance} + ': ' + ${a.title}">Ghi nhận tham dự</h1>
+    <p class="text-muted">
+        <span th:text="${sheet.clubName}">CLB</span> ·
+        <span th:text="${#temporals.format(a.startTime, 'dd/MM/yyyy HH:mm')} + ' – ' + ${#temporals.format(a.endTime, 'dd/MM/yyyy HH:mm')}">Thời gian</span>
+        <span th:replace="~{fragments/clubs :: activityState(${a.state})}"></span>
+    </p>
+    <p class="text-muted" th:text="#{activity.attendance.hint}">Đánh dấu những người đã tham dự.</p>
+    <form method="post" th:action="@{/clubs/{c}/activities/{id}/attendance(c=${a.clubId}, id=${a.id})}">
+        <div class="card card-custom">
+            <ul class="list-group list-group-flush">
+                <li th:each="r : ${sheet.rows}" class="list-group-item">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="attended" th:value="${r.userId}"
+                               th:id="'attended-' + ${r.userId}" th:checked="${r.attended}" th:disabled="${!a.canMarkAttendance}">
+                        <label class="form-check-label" th:for="'attended-' + ${r.userId}" th:text="${r.fullName}">Tên</label>
+                    </div>
+                </li>
+                <li th:if="${sheet.rows.empty}" class="list-group-item text-center text-muted py-4"
+                    th:text="#{activity.attendance.empty}">Chưa có ai đăng ký.</li>
+            </ul>
+        </div>
+        <button th:if="${a.canMarkAttendance and !sheet.rows.empty}" type="submit" class="btn btn-orange mt-3">
+            <i class="bi bi-check-lg"></i> <span th:text="#{common.save}">Lưu</span></button>
+    </form>
+</section>
+</body>
+</html>

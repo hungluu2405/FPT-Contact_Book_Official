@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{club.manage.members} + ' - ' + ${detail.club.name} + ' - ' + #{app.title}">Quản lý thành viên</title>
+</head>
+<body>
+<section th:with="club=${detail.club}">
+    <a th:replace="~{fragments/catalog :: back('/clubs/' + ${club.id}, ${club.name})}"></a>
+    <h1 class="page-title" th:text="#{club.manage.members}">Quản lý thành viên</h1>
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${status.name() == 'PENDING'} ? 'active'"
+               th:href="@{/clubs/{id}/members(id=${club.id}, status='PENDING')}" th:text="#{club.members.pending}">Chờ duyệt</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${status.name() == 'ACTIVE'} ? 'active'"
+               th:href="@{/clubs/{id}/members(id=${club.id}, status='ACTIVE')}" th:text="#{club.members.active}">Thành viên</a>
+        </li>
+    </ul>
+    <div class="card card-custom table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+            <tr>
+                <th th:text="#{profile.full-name}">Họ tên</th>
+                <th th:if="${status.name() == 'ACTIVE'}" th:text="#{club.members.role}">Vai trò</th>
+                <th th:text="${status.name() == 'PENDING'} ? #{club.members.requested-at} : #{club.members.joined-at}">Thời điểm</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${rows.content}">
+                <td th:text="${r.fullName}">Tên</td>
+                <td th:if="${status.name() == 'ACTIVE'}" th:text="#{'club.role.' + ${r.role}}">Thành viên</td>
+                <td th:text="${#temporals.format(status.name() == 'PENDING' ? r.createdAt : r.joinedAt, 'dd/MM/yyyy HH:mm')}">01/10/2026</td>
+                <td class="text-end">
+                    <th:block th:if="${status.name() == 'PENDING'}">
+                        <form class="d-inline" method="post"
+                              th:action="@{/clubs/{c}/members/{m}/approve(c=${club.id}, m=${r.id})}">
+                            <button type="submit" class="btn btn-sm btn-success" th:text="#{club.members.approve}">Duyệt</button>
+                        </form>
+                        <form class="d-inline" method="post" th:attr="data-confirm=#{club.members.reject.confirm}"
+                              th:action="@{/clubs/{c}/members/{m}/reject(c=${club.id}, m=${r.id})}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{club.members.reject}">Từ chối</button>
+                        </form>
+                    </th:block>
+                    <form th:if="${status.name() == 'ACTIVE' and r.role.name() != 'PRESIDENT'}" class="d-inline" method="post"
+                          th:action="@{/clubs/{c}/members/{m}/role(c=${club.id}, m=${r.id})}">
+                        <input type="hidden" name="role" th:value="${r.role.name() == 'MEMBER'} ? 'VICE_PRESIDENT' : 'MEMBER'">
+                        <button type="submit" class="btn btn-sm btn-outline-primary"
+                                th:text="${r.role.name() == 'MEMBER'} ? #{club.members.make-vice} : #{club.members.make-member}">Đổi vai trò</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${rows.empty}">
+                <td colspan="4" class="text-center text-muted py-4"
+                    th:text="${status.name() == 'PENDING'} ? #{club.members.no-pending} : #{club.members.empty}">Không có.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+</section>
+</body>
+</html>

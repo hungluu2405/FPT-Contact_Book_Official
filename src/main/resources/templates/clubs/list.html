@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{club.list} + ' - ' + #{app.title}">Câu lạc bộ</title>
+</head>
+<body>
+<section>
+    <h1 class="page-title" th:text="#{club.list}">Câu lạc bộ</h1>
+    <form class="row g-2 mb-3" method="get" th:action="@{/clubs}">
+        <div class="col-md-8">
+            <label class="visually-hidden" for="q" th:text="#{club.search}">Tìm kiếm</label>
+            <input type="search" id="q" name="q" class="form-control" th:value="${q}" th:placeholder="#{club.search}">
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i>
+                <span th:text="#{common.search}">Tìm kiếm</span></button>
+            <a class="btn btn-outline-secondary" th:href="@{/clubs}" th:text="#{common.reset}">Đặt lại</a>
+        </div>
+    </form>
+    <div class="row g-3">
+        <div class="col-md-6 col-xl-4" th:each="c : ${clubs.content}">
+            <a class="card card-custom h-100 p-3 text-decoration-none text-reset club-card" th:href="@{/clubs/{id}(id=${c.id})}">
+                <div class="d-flex gap-3 align-items-center mb-2">
+                    <span th:replace="~{fragments/clubs :: logo(${c.logoUrl}, 56)}"></span>
+                    <div>
+                        <div class="fw-semibold" th:text="${c.name}">Tên CLB</div>
+                        <small class="text-muted" th:text="${c.code} + ' · ' + #{club.members.count(${c.memberCount})}">F-CODE · 3 thành viên</small>
+                    </div>
+                </div>
+                <p class="small mb-0 text-muted" th:if="${c.description}" th:text="${#strings.abbreviate(c.description, 140)}">Mô tả</p>
+            </a>
+        </div>
+        <div class="col-12" th:if="${clubs.empty}">
+            <div class="card card-custom p-4 text-center text-muted" th:text="#{club.empty}">Chưa có câu lạc bộ nào.</div>
+        </div>
+    </div>
+    <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+</section>
+</body>
+</html>

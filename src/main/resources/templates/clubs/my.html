@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{menu.clubs.my} + ' - ' + #{app.title}">CLB của tôi</title>
+</head>
+<body>
+<section>
+    <h1 class="page-title" th:text="#{menu.clubs.my}">CLB của tôi</h1>
+    <div class="card card-custom">
+        <div class="list-group list-group-flush">
+            <a th:each="m : ${items}" th:href="@{/clubs/{id}(id=${m.clubId})}"
+               class="list-group-item list-group-item-action d-flex flex-wrap justify-content-between gap-2 py-3">
+                <span>
+                    <span class="fw-semibold" th:text="${m.name}">Tên CLB</span>
+                    <small class="text-muted" th:text="${m.code}">F-CODE</small>
+                    <th:block th:if="${m.clubStatus.name() == 'INACTIVE'}">
+                        <span th:replace="~{fragments/clubs :: clubStatus(${m.clubStatus})}"></span></th:block>
+                </span>
+                <span>
+                    <span th:if="${m.status.name() == 'ACTIVE'}" class="badge text-bg-primary"
+                          th:text="#{'club.role.' + ${m.role}}">Thành viên</span>
+                    <span th:unless="${m.status.name() == 'ACTIVE'}" class="badge"
+                          th:classappend="${m.status.name() == 'PENDING'} ? 'text-bg-warning' : 'text-bg-secondary'"
+                          th:text="#{'club.member-status.' + ${m.status}}">Chờ duyệt</span>
+                </span>
+            </a>
+            <div th:if="${items.empty}" class="list-group-item text-center text-muted py-4">
+                <span th:text="#{club.my.empty}">Bạn chưa tham gia câu lạc bộ nào.</span>
+                <a th:href="@{/clubs}" th:text="#{club.list}">Câu lạc bộ</a>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

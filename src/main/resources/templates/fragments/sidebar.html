@@ -68,6 +68,11 @@
                       class="badge rounded-pill text-bg-danger ms-auto" th:text="${pendingAdminRequests}">2</span>
             </a>
         </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/clubs}" th:classappend="${activeMenu == 'admin-clubs'} ? 'active'">
+                <i class="bi bi-flag"></i><span th:text="#{menu.clubs.admin}">Quản lý CLB</span>
+            </a>
+        </li>
         <!--/* Trưởng bộ môn chỉ quản lý môn học, lớp học phần thuộc bộ môn mình (SubjectService, ClassSectionService). */-->
         <li class="nav-item" sec:authorize="hasRole('HEAD_OF_DEPARTMENT') and !hasRole('ADMIN')">
             <a class="nav-link" th:href="@{/admin/subjects}" th:classappend="${activeMenu == 'catalog-subjects'} ? 'active'">
@@ -178,6 +183,16 @@
                 <i class="bi bi-chat-dots"></i><span th:text="#{menu.messages}">Tin nhắn</span>
                 <span th:if="${unreadMessages != null and unreadMessages > 0}"
                       class="badge rounded-pill text-bg-danger ms-auto" id="unread-messages" th:text="${unreadMessages}">2</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/clubs}" th:classappend="${activeMenu == 'clubs'} ? 'active'">
+                <i class="bi bi-people-fill"></i><span th:text="#{menu.clubs}">Câu lạc bộ</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('STUDENT')">
+            <a class="nav-link" th:href="@{/clubs/my}" th:classappend="${activeMenu == 'clubs-my'} ? 'active'">
+                <i class="bi bi-star"></i><span th:text="#{menu.clubs.my}">CLB của tôi</span>
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'HEAD_OF_DEPARTMENT', 'TEACHER')">
