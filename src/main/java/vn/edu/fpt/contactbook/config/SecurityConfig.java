@@ -47,6 +47,9 @@ public class SecurityConfig {
                 .requestMatchers("/teacher/**").hasAnyRole(RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT)
                 .requestMatchers("/student/**").hasRole(RoleCodes.STUDENT)
                 .requestMatchers("/parent/**").hasRole(RoleCodes.PARENT)
+                // Tin nhắn chỉ cho SV, PH, GV, TBM (ADMIN không dùng); thành viên hội thoại kiểm tra ở MessageService.
+                .requestMatchers("/messages", "/messages/**").hasAnyRole(RoleCodes.STUDENT, RoleCodes.PARENT,
+                        RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT)
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

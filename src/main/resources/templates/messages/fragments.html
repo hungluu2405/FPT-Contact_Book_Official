@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/*
+    Mảnh dùng chung của khung chat; cũng là phản hồi của /messages/{id}/newer (items) và /messages/{id}/older (older).
+    Nội dung tin hiển thị bằng th:text (không th:utext), xuống dòng giữ bằng .text-pre-line.
+*/-->
+<th:block th:fragment="items">
+    <div th:each="m : ${messages}" class="chat-message" th:classappend="${m.mine} ? 'chat-mine' : 'chat-theirs'"
+         th:attr="data-id=${m.id}">
+        <div class="chat-bubble">
+            <em th:if="${m.deleted}" class="text-muted" th:text="#{message.deleted}">Tin nhắn đã bị xóa</em>
+            <span th:unless="${m.deleted}" class="text-pre-line" th:text="${m.content}">Nội dung</span>
+        </div>
+        <div class="chat-meta">
+            <span th:text="${#temporals.format(m.sentAt, 'dd/MM/yyyy HH:mm')}">01/10/2026 08:00</span>
+            <form th:if="${m.mine and !m.deleted}" class="d-inline" method="post"
+                  th:action="@{/messages/{c}/messages/{id}/delete(c=${conversationId}, id=${m.id})}"
+                  th:attr="data-confirm=#{message.delete.confirm}">
+                <button type="submit" class="btn btn-link btn-sm p-0 ms-2 text-danger" th:text="#{message.delete}">Xóa tin</button>
+            </form>
+        </div>
+    </div>
+</th:block>
+
+<th:block th:fragment="older">
+    <div th:if="${chat.hasOlder}" class="text-center mb-2 chat-older">
+        <a class="btn btn-outline-secondary btn-sm js-load-older"
+           th:href="@{/messages/{id}(id=${chat.conversationId}, before=${chat.oldestId})}"
+           th:attr="data-fragment-url=@{/messages/{id}/older(id=${chat.conversationId}, before=${chat.oldestId})}"
+           th:text="#{message.load-older}">Tải tin cũ hơn</a>
+    </div>
+    <th:block th:with="messages=${chat.messages}, conversationId=${chat.conversationId}">
+        <th:block th:replace="~{messages/fragments :: items}"></th:block>
+    </th:block>
+</th:block>
+</body>
+</html>

@@ -173,6 +173,13 @@
                       class="badge rounded-pill text-bg-danger ms-auto" th:text="${unreadNotifications}">3</span>
             </a>
         </li>
+        <li class="nav-item" sec:authorize="hasAnyRole('STUDENT', 'PARENT', 'TEACHER', 'HEAD_OF_DEPARTMENT')">
+            <a class="nav-link" th:href="@{/messages}" th:classappend="${activeMenu == 'messages'} ? 'active'">
+                <i class="bi bi-chat-dots"></i><span th:text="#{menu.messages}">Tin nhắn</span>
+                <span th:if="${unreadMessages != null and unreadMessages > 0}"
+                      class="badge rounded-pill text-bg-danger ms-auto" id="unread-messages" th:text="${unreadMessages}">2</span>
+            </a>
+        </li>
         <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'HEAD_OF_DEPARTMENT', 'TEACHER')">
             <a class="nav-link" th:href="@{/notifications/new}" th:classappend="${activeMenu == 'notifications-new'} ? 'active'">
                 <i class="bi bi-send"></i><span th:text="#{menu.notifications.new}">Gửi thông báo</span>
