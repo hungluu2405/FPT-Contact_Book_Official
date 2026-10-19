@@ -1,11 +1,18 @@
 package vn.edu.fpt.contactbook.service;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Mã hành động và loại đối tượng ghi vào audit_logs, trùng tên với dữ liệu mẫu trong script.
  */
 public final class AuditActions {
 
     public static final String LOGIN = "LOGIN";
+    public static final String LOGIN_FAILED = "LOGIN_FAILED";
+    public static final String LOGIN_LOCKED = "LOGIN_LOCKED";
     public static final String CHANGE_PASSWORD = "CHANGE_PASSWORD";
     public static final String UPDATE_PROFILE = "UPDATE_PROFILE";
 
@@ -86,6 +93,8 @@ public final class AuditActions {
     public static final String CANCEL_CLUB_ACTIVITY = "CANCEL_CLUB_ACTIVITY";
     public static final String MARK_CLUB_ATTENDANCE = "MARK_CLUB_ATTENDANCE";
 
+    public static final String EXPORT_REPORT = "EXPORT_REPORT";
+
     public static final String ENTITY_USER = "User";
     public static final String ENTITY_FACULTY = "Faculty";
     public static final String ENTITY_DEPARTMENT = "Department";
@@ -107,6 +116,38 @@ public final class AuditActions {
     public static final String ENTITY_CLUB_MEMBER = "ClubMember";
     public static final String ENTITY_CLUB_ACTIVITY = "ClubActivity";
 
+    private static final String ENTITY_PREFIX = "ENTITY_";
+    private static final List<String> ACTIONS = constants(false);
+    private static final List<String> ENTITY_TYPES = constants(true);
+
     private AuditActions() {
+    }
+
+    /** Mọi mã hành động khai báo ở trên, theo thứ tự chữ cái (ô lọc của trang nhật ký). */
+    public static List<String> actions() {
+        return ACTIONS;
+    }
+
+    /** Mọi loại đối tượng (hằng số ENTITY_*), theo thứ tự chữ cái. */
+    public static List<String> entityTypes() {
+        return ENTITY_TYPES;
+    }
+
+    /** Đọc các hằng số public static final String của lớp này, để danh sách lọc không lệch khi thêm mã mới. */
+    private static List<String> constants(boolean entities) {
+        return Arrays.stream(AuditActions.class.getDeclaredFields())
+                .filter(f -> Modifier.isPublic(f.getModifiers()) && Modifier.isStatic(f.getModifiers())
+                        && Modifier.isFinal(f.getModifiers()) && f.getType() == String.class)
+                .filter(f -> f.getName().startsWith(ENTITY_PREFIX) == entities)
+                .map(AuditActions::value)
+                .distinct().sorted().toList();
+    }
+
+    private static String value(Field field) {
+        try {
+            return (String) field.get(null);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

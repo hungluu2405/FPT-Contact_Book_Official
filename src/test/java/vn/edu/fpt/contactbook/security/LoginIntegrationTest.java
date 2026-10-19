@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import vn.edu.fpt.contactbook.model.AuditLog;
 import vn.edu.fpt.contactbook.model.User;
 import vn.edu.fpt.contactbook.repository.AuditLogRepository;
 import vn.edu.fpt.contactbook.repository.UserRepository;
@@ -19,8 +20,11 @@ import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -199,13 +203,91 @@ class LoginIntegrationTest {
     }
 
     @Test
-    @DisplayName("Đăng nhập sai không ghi audit LOGIN")
-    void failedLoginWritesNoAudit() throws Exception {
-        long before = auditLogRepository.count();
+    @DisplayName("Đăng nhập sai không ghi LOGIN; ghi đúng một LOGIN_FAILED gắn tài khoản, kèm IP, không ghi mật khẩu")
+    void failedLoginWritesLoginFailed() throws Exception {
+        long lastId = lastAuditId();
 
-        login(TestAccounts.ADMIN, "wrong").andExpect(redirectedUrl("/login?error"));
+        login(TestAccounts.ADMIN, "wrong-secret").andExpect(redirectedUrl("/login?error"));
 
-        assertThat(auditLogRepository.count()).isEqualTo(before);
+        assertThat(auditsAfter(lastId)).singleElement().satisfies(entry -> {
+            assertThat(entry.getAction()).isEqualTo(AuditActions.LOGIN_FAILED);
+            assertThat(entry.getUser().getId()).isEqualTo(TestAccounts.ADMIN_ID);
+            assertThat(entry.getEntityType()).isEqualTo(AuditActions.ENTITY_USER);
+            assertThat(entry.getEntityId()).isEqualTo(TestAccounts.ADMIN_ID);
+            assertThat(entry.getDetail()).isEqualTo("reason=BAD_CREDENTIALS").doesNotContain("wrong-secret");
+            assertThat(entry.getIpAddress()).isEqualTo("127.0.0.1");
+        });
+    }
+
+    @Test
+    @DisplayName("Số không tồn tại hoặc sai định dạng: LOGIN_FAILED không gắn tài khoản, không ghi lại số đã nhập")
+    void failedLoginWithoutAccount() throws Exception {
+        long lastId = lastAuditId();
+
+        login(UNKNOWN_PHONE, PASSWORD).andExpect(redirectedUrl("/login?error"));
+        login("12345", PASSWORD).andExpect(redirectedUrl("/login?error"));
+
+        assertThat(auditsAfter(lastId)).extracting(AuditLog::getAction, AuditLog::getUser, AuditLog::getEntityId,
+                        AuditLog::getDetail)
+                .containsExactly(tuple(AuditActions.LOGIN_FAILED, null, null, "reason=UNKNOWN_ACCOUNT"),
+                        tuple(AuditActions.LOGIN_FAILED, null, null, "reason=INVALID_PHONE"));
+        assertThat(auditsAfter(lastId)).allSatisfy(entry -> assertThat(entry.getDetail())
+                .doesNotContain(UNKNOWN_PHONE).doesNotContain("12345"));
+    }
+
+    @Test
+    @DisplayName("Lần sai thứ 5 ghi thêm đúng một LOGIN_LOCKED; thử lại khi đang khóa ghi LOGIN_FAILED reason=LOCKED")
+    void lockIsAudited() throws Exception {
+        long lastId = lastAuditId();
+
+        for (int i = 0; i < 5; i++) {
+            login(TestAccounts.ADMIN, "wrong-" + i).andExpect(redirectedUrl("/login?error"));
+        }
+        login(TestAccounts.ADMIN, PASSWORD).andExpect(redirectedUrl("/login?error=locked"));
+
+        List<AuditLog> audits = auditsAfter(lastId);
+        assertThat(audits).extracting(AuditLog::getAction).containsExactly(
+                AuditActions.LOGIN_FAILED, AuditActions.LOGIN_FAILED, AuditActions.LOGIN_FAILED,
+                AuditActions.LOGIN_FAILED, AuditActions.LOGIN_FAILED, AuditActions.LOGIN_LOCKED,
+                AuditActions.LOGIN_FAILED);
+        AuditLog locked = audits.get(5);
+        assertThat(locked.getUser().getId()).isEqualTo(TestAccounts.ADMIN_ID);
+        assertThat(locked.getDetail()).isEqualTo("failures=5, lockMinutes=15");
+        assertThat(audits.getLast().getDetail()).isEqualTo("reason=LOCKED");
+    }
+
+    @Test
+    @DisplayName("Số không tồn tại bị khóa tạm: LOGIN_LOCKED không gắn tài khoản")
+    void lockOfUnknownPhoneIsAudited() throws Exception {
+        long lastId = lastAuditId();
+
+        for (int i = 0; i < 5; i++) {
+            login(UNKNOWN_PHONE, "wrong").andExpect(redirectedUrl("/login?error"));
+        }
+
+        assertThat(auditsAfter(lastId)).filteredOn(entry -> AuditActions.LOGIN_LOCKED.equals(entry.getAction()))
+                .singleElement().satisfies(entry -> {
+                    assertThat(entry.getUser()).isNull();
+                    assertThat(entry.getEntityType()).isNull();
+                    assertThat(entry.getDetail()).isEqualTo("failures=5, lockMinutes=15");
+                });
+    }
+
+    @Test
+    @DisplayName("Tài khoản bị khóa (is_active = 0), mật khẩu đúng: LOGIN_FAILED reason=DISABLED")
+    void disabledLoginIsAudited() throws Exception {
+        User teacher = userRepository.findById(TestAccounts.TEACHER_ID).orElseThrow();
+        teacher.setActive(false);
+        userRepository.saveAndFlush(teacher);
+        long lastId = lastAuditId();
+
+        login(TestAccounts.TEACHER, PASSWORD).andExpect(redirectedUrl("/login?error=disabled"));
+
+        assertThat(auditsAfter(lastId)).singleElement().satisfies(entry -> {
+            assertThat(entry.getAction()).isEqualTo(AuditActions.LOGIN_FAILED);
+            assertThat(entry.getUser().getId()).isEqualTo(TestAccounts.TEACHER_ID);
+            assertThat(entry.getDetail()).isEqualTo("reason=DISABLED");
+        });
     }
 
     @Test
@@ -261,6 +343,16 @@ class LoginIntegrationTest {
         mockMvc.perform(post("/logout").with(csrf()))
                 .andExpect(redirectedUrl("/login?logout"))
                 .andExpect(unauthenticated());
+    }
+
+    private long lastAuditId() {
+        return auditLogRepository.findAll().stream().mapToLong(AuditLog::getId).max().orElse(0);
+    }
+
+    /** Dòng audit ghi sau lastId, theo thứ tự ghi. */
+    private List<AuditLog> auditsAfter(long lastId) {
+        return auditLogRepository.findAll().stream().filter(entry -> entry.getId() > lastId)
+                .sorted(Comparator.comparing(AuditLog::getId)).toList();
     }
 
     private ResultActions login(String phone, String password) throws Exception {

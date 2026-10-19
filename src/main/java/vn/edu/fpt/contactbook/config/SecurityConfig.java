@@ -20,6 +20,7 @@ import vn.edu.fpt.contactbook.security.LoginSuccessHandler;
 import vn.edu.fpt.contactbook.security.MustChangePasswordFilter;
 import vn.edu.fpt.contactbook.security.PhoneAuthenticationProvider;
 import vn.edu.fpt.contactbook.security.SessionExpiredAccessDeniedHandler;
+import vn.edu.fpt.contactbook.service.AccountService;
 
 import java.util.Map;
 
@@ -50,6 +51,10 @@ public class SecurityConfig {
                 // Tin nhắn chỉ cho SV, PH, GV, TBM (ADMIN không dùng); thành viên hội thoại kiểm tra ở MessageService.
                 .requestMatchers("/messages", "/messages/**").hasAnyRole(RoleCodes.STUDENT, RoleCodes.PARENT,
                         RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT)
+                // Báo cáo: GV, TBM, ADMIN (phạm vi lớp/bộ môn kiểm tra ở ReportScope); báo cáo CLB chỉ ADMIN.
+                .requestMatchers("/reports/clubs", "/reports/clubs/**").hasRole(RoleCodes.ADMIN)
+                .requestMatchers("/reports", "/reports/**").hasAnyRole(RoleCodes.ADMIN,
+                        RoleCodes.HEAD_OF_DEPARTMENT, RoleCodes.TEACHER)
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -81,8 +86,10 @@ public class SecurityConfig {
     @Bean
     public PhoneAuthenticationProvider phoneAuthenticationProvider(UserDetailsService userDetailsService,
                                                                    PasswordEncoder passwordEncoder,
-                                                                   LoginAttemptService loginAttemptService) {
-        return new PhoneAuthenticationProvider(userDetailsService, passwordEncoder, loginAttemptService);
+                                                                   LoginAttemptService loginAttemptService,
+                                                                   AccountService accountService) {
+        return new PhoneAuthenticationProvider(userDetailsService, passwordEncoder, loginAttemptService,
+                accountService);
     }
 
     /** Chỉ đưa mã lỗi lên URL; AuthController đổi mã thành thông báo tiếng Việt. */

@@ -39,6 +39,18 @@ class LoginAttemptServiceTest {
     }
 
     @Test
+    @DisplayName("recordFailure trả true đúng một lần: lần sai làm tài khoản bị khóa (để ghi LOGIN_LOCKED)")
+    void reportsTheLockingFailure() {
+        for (int i = 1; i < LoginAttemptService.MAX_FAILURES; i++) {
+            assertThat(service.recordFailure(PHONE)).as("lần sai thứ %d", i).isFalse();
+        }
+        assertThat(service.recordFailure(PHONE)).isTrue();
+
+        clock.advance(LoginAttemptService.LOCK_DURATION);
+        assertThat(service.recordFailure(PHONE)).as("hết khóa, đếm lại từ 1").isFalse();
+    }
+
+    @Test
     @DisplayName("Khóa đúng 15 phút rồi tự mở, đếm lại từ đầu")
     void lockExpiresAfterFifteenMinutes() {
         failTimes(5);

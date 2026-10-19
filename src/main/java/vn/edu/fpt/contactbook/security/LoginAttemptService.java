@@ -32,13 +32,15 @@ public class LoginAttemptService {
         return attempt != null && attempt.lockedAt(clock.instant());
     }
 
-    public void recordFailure(String phone) {
+    /** Ghi một lần sai; trả true nếu chính lần này làm số điện thoại bị khóa tạm (để ghi LOGIN_LOCKED một lần). */
+    public boolean recordFailure(String phone) {
         Instant now = clock.instant();
-        attempts.compute(phone, (key, previous) -> {
+        Attempt attempt = attempts.compute(phone, (key, previous) -> {
             int failures = previous == null || previous.expiredAt(now) ? 1 : previous.failures() + 1;
             Instant lockedUntil = failures >= MAX_FAILURES ? now.plus(LOCK_DURATION) : null;
             return new Attempt(failures, now, lockedUntil);
         });
+        return attempt.failures() == MAX_FAILURES;
     }
 
     public void reset(String phone) {
