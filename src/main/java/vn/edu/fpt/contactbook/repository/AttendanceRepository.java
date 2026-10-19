@@ -54,6 +54,18 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
                                            @Param("sectionIds") Collection<Long> sectionIds);
 
     /**
+     * Số dòng điểm danh theo lớp học phần, sinh viên và trạng thái cho nhiều lớp một lần (báo cáo), chỉ buổi chưa
+     * hủy: mỗi phần tử là [classSectionId, studentId, AttendanceStatus, count].
+     */
+    @Query("""
+            SELECT a.session.classSection.id, a.student.id, a.status, COUNT(a) FROM Attendance a
+            WHERE a.session.classSection.id IN :sectionIds
+              AND a.session.status <> vn.edu.fpt.contactbook.model.enums.SessionStatus.CANCELLED
+            GROUP BY a.session.classSection.id, a.student.id, a.status
+            """)
+    List<Object[]> countBySectionStudentAndStatus(@Param("sectionIds") Collection<Long> sectionIds);
+
+    /**
      * Dòng vắng không phép của một sinh viên ở các buổi có ngày trong [from, to], chỉ lớp :sectionId nếu khác null
      * (duyệt đơn nghỉ).
      */

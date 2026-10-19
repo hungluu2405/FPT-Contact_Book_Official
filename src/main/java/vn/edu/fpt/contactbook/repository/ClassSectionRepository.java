@@ -69,6 +69,23 @@ public interface ClassSectionRepository extends JpaRepository<ClassSection, Long
     @EntityGraph(attributePaths = {"subject", "semester"})
     List<ClassSection> findAllByOrderBySemesterStartDateDescCodeAsc();
 
+    /**
+     * Lớp học phần của một học kỳ cho báo cáo, sắp theo mã môn rồi mã lớp: all = true là mọi lớp (ADMIN); ngược lại
+     * lớp do teacherId dạy HOẶC có môn thuộc departmentIds (teacherId được null, departmentIds không được rỗng).
+     */
+    @EntityGraph(attributePaths = {"subject", "subject.department", "semester", "teacher", "teacher.user"})
+    @Query("""
+            SELECT c FROM ClassSection c
+            WHERE c.semester.id = :semesterId
+              AND (:all = TRUE OR c.teacher.id = :teacherId OR c.subject.department.id IN :departmentIds)
+            ORDER BY c.subject.code, c.code
+            """)
+    List<ClassSection> findForReport(@Param("semesterId") Long semesterId, @Param("all") boolean all,
+                                     @Param("teacherId") Long teacherId,
+                                     @Param("departmentIds") Collection<Long> departmentIds);
+
+    boolean existsBySubjectIdAndTeacherId(Long subjectId, Long teacherId);
+
     boolean existsByCode(String code);
 
     boolean existsByCodeAndIdNot(String code, Long id);

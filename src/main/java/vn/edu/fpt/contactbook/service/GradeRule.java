@@ -78,6 +78,12 @@ final class GradeRule {
         return sum.divide(GradeComponentService.HUNDRED, 1, RoundingMode.HALF_UP);
     }
 
+    /** Tổng trọng số đúng 100 và môn có ít nhất một đầu điểm (như requireCompleteWeights, nhưng không ném lỗi). */
+    static boolean weightsComplete(List<GradeComponent> components) {
+        return !components.isEmpty() && components.stream().map(GradeComponent::getWeight)
+                .reduce(BigDecimal.ZERO, BigDecimal::add).compareTo(GradeComponentService.HUNDRED) == 0;
+    }
+
     /** Tổng trọng số phải đúng 100 (giả định 35); môn chưa có đầu điểm cũng bị chặn. */
     static void requireCompleteWeights(List<GradeComponent> components) {
         if (components.isEmpty()) {

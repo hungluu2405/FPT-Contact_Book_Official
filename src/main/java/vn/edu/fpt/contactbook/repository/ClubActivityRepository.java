@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import vn.edu.fpt.contactbook.model.ClubActivity;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,13 @@ public interface ClubActivityRepository extends JpaRepository<ClubActivity, Long
 
     /** Mọi hoạt động của CLB, mới nhất trước (trang quản lý hoạt động). */
     Page<ClubActivity> findByClubIdOrderByStartTimeDescIdDesc(Long clubId, Pageable pageable);
+
+    /**
+     * Trạng thái lưu và thời gian của mọi hoạt động thuộc các CLB (báo cáo CLB tính trạng thái hiển thị bằng
+     * ClubRule.state): mỗi phần tử là [clubId, ClubActivityStatus, startTime, endTime].
+     */
+    @Query("SELECT a.club.id, a.status, a.startTime, a.endTime FROM ClubActivity a WHERE a.club.id IN :clubIds")
+    List<Object[]> findTimesByClubs(@Param("clubIds") Collection<Long> clubIds);
 
     /** Khóa dòng hoạt động: kiểm tra sĩ số và đăng ký chạy lần lượt (hai người không cùng lấy chỗ cuối). */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
