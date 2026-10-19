@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{report.clubs.title} + ' - ' + #{app.title}">Báo cáo câu lạc bộ</title>
+</head>
+<body>
+<section>
+    <h1 class="page-title" th:text="#{menu.reports}">Báo cáo</h1>
+    <ul th:replace="~{fragments/reports :: tabs('clubs')}"></ul>
+    <form class="card card-custom p-3 mb-3" th:action="@{/reports/clubs}" method="get">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label for="status" class="form-label" th:text="#{club.status}">Trạng thái</label>
+                <select id="status" name="status" class="form-select">
+                    <option value="" th:text="#{report.all}">Tất cả</option>
+                    <option th:each="s : ${statuses}" th:value="${s}" th:selected="${s == status}"
+                            th:text="#{'club.status.' + ${s}}">Đang hoạt động</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary" th:text="#{schedule.show}">Xem</button>
+            </div>
+        </div>
+    </form>
+
+    <th:block th:replace="~{fragments/reports :: chart(${chart}, #{report.chart.clubs})}"></th:block>
+
+    <div class="card card-custom p-4 mb-3">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                <tr>
+                    <th th:text="#{report.clubs.club}">Câu lạc bộ</th>
+                    <th th:text="#{club.status}">Trạng thái</th>
+                    <th class="text-center" th:text="#{report.clubs.members}">Thành viên</th>
+                    <th class="text-center" th:text="#{activity.state.PLANNED}">Sắp diễn ra</th>
+                    <th class="text-center" th:text="#{activity.state.ONGOING}">Đang diễn ra</th>
+                    <th class="text-center" th:text="#{report.clubs.done}">Đã kết thúc</th>
+                    <th class="text-center" th:text="#{report.clubs.cancelled}">Đã hủy</th>
+                    <th class="text-center" th:text="#{report.clubs.activities}">Tổng hoạt động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${rows.content}">
+                    <td><a th:href="@{/clubs/{id}(id=${r.id})}" th:text="${r.code} + ' - ' + ${r.name}">F-CODE</a></td>
+                    <td><span class="badge" th:classappend="${r.status.name() == 'ACTIVE'} ? 'text-bg-success' : 'text-bg-secondary'"
+                              th:text="#{'club.status.' + ${r.status}}">Đang hoạt động</span></td>
+                    <td class="text-center" th:text="${r.members}">0</td>
+                    <td class="text-center" th:text="${r.planned}">0</td>
+                    <td class="text-center" th:text="${r.ongoing}">0</td>
+                    <td class="text-center" th:text="${r.done}">0</td>
+                    <td class="text-center" th:text="${r.cancelled}">0</td>
+                    <td class="text-center fw-bold" th:text="${r.activities()}">0</td>
+                </tr>
+                <tr th:if="${rows.empty}">
+                    <td colspan="8" class="text-center text-muted py-4" th:text="#{report.clubs.none}">Không có câu lạc bộ</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <nav th:replace="~{fragments/pager :: pager(${pager})}"></nav>
+        <p class="small text-muted mt-2 mb-0" th:text="#{report.clubs.note}">Ghi chú</p>
+    </div>
+</section>
+</body>
+</html>

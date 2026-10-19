@@ -430,3 +430,14 @@ body {
 .club-card:hover {
     border-color: var(--color-orange);
 }
+
+/* ---------- Báo cáo, nhật ký ---------- */
+.report-chart {
+    position: relative;
+    height: 320px;
+}
+
+.audit-detail {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
