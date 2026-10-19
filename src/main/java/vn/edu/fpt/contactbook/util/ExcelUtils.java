@@ -65,6 +65,28 @@ public final class ExcelUtils {
         return value == null ? null : LocalDate.parse(value, DATE);
     }
 
+    /**
+     * Số thập phân (ví dụ điểm): ô kiểu số đọc trực tiếp giá trị (không qua DataFormatter, vốn có thể làm tròn theo
+     * định dạng ô), ô chữ nhận cả dấu chấm lẫn dấu phẩy thập phân. null nếu trống.
+     *
+     * @throws NumberFormatException nếu ô có giá trị nhưng không phải số
+     */
+    public static BigDecimal decimal(Cell cell) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
+            return null;
+        }
+        CellType type = cell.getCellType() == CellType.FORMULA ? cell.getCachedFormulaResultType()
+                : cell.getCellType();
+        if (type == CellType.NUMERIC) {
+            if (DateUtil.isCellDateFormatted(cell)) {
+                throw new NumberFormatException("Date cell is not a number");
+            }
+            return BigDecimal.valueOf(cell.getNumericCellValue());
+        }
+        String value = text(cell);
+        return value == null ? null : new BigDecimal(value.replace(',', '.'));
+    }
+
     /** Dòng không có ô nào có chữ trong columnCount cột đầu. */
     public static boolean isBlankRow(Row row, int columnCount) {
         if (row == null) {

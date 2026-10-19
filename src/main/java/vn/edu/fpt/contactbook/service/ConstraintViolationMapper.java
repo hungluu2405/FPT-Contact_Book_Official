@@ -43,7 +43,9 @@ public final class ConstraintViolationMapper {
             Map.entry("uq_sess_cs_slot", new String[]{null, ScheduleMessages.SECTION_SLOT_TAKEN}),
             Map.entry("ck_sess_time", new String[]{"endTime", ScheduleMessages.END_AFTER_START}),
             Map.entry("ck_exams_time", new String[]{"endTime", ScheduleMessages.END_AFTER_START}),
-            Map.entry("uq_attendance", new String[]{null, AttendanceMessages.CONCURRENT_CHANGE}));
+            Map.entry("uq_attendance", new String[]{null, AttendanceMessages.CONCURRENT_CHANGE}),
+            Map.entry("uq_grades", new String[]{null, GradeMessages.CONCURRENT_CHANGE}),
+            Map.entry("ck_grades_score", new String[]{null, GradeMessages.SCORE_RANGE_DB}));
 
     private ConstraintViolationMapper() {
     }
