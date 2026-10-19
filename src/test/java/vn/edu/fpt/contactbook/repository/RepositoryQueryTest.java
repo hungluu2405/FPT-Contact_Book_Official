@@ -14,6 +14,10 @@ import org.springframework.test.context.ActiveProfiles;
 import vn.edu.fpt.contactbook.dto.UserListRow;
 import vn.edu.fpt.contactbook.model.ClassSection;
 import vn.edu.fpt.contactbook.model.ClassSession;
+import vn.edu.fpt.contactbook.model.Club;
+import vn.edu.fpt.contactbook.model.ClubActivity;
+import vn.edu.fpt.contactbook.model.ClubActivityParticipant;
+import vn.edu.fpt.contactbook.model.ClubActivityParticipantId;
 import vn.edu.fpt.contactbook.model.Conversation;
 import vn.edu.fpt.contactbook.model.ConversationMember;
 import vn.edu.fpt.contactbook.model.ConversationMemberId;
@@ -29,9 +33,13 @@ import vn.edu.fpt.contactbook.model.Student;
 import vn.edu.fpt.contactbook.model.Subject;
 import vn.edu.fpt.contactbook.model.User;
 import vn.edu.fpt.contactbook.model.UserRole;
+import vn.edu.fpt.contactbook.model.enums.ClubActivityStatus;
+import vn.edu.fpt.contactbook.model.enums.ClubMemberStatus;
+import vn.edu.fpt.contactbook.model.enums.ClubStatus;
 import vn.edu.fpt.contactbook.model.enums.ConversationType;
 import vn.edu.fpt.contactbook.model.enums.EnrollmentStatus;
 import vn.edu.fpt.contactbook.model.enums.ParentRelationship;
+import vn.edu.fpt.contactbook.model.enums.ParticipantStatus;
 import vn.edu.fpt.contactbook.model.enums.RoleCodes;
 import vn.edu.fpt.contactbook.model.enums.SectionStatus;
 import vn.edu.fpt.contactbook.support.TestDatabaseExtension;
@@ -671,6 +679,135 @@ class RepositoryQueryTest {
             message.setSentAt(sentAt);
             message.setDeleted(deleted);
             return messageRepository.save(message);
+        }
+    }
+
+    /**
+     * Câu lạc bộ. Dữ liệu mẫu: CLB 1 F-CODE (chủ nhiệm users.id 18, thành viên 19, 20 đang chờ duyệt), CLB 2 F-GUITAR
+     * (chủ nhiệm 20). Chưa có hoạt động nào; các hoạt động dưới đây tạo trong test và rollback.
+     */
+    @Nested
+    @DisplayName("Câu lạc bộ")
+    class ClubQueries {
+
+        @Autowired
+        private ClubRepository clubRepository;
+        @Autowired
+        private ClubMemberRepository memberRepository;
+        @Autowired
+        private ClubActivityRepository activityRepository;
+        @Autowired
+        private ClubActivityParticipantRepository participantRepository;
+        @Autowired
+        private UserRepository userRepository;
+        @Autowired
+        private UserRoleRepository userRoleRepository;
+
+        @Test
+        @DisplayName("Tìm CLB theo từ khóa và trạng thái; số thành viên ACTIVE và chủ nhiệm của nhiều CLB")
+        void clubsAndCounts() {
+            PageRequest page = PageRequest.of(0, 20);
+            assertThat(clubRepository.search(null, ClubStatus.ACTIVE, page)).extracting(Club::getCode)
+                    .containsExactlyInAnyOrder("F-CODE", "F-GUITAR");
+            assertThat(clubRepository.search(LikePatterns.containsIgnoreCase("guitar"), null, page))
+                    .extracting(Club::getCode).containsExactly("F-GUITAR");
+            assertThat(clubRepository.search(null, ClubStatus.INACTIVE, page)).isEmpty();
+            assertThat(memberRepository.countActiveByClubs(List.of(1L, 2L)))
+                    .extracting(r -> r[0] + "=" + r[1]).containsExactlyInAnyOrder("1=2", "2=1");
+            assertThat(memberRepository.findPresidentsOf(List.of(1L, 2L)))
+                    .extracting(m -> m.getUser().getId()).containsExactlyInAnyOrder(18L, 20L);
+        }
+
+        @Test
+        @DisplayName("Thành viên ACTIVE: chủ nhiệm trước; CLB của một người theo trạng thái")
+        void membersAndMyClubs() {
+            assertThat(memberRepository.findPageByClub(1L, ClubMemberStatus.ACTIVE, PageRequest.of(0, 20)))
+                    .extracting(m -> m.getUser().getId()).containsExactly(18L, 19L);
+            assertThat(memberRepository.findPageByClub(1L, ClubMemberStatus.PENDING, PageRequest.of(0, 20)))
+                    .extracting(m -> m.getUser().getId()).containsExactly(20L);
+            assertThat(memberRepository.findByUser(20L, List.of(ClubMemberStatus.PENDING, ClubMemberStatus.ACTIVE)))
+                    .extracting(m -> m.getClub().getCode() + ":" + m.getStatus())
+                    .containsExactlyInAnyOrder("F-CODE:PENDING", "F-GUITAR:ACTIVE");
+        }
+
+        @Test
+        @DisplayName("Giảng viên phụ trách chọn được: TEACHER / HEAD đang hoạt động")
+        void advisors() {
+            List<String> roles = List.of(RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT);
+            assertThat(userRoleRepository.findActiveUsersWithRole(roles)).extracting(User::getId)
+                    .containsExactlyInAnyOrder(2L, 3L, 15L, 16L, 17L);
+            assertThat(userRoleRepository.isActiveWithRole(16L, roles)).isTrue();
+            assertThat(userRoleRepository.isActiveWithRole(4L, roles)).isFalse();
+            User teacher = userRepository.findById(16L).orElseThrow();
+            teacher.setActive(false);
+            userRepository.flush();
+            assertThat(userRoleRepository.isActiveWithRole(16L, roles)).isFalse();
+        }
+
+        @Test
+        @DisplayName("Sĩ số đếm REGISTERED + ATTENDED; hoạt động sắp tới bỏ đã hủy và đã kết thúc")
+        void activities() {
+            LocalDateTime now = AppTime.now().truncatedTo(ChronoUnit.SECONDS);
+            ClubActivity future = activity(now.plusDays(1), ClubActivityStatus.PLANNED);
+            ClubActivity ongoing = activity(now.minusHours(1), ClubActivityStatus.PLANNED);
+            activity(now.plusDays(2), ClubActivityStatus.CANCELLED);
+            activity(now.minusDays(2), ClubActivityStatus.PLANNED);
+            participant(future, 18L, ParticipantStatus.REGISTERED);
+            participant(future, 19L, ParticipantStatus.CANCELLED);
+            participant(ongoing, 19L, ParticipantStatus.ATTENDED);
+            participantRepository.flush();
+
+            assertThat(activityRepository.findUpcoming(1L, now)).extracting(ClubActivity::getId)
+                    .containsExactly(ongoing.getId(), future.getId());
+            assertThat(participantRepository.countTaken(future.getId())).isEqualTo(1);
+            assertThat(participantRepository.countTakenByActivities(List.of(future.getId(), ongoing.getId())))
+                    .extracting(r -> r[0] + "=" + r[1])
+                    .containsExactlyInAnyOrder(future.getId() + "=1", ongoing.getId() + "=1");
+            assertThat(participantRepository.findTaken(future.getId())).extracting(p -> p.getUser().getId())
+                    .containsExactly(18L);
+        }
+
+        @Test
+        @DisplayName("Rời CLB chỉ hủy đăng ký REGISTERED của hoạt động chưa bắt đầu, của đúng CLB đó")
+        void cancelFutureRegistrations() {
+            LocalDateTime now = AppTime.now().truncatedTo(ChronoUnit.SECONDS);
+            ClubActivity future = activity(now.plusDays(1), ClubActivityStatus.PLANNED);
+            ClubActivity started = activity(now.minusHours(1), ClubActivityStatus.PLANNED);
+            participant(future, 19L, ParticipantStatus.REGISTERED);
+            participant(started, 19L, ParticipantStatus.REGISTERED);
+            participant(future, 18L, ParticipantStatus.REGISTERED);
+            participantRepository.flush();
+
+            assertThat(participantRepository.cancelFutureRegistrations(1L, 19L, now)).isEqualTo(1);
+            assertThat(participantRepository.cancelFutureRegistrations(2L, 18L, now)).isZero();
+            assertThat(status(future, 19L)).isEqualTo(ParticipantStatus.CANCELLED);
+            assertThat(status(started, 19L)).isEqualTo(ParticipantStatus.REGISTERED);
+            assertThat(status(future, 18L)).isEqualTo(ParticipantStatus.REGISTERED);
+        }
+
+        private ClubActivity activity(LocalDateTime start, ClubActivityStatus status) {
+            ClubActivity activity = new ClubActivity();
+            activity.setClub(clubRepository.getReferenceById(1L));
+            activity.setTitle("Hoạt động " + start);
+            activity.setStartTime(start);
+            activity.setEndTime(start.plusHours(3));
+            activity.setStatus(status);
+            activity.setCreatedBy(userRepository.getReferenceById(18L));
+            return activityRepository.saveAndFlush(activity);
+        }
+
+        private void participant(ClubActivity activity, Long userId, ParticipantStatus status) {
+            ClubActivityParticipant participant = new ClubActivityParticipant();
+            participant.setId(new ClubActivityParticipantId(activity.getId(), userId));
+            participant.setActivity(activity);
+            participant.setUser(userRepository.getReferenceById(userId));
+            participant.setStatus(status);
+            participantRepository.save(participant);
+        }
+
+        private ParticipantStatus status(ClubActivity activity, Long userId) {
+            return participantRepository.findById(new ClubActivityParticipantId(activity.getId(), userId))
+                    .map(ClubActivityParticipant::getStatus).orElseThrow();
         }
     }
 }
