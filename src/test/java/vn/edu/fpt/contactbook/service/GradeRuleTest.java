@@ -109,6 +109,14 @@ class GradeRuleTest {
                 .isInstanceOf(BusinessException.class).hasMessage(GradeMessages.NO_COMPONENTS);
     }
 
+    @Test
+    @DisplayName("weightsComplete: đúng 100% là true; khác 100% hoặc môn chưa có đầu điểm là false")
+    void weightsComplete() {
+        assertThat(GradeRule.weightsComplete(List.of(ASSIGNMENT, MIDTERM, FINAL))).isTrue();
+        assertThat(GradeRule.weightsComplete(List.of(ASSIGNMENT, MIDTERM))).isFalse();
+        assertThat(GradeRule.weightsComplete(List.of())).isFalse();
+    }
+
     static GradeComponent component(Long id, String weight, String maxScore) {
         GradeComponent component = new GradeComponent();
         component.setId(id);

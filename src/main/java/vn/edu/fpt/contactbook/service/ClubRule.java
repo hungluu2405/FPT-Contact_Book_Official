@@ -33,13 +33,19 @@ public final class ClubRule {
 
     /** Trạng thái hiển thị của hoạt động tại thời điểm now. */
     public static ClubActivityStatus state(ClubActivity activity, LocalDateTime now) {
-        if (activity.getStatus() == ClubActivityStatus.CANCELLED) {
+        return state(activity.getStatus(), activity.getStartTime(), activity.getEndTime(), now);
+    }
+
+    /** Như state(activity, now) nhưng nhận từng cột (báo cáo CLB đọc projection, không nạp entity). */
+    static ClubActivityStatus state(ClubActivityStatus stored, LocalDateTime start, LocalDateTime end,
+                                    LocalDateTime now) {
+        if (stored == ClubActivityStatus.CANCELLED) {
             return ClubActivityStatus.CANCELLED;
         }
-        if (now.isBefore(activity.getStartTime())) {
+        if (now.isBefore(start)) {
             return ClubActivityStatus.PLANNED;
         }
-        return now.isBefore(activity.getEndTime()) ? ClubActivityStatus.ONGOING : ClubActivityStatus.DONE;
+        return now.isBefore(end) ? ClubActivityStatus.ONGOING : ClubActivityStatus.DONE;
     }
 
     /** Đã tới giờ bắt đầu (kể cả đúng giờ). */

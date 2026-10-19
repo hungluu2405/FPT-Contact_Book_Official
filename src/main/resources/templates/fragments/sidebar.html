@@ -205,6 +205,16 @@
                 <i class="bi bi-envelope-check"></i><span th:text="#{menu.notifications.sent}">Đã gửi</span>
             </a>
         </li>
+        <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'HEAD_OF_DEPARTMENT', 'TEACHER')">
+            <a class="nav-link" th:href="@{/reports/attendance}" th:classappend="${activeMenu == 'reports'} ? 'active'">
+                <i class="bi bi-bar-chart-line"></i><span th:text="#{menu.reports}">Báo cáo</span>
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link" th:href="@{/admin/audit-logs}" th:classappend="${activeMenu == 'audit-logs'} ? 'active'">
+                <i class="bi bi-journal-text"></i><span th:text="#{menu.audit-logs}">Nhật ký hệ thống</span>
+            </a>
+        </li>
         <li class="nav-item">
             <a class="nav-link" th:href="@{/profile}" th:classappend="${activeMenu == 'profile'} ? 'active'">
                 <i class="bi bi-person-vcard"></i><span th:text="#{menu.profile}">Hồ sơ cá nhân</span>

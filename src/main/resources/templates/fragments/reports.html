@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!--/* Fragment dùng chung của các trang báo cáo: thẻ chọn báo cáo, bộ lọc, biểu đồ, ô số liệu. */-->
+
+<!--/* Thẻ chọn báo cáo; active là attendance, grades hoặc clubs. Báo cáo CLB chỉ ADMIN. */-->
+<ul th:fragment="tabs(active)" class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link" th:classappend="${active == 'attendance'} ? 'active'" th:href="@{/reports/attendance}"
+           th:text="#{report.attendance}">Điểm danh</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" th:classappend="${active == 'grades'} ? 'active'" th:href="@{/reports/grades}"
+           th:text="#{report.grades}">Điểm</a>
+    </li>
+    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+        <a class="nav-link" th:classappend="${active == 'clubs'} ? 'active'" th:href="@{/reports/clubs}"
+           th:text="#{report.clubs}">Câu lạc bộ</a>
+    </li>
+</ul>
+
+<!--/*
+  Bộ lọc học kỳ, môn, lớp học phần (chỉ gồm lựa chọn trong phạm vi người xem) và nút xuất Excel theo đúng bộ lọc
+  đang áp dụng. Có lớp học phần thì học kỳ và môn lấy theo lớp.
+*/-->
+<form th:fragment="filters(selection, semesters, path)" class="card card-custom p-3 mb-3" th:action="@{${path}}"
+      method="get">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label for="semesterId" class="form-label" th:text="#{section.semester}">Học kỳ</label>
+            <select id="semesterId" name="semesterId" class="form-select">
+                <option th:each="s : ${semesters}" th:value="${s.id}" th:selected="${s.id == selection.semester().id()}"
+                        th:text="${s.code} + ' - ' + ${s.name}">FA26</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="subjectId" class="form-label" th:text="#{section.subject}">Môn học</label>
+            <select id="subjectId" name="subjectId" class="form-select">
+                <option value="" th:text="#{report.all}">Tất cả</option>
+                <option th:each="s : ${selection.subjects()}" th:value="${s.id}"
+                        th:selected="${s.id == selection.subjectId()}" th:text="${s.code} + ' - ' + ${s.name}">PRJ301</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="sectionId" class="form-label" th:text="#{attendance.section}">Lớp học phần</label>
+            <select id="sectionId" name="sectionId" class="form-select">
+                <option value="" th:text="#{report.all}">Tất cả</option>
+                <option th:each="s : ${selection.sections()}" th:value="${s.id}"
+                        th:selected="${s.id == selection.sectionId()}" th:text="${s.code}">PRJ301-SE1901-FA26</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-primary" th:text="#{schedule.show}">Xem</button>
+            <a class="btn btn-outline-success"
+               th:href="@{${path} + '/export'(semesterId=${selection.semester().id()}, subjectId=${selection.subjectId()}, sectionId=${selection.sectionId()})}">
+                <i class="bi bi-file-earmark-excel"></i> <span th:text="#{report.export}">Xuất Excel</span></a>
+        </div>
+    </div>
+    <p class="small text-muted mt-2 mb-0" th:text="#{report.filter.hint}">Chọn lớp học phần để xem từng sinh viên.</p>
+</form>
+
+<!--/* Biểu đồ Chart.js (WebJars); chart là Map do ReportCharts tạo, null thì không vẽ. */-->
+<th:block th:fragment="chart(chart, title)">
+    <div class="card card-custom p-4 mb-3" th:if="${chart != null}">
+        <h2 class="h5 mb-3" th:text="${title}">Biểu đồ</h2>
+        <div class="report-chart"><canvas id="reportChart" th:aria-label="${title}" role="img"></canvas></div>
+        <script th:inline="javascript">
+            window.reportChart = /*[[${chart}]]*/ null;
+        </script>
+        <script th:src="@{/webjars/chart.js/dist/chart.umd.js}"></script>
+        <script th:src="@{/js/report-charts.js}"></script>
+    </div>
+</th:block>
+
+<!--/* Một ô số liệu tổng hợp. */-->
+<div th:fragment="stat(label, value)" class="col-6 col-md-3">
+    <div class="card card-custom p-3 h-100">
+        <div class="small text-muted" th:text="${label}">Số SV</div>
+        <div class="fs-4 fw-bold" th:text="${value}">0</div>
+    </div>
+</div>
+</body>
+</html>

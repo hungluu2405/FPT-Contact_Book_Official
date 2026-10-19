@@ -25,6 +25,10 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     @Query("SELECT g FROM Grade g WHERE g.enrollment.classSection.id = :sectionId")
     List<Grade> findBySectionId(@Param("sectionId") Long sectionId);
 
+    /** Mọi ô điểm (mọi trạng thái công bố) của nhiều lớp học phần một lần, cho báo cáo điểm. */
+    @Query("SELECT g FROM Grade g WHERE g.enrollment.classSection.id IN :sectionIds")
+    List<Grade> findBySectionIds(@Param("sectionIds") Collection<Long> sectionIds);
+
     /** CHỈ ô đã công bố của các dòng ghi danh: nguồn duy nhất cho trang điểm của sinh viên và phụ huynh. */
     @Query("SELECT g FROM Grade g WHERE g.enrollment.id IN :enrollmentIds AND g.isPublished = true")
     List<Grade> findPublishedByEnrollmentIds(@Param("enrollmentIds") Collection<Long> enrollmentIds);
