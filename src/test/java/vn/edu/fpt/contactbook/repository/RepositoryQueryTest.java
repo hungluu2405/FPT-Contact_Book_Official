@@ -14,9 +14,13 @@ import org.springframework.test.context.ActiveProfiles;
 import vn.edu.fpt.contactbook.dto.UserListRow;
 import vn.edu.fpt.contactbook.model.ClassSection;
 import vn.edu.fpt.contactbook.model.ClassSession;
+import vn.edu.fpt.contactbook.model.Conversation;
+import vn.edu.fpt.contactbook.model.ConversationMember;
+import vn.edu.fpt.contactbook.model.ConversationMemberId;
 import vn.edu.fpt.contactbook.model.Department;
 import vn.edu.fpt.contactbook.model.Enrollment;
 import vn.edu.fpt.contactbook.model.Faculty;
+import vn.edu.fpt.contactbook.model.Message;
 import vn.edu.fpt.contactbook.model.ParentStudent;
 import vn.edu.fpt.contactbook.model.Room;
 import vn.edu.fpt.contactbook.model.SchoolClass;
@@ -25,15 +29,19 @@ import vn.edu.fpt.contactbook.model.Student;
 import vn.edu.fpt.contactbook.model.Subject;
 import vn.edu.fpt.contactbook.model.User;
 import vn.edu.fpt.contactbook.model.UserRole;
+import vn.edu.fpt.contactbook.model.enums.ConversationType;
 import vn.edu.fpt.contactbook.model.enums.EnrollmentStatus;
 import vn.edu.fpt.contactbook.model.enums.ParentRelationship;
 import vn.edu.fpt.contactbook.model.enums.RoleCodes;
 import vn.edu.fpt.contactbook.model.enums.SectionStatus;
 import vn.edu.fpt.contactbook.support.TestDatabaseExtension;
+import vn.edu.fpt.contactbook.util.AppTime;
 import vn.edu.fpt.contactbook.util.LikePatterns;
 import vn.edu.fpt.contactbook.util.PhoneUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -515,6 +523,154 @@ class RepositoryQueryTest {
             assertThat(classSessionRepository.findForSections(List.of(27L), LocalDate.of(2026, 10, 12),
                     LocalDate.of(2026, 10, 18))).extracting(ClassSession::getId).containsExactly(43L, 44L);
             assertThat(examRepository.findPossibleConflicts(FROM, TO, null, null, List.of(-1L))).isEmpty();
+        }
+    }
+
+    /**
+     * Tin nhắn. Dữ liệu mẫu (FA26 là học kỳ hiện tại): lớp 1 do users.id 3 dạy SE190001 (users.id 4, phụ huynh
+     * users.id 5); lớp 27 do users.id 16 dạy users.id 18, 19 (phụ huynh 21, 22); lớp 28 do users.id 17 dạy 18, 20.
+     */
+    @Nested
+    @DisplayName("Tin nhắn")
+    class MessagingQueries {
+
+        @Autowired
+        private MessagingContactRepository contactRepository;
+        @Autowired
+        private ConversationRepository conversationRepository;
+        @Autowired
+        private ConversationMemberRepository memberRepository;
+        @Autowired
+        private MessageRepository messageRepository;
+        @Autowired
+        private UserRepository userRepository;
+        @Autowired
+        private SemesterRepository semesterRepository;
+        @Autowired
+        private ClassSectionRepository classSectionRepository;
+        @Autowired
+        private EnrollmentRepository enrollmentRepository;
+
+        @Test
+        @DisplayName("Đang dạy: SV ENROLLED ở lớp học kỳ hiện tại; phụ huynh qua con đã liên kết")
+        void teachingNow() {
+            assertThat(contactRepository.teachesStudentNow(3L, 4L)).isTrue();
+            assertThat(contactRepository.teachesStudentNow(16L, 18L)).isTrue();
+            assertThat(contactRepository.teachesStudentNow(2L, 4L)).isFalse();
+            assertThat(contactRepository.teachesStudentNow(17L, 19L)).isFalse();
+            assertThat(contactRepository.teachesChildNow(3L, 5L)).isTrue();
+            assertThat(contactRepository.teachesChildNow(16L, 21L)).isTrue();
+            assertThat(contactRepository.teachesChildNow(2L, 5L)).isFalse();
+            assertThat(contactRepository.teachesChildNow(17L, 22L)).isFalse();
+        }
+
+        @Test
+        @DisplayName("Hết học kỳ (học kỳ không còn là hiện tại): không còn quan hệ")
+        void semesterEnded() {
+            Semester fa26 = semesterRepository.findById(1L).orElseThrow();
+            fa26.setCurrent(false);
+            semesterRepository.flush();
+
+            assertThat(contactRepository.teachesStudentNow(3L, 4L)).isFalse();
+            assertThat(contactRepository.teachesChildNow(3L, 5L)).isFalse();
+            assertThat(contactRepository.findContacts(5L, false, false, true, null, PageRequest.of(0, 20))).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Lớp CANCELLED hoặc sinh viên DROPPED: không còn quan hệ")
+        void cancelledOrDropped() {
+            Enrollment enrollment = enrollmentRepository.findById(1L).orElseThrow();
+            enrollment.setStatus(EnrollmentStatus.DROPPED);
+            enrollmentRepository.flush();
+            assertThat(contactRepository.teachesStudentNow(3L, 4L)).isFalse();
+
+            enrollment.setStatus(EnrollmentStatus.ENROLLED);
+            ClassSection section = classSectionRepository.findById(1L).orElseThrow();
+            section.setStatus(SectionStatus.CANCELLED);
+            classSectionRepository.flush();
+            assertThat(contactRepository.teachesStudentNow(3L, 4L)).isFalse();
+            assertThat(contactRepository.teachesChildNow(3L, 5L)).isFalse();
+        }
+
+        @Test
+        @DisplayName("Danh bạ theo vai trò: PH, SV chỉ thấy GV đang dạy; GV thấy GV khác, SV và PH lớp mình")
+        void contacts() {
+            PageRequest page = PageRequest.of(0, 20);
+            assertThat(contactRepository.findContacts(5L, false, false, true, null, page))
+                    .extracting(User::getId).containsExactly(3L);
+            assertThat(contactRepository.findContacts(4L, false, true, false, null, page))
+                    .extracting(User::getId).containsExactly(3L);
+            assertThat(contactRepository.findContacts(3L, true, false, false, null, page))
+                    .extracting(User::getId).containsExactlyInAnyOrder(2L, 4L, 5L, 15L, 16L, 17L);
+            assertThat(contactRepository.findContacts(1L, false, false, false, null, page)).isEmpty();
+            assertThat(contactRepository.findContacts(3L, true, false, false,
+                    LikePatterns.containsIgnoreCase("0900000004"), page)).extracting(User::getId).containsExactly(4L);
+        }
+
+        @Test
+        @DisplayName("Danh bạ bỏ tài khoản bị khóa")
+        void contactsSkipInactive() {
+            User teacher = userRepository.findById(3L).orElseThrow();
+            teacher.setActive(false);
+            userRepository.flush();
+
+            assertThat(contactRepository.findContacts(5L, false, false, true, null, PageRequest.of(0, 20))).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Hội thoại DIRECT, trang hội thoại, đếm chưa đọc theo last_read_at (bỏ tin đã xóa, tin của mình)")
+        void conversationsAndUnread() {
+            LocalDateTime now = AppTime.now().truncatedTo(ChronoUnit.SECONDS);
+            Conversation conversation = new Conversation();
+            conversation.setType(ConversationType.DIRECT);
+            conversation.setCreatedBy(userRepository.getReferenceById(5L));
+            conversationRepository.save(conversation);
+            ConversationMember parent = member(conversation, 5L);
+            memberRepository.saveAll(List.of(parent, member(conversation, 3L)));
+            message(conversation, 3L, now.minusMinutes(10), false);
+            message(conversation, 3L, now.minusMinutes(5), true);
+            message(conversation, 3L, now.minusMinutes(1), false);
+            Message last = message(conversation, 5L, now, false);
+            messageRepository.flush();
+
+            assertThat(conversationRepository.findDirectIds(5L, 3L)).containsExactly(conversation.getId());
+            assertThat(conversationRepository.findDirectIds(3L, 5L)).containsExactly(conversation.getId());
+            assertThat(conversationRepository.findDirectIds(5L, 2L)).isEmpty();
+            Page<Object[]> rows = conversationRepository.findPageWithLastMessage(5L, PageRequest.of(0, 20));
+            assertThat(rows.getTotalElements()).isEqualTo(1);
+            assertThat(rows.getContent().getFirst()).containsExactly(conversation.getId(), last.getId());
+            assertThat(conversationRepository.findPageWithLastMessage(2L, PageRequest.of(0, 20))).isEmpty();
+
+            assertThat(messageRepository.countUnread(5L)).isEqualTo(2);
+            assertThat(messageRepository.countUnread(3L)).isEqualTo(1);
+            ConversationMember managed = memberRepository.findById(parent.getId()).orElseThrow();
+            managed.setLastReadAt(now.minusMinutes(3));
+            memberRepository.flush();
+            assertThat(messageRepository.countUnread(5L)).isEqualTo(1);
+            assertThat(messageRepository.countUnreadByConversation(5L, List.of(conversation.getId())))
+                    .extracting(r -> r[0] + "=" + r[1]).containsExactly(conversation.getId() + "=1");
+            managed.setLastReadAt(now);
+            memberRepository.flush();
+            assertThat(messageRepository.countUnread(5L)).isZero();
+            assertThat(messageRepository.countUnreadByConversation(5L, List.of(conversation.getId()))).isEmpty();
+        }
+
+        private ConversationMember member(Conversation conversation, Long userId) {
+            ConversationMember member = new ConversationMember();
+            member.setId(new ConversationMemberId(conversation.getId(), userId));
+            member.setConversation(conversation);
+            member.setUser(userRepository.getReferenceById(userId));
+            return member;
+        }
+
+        private Message message(Conversation conversation, Long senderId, LocalDateTime sentAt, boolean deleted) {
+            Message message = new Message();
+            message.setConversation(conversation);
+            message.setSender(userRepository.getReferenceById(senderId));
+            message.setContent("Tin " + sentAt);
+            message.setSentAt(sentAt);
+            message.setDeleted(deleted);
+            return messageRepository.save(message);
         }
     }
 }
