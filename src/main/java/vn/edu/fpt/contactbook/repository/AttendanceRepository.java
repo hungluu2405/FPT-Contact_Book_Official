@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.contactbook.model.Attendance;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -51,4 +52,19 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
             """)
     List<Object[]> countBySectionAndStatus(@Param("studentId") Long studentId,
                                            @Param("sectionIds") Collection<Long> sectionIds);
+
+    /**
+     * Dòng vắng không phép của một sinh viên ở các buổi có ngày trong [from, to], chỉ lớp :sectionId nếu khác null
+     * (duyệt đơn nghỉ).
+     */
+    @Query("""
+            SELECT a FROM Attendance a JOIN FETCH a.session s JOIN FETCH s.classSection cs
+            WHERE a.student.id = :studentId
+              AND a.status = vn.edu.fpt.contactbook.model.enums.AttendanceStatus.ABSENT_UNEXCUSED
+              AND s.sessionDate >= :from AND s.sessionDate <= :to
+              AND (:sectionId IS NULL OR cs.id = :sectionId)
+            ORDER BY s.sessionDate, s.startTime
+            """)
+    List<Attendance> findUnexcusedInRange(@Param("studentId") Long studentId, @Param("from") LocalDate from,
+                                          @Param("to") LocalDate to, @Param("sectionId") Long sectionId);
 }

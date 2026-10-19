@@ -64,6 +64,12 @@ public final class AuditActions {
 
     public static final String SEND_NOTIFICATION = "SEND_NOTIFICATION";
 
+    public static final String CREATE_REQUEST = "CREATE_REQUEST";
+    public static final String CANCEL_REQUEST = "CANCEL_REQUEST";
+    public static final String APPROVE_REQUEST = "APPROVE_REQUEST";
+    public static final String REJECT_REQUEST = "REJECT_REQUEST";
+    public static final String EXCUSE_ATTENDANCE = "EXCUSE_ATTENDANCE";
+
     public static final String ENTITY_USER = "User";
     public static final String ENTITY_FACULTY = "Faculty";
     public static final String ENTITY_DEPARTMENT = "Department";
@@ -79,6 +85,7 @@ public final class AuditActions {
     public static final String ENTITY_ATTENDANCE = "Attendance";
     public static final String ENTITY_GRADE = "Grade";
     public static final String ENTITY_NOTIFICATION = "Notification";
+    public static final String ENTITY_REQUEST = "Request";
 
     private AuditActions() {
     }

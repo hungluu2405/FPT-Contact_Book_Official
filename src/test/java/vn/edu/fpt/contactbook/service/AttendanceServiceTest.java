@@ -43,6 +43,7 @@ import vn.edu.fpt.contactbook.repository.SemesterRepository;
 import vn.edu.fpt.contactbook.repository.SubjectRepository;
 import vn.edu.fpt.contactbook.repository.TeacherRepository;
 import vn.edu.fpt.contactbook.repository.UserRepository;
+import vn.edu.fpt.contactbook.repository.UserRequestRepository;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
 import vn.edu.fpt.contactbook.service.AttendanceScope.Access;
 import vn.edu.fpt.contactbook.util.AppTime;
@@ -100,6 +101,7 @@ class AttendanceServiceTest {
     @Mock AuditLogRepository auditLogRepository;
     @Mock NotificationService notificationService;
     @Mock NotificationAudience audience;
+    @Mock UserRequestRepository userRequestRepository;
 
     private AttendanceService service;
     private ClassSection section;
@@ -121,7 +123,7 @@ class AttendanceServiceTest {
                 userAccessPolicy);
         service = new AttendanceService(scope, classSectionRepository, classSessionRepository, enrollmentRepository,
                 attendanceRepository, userRepository, auditService, new AttendanceRule(20), notificationService,
-                audience);
+                audience, userRequestRepository);
 
         Department se = CatalogTestData.department(1L, "SE");
         Semester fa26 = CatalogTestData.semester(1L, "FA26");

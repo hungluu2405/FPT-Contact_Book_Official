@@ -92,4 +92,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findAttendedInSemester(@Param("studentId") Long studentId, @Param("semesterId") Long semesterId);
 
     List<Enrollment> findByClassSectionIdAndStudentIdIn(Long classSectionId, Collection<Long> studentIds);
+
+    /** Lớp học phần sinh viên đang ở trạng thái :status (ô chọn lớp của đơn nghỉ), mới ghi danh trước. */
+    @EntityGraph(attributePaths = {"classSection", "classSection.subject", "classSection.semester"})
+    List<Enrollment> findByStudentIdAndStatusOrderByEnrolledAtDesc(Long studentId, EnrollmentStatus status);
 }

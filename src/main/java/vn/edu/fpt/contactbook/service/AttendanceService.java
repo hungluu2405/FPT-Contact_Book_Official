@@ -28,6 +28,7 @@ import vn.edu.fpt.contactbook.repository.ClassSectionRepository;
 import vn.edu.fpt.contactbook.repository.ClassSessionRepository;
 import vn.edu.fpt.contactbook.repository.EnrollmentRepository;
 import vn.edu.fpt.contactbook.repository.UserRepository;
+import vn.edu.fpt.contactbook.repository.UserRequestRepository;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
 import vn.edu.fpt.contactbook.service.AttendanceScope.Access;
 import vn.edu.fpt.contactbook.util.AppTime;
@@ -38,6 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -65,6 +67,7 @@ public class AttendanceService {
     private final AttendanceRule rule;
     private final NotificationService notificationService;
     private final NotificationAudience audience;
+    private final UserRequestRepository userRequestRepository;
 
     @Transactional(readOnly = true)
     public AttendanceSheet sheet(AppUserPrincipal actor, Access access, Long sectionId, Long sessionId) {
@@ -72,13 +75,16 @@ public class AttendanceService {
         ClassSession session = findSession(sectionId, sessionId);
         requireMarkable(section, session);
         Map<Long, Attendance> existing = existing(sessionId);
-        List<AttendanceSheet.Row> rows = enrolled(sectionId).stream()
-                .map(Enrollment::getStudent)
+        List<Student> students = enrolled(sectionId).stream().map(Enrollment::getStudent).toList();
+        Set<Long> onLeave = students.isEmpty() ? Set.of() : Set.copyOf(userRequestRepository
+                .findStudentsWithApprovedLeave(students.stream().map(Student::getId).toList(), sectionId,
+                        session.getSessionDate()));
+        List<AttendanceSheet.Row> rows = students.stream()
                 .map(student -> {
                     Attendance row = existing.get(student.getId());
                     return new AttendanceSheet.Row(student.getId(), student.getStudentCode(),
                             student.getUser().getFullName(), row == null ? null : row.getStatus(),
-                            row == null ? null : row.getNote());
+                            row == null ? null : row.getNote(), onLeave.contains(student.getId()));
                 })
                 .toList();
         return new AttendanceSheet(section.getId(), section.getCode(), section.getSubject().getCode(),
