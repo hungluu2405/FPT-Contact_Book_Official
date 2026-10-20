@@ -27,11 +27,11 @@ public class ExamForm {
     private LocalDate examDate;
 
     @NotNull(message = "{schedule.start-time.required}")
-    @DateTimeFormat(pattern = "HH:mm")
+    @DateTimeFormat(pattern = DateFormats.TIME, fallbackPatterns = DateFormats.TIME_SHORT)
     private LocalTime startTime;
 
     @NotNull(message = "{schedule.end-time.required}")
-    @DateTimeFormat(pattern = "HH:mm")
+    @DateTimeFormat(pattern = DateFormats.TIME, fallbackPatterns = DateFormats.TIME_SHORT)
     private LocalTime endTime;
 
     private Long roomId;

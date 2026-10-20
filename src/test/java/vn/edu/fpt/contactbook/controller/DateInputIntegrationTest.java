@@ -33,6 +33,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -97,6 +98,15 @@ class DateInputIntegrationTest {
 
         mockMvc.perform(get("/clubs/1/activities/{id}/edit", activity.getId()).with(as(CLUB_PRESIDENT)))
                 .andExpect(content().string(containsString("value=\"" + start.format(input) + "\"")));
+    }
+
+    @Test
+    @DisplayName("Ô giờ nhận cả 8:00 lẫn 08:00 (như ô ngày nhận 5/11/2026)")
+    void singleDigitHour() throws Exception {
+        mockMvc.perform(post("/admin/sections/1/exams/new").with(as(TestAccounts.ADMIN)).with(csrf())
+                        .param("examType", "FINAL").param("examDate", "16/12/2026").param("startTime", "8:00")
+                        .param("endTime", "09:30").param("roomId", "1"))
+                .andExpect(redirectedUrl("/admin/sections/1"));
     }
 
     @Test

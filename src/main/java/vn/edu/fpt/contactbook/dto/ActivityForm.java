@@ -30,11 +30,13 @@ public class ActivityForm {
     private String location;
 
     @NotNull(message = "{activity.start.required}")
-    @DateTimeFormat(pattern = DateFormats.DATE_TIME, fallbackPatterns = {DateFormats.DATE_TIME_SHORT, DateFormats.ISO_DATE_TIME})
+    @DateTimeFormat(pattern = DateFormats.DATE_TIME,
+            fallbackPatterns = {DateFormats.DATE_TIME_SHORT, DateFormats.ISO_DATE_TIME})
     private LocalDateTime startTime;
 
     @NotNull(message = "{activity.end.required}")
-    @DateTimeFormat(pattern = DateFormats.DATE_TIME, fallbackPatterns = {DateFormats.DATE_TIME_SHORT, DateFormats.ISO_DATE_TIME})
+    @DateTimeFormat(pattern = DateFormats.DATE_TIME,
+            fallbackPatterns = {DateFormats.DATE_TIME_SHORT, DateFormats.ISO_DATE_TIME})
     private LocalDateTime endTime;
 
     private Integer maxParticipants;
