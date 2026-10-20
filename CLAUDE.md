@@ -2,6 +2,8 @@
 
 Ứng dụng web xây dựng theo từng giai đoạn. Mỗi lượt chỉ làm đúng giai đoạn được giao, xong thì báo cáo và DỪNG.
 
+Phạm vi: file này áp dụng cho backend Spring Boot và giao diện web. App Android (Flutter) nằm trong `mobile/` và theo `mobile/CLAUDE.md`. Lộ trình mobile: `docs/MOBILE_ROADMAP.md`.
+
 ## 0. GHI ĐÈ RULE GLOBAL
 File này bổ sung `~/.claude/CLAUDE.md`. Ở những điểm dưới đây, file này thắng:
 - **Ngôn ngữ**: chữ trên giao diện, `messages.properties`, thông báo lỗi nghiệp vụ, chú thích trong code và tài liệu trong `docs/` viết bằng tiếng Việt. Tên lớp, biến, hàm, package, log và commit message vẫn bằng tiếng Anh.
@@ -24,7 +26,7 @@ File này bổ sung `~/.claude/CLAUDE.md`. Ở những điểm dưới đây, fi
 - Giao diện: Bootstrap 5 và Bootstrap Icons qua WebJars (không CDN), CSS/JS tự viết trong `static/`.
 - Excel: Apache POI. Giảm boilerplate: Lombok.
 - Không dùng H2. CHƯA thêm jjwt và springdoc (chờ giai đoạn REST API, cần bản tương thích Jackson 3).
-- Không làm Mobile, không viết REST API ở các giai đoạn hiện tại.
+- REST API cho mobile mở từ giai đoạn 9b, nằm dưới `/api/v1/**`, dùng lại service hiện có và cùng database `FptContactBook` (mobile không có database riêng). Trước giai đoạn 9b không viết REST API.
 - Spring Boot 4: starter web là `spring-boot-starter-webmvc`, starter test là `spring-boot-starter-webmvc-test`, Jackson 3 (package `tools.jackson`). Không chắc tên starter, API hay cấu hình thì tra tài liệu chính thức hoặc Maven Central, KHÔNG đoán.
 - **Dependency đã được duyệt** (thêm không cần hỏi, phiên bản để Spring Boot BOM quản lý; chỉ ghi version khi BOM không quản lý): các thư viện kể trên, `spring-boot-starter-security`, `spring-boot-starter-validation`, `thymeleaf-extras-springsecurity6` (hoặc bản tương ứng với Security 7, kiểm tra Maven Central), các starter test của Spring Boot 4, `spring-security-test`, `chart.js` (WebJars), `webjars-locator-lite`, `spring-boot-devtools` (đã có trong `pom.xml`). Không dùng Testcontainers (máy dev không chạy được Docker). Mọi thứ khác phải hỏi.
 
@@ -68,7 +70,7 @@ Tài nguyên: `templates/{layout,fragments,auth,admin,teacher,student,parent,com
   - HEAD_OF_DEPARTMENT chỉ trong bộ môn gắn với vai trò (`user_roles.department_id`).
   - STUDENT chỉ xem dữ liệu của chính mình.
   - PARENT chỉ xem dữ liệu con đã liên kết (`parent_student`).
-- CSRF bật cho mọi form, Thymeleaf tự chèn token. Không tắt CSRF.
+- CSRF bật cho mọi form, Thymeleaf tự chèn token. Không tắt CSRF. Ngoại lệ duy nhất: `SecurityFilterChain` riêng cho `/api/**`, stateless, xác thực bằng JWT (không dùng cookie phiên).
 - Tài khoản `users.is_active = 0` không đăng nhập được.
 - Lỗi đăng nhập luôn là "Số điện thoại hoặc mật khẩu không đúng", không tiết lộ số điện thoại có tồn tại hay không.
 - Hành động quan trọng ghi `audit_logs` qua một `AuditService` duy nhất (SRS FR-SYS-01).
