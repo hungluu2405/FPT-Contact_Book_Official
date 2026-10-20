@@ -389,6 +389,38 @@ class AttendanceIntegrationTest {
         return all.stream().max(Comparator.comparing(AuditLog::getId)).orElseThrow();
     }
 
+    @Nested
+    @DisplayName("Giao diện trên điện thoại (review 8a, U1, U2)")
+    class SmallScreens {
+
+        @Test
+        @DisplayName("Bảng điểm danh theo môn của SV, PH: dạng thẻ, mỗi ô có nhãn, chuyên cần và tỷ lệ vắng được ưu tiên")
+        void subjectTableStacks() throws Exception {
+            for (String url : List.of("/student/attendance", "/parent/children/1/attendance")) {
+                String phone = url.startsWith("/student") ? TestAccounts.STUDENT : TestAccounts.PARENT;
+                mockMvc.perform(get(url).with(as(phone)))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(allOf(containsString("table-stack"),
+                                containsString("data-label=\"Chuyên cần\""),
+                                containsString("data-label=\"Tỷ lệ vắng\""),
+                                containsString("data-label=\"Có mặt\""), containsString("stack-priority"))));
+            }
+        }
+
+        @Test
+        @DisplayName("Bảng điểm danh một buổi: dạng thẻ, trạng thái là nút lớn (btn-check), mỗi SV đúng 4 lựa chọn cùng tên")
+        void sheetUsesButtons() throws Exception {
+            String html = mockMvc.perform(get("/teacher/sections/1/sessions/1/attendance").with(as(TestAccounts.TEACHER)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(allOf(containsString("table-stack"),
+                            containsString("class=\"btn-check\""), containsString("attendance-choices"))))
+                    .andReturn().getResponse().getContentAsString();
+
+            // Một bản HTML duy nhất: không gửi trùng statuses[...] khi lưu.
+            assertThat(html.split("name=\"statuses\\[1\\]\"", -1)).hasSize(5);
+        }
+    }
+
     private RequestPostProcessor as(String phone) {
         return user(userDetailsService.loadUserByUsername(phone));
     }

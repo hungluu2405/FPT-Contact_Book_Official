@@ -209,6 +209,24 @@ class GradeIntegrationTest {
             mockMvc.perform(get(MANAGE + "/39/adjust").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isForbidden());
         }
+
+        @Test
+        @DisplayName("GV (kể cả GV của chính lớp), SV gửi POST điều chỉnh điểm đã công bố → 403, điểm và nhật ký "
+                + "không đổi (review 8a, T4)")
+        void teacherCannotPostAdjust() throws Exception {
+            // Ô 39: lớp 27 (GV003 = 0922334455), SV enrollments.id 17, đầu điểm 10, 8,50, đã công bố.
+            long adjustAudits = auditCount(AuditActions.ADJUST_GRADE);
+            for (String phone : List.of("0922334455", TestAccounts.TEACHER, TestAccounts.STUDENT)) {
+                mockMvc.perform(post("/admin/sections/27/grades/39/adjust").with(csrf()).with(as(phone))
+                                .param("score", "6").param("reason", "Sửa trái phép"))
+                        .andExpect(status().isForbidden());
+            }
+
+            Grade grade = gradeRepository.findById(39L).orElseThrow();
+            assertThat(grade.getScore()).isEqualByComparingTo("8.50");
+            assertThat(grade.getNote()).isNotEqualTo("Sửa trái phép");
+            assertThat(auditCount(AuditActions.ADJUST_GRADE)).isEqualTo(adjustAudits);
+        }
     }
 
     @Nested
@@ -328,6 +346,10 @@ class GradeIntegrationTest {
         section.setSemester(semesterRepository.findById(1L).orElseThrow());
         section.setTeacher(teacherRepository.findById(2L).orElseThrow());
         return classSectionRepository.saveAndFlush(section).getId();
+    }
+
+    private long auditCount(String action) {
+        return auditLogRepository.findAll().stream().filter(a -> action.equals(a.getAction())).count();
     }
 
     private AuditLog lastAudit(String action) {

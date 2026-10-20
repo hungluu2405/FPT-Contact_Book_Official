@@ -39,7 +39,8 @@
                 </div>
                 <div class="col-md-4">
                     <label for="dateOfBirth" class="form-label" th:text="#{profile.date-of-birth}">Ngày sinh</label>
-                    <input type="date" class="form-control" th:field="*{dateOfBirth}"
+                    <input type="text" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off"
+                           class="form-control" th:field="*{dateOfBirth}"
                            th:classappend="${#fields.hasErrors('dateOfBirth')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:errors="*{dateOfBirth}">Lỗi</div>
                 </div>

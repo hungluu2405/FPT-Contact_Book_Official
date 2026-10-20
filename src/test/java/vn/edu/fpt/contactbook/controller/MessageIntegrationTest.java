@@ -9,9 +9,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import vn.edu.fpt.contactbook.model.AuditLog;
+import vn.edu.fpt.contactbook.model.ConversationMember;
+import vn.edu.fpt.contactbook.model.ConversationMemberId;
 import vn.edu.fpt.contactbook.model.Message;
 import vn.edu.fpt.contactbook.model.Semester;
 import vn.edu.fpt.contactbook.repository.AuditLogRepository;
+import vn.edu.fpt.contactbook.repository.ConversationMemberRepository;
 import vn.edu.fpt.contactbook.repository.ConversationRepository;
 import vn.edu.fpt.contactbook.repository.MessageRepository;
 import vn.edu.fpt.contactbook.repository.SemesterRepository;
@@ -51,6 +54,7 @@ class MessageIntegrationTest {
     @Autowired MessageRepository messageRepository;
     @Autowired SemesterRepository semesterRepository;
     @Autowired AuditLogRepository auditLogRepository;
+    @Autowired ConversationMemberRepository memberRepository;
 
     @Nested
     @DisplayName("Ai nhắn cho ai")
@@ -258,6 +262,76 @@ class MessageIntegrationTest {
                             .param("content", "  " + "b".repeat(2000) + "\n"))
                     .andExpect(redirectedUrl("/messages/" + id));
             assertThat(messages(id)).last().extracting(Message::getContent).isEqualTo("b".repeat(2000));
+        }
+    }
+
+    @Nested
+    @DisplayName("Tải tin cũ hơn (review 8a, T1)")
+    class Older {
+
+        @Test
+        @DisplayName("Thành viên tải tin cũ hơn mốc theo trang 30 tin; còn tin cũ thì có link tải tiếp; hết thì không")
+        void pagesOlderMessages() throws Exception {
+            Long id = conversationWith(32);
+            List<Message> all = messages(id);
+            Long newest = all.getLast().getId();
+
+            String page = mockMvc.perform(get("/messages/{id}/older", id).param("before", newest.toString())
+                            .with(as(TestAccounts.TEACHER)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                    .andReturn().getResponse().getContentAsString();
+            assertThat(page).contains("Tin 31", "Tin 02").doesNotContain("Tin 32", "Tin 01", "<html")
+                    .contains("Tải tin cũ hơn");
+
+            Long oldestShown = all.get(1).getId();
+            mockMvc.perform(get("/messages/{id}/older", id).param("before", oldestShown.toString())
+                            .with(as(TestAccounts.TEACHER)))
+                    .andExpect(content().string(allOf(containsString("Tin 01"), not(containsString("Tin 02")),
+                            not(containsString("Tải tin cũ hơn")))));
+        }
+
+        @Test
+        @DisplayName("Tin đã xóa hiện 'Tin nhắn đã bị xóa'; tải tin cũ không đánh dấu đã đọc")
+        void deletedAndUnread() throws Exception {
+            Long id = conversationWith(3);
+            List<Message> all = messages(id);
+            mockMvc.perform(post("/messages/{c}/messages/{m}/delete", id, all.getFirst().getId())
+                    .with(as(TestAccounts.PARENT)).with(csrf())).andExpect(status().is3xxRedirection());
+
+            mockMvc.perform(get("/messages/{id}/older", id).param("before", all.getLast().getId().toString())
+                            .with(as(TestAccounts.TEACHER)))
+                    .andExpect(content().string(allOf(containsString("Tin nhắn đã bị xóa"),
+                            not(containsString("Tin 01")), containsString("Tin 02"))));
+
+            ConversationMember teacher = memberRepository.findById(
+                    new ConversationMemberId(id, TestAccounts.TEACHER_ID)).orElseThrow();
+            assertThat(teacher.getLastReadAt()).as("chưa mở hội thoại, chỉ tải tin cũ").isNull();
+        }
+
+        @Test
+        @DisplayName("Người ngoài hội thoại hoặc hội thoại không tồn tại → 403; chưa đăng nhập → /login")
+        void access() throws Exception {
+            Long id = conversationWith(2);
+            String before = messages(id).getLast().getId().toString();
+
+            mockMvc.perform(get("/messages/{id}/older", id).param("before", before)
+                    .with(as(TestAccounts.TEACHER_HEAD))).andExpect(status().isForbidden());
+            mockMvc.perform(get("/messages/{id}/older", 999999).param("before", before)
+                    .with(as(TestAccounts.TEACHER))).andExpect(status().isForbidden());
+            mockMvc.perform(get("/messages/{id}/older", id).param("before", before))
+                    .andExpect(redirectedUrl("/login"));
+        }
+
+        /** Hội thoại PH 0900000005 – GV 0900000003 với count tin "Tin 01".."Tin nn" do PH gửi. */
+        private Long conversationWith(int count) throws Exception {
+            Long id = sendTo(TestAccounts.PARENT, TestAccounts.TEACHER_ID, "Tin 01");
+            for (int i = 2; i <= count; i++) {
+                mockMvc.perform(post("/messages/{id}/send", id).with(as(TestAccounts.PARENT)).with(csrf())
+                                .param("content", "Tin %02d".formatted(i)))
+                        .andExpect(redirectedUrl("/messages/" + id));
+            }
+            return id;
         }
     }
 

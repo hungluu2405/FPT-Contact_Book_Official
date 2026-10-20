@@ -14,6 +14,7 @@ import vn.edu.fpt.contactbook.model.ClubActivity;
 import vn.edu.fpt.contactbook.model.ClubActivityParticipant;
 import vn.edu.fpt.contactbook.model.ClubActivityParticipantId;
 import vn.edu.fpt.contactbook.model.ClubMember;
+import vn.edu.fpt.contactbook.model.enums.ClubActivityStatus;
 import vn.edu.fpt.contactbook.model.enums.ClubMemberRole;
 import vn.edu.fpt.contactbook.model.enums.ClubMemberStatus;
 import vn.edu.fpt.contactbook.model.enums.ClubStatus;
@@ -24,6 +25,7 @@ import vn.edu.fpt.contactbook.repository.ClubActivityRepository;
 import vn.edu.fpt.contactbook.repository.ClubMemberRepository;
 import vn.edu.fpt.contactbook.repository.ClubRepository;
 import vn.edu.fpt.contactbook.repository.NotificationRecipientRepository;
+import vn.edu.fpt.contactbook.repository.UserRepository;
 import vn.edu.fpt.contactbook.security.AppUserDetailsService;
 import vn.edu.fpt.contactbook.service.AuditActions;
 import vn.edu.fpt.contactbook.support.IntegrationTest;
@@ -71,6 +73,7 @@ class ClubIntegrationTest {
     @Autowired ClubActivityParticipantRepository participantRepository;
     @Autowired NotificationRecipientRepository recipientRepository;
     @Autowired AuditLogRepository auditLogRepository;
+    @Autowired UserRepository userRepository;
 
     @Nested
     @DisplayName("ADMIN quản lý CLB")
@@ -248,6 +251,110 @@ class ClubIntegrationTest {
                         .andExpect(status().isForbidden());
                 mockMvc.perform(get("/clubs/1/activities/new").with(as(phone))).andExpect(status().isForbidden());
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("Quản lý hoạt động qua web (review 8a, T2)")
+    class ActivityManagement {
+
+        @Test
+        @DisplayName("Thành viên thường, chủ nhiệm CLB khác, GV, PH: 403 ở danh sách, sửa, hủy, ghi nhận tham dự; "
+                + "hoạt động không đổi")
+        void guards() throws Exception {
+            ClubActivity activity = activity(1L, "Hội thảo", AppTime.now().plusDays(3));
+            ClubActivity started = activity(1L, "Đang diễn ra", AppTime.now().minusHours(1));
+            for (String phone : List.of(MEMBER, OTHER_PRESIDENT, TestAccounts.TEACHER, TestAccounts.PARENT)) {
+                mockMvc.perform(get("/clubs/1/activities").with(as(phone))).andExpect(status().isForbidden());
+                mockMvc.perform(get("/clubs/1/activities/{a}/edit", activity.getId()).with(as(phone)))
+                        .andExpect(status().isForbidden());
+                mockMvc.perform(post("/clubs/1/activities/{a}/edit", activity.getId()).with(as(phone))
+                                .with(csrf()).param("title", "Đã sửa").param("startTime",
+                                        activity.getStartTime().format(INPUT))
+                                .param("endTime", activity.getEndTime().format(INPUT)))
+                        .andExpect(status().isForbidden());
+                mockMvc.perform(post("/clubs/1/activities/{a}/cancel", activity.getId()).with(as(phone))
+                        .with(csrf())).andExpect(status().isForbidden());
+                mockMvc.perform(get("/clubs/1/activities/{a}/attendance", started.getId()).with(as(phone)))
+                        .andExpect(status().isForbidden());
+                mockMvc.perform(post("/clubs/1/activities/{a}/attendance", started.getId()).with(as(phone))
+                        .with(csrf())).andExpect(status().isForbidden());
+            }
+            ClubActivity unchanged = activityRepository.findById(activity.getId()).orElseThrow();
+            assertThat(unchanged.getTitle()).isEqualTo("Hội thảo");
+            assertThat(unchanged.getStatus()).isEqualTo(ClubActivityStatus.PLANNED);
+        }
+
+        @Test
+        @DisplayName("Chủ nhiệm và ADMIN: mở danh sách, sửa, hủy, mở ghi nhận tham dự")
+        void managers() throws Exception {
+            ClubActivity activity = activity(1L, "Hội thảo", AppTime.now().plusDays(3));
+            ClubActivity started = activity(1L, "Đang diễn ra", AppTime.now().minusHours(1));
+            for (String phone : List.of(PRESIDENT, TestAccounts.ADMIN)) {
+                mockMvc.perform(get("/clubs/1/activities").with(as(phone)))
+                        .andExpect(status().isOk()).andExpect(content().string(containsString("Hội thảo")));
+                mockMvc.perform(get("/clubs/1/activities/{a}/edit", activity.getId()).with(as(phone)))
+                        .andExpect(status().isOk());
+                mockMvc.perform(get("/clubs/1/activities/{a}/attendance", started.getId()).with(as(phone)))
+                        .andExpect(status().isOk());
+            }
+            mockMvc.perform(post("/clubs/1/activities/{a}/edit", activity.getId()).with(as(PRESIDENT)).with(csrf())
+                            .param("title", "Hội thảo (đổi tên)")
+                            .param("startTime", activity.getStartTime().format(INPUT))
+                            .param("endTime", activity.getEndTime().format(INPUT)))
+                    .andExpect(redirectedUrl("/clubs/1/activities"));
+            mockMvc.perform(post("/clubs/1/activities/{a}/cancel", activity.getId()).with(as(TestAccounts.ADMIN))
+                    .with(csrf())).andExpect(status().is3xxRedirection());
+
+            ClubActivity changed = activityRepository.findById(activity.getId()).orElseThrow();
+            assertThat(changed.getTitle()).isEqualTo("Hội thảo (đổi tên)");
+            assertThat(changed.getStatus()).isEqualTo(ClubActivityStatus.CANCELLED);
+        }
+
+        @Test
+        @DisplayName("Hoạt động của CLB khác trên đường dẫn CLB 1: 404 (giả định 112), kể cả với chủ nhiệm và ADMIN")
+        void activityOfOtherClub() throws Exception {
+            ClubActivity other = activity(2L, "Đêm nhạc", AppTime.now().plusDays(5));
+            for (String phone : List.of(PRESIDENT, TestAccounts.ADMIN)) {
+                mockMvc.perform(get("/clubs/1/activities/{a}/edit", other.getId()).with(as(phone)))
+                        .andExpect(status().isNotFound());
+            }
+        }
+
+        @Test
+        @DisplayName("Đổi vai trò thành viên: chủ nhiệm được; thành viên thường, chủ nhiệm CLB khác: 403")
+        void changeRole() throws Exception {
+            // club_members.id 2: users.id 19, MEMBER, ACTIVE trong CLB 1.
+            for (String phone : List.of(MEMBER, OTHER_PRESIDENT)) {
+                mockMvc.perform(post("/clubs/1/members/2/role").with(as(phone)).with(csrf())
+                        .param("role", "VICE_PRESIDENT")).andExpect(status().isForbidden());
+            }
+            assertThat(memberRepository.findById(2L).orElseThrow().getMemberRole()).isEqualTo(ClubMemberRole.MEMBER);
+
+            mockMvc.perform(post("/clubs/1/members/2/role").with(as(PRESIDENT)).with(csrf())
+                    .param("role", "VICE_PRESIDENT")).andExpect(status().is3xxRedirection());
+            assertThat(memberRepository.findById(2L).orElseThrow().getMemberRole())
+                    .isEqualTo(ClubMemberRole.VICE_PRESIDENT);
+        }
+
+        @Test
+        @DisplayName("Chưa đăng nhập: chuyển tới trang đăng nhập")
+        void anonymous() throws Exception {
+            ClubActivity activity = activity(1L, "Hội thảo", AppTime.now().plusDays(3));
+            mockMvc.perform(get("/clubs/1/activities")).andExpect(redirectedUrl("/login"));
+            mockMvc.perform(get("/clubs/1/activities/{a}/attendance", activity.getId()))
+                    .andExpect(redirectedUrl("/login"));
+        }
+
+        /** Hoạt động 2 giờ của CLB, ghi thẳng vào database (để có hoạt động đã bắt đầu, form không cho tạo). */
+        private ClubActivity activity(Long clubId, String title, LocalDateTime start) {
+            ClubActivity activity = new ClubActivity();
+            activity.setClub(clubRepository.findById(clubId).orElseThrow());
+            activity.setTitle(title);
+            activity.setStartTime(start.withSecond(0).withNano(0));
+            activity.setEndTime(start.withSecond(0).withNano(0).plusHours(2));
+            activity.setCreatedBy(userRepository.getReferenceById(18L));
+            return activityRepository.saveAndFlush(activity);
         }
     }
 

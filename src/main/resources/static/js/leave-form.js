@@ -8,13 +8,19 @@
         return;
     }
 
+    // Ô ngày là ô chữ dd/mm/yyyy (nhận cả d/m/yyyy); trả '' khi chưa nhập đủ để không gợi ý tiêu đề sai.
     function format(value) {
-        var parts = value.split('-');
-        return parts.length === 3 ? parts[2] + '/' + parts[1] + '/' + parts[0] : '';
+        var match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value.trim());
+        if (!match) {
+            return '';
+        }
+        return ('0' + match[1]).slice(-2) + '/' + ('0' + match[2]).slice(-2) + '/' + match[3];
     }
 
     function suggestion() {
-        return from.value && to.value ? 'Đơn xin nghỉ học từ ' + format(from.value) + ' đến ' + format(to.value) : '';
+        var start = format(from.value);
+        var end = format(to.value);
+        return start && end ? 'Đơn xin nghỉ học từ ' + start + ' đến ' + end : '';
     }
 
     var auto = title.value === '' || title.value === suggestion();
@@ -27,7 +33,7 @@
     title.addEventListener('input', function () {
         auto = title.value === '';
     });
-    from.addEventListener('change', refresh);
-    to.addEventListener('change', refresh);
+    from.addEventListener('input', refresh);
+    to.addEventListener('input', refresh);
     refresh();
 })();

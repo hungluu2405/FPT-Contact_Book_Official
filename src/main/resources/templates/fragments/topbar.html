@@ -12,7 +12,7 @@
         <span th:text="#{app.brand}">FPT University</span>
     </a>
     <div class="app-user" sec:authorize="isAuthenticated()">
-        <!--/* Số chưa đọc do NotificationModelAdvice đưa vào Model (một truy vấn đếm). */-->
+        <!--/* Số chưa đọc do MenuBadgeInterceptor đưa vào Model sau khi xử lý trang (một truy vấn đếm). */-->
         <a class="app-bell" th:href="@{/notifications}"
            th:attr="aria-label=#{notification.bell(${unreadNotifications} ?: 0)}">
             <i class="bi bi-bell-fill"></i>

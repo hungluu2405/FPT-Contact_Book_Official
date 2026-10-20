@@ -36,7 +36,7 @@ public class UserForm {
     private Gender gender;
 
     @Past(message = "{user.date-of-birth.past}")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(pattern = DateFormats.DATE, fallbackPatterns = {DateFormats.DATE_SHORT, DateFormats.ISO_DATE})
     private LocalDate dateOfBirth;
 
     @Email(message = "{profile.email.invalid}")

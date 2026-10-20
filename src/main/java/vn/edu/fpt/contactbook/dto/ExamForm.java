@@ -23,15 +23,15 @@ public class ExamForm {
     private ExamType examType;
 
     @NotNull(message = "{exam.date.required}")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(pattern = DateFormats.DATE, fallbackPatterns = {DateFormats.DATE_SHORT, DateFormats.ISO_DATE})
     private LocalDate examDate;
 
     @NotNull(message = "{schedule.start-time.required}")
-    @DateTimeFormat(pattern = "HH:mm")
+    @DateTimeFormat(pattern = DateFormats.TIME, fallbackPatterns = DateFormats.TIME_SHORT)
     private LocalTime startTime;
 
     @NotNull(message = "{schedule.end-time.required}")
-    @DateTimeFormat(pattern = "HH:mm")
+    @DateTimeFormat(pattern = DateFormats.TIME, fallbackPatterns = DateFormats.TIME_SHORT)
     private LocalTime endTime;
 
     private Long roomId;

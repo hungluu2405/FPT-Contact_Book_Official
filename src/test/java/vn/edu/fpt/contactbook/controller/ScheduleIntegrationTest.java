@@ -12,7 +12,9 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import vn.edu.fpt.contactbook.model.AuditLog;
 import vn.edu.fpt.contactbook.model.ClassSection;
 import vn.edu.fpt.contactbook.model.ClassSession;
+import vn.edu.fpt.contactbook.model.Exam;
 import vn.edu.fpt.contactbook.model.Subject;
+import vn.edu.fpt.contactbook.model.enums.ExamType;
 import vn.edu.fpt.contactbook.model.enums.SessionStatus;
 import vn.edu.fpt.contactbook.repository.AuditLogRepository;
 import vn.edu.fpt.contactbook.repository.ClassSectionRepository;
@@ -28,6 +30,7 @@ import vn.edu.fpt.contactbook.support.IntegrationTest;
 import vn.edu.fpt.contactbook.support.TestAccounts;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -206,6 +209,52 @@ class ScheduleIntegrationTest {
             mockMvc.perform(weekly(ia, "2026-11-02", "2").with(head)).andExpect(status().isForbidden());
             mockMvc.perform(get("/admin/sections/" + ia + "/exams/new").with(head)).andExpect(status().isForbidden());
             assertThat(classSessionRepository.findByClassSectionIdOrderBySessionNoAsc(ia)).isEmpty();
+        }
+
+        @Test
+        @DisplayName("TBM SE sửa, hủy buổi học và sửa, xóa lịch thi của lớp bộ môn IA → 403, dữ liệu không đổi "
+                + "(review 8a, T3)")
+        void headCannotChangeOtherDepartmentSchedule() throws Exception {
+            ClassSection ia = classSectionRepository.findById(iaSection()).orElseThrow();
+            ClassSession session = new ClassSession();
+            session.setClassSection(ia);
+            session.setSessionNo((short) 1);
+            session.setSessionDate(LocalDate.of(2026, 11, 2));
+            session.setStartTime(LocalTime.of(7, 30));
+            session.setEndTime(LocalTime.of(9, 45));
+            session = classSessionRepository.saveAndFlush(session);
+            Exam exam = new Exam();
+            exam.setClassSection(ia);
+            exam.setExamType(ExamType.FINAL);
+            exam.setExamDate(LocalDate.of(2026, 12, 16));
+            exam.setStartTime(LocalTime.of(8, 0));
+            exam.setEndTime(LocalTime.of(9, 30));
+            exam = examRepository.saveAndFlush(exam);
+            String base = "/admin/sections/" + ia.getId();
+            RequestPostProcessor head = as(TestAccounts.TEACHER_HEAD);
+
+            mockMvc.perform(get(base + "/sessions/" + session.getId() + "/edit").with(head))
+                    .andExpect(status().isForbidden());
+            mockMvc.perform(post(base + "/sessions/" + session.getId() + "/edit").with(head).with(csrf())
+                            .param("sessionDate", "2026-11-03").param("startTime", "13:00").param("endTime", "15:15"))
+                    .andExpect(status().isForbidden());
+            mockMvc.perform(post(base + "/sessions/" + session.getId() + "/cancel").with(head).with(csrf()))
+                    .andExpect(status().isForbidden());
+            mockMvc.perform(get(base + "/exams/" + exam.getId() + "/edit").with(head))
+                    .andExpect(status().isForbidden());
+            mockMvc.perform(post(base + "/exams/" + exam.getId() + "/edit").with(head).with(csrf())
+                            .param("examType", "MIDTERM").param("examDate", "2026-12-17").param("startTime", "13:00")
+                            .param("endTime", "14:00"))
+                    .andExpect(status().isForbidden());
+            mockMvc.perform(post(base + "/exams/" + exam.getId() + "/delete").with(head).with(csrf()))
+                    .andExpect(status().isForbidden());
+
+            ClassSession sessionAfter = classSessionRepository.findById(session.getId()).orElseThrow();
+            assertThat(sessionAfter.getSessionDate()).isEqualTo(LocalDate.of(2026, 11, 2));
+            assertThat(sessionAfter.getStatus()).isEqualTo(SessionStatus.SCHEDULED);
+            Exam examAfter = examRepository.findById(exam.getId()).orElseThrow();
+            assertThat(examAfter.getExamType()).isEqualTo(ExamType.FINAL);
+            assertThat(examAfter.getExamDate()).isEqualTo(LocalDate.of(2026, 12, 16));
         }
 
         @ParameterizedTest

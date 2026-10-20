@@ -10,23 +10,32 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import vn.edu.fpt.contactbook.model.ClassSection;
+import vn.edu.fpt.contactbook.model.Semester;
 import vn.edu.fpt.contactbook.model.Notification;
 import vn.edu.fpt.contactbook.model.NotificationRecipient;
 import vn.edu.fpt.contactbook.model.User;
+import vn.edu.fpt.contactbook.repository.ClassSectionRepository;
 import vn.edu.fpt.contactbook.repository.NotificationFileRepository;
 import vn.edu.fpt.contactbook.repository.NotificationRecipientRepository;
 import vn.edu.fpt.contactbook.repository.NotificationRepository;
+import vn.edu.fpt.contactbook.repository.SemesterRepository;
+import vn.edu.fpt.contactbook.repository.SubjectRepository;
+import vn.edu.fpt.contactbook.repository.TeacherRepository;
 import vn.edu.fpt.contactbook.repository.UserRepository;
 import vn.edu.fpt.contactbook.security.AppUserDetailsService;
 import vn.edu.fpt.contactbook.support.IntegrationTest;
 import vn.edu.fpt.contactbook.support.TestAccounts;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -54,6 +63,10 @@ class NotificationIntegrationTest {
     @Autowired NotificationRecipientRepository recipientRepository;
     @Autowired NotificationFileRepository notificationFileRepository;
     @Autowired UserRepository userRepository;
+    @Autowired SemesterRepository semesterRepository;
+    @Autowired SubjectRepository subjectRepository;
+    @Autowired TeacherRepository teacherRepository;
+    @Autowired ClassSectionRepository classSectionRepository;
 
     @Nested
     @DisplayName("Gửi và đọc")
@@ -172,6 +185,60 @@ class NotificationIntegrationTest {
                     "/notifications/sent")) {
                 mockMvc.perform(get(url)).andExpect(redirectedUrl("/login"));
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("Ô chọn lớp học phần trên form gửi")
+    class SectionOptions {
+
+        @Test
+        @DisplayName("Có lớp của học kỳ chưa kết thúc và học kỳ vừa kết thúc; lớp của học kỳ kết thúc trước đó không "
+                + "hiện (ADMIN và GV)")
+        void openAndLatestEndedSemesters() throws Exception {
+            LocalDate today = AppTime.today();
+            ClassSection older = section("OLDER-01", semester("ZZ-OLD", today.minusYears(30).minusMonths(4),
+                    today.minusYears(30)));
+            ClassSection justEnded = section("ENDED-01", semester("ZZ-END", today.minusMonths(5),
+                    today.minusDays(1)));
+            ClassSection open = section("OPEN-01", semester("ZZ-OPEN", today.minusMonths(1), today));
+
+            // GV002 (0900000003) dạy cả ba lớp vừa tạo.
+            for (String phone : List.of(TestAccounts.ADMIN, TestAccounts.TEACHER)) {
+                mockMvc.perform(get("/notifications/new").with(as(phone)))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(allOf(containsString(open.getCode()),
+                                containsString(justEnded.getCode()), not(containsString(older.getCode())))));
+            }
+        }
+
+        @Test
+        @DisplayName("Ô chọn chỉ thu gọn lựa chọn: ADMIN gửi tay tới lớp học kỳ đã kết thúc không bị 403")
+        void endedSectionStillAllowedByScope() throws Exception {
+            LocalDate today = AppTime.today();
+            ClassSection ended = section("ENDED-02", semester("ZZ-END2", today.minusMonths(5), today.minusDays(1)));
+
+            // Lớp mới tạo chưa có sinh viên nên nhận lỗi nghiệp vụ "không còn người nhận", không phải 403.
+            mockMvc.perform(sectionForm(ended.getId()).with(as(TestAccounts.ADMIN)))
+                    .andExpect(result -> assertThat(result.getResponse().getStatus()).isNotEqualTo(403));
+        }
+
+        private Semester semester(String code, LocalDate start, LocalDate end) {
+            Semester semester = new Semester();
+            semester.setCode(code);
+            semester.setName("Học kỳ " + code);
+            semester.setStartDate(start);
+            semester.setEndDate(end);
+            return semesterRepository.saveAndFlush(semester);
+        }
+
+        private ClassSection section(String code, Semester semester) {
+            ClassSection section = new ClassSection();
+            section.setCode(code);
+            section.setSubject(subjectRepository.findById(1L).orElseThrow());
+            section.setSemester(semester);
+            section.setTeacher(teacherRepository.findById(2L).orElseThrow());
+            return classSectionRepository.saveAndFlush(section);
         }
     }
 

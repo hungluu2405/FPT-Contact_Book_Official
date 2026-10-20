@@ -10,10 +10,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Xóa và tạo lại database test từ database/fpt_contact_book.sql, đúng một lần cho mỗi lượt chạy test (JVM).
+ * Xóa và tạo lại database test từ database/fpt_contact_book.sql rồi chạy các migration trong database/migrations,
+ * đúng một lần cho mỗi lượt chạy test (JVM).
  * Gắn lên lớp test cần database bằng {@code @ExtendWith(TestDatabaseExtension.class)}.
  */
 public class TestDatabaseExtension implements BeforeAllCallback {
@@ -22,6 +24,7 @@ public class TestDatabaseExtension implements BeforeAllCallback {
             "jdbc:sqlserver://localhost:1433;databaseName=FptContactBook_test;encrypt=true;trustServerCertificate=true";
     static final String DEFAULT_USERNAME = "sa";
     static final Path SCRIPT = Path.of("database", "fpt_contact_book.sql");
+    static final Path MIGRATIONS = Path.of("database", "migrations");
 
     private static final Logger log = LoggerFactory.getLogger(TestDatabaseExtension.class);
     private static final String STORE_KEY = TestDatabaseExtension.class.getName();
@@ -44,7 +47,9 @@ public class TestDatabaseExtension implements BeforeAllCallback {
         String username = env("TEST_DB_USERNAME", DEFAULT_USERNAME);
         String password = env("TEST_DB_PASSWORD", "");
 
-        List<String> batches = SqlScriptLoader.load(SCRIPT, databaseName);
+        List<String> batches = new ArrayList<>(SqlScriptLoader.load(SCRIPT, databaseName));
+        // Migration chạy sau script gốc, theo thứ tự tên file (như khi chủ dự án chạy tay trên database dev).
+        batches.addAll(SqlScriptLoader.loadMigrations(MIGRATIONS, databaseName));
         String masterUrl = url.replaceAll("(?i)(;database(Name)?=)[^;]*", "$1master");
 
         try (Connection connection = DriverManager.getConnection(masterUrl, username, password);
@@ -57,7 +62,8 @@ public class TestDatabaseExtension implements BeforeAllCallback {
         } catch (SQLException e) {
             throw new IllegalStateException("Không tạo được database test " + databaseName, e);
         }
-        log.info("Recreated test database {} from {} ({} batches)", databaseName, SCRIPT, batches.size());
+        log.info("Recreated test database {} from {} and {} ({} batches)", databaseName, SCRIPT, MIGRATIONS,
+                batches.size());
 
         // Spring dùng đúng URL vừa qua rào chắn; system property thắng application-test.properties.
         System.setProperty("spring.datasource.url", url);

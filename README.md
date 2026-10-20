@@ -20,6 +20,12 @@ Hệ thống Sổ liên lạc điện tử Đại học FPT được phát tri�
    sqlcmd -S localhost -E -i database/fpt_contact_book.sql
    ```
 3. Kịch bản sẽ tạo cơ sở dữ liệu `FptContactBook` gồm 36 bảng chuẩn hóa, các ràng buộc toàn vẹn và dữ liệu mẫu thử nghiệm.
+4. Chạy lần lượt các file trong `database/migrations/` theo thứ tự tên (`V001__…`, `V002__…`). Mỗi file chỉ thêm
+   thay đổi mới (không sửa script gốc), có kiểm tra tồn tại nên chạy lại cũng an toàn:
+   ```bash
+   sqlcmd -S localhost -E -f 65001 -i database/migrations/V001__audit_log_indexes.sql
+   ```
+   Test tự động tự chạy script gốc rồi các migration này trên database `FptContactBook_test`.
 
 ---
 
@@ -30,8 +36,8 @@ Hệ thống cấu hình kết nối linh hoạt thông qua các biến môi tr�
 | Biến môi trường | Giá trị mặc định (cho môi trường phát triển local) | Mô tả |
 |---|---|---|
 | `DB_URL` | `jdbc:sqlserver://localhost:1433;databaseName=FptContactBook;encrypt=true;trustServerCertificate=true` | Chuỗi kết nối JDBC SQL Server |
-| `DB_USERNAME` | `sa` | Tên đăng nhập cơ sở dữ liệu |
-| `DB_PASSWORD` | `Fpt@12345` | Mật khẩu truy cập cơ sở dữ liệu |
+| `DB_USERNAME` | `<tên login SQL Server>` | Tên đăng nhập cơ sở dữ liệu. Nên tạo login riêng chỉ có quyền trên `FptContactBook` (và `FptContactBook_test` khi chạy test), không dùng `sa` |
+| `DB_PASSWORD` | *(không có mặc định)* | Mật khẩu của login trên; chỉ đặt bằng biến môi trường, không ghi vào mã nguồn hay tài liệu |
 
 *Lưu ý: Không lưu mật khẩu sản xuất vào mã nguồn hoặc tập tin `.properties`. Tham khảo mẫu tại `src/main/resources/application-example.properties`.*
 
@@ -66,7 +72,8 @@ http://localhost:8080/
 ```text
 c:\Project\fpt_contact_book\
 ├── database/
-│   └── fpt_contact_book.sql       # Script SQL Server 36 bảng (nguồn sự thật cấu trúc dữ liệu)
+│   ├── fpt_contact_book.sql       # Script SQL Server 36 bảng (nguồn sự thật cấu trúc dữ liệu)
+│   └── migrations/                # Thay đổi bổ sung sau script gốc, chạy theo thứ tự tên file
 ├── docs/
 │   ├── SRS.md                     # Tài liệu đặc tả yêu cầu phần mềm
 │   └── ASSUMPTIONS.md             # Danh sách các giả định nghiệp vụ & kỹ thuật

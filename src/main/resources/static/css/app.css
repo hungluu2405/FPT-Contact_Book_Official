@@ -441,3 +441,73 @@ body {
     white-space: pre-wrap;
     word-break: break-word;
 }
+
+/* ---------- Bảng điểm danh: nút trạng thái ---------- */
+.attendance-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* ---------- Bảng thành thẻ trên màn hình nhỏ (class table-stack) ---------- */
+/* Mỗi dòng là một thẻ; ô có data-label hiện nhãn phía trên giá trị; stack-priority lên ngay sau tiêu đề. */
+@media (max-width: 575.98px) {
+    .table-stack thead {
+        display: none;
+    }
+
+    .table-stack,
+    .table-stack tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .table-stack tr {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 0.75rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--color-border);
+        border-radius: 0.75rem;
+    }
+
+    .table-stack td {
+        flex: 0 0 100%;
+        padding: 0.25rem 0;
+        border: 0;
+        text-align: left !important;
+    }
+
+    .table-stack td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        color: var(--color-muted);
+        font-size: 0.85rem;
+        font-weight: 400;
+    }
+
+    .table-stack td.stack-title {
+        order: -2;
+        font-size: 1.1rem;
+    }
+
+    .table-stack td.stack-priority {
+        order: -1;
+        flex-basis: 50%;
+        font-size: 1.15rem;
+        font-weight: 600;
+    }
+
+    .table-stack td.stack-half {
+        flex-basis: 50%;
+    }
+
+    .table-stack .attendance-choices {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .table-stack .attendance-choices .btn {
+        padding: 0.6rem 0.25rem;
+    }
+}

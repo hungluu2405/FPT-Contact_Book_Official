@@ -150,8 +150,6 @@ public class MessageController {
         String path = chat == null || chat.conversationId() == null ? BASE : BASE + "/" + chat.conversationId();
         model.addAttribute("pager", PageUtils.pager(conversations, path, PageUtils.params()));
         model.addAttribute("chat", chat);
-        // NotificationModelAdvice đếm trước khi mở hội thoại đánh dấu đã đọc; đếm lại để menu đúng ngay trang này.
-        model.addAttribute("unreadMessages", messageService.unreadCount(actor.getUserId()));
         model.addAttribute("activeMenu", "messages");
         return VIEW;
     }

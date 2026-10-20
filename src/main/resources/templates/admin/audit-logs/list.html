@@ -34,12 +34,16 @@
             </div>
             <div class="col-md-2">
                 <label for="from" class="form-label" th:text="#{audit.from}">Từ ngày</label>
-                <input id="from" type="date" class="form-control" th:field="*{from}" th:errorclass="is-invalid">
+                <input id="from" type="text" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off"
+                       class="form-control" th:field="*{from}"
+                       th:errorclass="is-invalid">
                 <div class="invalid-feedback" th:if="${#fields.hasErrors('from')}" th:errors="*{from}">Lỗi</div>
             </div>
             <div class="col-md-2">
                 <label for="to" class="form-label" th:text="#{audit.to}">Đến ngày</label>
-                <input id="to" type="date" class="form-control" th:field="*{to}" th:errorclass="is-invalid">
+                <input id="to" type="text" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off"
+                       class="form-control" th:field="*{to}"
+                       th:errorclass="is-invalid">
                 <div class="invalid-feedback" th:if="${#fields.hasErrors('to')}" th:errors="*{to}">Lỗi</div>
             </div>
             <div class="col-12 d-flex gap-2">
