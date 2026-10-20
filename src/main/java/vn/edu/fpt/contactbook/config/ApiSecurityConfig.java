@@ -44,6 +44,7 @@ public class ApiSecurityConfig {
                 // Phạm vi chi tiết (con đã liên kết, dữ liệu của chính mình) kiểm tra lại ở service.
                 .requestMatchers("/api/v1/student/**").hasRole(RoleCodes.STUDENT)
                 .requestMatchers("/api/v1/parent/**").hasRole(RoleCodes.PARENT)
+                .requestMatchers("/api/v1/teacher/**").hasAnyRole(RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT)
                 .anyRequest().authenticated()
             )
             .csrf(AbstractHttpConfigurer::disable)

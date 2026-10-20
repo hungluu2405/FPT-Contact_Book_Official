@@ -61,7 +61,7 @@ class RequestPages {
     /** Danh sách cần duyệt; status là chuỗi trên URL (mặc định PENDING, "ALL" là tất cả). */
     String reviewList(Model model, AppUserPrincipal actor, View view, String status, int page, String baseUrl,
                       String title) {
-        RequestStatus filter = parseStatus(status);
+        RequestStatus filter = RequestStatusFilter.parse(status);
         Page<RequestListItem> items = requestService.reviewQueue(actor, view, filter, page);
         String selected = filter == null ? "ALL" : filter.name();
         model.addAttribute("items", items);
@@ -145,12 +145,5 @@ class RequestPages {
             redirectAttributes.addFlashAttribute("reviewComment", comment);
         }
         return "redirect:" + baseUrl + "/" + id;
-    }
-
-    private static RequestStatus parseStatus(String status) {
-        if (status == null || status.isBlank()) {
-            return RequestStatus.PENDING;
-        }
-        return Arrays.stream(RequestStatus.values()).filter(s -> s.name().equals(status)).findFirst().orElse(null);
     }
 }
