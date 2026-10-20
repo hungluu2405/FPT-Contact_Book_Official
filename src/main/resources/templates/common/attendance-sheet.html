@@ -28,7 +28,9 @@
                     <i class="bi bi-check2-all"></i> <span th:text="#{attendance.all-present}">Tất cả có mặt</span></button>
             </div>
             <div class="table-responsive">
-                <table class="table align-middle mb-0">
+                <!--/* table-stack: trên màn hình nhỏ mỗi sinh viên là một thẻ (app.css); chỉ có một bản HTML nên
+                     mỗi statuses[...] chỉ được gửi một lần. */-->
+                <table class="table align-middle mb-0 table-stack">
                     <thead>
                     <tr>
                         <th th:text="#{attendance.student-code}">Mã SV</th>
@@ -39,27 +41,31 @@
                     </thead>
                     <tbody>
                     <tr th:each="row : ${sheet.rows}">
-                        <td th:text="${row.studentCode}">SE190001</td>
-                        <td>
-                            <span th:text="${row.fullName}">Nguyễn Văn A</span>
+                        <td class="stack-half text-muted" th:text="${row.studentCode}">SE190001</td>
+                        <td class="stack-title">
+                            <span class="fw-semibold" th:text="${row.fullName}">Nguyễn Văn A</span>
                             <span th:if="${row.approvedLeave}" class="badge text-bg-info ms-1"
                                   th:text="#{attendance.approved-leave}">Có đơn nghỉ được duyệt</span>
                         </td>
-                        <td>
-                            <div th:if="${canSave}" class="d-flex flex-wrap gap-3" role="radiogroup"
+                        <td class="stack-full">
+                            <!--/* Nút lớn (btn-check), bấm dễ trên điện thoại; màu theo trạng thái như nhãn điểm danh. */-->
+                            <div th:if="${canSave}" class="attendance-choices" role="radiogroup"
                                  th:attr="aria-label=${row.fullName}">
-                                <div class="form-check" th:each="st : ${statuses}">
-                                    <input class="form-check-input" type="radio"
+                                <th:block th:each="st : ${statuses}">
+                                    <input class="btn-check" type="radio" autocomplete="off"
                                            th:id="'st-' + ${row.studentId} + '-' + ${st}"
                                            th:name="'statuses[' + ${row.studentId} + ']'" th:value="${st}"
                                            th:checked="${form.statuses[row.studentId] == st}">
-                                    <label class="form-check-label" th:for="'st-' + ${row.studentId} + '-' + ${st}"
+                                    <label class="btn" th:for="'st-' + ${row.studentId} + '-' + ${st}"
+                                           th:classappend="${st.name() == 'PRESENT' ? 'btn-outline-success'
+                                               : (st.name() == 'LATE' ? 'btn-outline-warning'
+                                               : (st.name() == 'ABSENT_EXCUSED' ? 'btn-outline-info' : 'btn-outline-danger'))}"
                                            th:text="#{'attendance-status.' + ${st}}">Có mặt</label>
-                                </div>
+                                </th:block>
                             </div>
                             <th:block th:unless="${canSave}"><span th:replace="~{fragments/attendance :: status(${row.status})}"></span></th:block>
                         </td>
-                        <td class="small" th:text="${row.note}">Ghi chú</td>
+                        <td class="small" th:attr="data-label=#{attendance.note}" th:text="${row.note}">Ghi chú</td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(sheet.rows)}">
                         <td colspan="4" class="text-center text-muted py-4" th:text="#{attendance.no-students}">Chưa có sinh viên</td>

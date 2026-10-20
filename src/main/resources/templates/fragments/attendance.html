@@ -8,17 +8,24 @@
       th:classappend="${status == null ? 'text-bg-light' : (status.name() == 'PRESENT' ? 'text-bg-success' : (status.name() == 'LATE' ? 'text-bg-warning' : (status.name() == 'ABSENT_EXCUSED' ? 'text-bg-info' : 'text-bg-danger')))}"
       th:text="${status == null} ? #{attendance.not-marked} : #{'attendance-status.' + ${status}}">Có mặt</span>
 
-<!--/* Các ô số liệu của một dòng: có mặt, muộn, vắng có phép, vắng không phép, chuyên cần, tỷ lệ vắng kèm cảnh báo. */-->
+<!--/*
+  Các ô số liệu của một dòng: có mặt, muộn, vắng có phép, vắng không phép, chuyên cần, tỷ lệ vắng kèm cảnh báo.
+  data-label là nhãn của ô khi bảng có class table-stack hiện thành thẻ trên màn hình nhỏ (app.css); stack-priority
+  đưa chuyên cần và tỷ lệ vắng lên ngay dưới tên môn, stack-half xếp các số đếm hai cột.
+*/-->
 <th:block th:fragment="cells(s, threshold)">
-    <td class="text-center" th:text="${s.present}">0</td>
-    <td class="text-center" th:text="${s.late}">0</td>
-    <td class="text-center" th:text="${s.absentExcused}">0</td>
-    <td class="text-center" th:text="${s.absentUnexcused}">0</td>
-    <td class="text-center">
+    <td class="text-center stack-half" th:attr="data-label=#{attendance-status.PRESENT}" th:text="${s.present}">0</td>
+    <td class="text-center stack-half" th:attr="data-label=#{attendance-status.LATE}" th:text="${s.late}">0</td>
+    <td class="text-center stack-half" th:attr="data-label=#{attendance-status.ABSENT_EXCUSED}"
+        th:text="${s.absentExcused}">0</td>
+    <td class="text-center stack-half" th:attr="data-label=#{attendance-status.ABSENT_UNEXCUSED}"
+        th:text="${s.absentUnexcused}">0</td>
+    <td class="text-center stack-priority" th:attr="data-label=#{attendance.rate}">
         <span th:text="${s.attendanceRate} != null ? ${#numbers.formatDecimal(s.attendanceRate, 1, 1, 'COMMA')} + '%' : '—'">100%</span>
         <div class="small text-muted" th:text="#{attendance.marked-of(${s.markedSessions()}, ${s.totalSessions})}">đã điểm danh 0/0</div>
     </td>
-    <td class="text-center" th:classappend="${s.warning} ? 'text-danger fw-bold'">
+    <td class="text-center stack-priority" th:attr="data-label=#{attendance.absent-rate}"
+        th:classappend="${s.warning} ? 'text-danger fw-bold'">
         <span th:text="${#numbers.formatDecimal(s.absentRate, 1, 1, 'COMMA')} + '%'">0%</span>
         <div th:if="${s.warning}"><span class="badge text-bg-danger"><i class="bi bi-exclamation-triangle-fill"></i>
             <span th:text="#{attendance.warning(${threshold})}">Vắng quá 20%</span></span></div>
