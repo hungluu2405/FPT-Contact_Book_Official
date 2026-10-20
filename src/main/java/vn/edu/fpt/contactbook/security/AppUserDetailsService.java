@@ -14,11 +14,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
  * Nạp người dùng theo số điện thoại ĐÃ chuẩn hóa (PhoneAuthenticationProvider chuẩn hóa trước),
- * kèm vai trò và bộ môn: 2 câu truy vấn.
+ * kèm vai trò và bộ môn: 2 câu truy vấn. REST API nạp theo users.id (loadById).
  */
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,16 @@ public class AppUserDetailsService implements UserDetailsService {
     public AppUserPrincipal loadUserByUsername(String phone) {
         User user = userRepository.findByPhone(phone)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return toPrincipal(user);
+    }
+
+    /** Nạp theo users.id (sub của JWT, REST API); không có thì rỗng. */
+    @Transactional(readOnly = true)
+    public Optional<AppUserPrincipal> loadById(Long userId) {
+        return userRepository.findById(userId).map(this::toPrincipal);
+    }
+
+    private AppUserPrincipal toPrincipal(User user) {
         List<UserRole> userRoles = userRoleRepository.findByUserId(user.getId());
 
         Set<String> roles = new HashSet<>();
