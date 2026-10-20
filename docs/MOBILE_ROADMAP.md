@@ -43,7 +43,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - Thông báo: danh sách, đánh dấu đã đọc, tải tệp.
   - Đơn nghỉ: gửi, xem, hủy.
   - Phạm vi dữ liệu kiểm tra ở service: STUDENT chỉ xem của mình, PARENT chỉ xem con đã liên kết.
-- **9d: API cho GV**
+- **9d: API cho GV (đã xong, nhánh `feature/phase-9d-teacher-api`; giả định 139–140)**
   - Lịch dạy, các lớp đang dạy, điểm danh một buổi (xem và lưu), duyệt hoặc từ chối đơn nghỉ.
   - TEACHER chỉ thao tác lớp mình dạy.
   - Nhập điểm, sửa lịch, danh mục chỉ làm trên Web.
@@ -71,4 +71,4 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
 - Không sửa `database/fpt_contact_book.sql`.
 
 ## 6. Câu mở đầu cho phiên kế tiếp
-"Đọc `docs/MOBILE_ROADMAP.md` và `docs/API.md`, rồi trình kế hoạch chi tiết giai đoạn 9d để tôi duyệt."
+"Đọc `docs/MOBILE_ROADMAP.md`, `docs/API.md` và `mobile/CLAUDE.md`, rồi trình kế hoạch chi tiết giai đoạn 10a để tôi duyệt."
