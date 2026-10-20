@@ -11,15 +11,19 @@ import org.mockito.quality.Strictness;
 import org.springframework.security.access.AccessDeniedException;
 import vn.edu.fpt.contactbook.model.ClassSection;
 import vn.edu.fpt.contactbook.model.Department;
+import vn.edu.fpt.contactbook.model.Semester;
 import vn.edu.fpt.contactbook.model.Teacher;
 import vn.edu.fpt.contactbook.model.enums.NotificationTargetType;
 import vn.edu.fpt.contactbook.model.enums.RoleCodes;
 import vn.edu.fpt.contactbook.model.enums.SectionStatus;
 import vn.edu.fpt.contactbook.repository.ClassSectionRepository;
 import vn.edu.fpt.contactbook.repository.NotificationAudienceRepository;
+import vn.edu.fpt.contactbook.repository.SemesterRepository;
 import vn.edu.fpt.contactbook.repository.TeacherRepository;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
+import vn.edu.fpt.contactbook.util.AppTime;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,7 +32,13 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -49,13 +59,14 @@ class NotificationAudienceTest {
     @Mock NotificationAudienceRepository audienceRepository;
     @Mock ClassSectionRepository classSectionRepository;
     @Mock TeacherRepository teacherRepository;
+    @Mock SemesterRepository semesterRepository;
 
     private NotificationAudience audience;
 
     @BeforeEach
     void setUp() {
         audience = new NotificationAudience(audienceRepository, classSectionRepository, teacherRepository,
-                new UserAccessPolicy(teacherRepository));
+                semesterRepository, new UserAccessPolicy(teacherRepository));
         Department se = CatalogTestData.department(1L, "SE");
         Department ia = CatalogTestData.department(38L, "IA");
         Teacher gv002 = CatalogTestData.teacher(2L, "GV002", se);
@@ -158,5 +169,57 @@ class NotificationAudienceTest {
 
         assertThat(audience.studentsAndParents(List.of(1L))).containsExactly(4L, 5L);
         assertThat(audience.studentsAndParents(List.of())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Ô chọn lớp học phần chỉ gồm học kỳ chưa kết thúc (end_date ≥ hôm nay), theo phạm vi người gửi")
+    void sectionOptionsOnlyOpenSemesters() {
+        LocalDate today = AppTime.today();
+        when(semesterRepository.findByEndDateGreaterThanEqualOrderByStartDateDesc(today))
+                .thenReturn(List.of(semester(1L, today), semester(38L, today.plusMonths(6))));
+
+        audience.sections(ADMIN);
+        audience.sections(TEACHER);
+        audience.sections(HEAD_SE);
+
+        verify(classSectionRepository).findForNotification(eq(List.of(1L, 38L)), eq(true), isNull(),
+                eq(CatalogSupport.NO_IDS));
+        verify(classSectionRepository).findForNotification(eq(List.of(1L, 38L)), eq(false), eq(2L),
+                eq(CatalogSupport.NO_IDS));
+        verify(classSectionRepository).findForNotification(eq(List.of(1L, 38L)), eq(false), isNull(),
+                eq(Set.of(1L)));
+    }
+
+    @Test
+    @DisplayName("Không còn học kỳ chưa kết thúc: dùng học kỳ mới nhất; chưa có học kỳ nào: rỗng, không truy vấn")
+    void sectionOptionsFallback() {
+        when(semesterRepository.findByEndDateGreaterThanEqualOrderByStartDateDesc(any())).thenReturn(List.of());
+        when(semesterRepository.findAllByOrderByStartDateDesc())
+                .thenReturn(List.of(semester(37L, LocalDate.of(2026, 8, 23)),
+                        semester(5L, LocalDate.of(2025, 12, 20))));
+
+        audience.sections(ADMIN);
+        verify(classSectionRepository).findForNotification(eq(List.of(37L)), eq(true), isNull(), any());
+
+        when(semesterRepository.findAllByOrderByStartDateDesc()).thenReturn(List.of());
+        assertThat(audience.sections(TEACHER)).isEmpty();
+        verify(classSectionRepository, never()).findForNotification(any(), eq(false), any(), any());
+    }
+
+    @Test
+    @DisplayName("Người không có phạm vi lớp học phần (SV): rỗng, không truy vấn")
+    void sectionOptionsNoScope() {
+        when(semesterRepository.findByEndDateGreaterThanEqualOrderByStartDateDesc(any()))
+                .thenReturn(List.of(semester(1L, AppTime.today())));
+
+        assertThat(audience.sections(STUDENT)).isEmpty();
+        verify(classSectionRepository, never()).findForNotification(any(), anyBoolean(), any(), any());
+    }
+
+    private static Semester semester(Long id, LocalDate endDate) {
+        Semester semester = CatalogTestData.semester(id, "S" + id);
+        semester.setStartDate(endDate.minusMonths(4));
+        semester.setEndDate(endDate);
+        return semester;
     }
 }

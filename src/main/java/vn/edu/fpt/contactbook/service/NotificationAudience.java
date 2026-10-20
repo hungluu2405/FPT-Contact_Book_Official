@@ -4,13 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import vn.edu.fpt.contactbook.model.ClassSection;
+import vn.edu.fpt.contactbook.model.Semester;
 import vn.edu.fpt.contactbook.model.Teacher;
 import vn.edu.fpt.contactbook.model.enums.NotificationTargetType;
 import vn.edu.fpt.contactbook.model.enums.RoleCodes;
 import vn.edu.fpt.contactbook.repository.ClassSectionRepository;
 import vn.edu.fpt.contactbook.repository.NotificationAudienceRepository;
+import vn.edu.fpt.contactbook.repository.SemesterRepository;
 import vn.edu.fpt.contactbook.repository.TeacherRepository;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.util.Collection;
 import java.util.EnumSet;
@@ -37,6 +40,7 @@ public class NotificationAudience {
     private final NotificationAudienceRepository audienceRepository;
     private final ClassSectionRepository classSectionRepository;
     private final TeacherRepository teacherRepository;
+    private final SemesterRepository semesterRepository;
     private final UserAccessPolicy userAccessPolicy;
 
     /** Phạm vi người gửi được chọn trên form; rỗng là không được gửi thông báo. */
@@ -87,20 +91,34 @@ public class NotificationAudience {
         };
     }
 
-    /** Lớp học phần người gửi được chọn (ADMIN mọi lớp), mới nhất trước. */
+    /**
+     * Lớp học phần cho ô chọn trên form gửi (ADMIN mọi lớp, TBM lớp bộ môn mình, GV lớp mình dạy), mới nhất trước.
+     * Chỉ lớp của học kỳ chưa kết thúc (end_date ≥ hôm nay); không còn học kỳ nào như vậy thì học kỳ mới nhất. Đây chỉ
+     * là thu gọn lựa chọn: khi gửi, phạm vi vẫn kiểm tra bằng canSend như trước.
+     */
     public List<ClassSection> sections(AppUserPrincipal actor) {
-        if (userAccessPolicy.isAdmin(actor)) {
-            return classSectionRepository.findAllByOrderBySemesterStartDateDescCodeAsc();
-        }
-        Set<ClassSection> sections = new LinkedHashSet<>();
+        boolean admin = userAccessPolicy.isAdmin(actor);
         Set<Long> departments = headDepartments(actor);
-        if (!departments.isEmpty()) {
-            sections.addAll(classSectionRepository.findBySubjectDepartmentIdInOrderBySemesterStartDateDescCodeAsc(
-                    departments));
+        Long teacherId = admin ? null : teacher(actor).map(Teacher::getId).orElse(null);
+        if (!admin && departments.isEmpty() && teacherId == null) {
+            return List.of();
         }
-        teacher(actor).ifPresent(t -> sections.addAll(
-                classSectionRepository.findByTeacherIdOrderBySemesterStartDateDescCodeAsc(t.getId())));
-        return List.copyOf(sections);
+        List<Long> semesterIds = optionSemesterIds();
+        if (semesterIds.isEmpty()) {
+            return List.of();
+        }
+        // Danh sách IN không được rỗng (như ClassSectionService.list).
+        return classSectionRepository.findForNotification(semesterIds, admin, teacherId,
+                departments.isEmpty() ? CatalogSupport.NO_IDS : departments);
+    }
+
+    private List<Long> optionSemesterIds() {
+        List<Semester> open = semesterRepository.findByEndDateGreaterThanEqualOrderByStartDateDesc(AppTime.today());
+        if (!open.isEmpty()) {
+            return open.stream().map(Semester::getId).toList();
+        }
+        return semesterRepository.findAllByOrderByStartDateDesc().stream().findFirst()
+                .map(semester -> List.of(semester.getId())).orElse(List.of());
     }
 
     public Set<Long> headDepartments(AppUserPrincipal actor) {

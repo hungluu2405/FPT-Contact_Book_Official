@@ -38,6 +38,7 @@ import vn.edu.fpt.contactbook.repository.NotificationRecipientRepository;
 import vn.edu.fpt.contactbook.repository.NotificationRepository;
 import vn.edu.fpt.contactbook.repository.RoleRepository;
 import vn.edu.fpt.contactbook.repository.SchoolClassRepository;
+import vn.edu.fpt.contactbook.repository.SemesterRepository;
 import vn.edu.fpt.contactbook.repository.StoredFileRepository;
 import vn.edu.fpt.contactbook.repository.TeacherRepository;
 import vn.edu.fpt.contactbook.repository.UserRepository;
@@ -97,7 +98,8 @@ class NotificationServiceTest {
         service = new NotificationService(notificationRepository, recipientRepository, notificationFileRepository,
                 storedFileRepository, userRepository, roleRepository, departmentRepository, schoolClassRepository,
                 classSectionRepository, new NotificationAudience(audienceRepository, classSectionRepository,
-                teacherRepository, policy), storage, mock(CatalogLookupService.class), policy,
+                teacherRepository, mock(SemesterRepository.class), policy), storage, mock(CatalogLookupService.class),
+                policy,
                 new AuditService(auditLogRepository, userRepository));
 
         Department se = CatalogTestData.department(1L, "SE");

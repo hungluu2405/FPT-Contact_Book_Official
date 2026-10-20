@@ -59,15 +59,21 @@ public interface ClassSectionRepository extends JpaRepository<ClassSection, Long
     @Query("SELECT c FROM ClassSection c WHERE c.id = :id")
     Optional<ClassSection> findByIdForUpdate(@Param("id") Long id);
 
-    /** Lớp học phần để chọn đích gửi thông báo, mới nhất trước: của một giảng viên / thuộc các bộ môn / tất cả. */
+    /**
+     * Lớp học phần để chọn đích gửi thông báo, chỉ trong các học kỳ semesterIds, mới nhất trước: all = true là mọi
+     * lớp (ADMIN); ngược lại lớp do teacherId dạy HOẶC có môn thuộc departmentIds (teacherId được null,
+     * departmentIds không được rỗng).
+     */
     @EntityGraph(attributePaths = {"subject", "semester"})
-    List<ClassSection> findByTeacherIdOrderBySemesterStartDateDescCodeAsc(Long teacherId);
-
-    @EntityGraph(attributePaths = {"subject", "semester"})
-    List<ClassSection> findBySubjectDepartmentIdInOrderBySemesterStartDateDescCodeAsc(Collection<Long> departmentIds);
-
-    @EntityGraph(attributePaths = {"subject", "semester"})
-    List<ClassSection> findAllByOrderBySemesterStartDateDescCodeAsc();
+    @Query("""
+            SELECT c FROM ClassSection c
+            WHERE c.semester.id IN :semesterIds
+              AND (:all = TRUE OR c.teacher.id = :teacherId OR c.subject.department.id IN :departmentIds)
+            ORDER BY c.semester.startDate DESC, c.code
+            """)
+    List<ClassSection> findForNotification(@Param("semesterIds") Collection<Long> semesterIds,
+                                           @Param("all") boolean all, @Param("teacherId") Long teacherId,
+                                           @Param("departmentIds") Collection<Long> departmentIds);
 
     /**
      * Lớp học phần của một học kỳ cho báo cáo, sắp theo mã môn rồi mã lớp: all = true là mọi lớp (ADMIN); ngược lại
