@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import tools.jackson.databind.json.JsonMapper;
 import vn.edu.fpt.contactbook.exception.ApiErrors;
+import vn.edu.fpt.contactbook.model.enums.RoleCodes;
 import vn.edu.fpt.contactbook.security.ApiErrorWriter;
 import vn.edu.fpt.contactbook.security.ApiMustChangePasswordFilter;
 import vn.edu.fpt.contactbook.security.ApiPrincipalConverter;
@@ -40,6 +41,9 @@ public class ApiSecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
                 .requestMatchers(OPENAPI_PATHS).permitAll()
+                // Phạm vi chi tiết (con đã liên kết, dữ liệu của chính mình) kiểm tra lại ở service.
+                .requestMatchers("/api/v1/student/**").hasRole(RoleCodes.STUDENT)
+                .requestMatchers("/api/v1/parent/**").hasRole(RoleCodes.PARENT)
                 .anyRequest().authenticated()
             )
             .csrf(AbstractHttpConfigurer::disable)
