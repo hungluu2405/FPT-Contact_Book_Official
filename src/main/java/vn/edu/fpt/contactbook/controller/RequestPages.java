@@ -92,7 +92,7 @@ class RequestPages {
         if (!bindingResult.hasErrors()) {
             try {
                 Long id = requestService.createLeave(actor, view, studentId, form,
-                        NotificationController.uploads(files), request.getRemoteAddr());
+                        Uploads.of(files), request.getRemoteAddr());
                 redirectAttributes.addFlashAttribute("successMessage", "Đã gửi đơn xin nghỉ");
                 return "redirect:" + baseUrl + "/" + id;
             } catch (BusinessException e) {
@@ -107,7 +107,7 @@ class RequestPages {
                        String baseUrl) throws IOException {
         if (!bindingResult.hasErrors()) {
             try {
-                Long id = requestService.createOther(actor, form, NotificationController.uploads(files),
+                Long id = requestService.createOther(actor, form, Uploads.of(files),
                         request.getRemoteAddr());
                 redirectAttributes.addFlashAttribute("successMessage", "Đã gửi đơn");
                 return "redirect:" + baseUrl + "/" + id;
