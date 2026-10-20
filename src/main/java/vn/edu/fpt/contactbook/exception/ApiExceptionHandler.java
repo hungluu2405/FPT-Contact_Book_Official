@@ -12,9 +12,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.web.ErrorResponse;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import vn.edu.fpt.contactbook.dto.api.ApiError;
 
 import java.util.List;
@@ -31,12 +32,20 @@ public class ApiExceptionHandler {
 
     private final ApiErrors apiErrors;
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> invalid(MethodArgumentNotValidException e) {
+    /** Body JSON (@RequestBody) hoặc form multipart (@ModelAttribute) không hợp lệ; sai kiểu dùng typeMismatch.*. */
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ApiError> invalid(BindException e) {
         List<ApiError.FieldError> fieldErrors = e.getBindingResult().getFieldErrors().stream()
-                .map(error -> new ApiError.FieldError(error.getField(), error.getDefaultMessage()))
+                .map(error -> new ApiError.FieldError(error.getField(), apiErrors.message(error)))
                 .toList();
         return respond(apiErrors.of(ApiErrorCode.VALIDATION_FAILED, fieldErrors));
+    }
+
+    /** Tham số trên URL sai kiểu (ngày, số...): lỗi gắn với tên tham số, thông báo typeMismatch.* như form web. */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> typeMismatch(MethodArgumentTypeMismatchException e) {
+        return respond(apiErrors.of(ApiErrorCode.VALIDATION_FAILED,
+                List.of(new ApiError.FieldError(e.getName(), apiErrors.typeMismatch(e.getRequiredType())))));
     }
 
     /** Body không phải JSON hoặc sai kiểu dữ liệu. */

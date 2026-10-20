@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.contactbook.dto.AttachmentDownload;
-import vn.edu.fpt.contactbook.dto.AttachmentUpload;
 import vn.edu.fpt.contactbook.dto.NotificationDetail;
 import vn.edu.fpt.contactbook.dto.NotificationForm;
 import vn.edu.fpt.contactbook.dto.NotificationListItem;
@@ -40,7 +39,6 @@ import vn.edu.fpt.contactbook.util.PageUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -123,7 +121,7 @@ public class NotificationController {
                        HttpServletRequest request, RedirectAttributes redirectAttributes) throws IOException {
         if (!bindingResult.hasErrors()) {
             try {
-                Long id = notificationService.send(actor, form, uploads(files), request.getRemoteAddr());
+                Long id = notificationService.send(actor, form, Uploads.of(files), request.getRemoteAddr());
                 redirectAttributes.addFlashAttribute("successMessage", "Đã gửi thông báo");
                 return "redirect:" + BASE + "/" + id;
             } catch (BusinessException e) {
@@ -149,23 +147,5 @@ public class NotificationController {
         model.addAttribute("priorities", NotificationPriority.values());
         model.addAttribute("activeMenu", "notifications-new");
         return "notifications/form";
-    }
-
-    /**
-     * Bỏ phần tệp rỗng trình duyệt gửi khi không chọn tệp; tệp còn lại kiểm tra ở service. Dùng chung cho form đơn
-     * từ.
-     */
-    static List<AttachmentUpload> uploads(List<MultipartFile> files) throws IOException {
-        List<AttachmentUpload> uploads = new ArrayList<>();
-        if (files != null) {
-            for (MultipartFile file : files) {
-                if (file != null && !(file.isEmpty() && (file.getOriginalFilename() == null
-                        || file.getOriginalFilename().isBlank()))) {
-                    uploads.add(new AttachmentUpload(file.getOriginalFilename(), file.getContentType(),
-                            file.getBytes()));
-                }
-            }
-        }
-        return uploads;
     }
 }

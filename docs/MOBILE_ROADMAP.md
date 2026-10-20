@@ -38,7 +38,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - Đăng nhập bằng số điện thoại, dùng lại `PhoneAuthenticationProvider`, `LoginAttemptService` và audit (LOGIN_FAILED, LOGIN_LOCKED). Có refresh token, đăng xuất, đổi mật khẩu (gồm cả trường hợp `must_change_password`).
   - Chuẩn hóa dạng lỗi và dạng phân trang; OpenAPI dùng làm hợp đồng cho mobile.
   - Service dùng chung với web; dữ liệu nằm cùng database SQL Server.
-- **9c: API cho SV và PH**
+- **9c: API cho SV và PH (đã xong, nhánh `feature/phase-9c-student-parent-api`; giả định 135–138)**
   - Hồ sơ, danh sách con (PH), thời khóa biểu, lịch thi, điểm (chỉ cột đã công bố), điểm danh.
   - Thông báo: danh sách, đánh dấu đã đọc, tải tệp.
   - Đơn nghỉ: gửi, xem, hủy.
@@ -71,4 +71,4 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
 - Không sửa `database/fpt_contact_book.sql`.
 
 ## 6. Câu mở đầu cho phiên kế tiếp
-"Đọc `docs/MOBILE_ROADMAP.md` và `docs/API.md`, rồi trình kế hoạch chi tiết giai đoạn 9c để tôi duyệt."
+"Đọc `docs/MOBILE_ROADMAP.md` và `docs/API.md`, rồi trình kế hoạch chi tiết giai đoạn 9d để tôi duyệt."

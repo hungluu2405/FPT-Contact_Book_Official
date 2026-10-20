@@ -31,7 +31,55 @@ Phản hồi đăng nhập, làm mới và đổi mật khẩu:
 | GET | `/me` | Có | `{id, phone, fullName, roles, mustChangePassword}` |
 | POST | `/me/password` | Có | `{currentPassword, newPassword, confirmPassword}`, trả cặp token mới |
 
-Các API dữ liệu của SV, PH (giai đoạn 9c) và GV (9d) sẽ được bổ sung vào bảng này.
+### Dùng chung (mọi vai trò)
+| Method | Đường dẫn | Mô tả |
+|---|---|---|
+| GET | `/me/profile` | Hồ sơ: `{phone, fullName, email, gender, dateOfBirth, address, hasAvatar, lastLoginAt, roles[{roleCode, departmentCode, departmentName}]}` |
+| GET | `/me/avatar` | Ảnh đại diện (JPEG/PNG, cache 1 giờ); chưa có ảnh: 404 `NOT_FOUND` |
+| GET | `/semesters` | Học kỳ cho ô chọn: `[{id, code, name, groupId}]` |
+| GET | `/notifications?page=` | Thông báo đã nhận (phân trang): `{id, title, senderName, priority, createdAt, read}` |
+| GET | `/notifications/unread-count` | `{count}` |
+| GET | `/notifications/{id}` | `{id, title, content, priority, targetLabel, senderName, createdAt, files[{id, fileName, sizeBytes}]}`; lần đầu mở thì đánh dấu đã đọc |
+| POST | `/notifications/read-all` | Đánh dấu tất cả đã đọc, trả `{count}` còn lại |
+| GET | `/notifications/{id}/files/{fileId}` | Tải tệp đính kèm |
+| GET | `/requests/{id}/files/{fileId}` | Tải tệp đính kèm của đơn |
+
+### Sinh viên (`/student`, vai trò STUDENT) và phụ huynh (`/parent/children/{studentId}`, vai trò PARENT)
+`GET /parent/children` trả các con đã liên kết `[{id, code, name}]` (`id` là `studentId`). Mọi đường dẫn dưới đây có ở cả hai gốc; phụ huynh xem con chưa liên kết bị 403 `FORBIDDEN`. `semesterId` bỏ trống: học kỳ hiện tại.
+
+| Method | Đường dẫn con | Trả về |
+|---|---|---|
+| GET | `/schedule/week?semesterId=&date=yyyy-MM-dd` | `{semester, data: {weekStart, weekEnd, previous, next, days[{date, today, items[ScheduleItem]}]}}` |
+| GET | `/schedule/sessions?semesterId=&page=` | `{semester, data: Page<ScheduleItem>}` |
+| GET | `/exams?semesterId=&page=` | `{semester, data: Page<{id, sectionCode, subjectCode, subjectName, examType, date, startTime, endTime, roomCode, note}>}` |
+| GET | `/grades?semesterId=` | `{semester, data: [{sectionCode, subjectCode, subjectName, cells[{componentName, weight, maxScore, score}], average}]}`; `score` null nếu chưa có hoặc chưa công bố |
+| GET | `/attendance?semesterId=` | `{semester, thresholdPercent, sections[{sectionId, sectionCode, subjectCode, subjectName, summary}]}` |
+| GET | `/attendance/{sectionId}?page=` | `{summary, thresholdPercent, sessions: Page<{sessionNo, date, startTime, endTime, roomCode, sessionStatus, status, note}>}` |
+| GET | `/requests?page=` | `Page<{id, type, title, studentCode, studentName, requesterName, sectionCode, fromDate, toDate, status, createdAt}>` (mọi loại đơn) |
+| GET | `/requests/{id}` | Chi tiết đơn (RequestDetail): `{..., files[], reviews[], canCancel, canReview}` |
+| GET | `/requests/leave-options` | `{studentId, studentCode, studentName, sections[{id, code, name}]}` |
+| POST | `/requests/leave` | `multipart/form-data`: `fromDate`, `toDate` (yyyy-MM-dd hoặc dd/MM/yyyy), `reason`, tùy chọn `title`, `sectionId`, `files` (nhiều tệp, mỗi tệp tối đa 10MB). 201 + chi tiết đơn |
+| POST | `/requests/{id}/cancel` | Hủy đơn đang chờ duyệt, trả chi tiết đơn; đơn không còn chờ duyệt: 400 `BUSINESS_ERROR` |
+
+`ScheduleItem`: `{date, startTime, endTime, subjectCode, subjectName, sectionCode, roomCode, teacherName, status, note}`. `summary` (chuyên cần): `{present, late, absentExcused, absentUnexcused, totalSessions, attendanceRate, absentRate, warning}` (tỷ lệ là phần trăm, `warning` = vượt ngưỡng vắng).
+
+Các API của GV (giai đoạn 9d) sẽ được bổ sung vào đây.
+
+## Giá trị enum
+Trả dạng mã; mobile hiển thị chữ tiếng Việt như web:
+
+| Enum | Mã → chữ |
+|---|---|
+| `status` của buổi học, `sessionStatus` | `SCHEDULED` Đã lên lịch, `DONE` Đã học, `CANCELLED` Đã hủy, `MAKEUP` Học bù |
+| `status` điểm danh | `PRESENT` Có mặt, `LATE` Đi muộn, `ABSENT_EXCUSED` Vắng có phép, `ABSENT_UNEXCUSED` Vắng không phép; null là chưa điểm danh |
+| `examType` | `MIDTERM` Giữa kỳ, `FINAL` Cuối kỳ, `RETAKE` Thi lại |
+| `type` của đơn | `LEAVE` Xin nghỉ học, `TRANSCRIPT` Xin bảng điểm, `CERTIFICATE` Xác nhận sinh viên, `OTHER` Đơn khác |
+| `status` của đơn | `PENDING` Chờ duyệt, `APPROVED` Đã duyệt, `REJECTED` Từ chối, `CANCELLED` Đã hủy |
+| `decision` duyệt đơn | `APPROVED` Duyệt, `REJECTED` Từ chối |
+| `priority` thông báo | `NORMAL` Thường, `IMPORTANT` Quan trọng, `URGENT` Khẩn |
+| `gender` | `MALE`, `FEMALE`, `OTHER` |
+
+Ngày `yyyy-MM-dd`, giờ `HH:mm:ss`, thời điểm `yyyy-MM-ddTHH:mm:ss`; số thập phân (điểm, trọng số) là số JSON.
 
 ## Lỗi
 ```json
@@ -54,6 +102,8 @@ Mobile xử lý theo `code`; `message` là câu tiếng Việt để hiện cho 
 | `NOT_FOUND` | 404 | Không tìm thấy dữ liệu |
 | `CONFLICT` | 409 | Trùng hoặc vi phạm ràng buộc dữ liệu |
 | `INTERNAL_ERROR` | 500 | Lỗi hệ thống |
+
+Tệp vượt giới hạn tải lên (10MB mỗi tệp, 30MB mỗi request) bị máy chủ chặn trước khi tới API: HTTP 413, không có body ApiError.
 
 ## Phân trang
 Danh sách trả dạng `{"items": [...], "page": 0, "size": 20, "totalElements": 57, "totalPages": 3}`. Tham số `page` (đếm từ 0) và `size`.
