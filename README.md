@@ -20,6 +20,12 @@ Hệ thống Sổ liên lạc điện tử Đại học FPT được phát tri�
    sqlcmd -S localhost -E -i database/fpt_contact_book.sql
    ```
 3. Kịch bản sẽ tạo cơ sở dữ liệu `FptContactBook` gồm 36 bảng chuẩn hóa, các ràng buộc toàn vẹn và dữ liệu mẫu thử nghiệm.
+4. Chạy lần lượt các file trong `database/migrations/` theo thứ tự tên (`V001__…`, `V002__…`). Mỗi file chỉ thêm
+   thay đổi mới (không sửa script gốc), có kiểm tra tồn tại nên chạy lại cũng an toàn:
+   ```bash
+   sqlcmd -S localhost -E -f 65001 -i database/migrations/V001__audit_log_indexes.sql
+   ```
+   Test tự động tự chạy script gốc rồi các migration này trên database `FptContactBook_test`.
 
 ---
 
@@ -66,7 +72,8 @@ http://localhost:8080/
 ```text
 c:\Project\fpt_contact_book\
 ├── database/
-│   └── fpt_contact_book.sql       # Script SQL Server 36 bảng (nguồn sự thật cấu trúc dữ liệu)
+│   ├── fpt_contact_book.sql       # Script SQL Server 36 bảng (nguồn sự thật cấu trúc dữ liệu)
+│   └── migrations/                # Thay đổi bổ sung sau script gốc, chạy theo thứ tự tên file
 ├── docs/
 │   ├── SRS.md                     # Tài liệu đặc tả yêu cầu phần mềm
 │   └── ASSUMPTIONS.md             # Danh sách các giả định nghiệp vụ & kỹ thuật

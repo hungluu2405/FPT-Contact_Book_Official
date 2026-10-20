@@ -2,8 +2,12 @@ package vn.edu.fpt.contactbook.support;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,5 +64,40 @@ class SqlScriptLoaderTest {
                 .contains("CREATE TABLE [dbo].[users]")
                 .contains("Bộ môn Kỹ thuật phần mềm");
         assertThat(batches).noneMatch(batch -> batch.lines().anyMatch(line -> line.strip().equalsIgnoreCase("GO")));
+    }
+
+    @Test
+    @DisplayName("Migration: đọc mọi file .sql UTF-8 (có hoặc không BOM) theo thứ tự tên, đổi tên database, tách GO")
+    void loadsMigrationsInNameOrder(@TempDir Path dir) throws IOException {
+        Files.writeString(dir.resolve("V002__second.sql"), "USE [FptContactBook]\nGO\nSELECT 2;\nGO\n");
+        byte[] bom = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
+        byte[] first = "USE [FptContactBook]\r\nGO\r\n-- Tiếng Việt\r\nSELECT 1;\r\n".getBytes(StandardCharsets.UTF_8);
+        byte[] withBom = new byte[bom.length + first.length];
+        System.arraycopy(bom, 0, withBom, 0, bom.length);
+        System.arraycopy(first, 0, withBom, bom.length, first.length);
+        Files.write(dir.resolve("V001__first.sql"), withBom);
+        Files.writeString(dir.resolve("README.txt"), "không phải migration");
+
+        List<String> batches = SqlScriptLoader.loadMigrations(dir, "FptContactBook_test");
+
+        assertThat(batches).containsExactly("USE [FptContactBook_test]", "-- Tiếng Việt\nSELECT 1;",
+                "USE [FptContactBook_test]", "SELECT 2;");
+    }
+
+    @Test
+    @DisplayName("Không có thư mục migration: danh sách rỗng")
+    void missingMigrationDirectory(@TempDir Path dir) {
+        assertThat(SqlScriptLoader.loadMigrations(dir.resolve("khong-co"), "FptContactBook_test")).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Migration thật: chạy trên database test, tạo chỉ mục audit_logs có kiểm tra tồn tại")
+    void loadsRealMigrations() {
+        List<String> batches = SqlScriptLoader.loadMigrations(TestDatabaseExtension.MIGRATIONS, "FptContactBook_test");
+        String all = String.join("\n", batches);
+
+        assertThat(batches.getFirst()).endsWith("USE [FptContactBook_test]");
+        assertThat(all.replace("FptContactBook_test", "")).doesNotContain("FptContactBook");
+        assertThat(all).contains("ix_audit_action").contains("ix_audit_entity").contains("IF NOT EXISTS");
     }
 }
