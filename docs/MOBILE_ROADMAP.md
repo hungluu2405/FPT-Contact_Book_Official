@@ -11,7 +11,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
 - **2 file đang sửa dở** trong `C:\Users\pooo\myfschoolse1945` (`lib/vn/edu/fpt/screen/account/login_screen.dart`, `lib/vn/edu/fpt/screen/widget/auth_widget.dart`): Claude tự commit nguyên trạng trong repo cũ trước khi chép. Rule global cấm commit trên `main`, nên làm trên nhánh `chore/wip-login-ui`.
 - **Đổi tên**: package Dart `myfschoolse1945` thành `fpt_contact_book_mobile`; applicationId/namespace `com.example.myfschoolse1945` thành `vn.edu.fpt.contactbook`.
 - **Thư viện mobile**: Riverpod (`flutter_riverpod`) và `dio`. Chờ duyệt (đề xuất kèm license và tình trạng bảo trì khi thêm ở 10a): `flutter_secure_storage`, `go_router`, `intl`.
-- **Thư viện backend**: chờ duyệt ở 9a/9b: `jjwt` và `springdoc-openapi`, chọn bản tương thích Spring Boot 4 và Jackson 3.
+- **Thư viện backend** (đã duyệt ở 9b): `spring-boot-starter-security-oauth2-resource-server` thay cho `jjwt`, và `springdoc-openapi-starter-webmvc-ui` 3.1.1.
 
 ## 2. Hiện trạng project Flutter (đã khảo sát)
 - 3 file Dart: `main.dart` (chứa màu và `MaterialApp`), `login_screen.dart`, `auth_widget.dart`. Chỉ có giao diện, chưa gọi API.
@@ -33,7 +33,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - Đã sửa `CLAUDE.md` gốc (phạm vi, REST API từ 9b, ngoại lệ CSRF cho API JWT) và viết `mobile/CLAUDE.md`.
   - Đã thay test Counter bằng smoke test màn hình đăng nhập.
   - Người dùng tự archive repo GitHub cũ.
-- **9b: nền tảng API (backend)**
+- **9b: nền tảng API (backend) (đã xong, nhánh `feature/phase-9b-api-foundation`; hợp đồng ở `docs/API.md`, giả định 129–134)**
   - `SecurityFilterChain` riêng cho `/api/**`: stateless, xác thực JWT, lỗi trả JSON.
   - Đăng nhập bằng số điện thoại, dùng lại `PhoneAuthenticationProvider`, `LoginAttemptService` và audit (LOGIN_FAILED, LOGIN_LOCKED). Có refresh token, đăng xuất, đổi mật khẩu (gồm cả trường hợp `must_change_password`).
   - Chuẩn hóa dạng lỗi và dạng phân trang; OpenAPI dùng làm hợp đồng cho mobile.
@@ -71,4 +71,4 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
 - Không sửa `database/fpt_contact_book.sql`.
 
 ## 6. Câu mở đầu cho phiên kế tiếp
-"Đọc `docs/MOBILE_ROADMAP.md`, rồi trình kế hoạch chi tiết giai đoạn 9b để tôi duyệt."
+"Đọc `docs/MOBILE_ROADMAP.md` và `docs/API.md`, rồi trình kế hoạch chi tiết giai đoạn 9c để tôi duyệt."
