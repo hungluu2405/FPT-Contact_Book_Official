@@ -30,8 +30,8 @@ Hệ thống cấu hình kết nối linh hoạt thông qua các biến môi tr�
 | Biến môi trường | Giá trị mặc định (cho môi trường phát triển local) | Mô tả |
 |---|---|---|
 | `DB_URL` | `jdbc:sqlserver://localhost:1433;databaseName=FptContactBook;encrypt=true;trustServerCertificate=true` | Chuỗi kết nối JDBC SQL Server |
-| `DB_USERNAME` | `sa` | Tên đăng nhập cơ sở dữ liệu |
-| `DB_PASSWORD` | `Fpt@12345` | Mật khẩu truy cập cơ sở dữ liệu |
+| `DB_USERNAME` | `<tên login SQL Server>` | Tên đăng nhập cơ sở dữ liệu. Nên tạo login riêng chỉ có quyền trên `FptContactBook` (và `FptContactBook_test` khi chạy test), không dùng `sa` |
+| `DB_PASSWORD` | *(không có mặc định)* | Mật khẩu của login trên; chỉ đặt bằng biến môi trường, không ghi vào mã nguồn hay tài liệu |
 
 *Lưu ý: Không lưu mật khẩu sản xuất vào mã nguồn hoặc tập tin `.properties`. Tham khảo mẫu tại `src/main/resources/application-example.properties`.*
 
