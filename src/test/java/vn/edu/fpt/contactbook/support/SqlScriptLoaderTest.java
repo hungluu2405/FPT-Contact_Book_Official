@@ -85,6 +85,21 @@ class SqlScriptLoaderTest {
     }
 
     @Test
+    @DisplayName("Migration lưu bằng SSMS (UTF-16 LE có BOM) cũng đọc được")
+    void loadsUtf16Migration(@TempDir Path dir) throws IOException {
+        byte[] body = "USE [FptContactBook]\r\nGO\r\n-- Chỉ mục mới\r\nSELECT 1;\r\n"
+                .getBytes(StandardCharsets.UTF_16LE);
+        byte[] withBom = new byte[body.length + 2];
+        withBom[0] = (byte) 0xFF;
+        withBom[1] = (byte) 0xFE;
+        System.arraycopy(body, 0, withBom, 2, body.length);
+        Files.write(dir.resolve("V001__ssms.sql"), withBom);
+
+        assertThat(SqlScriptLoader.loadMigrations(dir, "FptContactBook_test"))
+                .containsExactly("USE [FptContactBook_test]", "-- Chỉ mục mới\nSELECT 1;");
+    }
+
+    @Test
     @DisplayName("Không có thư mục migration: danh sách rỗng")
     void missingMigrationDirectory(@TempDir Path dir) {
         assertThat(SqlScriptLoader.loadMigrations(dir.resolve("khong-co"), "FptContactBook_test")).isEmpty();

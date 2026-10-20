@@ -35,7 +35,7 @@ public final class SqlScriptLoader {
     }
 
     /**
-     * Các file migration (*.sql, UTF-8, có hoặc không BOM) trong directory, theo thứ tự tên file, đổi tên database và
+     * Các file migration (*.sql, UTF-8 có hoặc không BOM, hoặc UTF-16 LE có BOM) trong directory, theo thứ tự tên file, đổi tên database và
      * tách batch như script gốc. Thư mục không tồn tại → danh sách rỗng.
      */
     public static List<String> loadMigrations(Path directory, String targetDatabase) {
@@ -50,12 +50,15 @@ public final class SqlScriptLoader {
         }
         List<String> batches = new ArrayList<>();
         for (Path file : files) {
-            String sql;
+            byte[] bytes;
             try {
-                sql = Files.readString(file, StandardCharsets.UTF_8);
+                bytes = Files.readAllBytes(file);
             } catch (IOException e) {
                 throw new UncheckedIOException("Không đọc được migration: " + file.toAbsolutePath(), e);
             }
+            // SSMS lưu file dạng UTF-16 LE có BOM (như script gốc); file soạn bằng trình soạn thảo khác là UTF-8.
+            boolean utf16 = bytes.length >= 2 && (bytes[0] & 0xFF) == 0xFF && (bytes[1] & 0xFF) == 0xFE;
+            String sql = utf16 ? decodeUtf16Le(bytes) : new String(bytes, StandardCharsets.UTF_8);
             if (sql.startsWith(UTF8_BOM)) {
                 sql = sql.substring(1);
             }
