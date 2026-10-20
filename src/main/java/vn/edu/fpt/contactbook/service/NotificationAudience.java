@@ -15,6 +15,8 @@ import vn.edu.fpt.contactbook.repository.TeacherRepository;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
 import vn.edu.fpt.contactbook.util.AppTime;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
@@ -93,8 +95,8 @@ public class NotificationAudience {
 
     /**
      * Lớp học phần cho ô chọn trên form gửi (ADMIN mọi lớp, TBM lớp bộ môn mình, GV lớp mình dạy), mới nhất trước.
-     * Chỉ lớp của học kỳ chưa kết thúc (end_date ≥ hôm nay); không còn học kỳ nào như vậy thì học kỳ mới nhất. Đây chỉ
-     * là thu gọn lựa chọn: khi gửi, phạm vi vẫn kiểm tra bằng canSend như trước.
+     * Chỉ lớp của học kỳ chưa kết thúc (end_date ≥ hôm nay) và của học kỳ vừa kết thúc gần nhất. Đây chỉ là thu gọn
+     * lựa chọn: khi gửi, phạm vi vẫn kiểm tra bằng canSend như trước.
      */
     public List<ClassSection> sections(AppUserPrincipal actor) {
         boolean admin = userAccessPolicy.isAdmin(actor);
@@ -112,13 +114,14 @@ public class NotificationAudience {
                 departments.isEmpty() ? CatalogSupport.NO_IDS : departments);
     }
 
+    /** Học kỳ chưa kết thúc (mới nhất trước) rồi học kỳ vừa kết thúc gần nhất (vẫn còn công bố điểm, thi lại...). */
     private List<Long> optionSemesterIds() {
-        List<Semester> open = semesterRepository.findByEndDateGreaterThanEqualOrderByStartDateDesc(AppTime.today());
-        if (!open.isEmpty()) {
-            return open.stream().map(Semester::getId).toList();
-        }
-        return semesterRepository.findAllByOrderByStartDateDesc().stream().findFirst()
-                .map(semester -> List.of(semester.getId())).orElse(List.of());
+        LocalDate today = AppTime.today();
+        List<Long> ids = new ArrayList<>(semesterRepository.findByEndDateGreaterThanEqualOrderByStartDateDesc(today)
+                .stream().map(Semester::getId).toList());
+        semesterRepository.findFirstByEndDateLessThanOrderByEndDateDesc(today).map(Semester::getId)
+                .ifPresent(ids::add);
+        return ids;
     }
 
     public Set<Long> headDepartments(AppUserPrincipal actor) {

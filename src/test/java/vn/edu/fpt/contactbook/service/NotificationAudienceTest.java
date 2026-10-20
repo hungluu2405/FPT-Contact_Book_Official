@@ -172,36 +172,39 @@ class NotificationAudienceTest {
     }
 
     @Test
-    @DisplayName("Ô chọn lớp học phần chỉ gồm học kỳ chưa kết thúc (end_date ≥ hôm nay), theo phạm vi người gửi")
-    void sectionOptionsOnlyOpenSemesters() {
+    @DisplayName("Ô chọn lớp học phần: học kỳ chưa kết thúc (end_date ≥ hôm nay) và học kỳ vừa kết thúc gần nhất, "
+            + "theo phạm vi người gửi")
+    void sectionOptionsOpenAndLatestEnded() {
         LocalDate today = AppTime.today();
         when(semesterRepository.findByEndDateGreaterThanEqualOrderByStartDateDesc(today))
-                .thenReturn(List.of(semester(1L, today), semester(38L, today.plusMonths(6))));
+                .thenReturn(List.of(semester(38L, today.plusMonths(6)), semester(1L, today)));
+        when(semesterRepository.findFirstByEndDateLessThanOrderByEndDateDesc(today))
+                .thenReturn(Optional.of(semester(37L, today.minusDays(1))));
 
         audience.sections(ADMIN);
         audience.sections(TEACHER);
         audience.sections(HEAD_SE);
 
-        verify(classSectionRepository).findForNotification(eq(List.of(1L, 38L)), eq(true), isNull(),
+        verify(classSectionRepository).findForNotification(eq(List.of(38L, 1L, 37L)), eq(true), isNull(),
                 eq(CatalogSupport.NO_IDS));
-        verify(classSectionRepository).findForNotification(eq(List.of(1L, 38L)), eq(false), eq(2L),
+        verify(classSectionRepository).findForNotification(eq(List.of(38L, 1L, 37L)), eq(false), eq(2L),
                 eq(CatalogSupport.NO_IDS));
-        verify(classSectionRepository).findForNotification(eq(List.of(1L, 38L)), eq(false), isNull(),
+        verify(classSectionRepository).findForNotification(eq(List.of(38L, 1L, 37L)), eq(false), isNull(),
                 eq(Set.of(1L)));
     }
 
     @Test
-    @DisplayName("Không còn học kỳ chưa kết thúc: dùng học kỳ mới nhất; chưa có học kỳ nào: rỗng, không truy vấn")
-    void sectionOptionsFallback() {
+    @DisplayName("Không còn học kỳ chưa kết thúc: chỉ học kỳ vừa kết thúc gần nhất; chưa có học kỳ nào: rỗng, "
+            + "không truy vấn")
+    void sectionOptionsOnlyEnded() {
         when(semesterRepository.findByEndDateGreaterThanEqualOrderByStartDateDesc(any())).thenReturn(List.of());
-        when(semesterRepository.findAllByOrderByStartDateDesc())
-                .thenReturn(List.of(semester(37L, LocalDate.of(2026, 8, 23)),
-                        semester(5L, LocalDate.of(2025, 12, 20))));
+        when(semesterRepository.findFirstByEndDateLessThanOrderByEndDateDesc(any()))
+                .thenReturn(Optional.of(semester(37L, LocalDate.of(2026, 8, 23))));
 
         audience.sections(ADMIN);
         verify(classSectionRepository).findForNotification(eq(List.of(37L)), eq(true), isNull(), any());
 
-        when(semesterRepository.findAllByOrderByStartDateDesc()).thenReturn(List.of());
+        when(semesterRepository.findFirstByEndDateLessThanOrderByEndDateDesc(any())).thenReturn(Optional.empty());
         assertThat(audience.sections(TEACHER)).isEmpty();
         verify(classSectionRepository, never()).findForNotification(any(), eq(false), any(), any());
     }

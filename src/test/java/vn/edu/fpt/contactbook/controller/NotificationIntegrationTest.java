@@ -193,20 +193,23 @@ class NotificationIntegrationTest {
     class SectionOptions {
 
         @Test
-        @DisplayName("Chỉ có lớp của học kỳ chưa kết thúc; lớp của học kỳ đã kết thúc không hiện (ADMIN và GV)")
-        void onlyOpenSemesters() throws Exception {
+        @DisplayName("Có lớp của học kỳ chưa kết thúc và học kỳ vừa kết thúc; lớp của học kỳ kết thúc trước đó không "
+                + "hiện (ADMIN và GV)")
+        void openAndLatestEndedSemesters() throws Exception {
             LocalDate today = AppTime.today();
-            ClassSection ended = section("ENDED-01", semester("ZZ-END", today.minusMonths(5), today.minusDays(1)));
+            ClassSection older = section("OLDER-01", semester("ZZ-OLD", today.minusYears(30).minusMonths(4),
+                    today.minusYears(30)));
+            ClassSection justEnded = section("ENDED-01", semester("ZZ-END", today.minusMonths(5),
+                    today.minusDays(1)));
             ClassSection open = section("OPEN-01", semester("ZZ-OPEN", today.minusMonths(1), today));
 
-            mockMvc.perform(get("/notifications/new").with(as(TestAccounts.ADMIN)))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString(open.getCode()),
-                            not(containsString(ended.getCode())))));
-            // GV002 (0900000003) dạy cả hai lớp vừa tạo.
-            mockMvc.perform(get("/notifications/new").with(as(TestAccounts.TEACHER)))
-                    .andExpect(content().string(allOf(containsString(open.getCode()),
-                            not(containsString(ended.getCode())))));
+            // GV002 (0900000003) dạy cả ba lớp vừa tạo.
+            for (String phone : List.of(TestAccounts.ADMIN, TestAccounts.TEACHER)) {
+                mockMvc.perform(get("/notifications/new").with(as(phone)))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(allOf(containsString(open.getCode()),
+                                containsString(justEnded.getCode()), not(containsString(older.getCode())))));
+            }
         }
 
         @Test

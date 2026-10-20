@@ -33,6 +33,9 @@ public interface SemesterRepository extends JpaRepository<Semester, Long> {
     /** Học kỳ chưa kết thúc tại ngày day (end_date ≥ day), mới nhất trước. */
     List<Semester> findByEndDateGreaterThanEqualOrderByStartDateDesc(LocalDate day);
 
+    /** Học kỳ đã kết thúc trước ngày day (end_date < day) gần nhất. */
+    Optional<Semester> findFirstByEndDateLessThanOrderByEndDateDesc(LocalDate day);
+
     boolean existsByCode(String code);
 
     boolean existsByCodeAndIdNot(String code, Long id);
