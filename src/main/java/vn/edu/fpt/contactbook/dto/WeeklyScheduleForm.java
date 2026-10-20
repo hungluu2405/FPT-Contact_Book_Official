@@ -33,7 +33,7 @@ public class WeeklyScheduleForm {
     private Long roomId;
 
     @NotNull(message = "{schedule.from-date.required}")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(pattern = DateFormats.DATE, fallbackPatterns = {DateFormats.DATE_SHORT, DateFormats.ISO_DATE})
     private LocalDate fromDate;
 
     @NotNull(message = "{schedule.count.required}")

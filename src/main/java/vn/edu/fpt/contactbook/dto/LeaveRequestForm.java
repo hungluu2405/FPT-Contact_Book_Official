@@ -25,11 +25,11 @@ public class LeaveRequestForm {
     private Long sectionId;
 
     @NotNull(message = "{request.from.required}")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(pattern = DateFormats.DATE, fallbackPatterns = {DateFormats.DATE_SHORT, DateFormats.ISO_DATE})
     private LocalDate fromDate;
 
     @NotNull(message = "{request.to.required}")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(pattern = DateFormats.DATE, fallbackPatterns = {DateFormats.DATE_SHORT, DateFormats.ISO_DATE})
     private LocalDate toDate;
 
     @NotBlank(message = "{request.reason.required}")

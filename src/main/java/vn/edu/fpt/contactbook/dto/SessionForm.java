@@ -19,7 +19,7 @@ import java.time.LocalTime;
 public class SessionForm {
 
     @NotNull(message = "{schedule.date.required}")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(pattern = DateFormats.DATE, fallbackPatterns = {DateFormats.DATE_SHORT, DateFormats.ISO_DATE})
     private LocalDate sessionDate;
 
     @NotNull(message = "{schedule.start-time.required}")

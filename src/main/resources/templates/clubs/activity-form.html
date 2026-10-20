@@ -25,13 +25,15 @@
                 </div>
                 <div class="col-md-6">
                     <label for="startTime" class="form-label" th:text="#{activity.start} + ' *'">Bắt đầu</label>
-                    <input type="datetime-local" class="form-control" th:field="*{startTime}"
+                    <input type="text" placeholder="dd/mm/yyyy hh:mm" maxlength="16" autocomplete="off"
+                           class="form-control" th:field="*{startTime}"
                            th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:errors="*{startTime}">Lỗi</div>
                 </div>
                 <div class="col-md-6">
                     <label for="endTime" class="form-label" th:text="#{activity.end} + ' *'">Kết thúc</label>
-                    <input type="datetime-local" class="form-control" th:field="*{endTime}"
+                    <input type="text" placeholder="dd/mm/yyyy hh:mm" maxlength="16" autocomplete="off"
+                           class="form-control" th:field="*{endTime}"
                            th:classappend="${#fields.hasErrors('endTime')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:errors="*{endTime}">Lỗi</div>
                 </div>

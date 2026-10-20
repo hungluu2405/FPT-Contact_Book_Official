@@ -27,10 +27,10 @@ public class SemesterForm {
     private String name;
 
     @NotNull(message = "{catalog.start-date.required}")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(pattern = DateFormats.DATE, fallbackPatterns = {DateFormats.DATE_SHORT, DateFormats.ISO_DATE})
     private LocalDate startDate;
 
     @NotNull(message = "{catalog.end-date.required}")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(pattern = DateFormats.DATE, fallbackPatterns = {DateFormats.DATE_SHORT, DateFormats.ISO_DATE})
     private LocalDate endDate;
 }

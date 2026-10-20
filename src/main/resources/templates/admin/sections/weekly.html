@@ -27,13 +27,15 @@
                 </div>
                 <div class="col-md-4">
                     <label for="startTime" class="form-label" th:text="#{schedule.start-time} + ' *'">Giờ</label>
-                    <input type="time" class="form-control" th:field="*{startTime}"
+                    <input type="text" placeholder="hh:mm" maxlength="5" autocomplete="off"
+                           class="form-control" th:field="*{startTime}"
                            th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:errors="*{startTime}">Lỗi</div>
                 </div>
                 <div class="col-md-4">
                     <label for="endTime" class="form-label" th:text="#{schedule.end-time} + ' *'">Giờ</label>
-                    <input type="time" class="form-control" th:field="*{endTime}"
+                    <input type="text" placeholder="hh:mm" maxlength="5" autocomplete="off"
+                           class="form-control" th:field="*{endTime}"
                            th:classappend="${#fields.hasErrors('endTime')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:errors="*{endTime}">Lỗi</div>
                 </div>

@@ -29,7 +29,7 @@ public class ClubForm {
     @Size(max = 2000, message = "{club.description.size}")
     private String description;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(pattern = DateFormats.DATE, fallbackPatterns = {DateFormats.DATE_SHORT, DateFormats.ISO_DATE})
     private LocalDate foundedDate;
 
     private Long advisorUserId;

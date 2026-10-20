@@ -78,7 +78,8 @@
 
 <div th:fragment="date(field, label, required, cols)" th:class="${cols}">
     <label th:for="${field}" class="form-label" th:text="${label} + (${required} ? ' *' : '')">Nhãn</label>
-    <input type="date" class="form-control" th:field="*{__${field}__}"
+    <input type="text" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off"
+           class="form-control" th:field="*{__${field}__}"
            th:classappend="${#fields.hasErrors(field)} ? 'is-invalid'">
     <div class="invalid-feedback" th:errors="*{__${field}__}">Lỗi</div>
 </div>
