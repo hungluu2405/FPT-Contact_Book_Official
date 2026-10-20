@@ -5,7 +5,7 @@ App Android cho sinh viên (SV), phụ huynh (PH) và giảng viên (GV). File n
 ## 1. DỮ LIỆU
 - App **không có database riêng**: không SQLite, không Hive, không chế độ offline. Mọi dữ liệu nghiệp vụ đọc và ghi qua REST API của backend (`/api/v1/**`). Backend lưu vào database SQL Server `FptContactBook`, chung với web.
 - Chỉ được lưu trên máy: token và cài đặt nhỏ của app. Không lưu điểm, thông báo hay hồ sơ xuống máy.
-- Hợp đồng API là tài liệu OpenAPI của backend. Không đoán tên trường; thiếu API thì dừng và đề xuất thêm ở backend.
+- Hợp đồng API: `docs/API.md` (quy ước token, mã lỗi, phân trang) và tài liệu OpenAPI của backend (`/v3/api-docs`). Không đoán tên trường; thiếu API thì dừng và đề xuất thêm ở backend.
 - Phân quyền và phạm vi dữ liệu do backend kiểm tra. App chỉ ẩn hoặc hiện chức năng theo vai trò, không thay thế việc kiểm tra đó.
 
 ## 2. CÔNG NGHỆ

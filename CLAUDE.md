@@ -25,7 +25,7 @@ File này bổ sung `~/.claude/CLAUDE.md`. Ở những điểm dưới đây, fi
 - Spring Security 7, cấu hình bằng bean `SecurityFilterChain`.
 - Giao diện: Bootstrap 5 và Bootstrap Icons qua WebJars (không CDN), CSS/JS tự viết trong `static/`.
 - Excel: Apache POI. Giảm boilerplate: Lombok.
-- Không dùng H2. CHƯA thêm jjwt và springdoc (chờ giai đoạn REST API, cần bản tương thích Jackson 3).
+- Không dùng H2. JWT dùng `spring-boot-starter-security-oauth2-resource-server` (không dùng jjwt); OpenAPI dùng `springdoc-openapi-starter-webmvc-ui` (phiên bản ghi trong `pom.xml`). Hợp đồng API cho mobile: `docs/API.md` và `/v3/api-docs`.
 - REST API cho mobile mở từ giai đoạn 9b, nằm dưới `/api/v1/**`, dùng lại service hiện có và cùng database `FptContactBook` (mobile không có database riêng). Trước giai đoạn 9b không viết REST API.
 - Spring Boot 4: starter web là `spring-boot-starter-webmvc`, starter test là `spring-boot-starter-webmvc-test`, Jackson 3 (package `tools.jackson`). Không chắc tên starter, API hay cấu hình thì tra tài liệu chính thức hoặc Maven Central, KHÔNG đoán.
 - **Dependency đã được duyệt** (thêm không cần hỏi, phiên bản để Spring Boot BOM quản lý; chỉ ghi version khi BOM không quản lý): các thư viện kể trên, `spring-boot-starter-security`, `spring-boot-starter-validation`, `thymeleaf-extras-springsecurity6` (hoặc bản tương ứng với Security 7, kiểm tra Maven Central), các starter test của Spring Boot 4, `spring-security-test`, `chart.js` (WebJars), `webjars-locator-lite`, `spring-boot-devtools` (đã có trong `pom.xml`). Không dùng Testcontainers (máy dev không chạy được Docker). Mọi thứ khác phải hỏi.
