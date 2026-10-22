@@ -119,9 +119,83 @@ void main() {
       '/me',
       FakeReply(200, userJson(fullName: 'Lê Minh Sinh')),
     );
+    app.stubHome(unread: 3);
     await pumpApp(tester, app: app);
 
     await expectScreen(tester, 'home_student');
+  });
+
+  testWidgets('parent home with one child', (tester) async {
+    usePhoneScreen(tester);
+    final app = TestApp(accessToken: 'a', refreshToken: 'r');
+    app.http.reply(
+      'GET',
+      '/me',
+      FakeReply(200, userJson(fullName: 'Lê Văn Phụ', roles: ['PARENT'])),
+    );
+    app.stubHome(children: [childJson(name: 'Lê Minh Sinh')]);
+    await pumpApp(tester, app: app);
+
+    await expectScreen(tester, 'home_parent_one_child');
+  });
+
+  testWidgets('parent picks one of two children', (tester) async {
+    usePhoneScreen(tester);
+    final app = TestApp(accessToken: 'a', refreshToken: 'r');
+    app.http.reply(
+      'GET',
+      '/me',
+      FakeReply(200, userJson(fullName: 'Lê Văn Phụ', roles: ['PARENT'])),
+    );
+    app.stubHome(
+      unread: 12,
+      children: [
+        childJson(id: 1, name: 'Lê Minh Sinh'),
+        childJson(id: 2, code: 'SE190002', name: 'Lê Thu Hà'),
+      ],
+    );
+    await pumpApp(tester, app: app);
+
+    await tester.tap(find.byIcon(Icons.arrow_drop_down));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'home_parent_child_picker');
+  });
+
+  testWidgets('parent home without linked children', (tester) async {
+    usePhoneScreen(tester);
+    final app = TestApp(accessToken: 'a', refreshToken: 'r');
+    app.http.reply(
+      'GET',
+      '/me',
+      FakeReply(200, userJson(fullName: 'Lê Văn Phụ', roles: ['PARENT'])),
+    );
+    app.stubHome();
+    await pumpApp(tester, app: app);
+
+    await expectScreen(tester, 'home_parent_no_children');
+  });
+
+  testWidgets('account tab', (tester) async {
+    usePhoneScreen(tester);
+    final app = TestApp(accessToken: 'a', refreshToken: 'r');
+    app.http.reply(
+      'GET',
+      '/me',
+      FakeReply(200, userJson(fullName: 'Lê Minh Sinh')),
+    );
+    app.http.reply(
+      'GET',
+      '/me/profile',
+      FakeReply(200, profileJson(fullName: 'Lê Minh Sinh')),
+    );
+    app.stubHome();
+    await pumpApp(tester, app: app);
+
+    await tester.tap(find.text('Tài khoản'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'account_tab');
   });
 
   testWidgets('admin-only home', (tester) async {
@@ -145,9 +219,17 @@ void main() {
       '/me',
       FakeReply(200, userJson(fullName: 'Lê Văn Phụ', roles: ['PARENT'])),
     );
+    app.http.reply(
+      'GET',
+      '/me/profile',
+      FakeReply(200, profileJson(fullName: 'Lê Văn Phụ')),
+    );
+    app.stubHome(children: [childJson(name: 'Lê Minh Sinh')]);
     await pumpApp(tester, app: app);
+    await tester.tap(find.text('Tài khoản'));
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Đăng xuất'));
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Đăng xuất'));
     await tester.pumpAndSettle();
 
     await expectScreen(tester, 'logout_dialog');

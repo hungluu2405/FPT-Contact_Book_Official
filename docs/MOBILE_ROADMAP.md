@@ -54,13 +54,17 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - API client: tự gắn và làm mới token; lỗi mạng hiện thông báo kèm nút thử lại.
   - Nối màn hình đăng nhập với API; thêm màn hình bắt buộc đổi mật khẩu và đăng xuất.
   - Thay test Counter bằng test thật.
-- **10b: màn hình SV và PH**: trang chủ, chọn con, thời khóa biểu, lịch thi, điểm, điểm danh.
+- **10b: màn hình SV và PH** (nhánh `feature/phase-10b-student-parent`, giả định 157–160)
+  - 10b-1 (đã xong): trang chủ theo mockup (ảnh trường, lưới 6 chức năng), chọn con, thanh điều hướng dưới, tab Tài khoản.
+  - 10b-2: lịch học theo tuần, lịch thi.
+  - 10b-3: điểm, điểm danh.
+  - 10b-4: CLB (API chỉ đọc ở backend và màn hình mobile, chủ dự án duyệt đưa vào 10b).
 - **10c: thông báo và đơn nghỉ**: số chưa đọc, chi tiết thông báo, tải tệp; gửi đơn nghỉ kèm ảnh hoặc tệp minh chứng.
 - **10d: màn hình GV**: lịch dạy, điểm danh một buổi, duyệt đơn nghỉ.
 - **11: kiểm thử tổng và đóng gói**: chạy trên máy ảo và máy thật; rà soát bảo mật; build APK release; viết hướng dẫn cài đặt và cấu hình địa chỉ server.
 
 ## 4. Ngoài phạm vi
-Đăng ký, nhập/sửa điểm, lịch và danh mục trên mobile (quên mật khẩu qua email đã thêm, giả định 154–156); chế độ offline; push notification; tin nhắn và CLB trên mobile. Các mục này có thể thêm sau nếu duyệt.
+Đăng ký, nhập/sửa điểm, lịch và danh mục trên mobile (quên mật khẩu qua email đã thêm, giả định 154–156); chế độ offline; push notification; tin nhắn trên mobile (CLB chỉ đọc đã duyệt ở 10b-4). Các mục này có thể thêm sau nếu duyệt.
 
 ## 5. Ràng buộc vẫn giữ
 - Không push.
