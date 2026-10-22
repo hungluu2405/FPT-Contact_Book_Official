@@ -1,11 +1,128 @@
 :root {
     --color-navy: #0A1930;
     --color-orange: #F97316;
+    --color-orange-hover: #EA580C;
+    --color-orange-dark: #C2410C;
+    --color-orange-light: #FFF7ED;
+    --color-fpt-blue: #0066B3;
+    --color-fpt-green: #00A651;
     --color-bg: #F8F7F4;
     --color-text: #1F2937;
     --color-white: #FFFFFF;
     --color-border: #E5E7EB;
     --color-muted: #6B7280;
+
+    /* Màu chủ đạo của Bootstrap là cam (đồng bộ với app mobile): nút, link, ô đang nhập, phân trang... */
+    --bs-primary: #F97316;
+    --bs-primary-rgb: 249, 115, 22;
+    --bs-primary-text-emphasis: #9A3412;
+    --bs-primary-bg-subtle: #FFF7ED;
+    --bs-primary-border-subtle: #FDBA74;
+    --bs-link-color: #C2410C;
+    --bs-link-color-rgb: 194, 65, 12;
+    --bs-link-hover-color: #9A3412;
+    --bs-link-hover-color-rgb: 154, 52, 18;
+    --bs-focus-ring-color: rgba(249, 115, 22, 0.25);
+}
+
+/* ---------- Ghi đè thành phần Bootstrap sang tông cam ---------- */
+.btn-primary {
+    --bs-btn-color: #FFFFFF;
+    --bs-btn-bg: #F97316;
+    --bs-btn-border-color: #F97316;
+    --bs-btn-hover-color: #FFFFFF;
+    --bs-btn-hover-bg: #EA580C;
+    --bs-btn-hover-border-color: #EA580C;
+    --bs-btn-focus-shadow-rgb: 249, 115, 22;
+    --bs-btn-active-color: #FFFFFF;
+    --bs-btn-active-bg: #C2410C;
+    --bs-btn-active-border-color: #C2410C;
+    --bs-btn-disabled-color: #FFFFFF;
+    --bs-btn-disabled-bg: #FDBA74;
+    --bs-btn-disabled-border-color: #FDBA74;
+    font-weight: 600;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: #C2410C;
+    --bs-btn-border-color: #F97316;
+    --bs-btn-hover-color: #FFFFFF;
+    --bs-btn-hover-bg: #F97316;
+    --bs-btn-hover-border-color: #F97316;
+    --bs-btn-focus-shadow-rgb: 249, 115, 22;
+    --bs-btn-active-color: #FFFFFF;
+    --bs-btn-active-bg: #EA580C;
+    --bs-btn-active-border-color: #EA580C;
+    --bs-btn-disabled-color: #FDBA74;
+    --bs-btn-disabled-border-color: #FDBA74;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #FDBA74;
+    box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: var(--color-orange);
+    border-color: var(--color-orange);
+}
+
+.form-check-input:focus {
+    border-color: #FDBA74;
+    box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.25);
+}
+
+.pagination {
+    --bs-pagination-color: var(--color-orange-dark);
+    --bs-pagination-hover-color: var(--color-orange-dark);
+    --bs-pagination-focus-color: var(--color-orange-dark);
+    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.25);
+    --bs-pagination-active-bg: var(--color-orange);
+    --bs-pagination-active-border-color: var(--color-orange);
+}
+
+.nav-pills {
+    --bs-nav-pills-link-active-bg: var(--color-orange);
+}
+
+/* Nhãn nhỏ nền primary: cam đậm để chữ trắng đủ tương phản. */
+.text-bg-primary {
+    background-color: var(--color-orange-dark) !important;
+}
+
+.nav-tabs .nav-link,
+.nav-pills .nav-link {
+    --bs-nav-link-color: var(--color-orange-dark);
+    --bs-nav-link-hover-color: #9A3412;
+}
+
+.progress,
+.progress-stacked {
+    --bs-progress-bar-bg: var(--color-orange);
+}
+
+/* Dải ba màu FPT (xanh, cam, xanh lá) dưới logo trang đăng nhập. */
+.brand-stripe {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+
+.brand-stripe span {
+    width: 28px;
+    height: 4px;
+    border-radius: 2px;
+}
+
+.brand-stripe span:nth-child(1) { background-color: var(--color-fpt-blue); }
+.brand-stripe span:nth-child(2) { background-color: var(--color-orange); }
+.brand-stripe span:nth-child(3) { background-color: var(--color-fpt-green); }
+
+/* Logo FPT Education / FPT Schools (static/images/fpt_schools_logo.png: đã cắt sát lề, nền trong suốt). */
+.brand-logo {
+    display: block;
+    height: auto;
 }
 
 body {
@@ -73,60 +190,125 @@ body {
     color: var(--color-white);
 }
 
-/* ---------- Trang đăng nhập ---------- */
-.login-body {
-    background-color: var(--color-bg);
-    font-size: 1.05rem;
-}
-
-.login-hero {
-    background-color: var(--color-navy);
-    color: var(--color-white);
-    text-align: center;
-    padding: 2.5rem 1.5rem 6rem;
-    border-bottom-left-radius: 2.5rem;
-    border-bottom-right-radius: 2.5rem;
-}
-
-.login-brand {
-    color: var(--color-orange);
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    margin-bottom: 1rem;
-}
-
-.login-title {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-}
-
-.login-subtitle {
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 0;
-}
-
-.login-card-wrap {
-    display: flex;
-    justify-content: center;
-    padding: 0 1rem 2rem;
-    margin-top: -4rem;
-}
-
-.login-card {
+/* ---------- Trang đăng nhập, trang lỗi: nền trắng, mảng cong cam nhạt ở góc trên và đáy ---------- */
+.login-body,
+.error-body {
     background-color: var(--color-white);
-    border-radius: 1rem;
-    box-shadow: 0 10px 25px rgba(10, 25, 48, 0.12);
-    padding: 2rem 1.5rem;
+    background-image:
+        radial-gradient(circle at 100% 0, var(--color-orange-light) 0, var(--color-orange-light) min(260px, 45vw), transparent calc(min(260px, 45vw) + 1px)),
+        radial-gradient(circle at 0 6%, rgba(249, 115, 22, 0.06) 0, rgba(249, 115, 22, 0.06) 90px, transparent 91px),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 200' preserveAspectRatio='none'%3E%3Cpath d='M0 60 Q 430 0 860 60 T 1440 50 V200 H0Z' fill='%23F97316' fill-opacity='0.07'/%3E%3Cpath d='M0 120 Q 500 60 940 125 T 1440 115 V200 H0Z' fill='%23F97316' fill-opacity='0.12'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 0 0, 0 0, bottom center;
+    background-size: auto, auto, 100% 160px;
+    min-height: 100vh;
+}
+
+.login-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.05rem;
+    padding: 3rem 1.25rem 2rem;
+}
+
+.login-panel {
     width: 100%;
     max-width: 420px;
 }
 
-.login-forgot {
+.login-logo {
+    width: 240px;
+    max-width: 80%;
+    margin: 0 auto 0.9rem;
+}
+
+.login-greeting {
+    color: var(--color-navy);
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 2rem 0 1.25rem;
+}
+
+.login-form .form-label {
+    font-weight: 600;
+}
+
+/* Icon đầu ô và nút hiện mật khẩu liền với ô nhập: không vạch ngăn, cùng viền xám nhạt. */
+.login-form .input-group-text {
+    background-color: var(--color-white);
     color: var(--color-muted);
-    font-size: 0.9rem;
+    border-right: 0;
+}
+
+.login-form .input-group .form-control:not(:first-child) {
+    border-left: 0;
+}
+
+.login-form .input-group .form-control:not(:last-child) {
+    border-right: 0;
+}
+
+.login-form .input-group .btn-outline-secondary {
+    --bs-btn-border-color: var(--bs-border-color);
+    --bs-btn-color: var(--color-muted);
+    --bs-btn-hover-bg: var(--color-bg);
+    --bs-btn-hover-color: var(--color-text);
+    --bs-btn-hover-border-color: var(--bs-border-color);
+    border-left: 0;
+}
+
+.login-form .input-group:focus-within .input-group-text,
+.login-form .input-group:focus-within .form-control,
+.login-form .input-group:focus-within .btn {
+    border-color: #FDBA74;
+}
+
+.login-form .input-group .form-control:focus {
+    box-shadow: none;
+}
+
+.login-form .input-group:focus-within {
+    border-radius: 0.875rem;
+    box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.2);
+}
+
+.login-form .input-group-text,
+.login-form .form-control,
+.login-form .btn {
+    border-radius: 0.875rem;
+}
+
+.login-form .input-group > :not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.login-form .input-group > :not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.login-submit {
+    min-height: 54px;
+    font-size: 1.1rem;
+    box-shadow: 0 6px 16px rgba(249, 115, 22, 0.3);
+}
+
+.login-forgot {
+    color: var(--color-orange-dark);
+    font-size: 0.95rem;
+    font-weight: 600;
     text-align: center;
     margin: 1.25rem 0 0;
+}
+
+.login-footer {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: auto;
+    padding-top: 3rem;
 }
 
 /* ---------- Bố cục chung ---------- */
@@ -135,8 +317,10 @@ body {
 }
 
 .app-topbar {
-    background-color: var(--color-navy);
-    color: var(--color-white);
+    background-color: var(--color-white);
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -147,7 +331,7 @@ body {
 }
 
 .app-brand {
-    color: var(--color-white);
+    color: var(--color-navy);
     font-weight: 700;
     text-decoration: none;
     display: inline-flex;
@@ -156,11 +340,28 @@ body {
 }
 
 .app-brand:hover {
-    color: var(--color-orange);
+    color: var(--color-orange-dark);
+}
+
+.app-brand .brand-logo {
+    height: 44px;
+    width: auto;
+}
+
+/* Mép dưới thanh trên: dải ba màu FPT. */
+.app-topbar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-fpt-blue) 0 33.3%, var(--color-orange) 33.3% 66.6%,
+        var(--color-fpt-green) 66.6% 100%);
 }
 
 .app-menu-toggle {
-    color: var(--color-white);
+    color: var(--color-text);
     font-size: 1.5rem;
     padding: 0 0.25rem;
 }
@@ -192,6 +393,7 @@ body {
 
 .app-sidebar .nav-link {
     color: var(--color-text);
+    font-weight: 500;
     border-radius: 0.5rem;
     display: flex;
     align-items: center;
@@ -204,8 +406,10 @@ body {
 }
 
 .app-sidebar .nav-link.active {
-    background-color: var(--color-orange);
-    color: var(--color-white);
+    background-color: var(--color-orange-light);
+    color: var(--color-orange-dark);
+    font-weight: 700;
+    box-shadow: inset 4px 0 0 var(--color-orange);
 }
 
 /* Tiêu đề nhóm menu (ví dụ "Danh mục"). */
@@ -257,7 +461,9 @@ body {
 }
 
 .role-badge {
-    background-color: var(--color-navy);
+    background-color: var(--color-orange-light);
+    color: var(--color-orange-dark);
+    border: 1px solid #FDBA74;
     margin-right: 0.5rem;
 }
 
@@ -295,6 +501,7 @@ body {
 /* ---------- Trang lỗi ---------- */
 .error-body {
     display: flex;
+    min-height: 100vh;
     align-items: center;
     justify-content: center;
     padding: 1rem;
@@ -321,10 +528,10 @@ body {
     user-select: all;
 }
 
-/* Thời khóa biểu: buổi hủy gạch ngang, buổi bù viền xanh, ngày hôm nay nổi bật. */
+/* Thời khóa biểu: viền cam, buổi hủy gạch ngang, buổi bù viền xanh, ngày hôm nay nổi bật. */
 .schedule-item {
     background-color: var(--color-bg);
-    border-left: 4px solid var(--color-navy);
+    border-left: 4px solid var(--color-orange);
 }
 
 .schedule-item.schedule-makeup {
@@ -349,7 +556,7 @@ body {
 
 .app-bell {
     position: relative;
-    color: var(--color-white);
+    color: var(--color-text);
     font-size: 1.25rem;
     margin-right: 0.75rem;
     text-decoration: none;
