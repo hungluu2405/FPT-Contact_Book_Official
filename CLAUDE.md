@@ -77,7 +77,7 @@ Tài nguyên: `templates/{layout,fragments,auth,admin,teacher,student,parent,com
 
 ## 6. GIAO DIỆN
 - Ngày `dd/MM/yyyy`, giờ `HH:mm`, múi giờ `Asia/Ho_Chi_Minh`, locale `vi_VN`.
-- Màu (CSS variables trong `static/css/app.css`): navy `#0A1930`, cam `#F97316`, nền `#F8F7F4`, chữ `#1F2937`.
+- Màu (CSS variables trong `static/css/app.css`, đồng bộ với app mobile): nền trắng; cam `#F97316` là màu của mọi nút chính (Bootstrap `primary` đã ghi đè thành cam); cam đậm `#C2410C` cho link, chữ nhỏ; cam nhạt `#FFF7ED` cho mảng nền, mục menu đang chọn; navy `#0A1930` chỉ cho chữ tiêu đề lớn; chữ `#1F2937`, chữ phụ `#6B7280`. Xanh FPT `#0066B3`, xanh lá `#00A651` chỉ dùng ở logo và dải ba màu. Nút Hủy giữ xám, nút Xóa giữ đỏ.
 - Bố cục chung bằng fragments: `layout/base.html` gồm thanh trên, menu trái theo vai trò, vùng flash, vùng nội dung. Không lặp HTML khung.
 - Responsive; chữ rõ, nút lớn (phụ huynh lớn tuổi dùng).
 - Form dùng Bean Validation, lỗi tiếng Việt cạnh từng ô, thông báo trong `messages.properties`.
