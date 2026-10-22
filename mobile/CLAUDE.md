@@ -10,16 +10,20 @@ App Android cho sinh viên (SV), phụ huynh (PH) và giảng viên (GV). File n
 
 ## 2. CÔNG NGHỆ
 - Flutter stable, Dart theo `pubspec.yaml`. Chỉ phát triển và kiểm thử **Android**. Các thư mục ios, web, windows, macos, linux giữ nguyên, không sửa.
-- Quản lý trạng thái: `flutter_riverpod`. HTTP: `dio`.
-- Đã duyệt nhưng chưa thêm: `flutter_riverpod`, `dio`. Chờ duyệt: `flutter_secure_storage`, `go_router`, `intl`. Mọi package khác (kể cả dev) phải hỏi, kèm lý do, license và tình trạng bảo trì.
+- Quản lý trạng thái: controller kế thừa `ChangeNotifier` (có sẵn trong Flutter), màn hình nghe bằng `ListenableBuilder`. Không dùng Riverpod. Điều hướng bằng `Navigator` sẵn có.
+- Đã thêm (10a): `dio` (HTTP), `flutter_secure_storage` (lưu token). Chưa thêm: `go_router`, `intl`, chỉ thêm khi cần và được duyệt. Mọi package khác (kể cả dev) phải hỏi, kèm lý do, license và tình trạng bảo trì.
 - Địa chỉ server truyền qua `--dart-define=API_BASE_URL=...`, không viết cứng trong code. Máy ảo Android gọi backend local qua `http://10.0.2.2:8080`.
 - HTTP thường (cleartext) chỉ bật cho bản debug. Bản release dùng HTTPS. Quyền `INTERNET` phải có trong manifest `src/main`.
 
-## 3. CẤU TRÚC (feature-first, áp dụng từ giai đoạn 10a)
-- `lib/core/`: theme (màu, chữ), API client, xử lý lỗi, lưu token, router.
-- `lib/features/<chức năng>/`: `data/` (gọi API, model), `presentation/` (màn hình, widget, provider).
-- Màu lấy từ theme, không import `main.dart` để lấy màu.
-- Hiện code còn ở `lib/vn/edu/fpt/screen/...` và package tên `myfschoolse1945`. Giai đoạn 10a sẽ đổi sang package `fpt_contact_book_mobile`, applicationId `vn.edu.fpt.contactbook`.
+## 3. CẤU TRÚC (MVC, áp dụng từ giai đoạn 10a)
+Package Dart `fpt_contact_book_mobile`, applicationId `vn.edu.fpt.contactbook`. Code nằm dưới `lib/vn/edu/fpt/`:
+- `screen/`: màn hình (View), tên `<hành động>_<đối tượng>_screen.dart`, ví dụ `add_user_screen.dart`, `list_user_screen.dart`, `edit_user_screen.dart`, `view_user_screen.dart`. Chia thư mục con theo nhóm (`account/`, `home/`, ...); widget dùng chung ở `screen/widget/`.
+- `controller/`: mỗi nghiệp vụ một file `<đối tượng>_controller.dart`, các màn hình của nghiệp vụ đó dùng chung (ví dụ bốn màn hình User dùng `user_controller.dart`). Controller kế thừa `ChangeNotifier`, giữ trạng thái đang tải, lỗi, dữ liệu; được truyền vào màn hình qua tham số constructor.
+- `model/`: `<đối tượng>_model.dart`, dùng làm tham số truyền dữ liệu giữa các file. Field private, có `get`/`set` tường minh, `fromJson`/`toJson` đúng tên trường của API (lint `unnecessary_getters_setters` đã tắt cho quy ước này).
+- `service/`: gọi API (`ApiClient` tự gắn và làm mới token), lưu token. Controller gọi service, không gọi HTTP trực tiếp.
+- `util/`: màu (`AppColors`), theme, cấu hình (`AppConfig`).
+- Màu lấy từ `AppColors`/theme, không import `main.dart` để lấy màu.
+- Test đặt trong `test/` theo cùng tầng (`model/`, `service/`, `controller/`, widget test); giả lập ở ranh giới HTTP bằng `test/support/fakes.dart`.
 
 ## 4. NGHIỆP VỤ (theo SRS mục 8)
 - SV: thời khóa biểu, lịch thi, điểm (chỉ cột đã công bố), điểm danh, thông báo, đơn nghỉ.

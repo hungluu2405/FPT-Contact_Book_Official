@@ -10,13 +10,14 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
 - **Thư mục nền tảng**: **giữ tất cả** (android, ios, web, windows, macos, linux), nhưng chỉ phát triển và kiểm thử Android.
 - **2 file đang sửa dở** trong `C:\Users\pooo\myfschoolse1945` (`lib/vn/edu/fpt/screen/account/login_screen.dart`, `lib/vn/edu/fpt/screen/widget/auth_widget.dart`): Claude tự commit nguyên trạng trong repo cũ trước khi chép. Rule global cấm commit trên `main`, nên làm trên nhánh `chore/wip-login-ui`.
 - **Đổi tên**: package Dart `myfschoolse1945` thành `fpt_contact_book_mobile`; applicationId/namespace `com.example.myfschoolse1945` thành `vn.edu.fpt.contactbook`.
-- **Thư viện mobile**: Riverpod (`flutter_riverpod`) và `dio`. Chờ duyệt (đề xuất kèm license và tình trạng bảo trì khi thêm ở 10a): `flutter_secure_storage`, `go_router`, `intl`.
+- **Thư viện mobile** (chốt ở 10a): `dio` và `flutter_secure_storage`. Không dùng Riverpod (controller dùng `ChangeNotifier` theo cấu trúc MVC) và chưa dùng `go_router`; `intl` thêm khi cần hiển thị ngày.
+- **Cấu trúc** (chốt ở 10a): MVC dưới `lib/vn/edu/fpt/` gồm `screen/`, `controller/`, `model/`, cùng `service/` và `util/` (xem `mobile/CLAUDE.md` mục 3).
 - **Thư viện backend** (đã duyệt ở 9b): `spring-boot-starter-security-oauth2-resource-server` thay cho `jjwt`, và `springdoc-openapi-starter-webmvc-ui` 3.1.1.
 
 ## 2. Hiện trạng project Flutter (đã khảo sát)
 - 3 file Dart: `main.dart` (chứa màu và `MaterialApp`), `login_screen.dart`, `auth_widget.dart`. Chỉ có giao diện, chưa gọi API.
 - Dependency hiện có: `cupertino_icons`, `flutter_lints`. SDK `^3.13.2`. Asset nằm ở `assets/images/`.
-- Màu khớp với web: navy `#0A1930`, cam `#F97316`, nền `#F8F7F4`; ngoài ra có `fptBlue` và `fptGreen`.
+- Màu khớp với web lúc khảo sát: navy `#0A1930`, cam `#F97316`, nền `#F8F7F4`; ngoài ra có `fptBlue` và `fptGreen`. Từ 10a app theo bộ màu trắng và cam mới (`mobile/CLAUDE.md` mục 5).
 - Những chỗ cần sửa:
   - Nút "Quên mật khẩu?": SRS mục 8 không có chức năng này trên mobile, nên bỏ và thay bằng dòng "Liên hệ quản trị viên".
   - Phụ đề "dành cho sinh viên" là sai, vì cả SV, PH và GV đều dùng app.
@@ -47,8 +48,8 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - Lịch dạy, các lớp đang dạy, điểm danh một buổi (xem và lưu), duyệt hoặc từ chối đơn nghỉ.
   - TEACHER chỉ thao tác lớp mình dạy.
   - Nhập điểm, sửa lịch, danh mục chỉ làm trên Web.
-- **10a: khung app**
-  - Đổi tên package/applicationId; sắp xếp lại cấu trúc theo feature-first; tách theme.
+- **10a: khung app (đã xong, nhánh `feature/phase-10a-app-shell`; giả định 147–151)**
+  - Đổi tên package/applicationId; sắp xếp lại cấu trúc theo MVC (`screen`, `controller`, `model`, `service`, `util`); tách theme.
   - Quyền `INTERNET` trong manifest main; cleartext chỉ cho debug.
   - API client: tự gắn và làm mới token; lỗi mạng hiện thông báo kèm nút thử lại.
   - Nối màn hình đăng nhập với API; thêm màn hình bắt buộc đổi mật khẩu và đăng xuất.
@@ -71,4 +72,4 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
 - Không sửa `database/fpt_contact_book.sql`.
 
 ## 6. Câu mở đầu cho phiên kế tiếp
-"Đọc `docs/MOBILE_ROADMAP.md`, `docs/API.md` và `mobile/CLAUDE.md`, rồi trình kế hoạch chi tiết giai đoạn 10a để tôi duyệt."
+"Đọc `docs/MOBILE_ROADMAP.md`, `docs/API.md` và `mobile/CLAUDE.md`, rồi trình kế hoạch chi tiết giai đoạn 10b để tôi duyệt."

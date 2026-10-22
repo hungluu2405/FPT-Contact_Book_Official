@@ -1,4 +1,4 @@
-package com.example.myfschoolse1945
+package vn.edu.fpt.contactbook
 
 import io.flutter.embedding.android.FlutterActivity
 
