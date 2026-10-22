@@ -173,7 +173,7 @@ public class AttendanceReportService {
         List<List<Object>> rows = new ArrayList<>();
         for (SectionAttendanceRow student : data.students()) {
             AttendanceSummary s = student.summary();
-            rows.add(ReportExports.cells(student.studentCode(), student.fullName(), s.present(), s.late(),
+            rows.add(ReportExports.cells(student.studentCode(), student.fullName(), s.present(),
                     s.absentExcused(), s.absentUnexcused(), s.markedSessions(), s.totalSessions(),
                     s.attendanceRate(), s.absentRate(), s.warning() ? ReportMessages.YES : null));
         }

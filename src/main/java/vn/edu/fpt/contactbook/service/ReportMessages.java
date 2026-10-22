@@ -26,8 +26,7 @@ final class ReportMessages {
     static final String SHEET_SECTIONS = "Lớp học phần";
     static final String SHEET_STATS = "Thống kê";
 
-    static final List<String> ATTENDANCE_STUDENT_HEADERS = List.of("Mã SV", "Họ tên", "Có mặt", "Đi muộn",
-            "Vắng có phép", "Vắng không phép", "Số buổi đã điểm danh", "Số buổi của lớp", "Chuyên cần (%)",
+    static final List<String> ATTENDANCE_STUDENT_HEADERS = List.of("Mã SV", "Họ tên", "Có mặt", "Vắng có phép", "Vắng không phép", "Số buổi đã điểm danh", "Số buổi của lớp", "Chuyên cần (%)",
             "Tỷ lệ vắng (%)", "Vượt ngưỡng");
     static final List<String> ATTENDANCE_SECTION_HEADERS = List.of("Lớp học phần", "Mã môn", "Tên môn",
             "Giảng viên", "Số SV", "Số buổi", "Chuyên cần (%)", "Số SV vượt ngưỡng");

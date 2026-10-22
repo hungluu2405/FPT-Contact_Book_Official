@@ -5,17 +5,16 @@
 
 <!--/* Nhãn một trạng thái điểm danh; status null là chưa điểm danh. */-->
 <span th:fragment="status(status)" class="badge"
-      th:classappend="${status == null ? 'text-bg-light' : (status.name() == 'PRESENT' ? 'text-bg-success' : (status.name() == 'LATE' ? 'text-bg-warning' : (status.name() == 'ABSENT_EXCUSED' ? 'text-bg-info' : 'text-bg-danger')))}"
+      th:classappend="${status == null ? 'text-bg-light' : (status.name() == 'PRESENT' ? 'text-bg-success' : (status.name() == 'ABSENT_EXCUSED' ? 'text-bg-info' : 'text-bg-danger'))}"
       th:text="${status == null} ? #{attendance.not-marked} : #{'attendance-status.' + ${status}}">Có mặt</span>
 
 <!--/*
-  Các ô số liệu của một dòng: có mặt, muộn, vắng có phép, vắng không phép, chuyên cần, tỷ lệ vắng kèm cảnh báo.
+  Các ô số liệu của một dòng: có mặt, vắng có phép, vắng không phép, chuyên cần, tỷ lệ vắng kèm cảnh báo.
   data-label là nhãn của ô khi bảng có class table-stack hiện thành thẻ trên màn hình nhỏ (app.css); stack-priority
   đưa chuyên cần và tỷ lệ vắng lên ngay dưới tên môn, stack-half xếp các số đếm hai cột.
 */-->
 <th:block th:fragment="cells(s, threshold)">
     <td class="text-center stack-half" th:attr="data-label=#{attendance-status.PRESENT}" th:text="${s.present}">0</td>
-    <td class="text-center stack-half" th:attr="data-label=#{attendance-status.LATE}" th:text="${s.late}">0</td>
     <td class="text-center stack-half" th:attr="data-label=#{attendance-status.ABSENT_EXCUSED}"
         th:text="${s.absentExcused}">0</td>
     <td class="text-center stack-half" th:attr="data-label=#{attendance-status.ABSENT_UNEXCUSED}"
@@ -35,7 +34,6 @@
 <!--/* Tiêu đề các cột của fragment cells. */-->
 <th:block th:fragment="headers">
     <th class="text-center" th:text="#{attendance-status.PRESENT}">Có mặt</th>
-    <th class="text-center" th:text="#{attendance-status.LATE}">Đi muộn</th>
     <th class="text-center" th:text="#{attendance-status.ABSENT_EXCUSED}">Vắng có phép</th>
     <th class="text-center" th:text="#{attendance-status.ABSENT_UNEXCUSED}">Vắng không phép</th>
     <th class="text-center" th:text="#{attendance.rate}">Chuyên cần</th>

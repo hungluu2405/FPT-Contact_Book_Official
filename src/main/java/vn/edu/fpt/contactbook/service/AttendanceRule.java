@@ -11,9 +11,9 @@ import java.util.Map;
 
 /**
  * Công thức chuyên cần (SRS FR-ATT-02, 04):
- * tỷ lệ vắng = (ABSENT_EXCUSED + ABSENT_UNEXCUSED) / số buổi chưa hủy của lớp; LATE không tính là vắng.
+ * tỷ lệ vắng = (ABSENT_EXCUSED + ABSENT_UNEXCUSED) / số buổi chưa hủy của lớp.
  * Cảnh báo khi tỷ lệ vắng VƯỢT ngưỡng (lớn hơn hẳn); lớp chưa có buổi nào thì không cảnh báo.
- * tỷ lệ chuyên cần = (PRESENT + LATE) / số buổi sinh viên đã được điểm danh.
+ * tỷ lệ chuyên cần = PRESENT / số buổi sinh viên đã được điểm danh (đi muộn được điểm danh là PRESENT).
  * So sánh với ngưỡng bằng số nguyên để không lệch do làm tròn.
  */
 @Component
@@ -35,14 +35,13 @@ public class AttendanceRule {
     /** counts: số buổi theo trạng thái (thiếu khóa là 0); totalSessions: số buổi chưa hủy của lớp. */
     public AttendanceSummary summarize(Map<AttendanceStatus, Long> counts, long totalSessions) {
         long present = counts.getOrDefault(AttendanceStatus.PRESENT, 0L);
-        long late = counts.getOrDefault(AttendanceStatus.LATE, 0L);
         long excused = counts.getOrDefault(AttendanceStatus.ABSENT_EXCUSED, 0L);
         long unexcused = counts.getOrDefault(AttendanceStatus.ABSENT_UNEXCUSED, 0L);
         long absent = excused + unexcused;
-        long marked = present + late + absent;
+        long marked = present + absent;
         boolean warning = totalSessions > 0 && absent * 100 > (long) thresholdPercent * totalSessions;
-        return new AttendanceSummary(present, late, excused, unexcused, totalSessions,
-                marked == 0 ? null : percent(present + late, marked),
+        return new AttendanceSummary(present, excused, unexcused, totalSessions,
+                marked == 0 ? null : percent(present, marked),
                 totalSessions == 0 ? BigDecimal.ZERO.setScale(1) : percent(absent, totalSessions), warning);
     }
 

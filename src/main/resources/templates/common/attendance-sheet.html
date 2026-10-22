@@ -6,7 +6,8 @@
 </head>
 <body>
 <section>
-    <!--/* baseUrl: trang để quay về; actionUrl: URL của chính bảng này. canSave = false là chỉ xem (trưởng bộ môn). */-->
+    <!--/* baseUrl: trang để quay về; actionUrl: URL của chính bảng này. canSave = false là chỉ xem (trưởng bộ môn, hoặc
+         giáo viên đã quá hạn). Ba trạng thái: có mặt, vắng có phép, vắng không phép; đi muộn ghi vào ô ghi chú. */-->
     <a th:replace="~{fragments/catalog :: back(${baseUrl}, ${sheet.sectionCode})}"></a>
     <h1 class="page-title" th:text="#{attendance.sheet(${sheet.sessionNo})} + ': ' + ${sheet.sectionCode}">Điểm danh</h1>
     <p class="text-muted">
@@ -16,9 +17,15 @@
         <span th:text="${sheet.roomCode} ?: #{schedule.no-room}">R101</span>
     </p>
 
-    <p th:unless="${canSave}" class="alert alert-info" th:text="#{attendance.read-only}">Chỉ xem.</p>
-    <p th:if="${canSave and sheet.marked}" class="alert alert-warning" th:text="#{attendance.reason.hint}">Đã điểm danh.</p>
-    <p th:if="${canSave and !sheet.marked}" class="text-muted" th:text="#{attendance.first-time.hint}">Chọn trạng thái.</p>
+    <!--/* Hạn của giáo viên: 24 giờ từ lần điểm danh đầu (chưa điểm danh: từ giờ kết thúc buổi). */-->
+    <p th:if="${sheet.locked}" class="alert alert-secondary"
+       th:text="#{attendance.locked(${#temporals.format(sheet.editableUntil, 'HH:mm dd/MM/yyyy')})}">Đã hết hạn.</p>
+    <p th:unless="${sheet.locked}" class="text-muted mb-2"><i class="bi bi-clock"></i>
+        <span th:text="#{attendance.deadline(${#temporals.format(sheet.editableUntil, 'HH:mm dd/MM/yyyy')})}">Hạn</span></p>
+    <p th:if="${!canSave and !sheet.locked}" class="alert alert-info" th:text="#{attendance.read-only}">Chỉ xem.</p>
+    <p th:if="${canSave and sheet.reasonRequired}" class="alert alert-warning"
+       th:text="${sheet.marked} ? #{attendance.reason.hint} : #{attendance.reason.manager-hint}">Cần lý do.</p>
+    <p th:if="${canSave and !sheet.marked and !sheet.reasonRequired}" class="text-muted" th:text="#{attendance.first-time.hint}">Chọn trạng thái.</p>
 
     <form th:action="@{${actionUrl}}" method="post" th:object="${form}" novalidate>
         <div th:replace="~{fragments/catalog :: globalErrors}"></div>
@@ -58,14 +65,18 @@
                                            th:checked="${form.statuses[row.studentId] == st}">
                                     <label class="btn" th:for="'st-' + ${row.studentId} + '-' + ${st}"
                                            th:classappend="${st.name() == 'PRESENT' ? 'btn-outline-success'
-                                               : (st.name() == 'LATE' ? 'btn-outline-warning'
-                                               : (st.name() == 'ABSENT_EXCUSED' ? 'btn-outline-info' : 'btn-outline-danger'))}"
+                                               : (st.name() == 'ABSENT_EXCUSED' ? 'btn-outline-info' : 'btn-outline-danger')}"
                                            th:text="#{'attendance-status.' + ${st}}">Có mặt</label>
                                 </th:block>
                             </div>
                             <th:block th:unless="${canSave}"><span th:replace="~{fragments/attendance :: status(${row.status})}"></span></th:block>
                         </td>
-                        <td class="small" th:attr="data-label=#{attendance.note}" th:text="${row.note}">Ghi chú</td>
+                        <td class="attendance-note" th:attr="data-label=#{attendance.note}">
+                            <input th:if="${canSave}" type="text" class="form-control" maxlength="255"
+                                   th:name="'notes[' + ${row.studentId} + ']'" th:value="${form.notes[row.studentId]}"
+                                   th:placeholder="#{attendance.note.placeholder}" th:attr="aria-label=#{attendance.note} + ' ' + ${row.fullName}">
+                            <span th:unless="${canSave}" class="small" th:text="${row.note}">Ghi chú</span>
+                        </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(sheet.rows)}">
                         <td colspan="4" class="text-center text-muted py-4" th:text="#{attendance.no-students}">Chưa có sinh viên</td>
@@ -73,7 +84,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="mt-3" th:if="${canSave and sheet.marked}">
+            <div class="mt-3" th:if="${canSave and sheet.reasonRequired}">
                 <label for="reason" class="form-label" th:text="#{attendance.reason} + ' *'">Lý do</label>
                 <input type="text" class="form-control" th:field="*{reason}" maxlength="255"
                        th:classappend="${#fields.hasErrors('reason')} ? 'is-invalid'">

@@ -18,6 +18,8 @@ import vn.edu.fpt.contactbook.repository.AttendanceRepository;
 import vn.edu.fpt.contactbook.repository.AuditLogRepository;
 import vn.edu.fpt.contactbook.repository.ClassSectionRepository;
 import vn.edu.fpt.contactbook.repository.ClassSessionRepository;
+import vn.edu.fpt.contactbook.repository.UserRepository;
+import vn.edu.fpt.contactbook.repository.StudentRepository;
 import vn.edu.fpt.contactbook.service.AuditActions;
 import vn.edu.fpt.contactbook.support.ApiClient;
 import vn.edu.fpt.contactbook.support.IntegrationTest;
@@ -55,12 +57,18 @@ class TeacherApiIntegrationTest {
     @Autowired AuditLogRepository auditLogRepository;
     @Autowired ClassSectionRepository classSectionRepository;
     @Autowired ClassSessionRepository classSessionRepository;
+    @Autowired StudentRepository studentRepository;
+    @Autowired UserRepository userRepository;
 
     ApiClient api;
 
     @BeforeEach
     void setUp() {
         api = new ApiClient(mockMvc, jsonMapper);
+        // Buổi 1 trong dữ liệu mẫu là 08/09/2026, đã quá hạn 24 giờ: đưa về hôm nay (test rollback).
+        ClassSession session = classSessionRepository.findById(1L).orElseThrow();
+        session.setSessionDate(AppTime.today());
+        classSessionRepository.saveAndFlush(session);
     }
 
     @Nested
@@ -81,9 +89,9 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Lịch dạy tuần 07/09/2026 có PRJ301; lịch thi và danh sách buổi phân trang")
+        @DisplayName("Lịch dạy tuần này có PRJ301 (buổi 1 đưa về hôm nay); lịch thi và danh sách buổi phân trang")
         void schedule() throws Exception {
-            JsonNode week = api.json(api.perform(get(API + "/schedule/week").param("date", "2026-09-08"),
+            JsonNode week = api.json(api.perform(get(API + "/schedule/week").param("date", AppTime.today().toString()),
                     TestAccounts.TEACHER).andExpect(status().isOk())).get("data");
             List<String> subjects = new ArrayList<>();
             week.get("days").forEach(day -> day.get("items").forEach(item -> subjects.add(
@@ -150,8 +158,11 @@ class TeacherApiIntegrationTest {
 
             assertThat(fieldNames(sheet)).containsExactlyInAnyOrder("sectionId", "sectionCode", "subjectCode",
                     "subjectName", "sessionId", "sessionNo", "date", "startTime", "endTime", "roomCode", "marked",
-                    "rows");
+                    "editableUntil", "locked", "reasonRequired", "rows");
             assertThat(sheet.get("marked").asBoolean()).isFalse();
+            assertThat(sheet.get("locked").asBoolean()).isFalse();
+            assertThat(sheet.get("editableUntil").asString())
+                    .startsWith(AppTime.today().plusDays(1).toString());
             JsonNode row = sheet.get("rows").get(0);
             assertThat(fieldNames(row)).containsExactlyInAnyOrder("studentId", "studentCode", "fullName", "status",
                     "note", "approvedLeave");
@@ -181,7 +192,7 @@ class TeacherApiIntegrationTest {
                     TestAccounts.TEACHER).andExpect(status().isOk()));
             assertThat(adjusted.get("firstTime").asBoolean()).isFalse();
             assertThat(adjusted.get("changed").asInt()).isEqualTo(1);
-            assertThat(adjusted.get("sheet").get("rows").get(0).get("note").asString()).isEqualTo("Có giấy khám bệnh");
+            assertThat(adjusted.get("sheet").get("rows").get(0).get("note").isNull()).isTrue();
             assertThat(lastAudit(AuditActions.ADJUST_ATTENDANCE).getDetail())
                     .contains("status=PRESENT -> ABSENT_EXCUSED");
 
@@ -224,6 +235,52 @@ class TeacherApiIntegrationTest {
             api.perform(save(url, Map.of("1", "PRESENT"), null), TestAccounts.TEACHER)
                     .andExpect(status().isBadRequest());
             assertThat(attendanceRepository.findBySessionId(future)).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("Ghi chú và hạn 24 giờ qua API")
+    class NotesAndWindow {
+
+        @Test
+        @DisplayName("Lưu kèm notes: ghi chú lưu theo học sinh; lần sau không gửi notes thì ghi chú giữ nguyên")
+        void notesAreKept() throws Exception {
+            api.perform(saveWithNotes(SHEET, Map.of("1", "PRESENT"), Map.of("1", "Đi muộn 10 phút"), null),
+                    TestAccounts.TEACHER).andExpect(status().isOk());
+
+            JsonNode adjusted = api.json(api.perform(save(SHEET, Map.of("1", "ABSENT_UNEXCUSED"), "Nhập nhầm"),
+                    TestAccounts.TEACHER).andExpect(status().isOk()));
+
+            JsonNode row = adjusted.get("sheet").get("rows").get(0);
+            assertThat(row.get("status").asString()).isEqualTo("ABSENT_UNEXCUSED");
+            assertThat(row.get("note").asString()).isEqualTo("Đi muộn 10 phút");
+        }
+
+        @Test
+        @DisplayName("Quá 24 giờ từ lần điểm danh đầu: bảng locked, lưu bị 400 BUSINESS_ERROR")
+        void lockedAfterWindow() throws Exception {
+            Attendance row = new Attendance();
+            row.setSession(classSessionRepository.findById(1L).orElseThrow());
+            row.setStudent(studentRepository.findById(1L).orElseThrow());
+            row.setStatus(AttendanceStatus.PRESENT);
+            row.setMarkedAt(AppTime.now().minusHours(25));
+            row.setMarkedBy(userRepository.findById(TestAccounts.TEACHER_ID).orElseThrow());
+            attendanceRepository.saveAndFlush(row);
+
+            JsonNode sheet = api.json(api.perform(get(SHEET), TestAccounts.TEACHER).andExpect(status().isOk()));
+            assertThat(sheet.get("locked").asBoolean()).isTrue();
+            JsonNode error = api.json(api.perform(save(SHEET, Map.of("1", "ABSENT_UNEXCUSED"), "Khiếu nại"),
+                    TestAccounts.TEACHER).andExpect(status().isBadRequest()));
+            assertThat(error.get("code").asString()).isEqualTo("BUSINESS_ERROR");
+            assertThat(error.get("message").asString()).startsWith("Đã hết hạn điểm danh, chỉnh sửa");
+        }
+
+        @Test
+        @DisplayName("Trạng thái LATE đã bỏ: 400 VALIDATION_FAILED")
+        void lateIsRejected() throws Exception {
+            JsonNode error = api.json(api.perform(save(SHEET, Map.of("1", "LATE"), null), TestAccounts.TEACHER)
+                    .andExpect(status().isBadRequest()));
+            assertThat(error.get("code").asString()).isEqualTo("VALIDATION_FAILED");
         }
     }
 
@@ -292,6 +349,15 @@ class TeacherApiIntegrationTest {
     private MockHttpServletRequestBuilder save(String url, Map<String, String> statuses, String reason) {
         Map<String, Object> body = new HashMap<>();
         body.put("statuses", statuses);
+        body.put("reason", reason);
+        return post(url).contentType(MediaType.APPLICATION_JSON).content(jsonMapper.writeValueAsString(body));
+    }
+
+    private MockHttpServletRequestBuilder saveWithNotes(String url, Map<String, String> statuses,
+                                                       Map<String, String> notes, String reason) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("statuses", statuses);
+        body.put("notes", notes);
         body.put("reason", reason);
         return post(url).contentType(MediaType.APPLICATION_JSON).content(jsonMapper.writeValueAsString(body));
     }

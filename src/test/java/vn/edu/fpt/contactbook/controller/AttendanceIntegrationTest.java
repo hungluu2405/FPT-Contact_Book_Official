@@ -1,5 +1,6 @@
 package vn.edu.fpt.contactbook.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,8 +20,10 @@ import vn.edu.fpt.contactbook.repository.ClassSectionRepository;
 import vn.edu.fpt.contactbook.repository.ClassSessionRepository;
 import vn.edu.fpt.contactbook.repository.DepartmentRepository;
 import vn.edu.fpt.contactbook.repository.SemesterRepository;
+import vn.edu.fpt.contactbook.repository.StudentRepository;
 import vn.edu.fpt.contactbook.repository.SubjectRepository;
 import vn.edu.fpt.contactbook.repository.TeacherRepository;
+import vn.edu.fpt.contactbook.repository.UserRepository;
 import vn.edu.fpt.contactbook.security.AppUserDetailsService;
 import vn.edu.fpt.contactbook.service.AuditActions;
 import vn.edu.fpt.contactbook.support.IntegrationTest;
@@ -68,6 +71,86 @@ class AttendanceIntegrationTest {
     @Autowired SemesterRepository semesterRepository;
     @Autowired TeacherRepository teacherRepository;
     @Autowired DepartmentRepository departmentRepository;
+    @Autowired StudentRepository studentRepository;
+    @Autowired UserRepository userRepository;
+
+    /**
+     * Buổi 1 của lớp 1 trong dữ liệu mẫu là 08/09/2026, đã quá hạn 24 giờ của giáo viên. Đưa buổi về hôm nay để giáo
+     * viên còn hạn điểm danh (test rollback nên không đổi dữ liệu thật).
+     */
+    @BeforeEach
+    void sessionOneToday() {
+        ClassSession session = classSessionRepository.findById(1L).orElseThrow();
+        session.setSessionDate(AppTime.today());
+        classSessionRepository.saveAndFlush(session);
+    }
+
+    @Nested
+    @DisplayName("Hạn 24 giờ của giáo viên")
+    class EditWindow {
+
+        @Test
+        @DisplayName("Còn hạn: bảng điểm danh hiện mốc hạn, có ô ghi chú và 3 nút")
+        void showsDeadline() throws Exception {
+            mockMvc.perform(get("/teacher/sections/1/sessions/1/attendance").with(as(TestAccounts.TEACHER)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(allOf(containsString("Hạn điểm danh, chỉnh sửa của giáo viên:"),
+                            containsString("name=\"notes[1]\""), containsString("Vắng có phép"),
+                            not(containsString("value=\"LATE\"")))));
+        }
+
+        @Test
+        @DisplayName("Quá 24 giờ từ lần điểm danh đầu: giáo viên chỉ xem, lưu bị từ chối; ADMIN vẫn sửa được kèm lý do")
+        void lockedAfterWindow() throws Exception {
+            Attendance row = new Attendance();
+            row.setSession(classSessionRepository.findById(1L).orElseThrow());
+            row.setStudent(studentRepository.findById(1L).orElseThrow());
+            row.setStatus(AttendanceStatus.PRESENT);
+            row.setMarkedAt(AppTime.now().minusHours(25));
+            row.setMarkedBy(userRepository.findById(TestAccounts.TEACHER_ID).orElseThrow());
+            attendanceRepository.saveAndFlush(row);
+
+            mockMvc.perform(get("/teacher/sections/1/sessions/1/attendance").with(as(TestAccounts.TEACHER)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(allOf(containsString("Đã hết hạn điểm danh, chỉnh sửa"),
+                            not(containsString("class=\"btn-check\"")))));
+            mockMvc.perform(mark(1L, 1L, "statuses[1]", "ABSENT_UNEXCUSED").param("reason", "Khiếu nại muộn")
+                            .with(as(TestAccounts.TEACHER)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Đã hết hạn điểm danh, chỉnh sửa")));
+            assertThat(attendanceRepository.findBySessionId(1L).getFirst().getStatus())
+                    .isEqualTo(AttendanceStatus.PRESENT);
+
+            mockMvc.perform(post("/admin/sections/1/sessions/1/attendance").with(csrf())
+                            .param("statuses[1]", "ABSENT_EXCUSED").param("reason", "Có minh chứng")
+                            .with(as(TestAccounts.ADMIN)))
+                    .andExpect(status().is3xxRedirection());
+            assertThat(attendanceRepository.findBySessionId(1L).getFirst().getStatus())
+                    .isEqualTo(AttendanceStatus.ABSENT_EXCUSED);
+        }
+
+        @Test
+        @DisplayName("Buổi đã kết thúc quá 24 giờ mà chưa điểm danh: giáo viên bị chặn, không ghi gì")
+        void firstMarkAfterWindow() throws Exception {
+            ClassSession session = classSessionRepository.findById(1L).orElseThrow();
+            session.setSessionDate(AppTime.today().minusDays(2));
+            classSessionRepository.saveAndFlush(session);
+
+            mockMvc.perform(mark(1L, 1L, "statuses[1]", "PRESENT").with(as(TestAccounts.TEACHER)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Đã hết hạn điểm danh, chỉnh sửa")));
+            assertThat(attendanceRepository.findBySessionId(1L)).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Trạng thái LATE (đã bỏ) gửi bằng tay: hiện lại form, không ghi")
+        void lateIsRejected() throws Exception {
+            mockMvc.perform(mark(1L, 1L, "statuses[1]", "LATE").with(as(TestAccounts.TEACHER)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Trạng thái điểm danh không hợp lệ")));
+            assertThat(attendanceRepository.findBySessionId(1L)).isEmpty();
+        }
+    }
 
     @Nested
     @DisplayName("Giảng viên điểm danh")
@@ -90,24 +173,25 @@ class AttendanceIntegrationTest {
         }
 
         @Test
-        @DisplayName("Lưu lần đầu: tạo dòng với marked_by là giảng viên, không cần lý do, audit MARK_ATTENDANCE")
+        @DisplayName("Lưu lần đầu: có mặt kèm ghi chú đi muộn, marked_by là giảng viên, không cần lý do, audit")
         void teacherSavesFirstTime() throws Exception {
-            mockMvc.perform(mark(1L, 1L, "statuses[1]", "LATE").with(as(TestAccounts.TEACHER)))
+            mockMvc.perform(mark(1L, 1L, "statuses[1]", "PRESENT").param("notes[1]", " Đi muộn 10 phút ")
+                            .with(as(TestAccounts.TEACHER)))
                     .andExpect(redirectedUrl("/teacher/sections/1"))
                     .andExpect(flash().attribute("successMessage", "Đã lưu điểm danh buổi 1 (1 sinh viên)"));
 
             assertThat(attendanceRepository.findBySessionId(1L))
                     .extracting(a -> a.getStudent().getId(), Attendance::getStatus, a -> a.getMarkedBy().getId(),
                             Attendance::getNote)
-                    .containsExactly(tuple(1L, AttendanceStatus.LATE, TestAccounts.TEACHER_ID, null));
+                    .containsExactly(tuple(1L, AttendanceStatus.PRESENT, TestAccounts.TEACHER_ID, "Đi muộn 10 phút"));
             AuditLog audit = lastAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.MARK_ATTENDANCE);
             assertThat(audit.getUser().getId()).isEqualTo(TestAccounts.TEACHER_ID);
-            assertThat(audit.getDetail()).contains("LATE=1");
+            assertThat(audit.getDetail()).contains("PRESENT=1", "ABSENT_EXCUSED=0", "ABSENT_UNEXCUSED=0");
         }
 
         @Test
-        @DisplayName("Điều chỉnh sau lần lưu đầu: thiếu lý do thì báo lỗi; có lý do thì audit cũ → mới")
+        @DisplayName("Điều chỉnh sau lần lưu đầu: thiếu lý do thì báo lỗi; có lý do thì audit cũ → mới, lý do không đè ghi chú")
         void teacherAdjustsWithReason() throws Exception {
             mockMvc.perform(mark(1L, 1L, "statuses[1]", "PRESENT").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().is3xxRedirection());
@@ -124,7 +208,7 @@ class AttendanceIntegrationTest {
                     .andExpect(flash().attribute("successMessage", "Đã điều chỉnh điểm danh của 1 sinh viên"));
             Attendance row = attendanceRepository.findBySessionId(1L).getFirst();
             assertThat(row.getStatus()).isEqualTo(AttendanceStatus.ABSENT_EXCUSED);
-            assertThat(row.getNote()).isEqualTo("Có giấy khám bệnh");
+            assertThat(row.getNote()).isNull();
             AuditLog audit = lastAudit(AuditActions.ADJUST_ATTENDANCE);
             assertThat(audit.getEntityId()).isEqualTo(row.getId());
             assertThat(audit.getDetail()).contains("student=SE190001", "status=PRESENT -> ABSENT_EXCUSED",
@@ -205,7 +289,7 @@ class AttendanceIntegrationTest {
             AuditLog audit = lastAudit(AuditActions.ADJUST_ATTENDANCE);
             assertThat(audit.getUser().getId()).isEqualTo(TestAccounts.ADMIN_ID);
             assertThat(audit.getDetail()).contains("student=SE180101", "status=PRESENT -> ABSENT_EXCUSED",
-                    "oldNote=Đúng giờ", "reason=Có minh chứng đi viện");
+                    "note=Đúng giờ -> Đúng giờ", "reason=Có minh chứng đi viện");
             assertThat(attendanceRepository.findBySessionId(41L))
                     .extracting(a -> a.getStudent().getId(), Attendance::getStatus, a -> a.getMarkedBy().getId())
                     .containsExactlyInAnyOrder(tuple(2L, AttendanceStatus.ABSENT_EXCUSED, TestAccounts.ADMIN_ID),
@@ -408,7 +492,7 @@ class AttendanceIntegrationTest {
         }
 
         @Test
-        @DisplayName("Bảng điểm danh một buổi: dạng thẻ, trạng thái là nút lớn (btn-check), mỗi SV đúng 4 lựa chọn cùng tên")
+        @DisplayName("Bảng điểm danh một buổi: dạng thẻ, trạng thái là nút lớn (btn-check), mỗi SV đúng 3 lựa chọn cùng tên")
         void sheetUsesButtons() throws Exception {
             String html = mockMvc.perform(get("/teacher/sections/1/sessions/1/attendance").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
@@ -417,7 +501,7 @@ class AttendanceIntegrationTest {
                     .andReturn().getResponse().getContentAsString();
 
             // Một bản HTML duy nhất: không gửi trùng statuses[...] khi lưu.
-            assertThat(html.split("name=\"statuses\\[1\\]\"", -1)).hasSize(5);
+            assertThat(html.split("name=\"statuses\\[1\\]\"", -1)).hasSize(4);
         }
     }
 

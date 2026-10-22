@@ -174,6 +174,31 @@ class RequestIntegrationTest {
                     .andExpect(redirectedUrl("/admin/requests/" + id));
             assertThat(requestRepository.findById(id).orElseThrow().getStatus()).isEqualTo(RequestStatus.APPROVED);
         }
+
+        @Test
+        @DisplayName("Duyệt đơn giữ ghi chú của giáo viên, nối thêm tham chiếu đơn; không bị chặn bởi hạn 24 giờ")
+        void approveKeepsTeacherNote() throws Exception {
+            LocalDate today = AppTime.today();
+            // Điểm danh từ 5 ngày trước: giáo viên đã hết hạn sửa, nhưng duyệt đơn vẫn chuyển được.
+            Attendance absent = new Attendance();
+            absent.setSession(session(1L, today.minusDays(5)));
+            absent.setStudent(studentRepository.findById(1L).orElseThrow());
+            absent.setStatus(AttendanceStatus.ABSENT_UNEXCUSED);
+            absent.setNote("Không liên lạc được phụ huynh");
+            absent.setMarkedAt(AppTime.now().minusDays(5));
+            absent.setMarkedBy(userRepository.findById(TestAccounts.TEACHER_ID).orElseThrow());
+            attendanceRepository.saveAndFlush(absent);
+
+            Long id = sendLeave(leave("/student/requests/new", today.minusDays(6), today.minusDays(1), "1")
+                    .with(as(TestAccounts.STUDENT)), "/student/requests/");
+            mockMvc.perform(post("/teacher/requests/" + id + "/review").with(csrf()).param("decision", "APPROVED")
+                            .param("comment", "Đồng ý").with(as(TestAccounts.TEACHER)))
+                    .andExpect(redirectedUrl("/teacher/requests/" + id));
+
+            Attendance reloaded = reload(absent);
+            assertThat(reloaded.getStatus()).isEqualTo(AttendanceStatus.ABSENT_EXCUSED);
+            assertThat(reloaded.getNote()).isEqualTo("Không liên lạc được phụ huynh · Vắng có phép theo đơn #" + id);
+        }
     }
 
     @Nested
@@ -186,7 +211,7 @@ class RequestIntegrationTest {
         void approveExcusesAbsences() throws Exception {
             LocalDate today = AppTime.today();
             Attendance inRange = attendance(session(1L, today.minusDays(5)), AttendanceStatus.ABSENT_UNEXCUSED);
-            Attendance late = attendance(session(1L, today.minusDays(3)), AttendanceStatus.LATE);
+            Attendance present = attendance(session(1L, today.minusDays(3)), AttendanceStatus.PRESENT);
             Attendance outOfRange = attendance(session(1L, today.minusDays(20)), AttendanceStatus.ABSENT_UNEXCUSED);
             Attendance otherSection = attendance(session(27L, today.minusDays(4)), AttendanceStatus.ABSENT_UNEXCUSED);
             Long markedSession = inRange.getSession().getId();
@@ -208,7 +233,7 @@ class RequestIntegrationTest {
             assertThat(reload(inRange).getStatus()).isEqualTo(AttendanceStatus.ABSENT_EXCUSED);
             assertThat(reload(inRange).getNote()).isEqualTo("Vắng có phép theo đơn #" + id);
             assertThat(reload(inRange).getUpdatedAt()).isNotNull();
-            assertThat(reload(late).getStatus()).isEqualTo(AttendanceStatus.LATE);
+            assertThat(reload(present).getStatus()).isEqualTo(AttendanceStatus.PRESENT);
             assertThat(reload(outOfRange).getStatus()).isEqualTo(AttendanceStatus.ABSENT_UNEXCUSED);
             assertThat(reload(otherSection).getStatus()).isEqualTo(AttendanceStatus.ABSENT_UNEXCUSED);
             assertThat(requestRepository.findById(id).orElseThrow().getStatus()).isEqualTo(RequestStatus.APPROVED);

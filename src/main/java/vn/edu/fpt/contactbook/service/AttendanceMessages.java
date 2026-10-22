@@ -13,7 +13,9 @@ final class AttendanceMessages {
     static final String STUDENTS_CHANGED = "Danh sách sinh viên của lớp vừa thay đổi, vui lòng tải lại trang";
     static final String REASON_REQUIRED = "Vui lòng nhập lý do điều chỉnh điểm danh";
     static final String REASON_SIZE = "Lý do tối đa 255 ký tự";
-    static final String NOT_MARKED_YET = "Buổi học chưa được giảng viên điểm danh nên chưa điều chỉnh được";
+    static final String NOT_MARKED_YET = "Buổi học chưa được giảng viên điểm danh; giảng viên còn hạn điểm danh đến %s";
+    static final String EDIT_LOCKED = "Đã hết hạn điểm danh, chỉnh sửa (đến %s). Vui lòng liên hệ quản trị viên";
+    static final String NOTE_SIZE = "Ghi chú tối đa 255 ký tự";
     static final String CONCURRENT_CHANGE = "Điểm danh vừa được người khác lưu, vui lòng tải lại trang và thử lại";
 
     private AttendanceMessages() {

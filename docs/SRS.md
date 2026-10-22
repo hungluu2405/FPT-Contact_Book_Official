@@ -144,9 +144,9 @@ Nhóm FR-USER-01 đến 04 tương ứng 4 màn hình CRUD: add, list, edit, vie
 
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
-| FR-ATT-01 | Điểm danh theo buổi | Đánh dấu có mặt, đi muộn, vắng có phép, vắng không phép | GV (lớp mình) | C |
+| FR-ATT-01 | Điểm danh theo buổi | Đánh dấu có mặt, vắng có phép, vắng không phép; mỗi học sinh có ghi chú (đi muộn ghi là có mặt kèm ghi chú). Điểm danh lần đầu trong 24 giờ sau khi buổi học kết thúc | GV (lớp mình) | C |
 | FR-ATT-02 | Xem điểm danh | Lịch sử theo môn, tỷ lệ chuyên cần | SV, PH (con), GV, TBM | C |
-| FR-ATT-03 | Điều chỉnh điểm danh | Sửa khi có minh chứng, lưu người sửa và thời điểm sửa | GV, AD | TB |
+| FR-ATT-03 | Điều chỉnh điểm danh | Sửa khi có minh chứng, lưu người sửa và thời điểm sửa. GV chỉ sửa trong 24 giờ kể từ lần điểm danh đầu; quá hạn chỉ AD sửa (bắt buộc lý do) | GV, AD | TB |
 | FR-ATT-04 | Cảnh báo vắng quá ngưỡng | Báo SV và PH khi số buổi vắng vượt ngưỡng | Hệ thống | TB |
 
 ### 3.6 Điểm số (FR-GRADE)

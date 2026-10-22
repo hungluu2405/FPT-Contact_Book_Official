@@ -51,13 +51,24 @@ class AttendancePages {
         return "common/section-attendance";
     }
 
-    /** Mở bảng điểm danh: trạng thái đã lưu điền sẵn vào form. */
+    /**
+     * Mở bảng điểm danh: trạng thái, ghi chú đã lưu điền sẵn vào form; buổi chưa điểm danh thì học sinh có đơn nghỉ
+     * đã duyệt được chọn sẵn "Vắng có phép".
+     */
     String sheet(Model model, AppUserPrincipal actor, Access access, Long sectionId, Long sessionId,
                  String baseUrl, boolean canSave) {
         AttendanceSheet sheet = attendanceService.sheet(actor, access, sectionId, sessionId);
         AttendanceForm form = new AttendanceForm();
-        sheet.rows().stream().filter(row -> row.status() != null)
-                .forEach(row -> form.getStatuses().put(row.studentId(), row.status()));
+        for (AttendanceSheet.Row row : sheet.rows()) {
+            if (row.status() != null) {
+                form.getStatuses().put(row.studentId(), row.status());
+            } else if (row.approvedLeave()) {
+                form.getStatuses().put(row.studentId(), AttendanceStatus.ABSENT_EXCUSED);
+            }
+            if (row.note() != null) {
+                form.getNotes().put(row.studentId(), row.note());
+            }
+        }
         model.addAttribute("form", form);
         return sheetView(model, sheet, baseUrl, canSave);
     }
@@ -101,11 +112,12 @@ class AttendancePages {
                 : "Đã điều chỉnh điểm danh của " + result.changed() + " sinh viên";
     }
 
+    /** Quá hạn của giáo viên (sheet.locked) thì chỉ xem, kèm thông báo hạn. */
     private String sheetView(Model model, AttendanceSheet sheet, String baseUrl, boolean canSave) {
         model.addAttribute("sheet", sheet);
         model.addAttribute("statuses", AttendanceStatus.values());
         model.addAttribute("baseUrl", baseUrl);
-        model.addAttribute("canSave", canSave);
+        model.addAttribute("canSave", canSave && !sheet.locked());
         return "common/attendance-sheet";
     }
 }

@@ -656,6 +656,11 @@ body {
     gap: 0.5rem;
 }
 
+/* Ô ghi chú từng học sinh (ví dụ "đi muộn 10 phút") đủ rộng để gõ trên máy tính. */
+.attendance-note {
+    min-width: 200px;
+}
+
 /* ---------- Bảng thành thẻ trên màn hình nhỏ (class table-stack) ---------- */
 /* Mỗi dòng là một thẻ; ô có data-label hiện nhãn phía trên giá trị; stack-priority lên ngay sau tiêu đề. */
 @media (max-width: 575.98px) {
@@ -711,10 +716,17 @@ body {
 
     .table-stack .attendance-choices {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .table-stack .attendance-choices .btn {
         padding: 0.6rem 0.25rem;
+        white-space: normal;
+        line-height: 1.2;
+    }
+
+    .table-stack td.attendance-note {
+        min-width: 0;
+        padding-top: 0.5rem;
     }
 }

@@ -7,12 +7,12 @@ import java.math.BigDecimal;
  * totalSessions: số buổi chưa hủy của lớp (mẫu số tỷ lệ vắng); markedSessions: số buổi sinh viên đã được điểm danh
  * (mẫu số tỷ lệ chuyên cần). attendanceRate null khi chưa được điểm danh buổi nào. Tỷ lệ tính theo phần trăm.
  */
-public record AttendanceSummary(long present, long late, long absentExcused, long absentUnexcused,
+public record AttendanceSummary(long present, long absentExcused, long absentUnexcused,
                                 long totalSessions, BigDecimal attendanceRate, BigDecimal absentRate,
                                 boolean warning) {
 
     public long markedSessions() {
-        return present + late + absentExcused + absentUnexcused;
+        return present + absentExcused + absentUnexcused;
     }
 
     public long absent() {

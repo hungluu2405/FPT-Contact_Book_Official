@@ -38,7 +38,6 @@ class ReportCharts {
             }
             Map<AttendanceStatus, Long> counts = new LinkedHashMap<>();
             counts.put(AttendanceStatus.PRESENT, s.present());
-            counts.put(AttendanceStatus.LATE, s.late());
             counts.put(AttendanceStatus.ABSENT_EXCUSED, s.absentExcused());
             counts.put(AttendanceStatus.ABSENT_UNEXCUSED, s.absentUnexcused());
             List<String> labels = counts.keySet().stream()

@@ -441,7 +441,8 @@ public class RequestService {
 
     /**
      * Chuyển các dòng vắng không phép của sinh viên trong khoảng ngày (đúng lớp nếu đơn có chọn lớp) thành vắng có
-     * phép; ghi chú tham chiếu đơn (ghi chú cũ giữ trong audit); marked_by giữ nguyên. Trả số dòng đã đổi.
+     * phép; tham chiếu đơn nối sau ghi chú của giáo viên (không đè, tối đa 255 ký tự; ghi chú cũ cũng giữ trong
+     * audit); marked_by giữ nguyên. Không bị chặn bởi hạn điểm danh của giáo viên. Trả số dòng đã đổi.
      */
     private int excuseAbsences(AppUserPrincipal actor, UserRequest request, String ipAddress) {
         List<Attendance> rows = attendanceRepository.findUnexcusedInRange(request.getStudent().getId(),
@@ -450,12 +451,14 @@ public class RequestService {
         if (rows.isEmpty()) {
             return 0;
         }
-        String note = "Vắng có phép theo đơn #" + request.getId();
+        String reference = "Vắng có phép theo đơn #" + request.getId();
         List<String> oldNotes = new ArrayList<>(rows.size());
         for (Attendance row : rows) {
             oldNotes.add(row.getNote());
             row.setStatus(AttendanceStatus.ABSENT_EXCUSED);
-            row.setNote(note);
+            String teacherNote = CatalogSupport.trimToNull(row.getNote());
+            String note = teacherNote == null ? reference : teacherNote + " · " + reference;
+            row.setNote(note.length() > 255 ? note.substring(0, 255) : note);
         }
         attendanceRepository.saveAllAndFlush(rows);
         for (int i = 0; i < rows.size(); i++) {

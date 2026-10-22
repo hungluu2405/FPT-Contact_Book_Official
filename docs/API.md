@@ -61,7 +61,7 @@ Phản hồi đăng nhập, làm mới và đổi mật khẩu:
 | POST | `/requests/leave` | `multipart/form-data`: `fromDate`, `toDate` (yyyy-MM-dd hoặc dd/MM/yyyy), `reason`, tùy chọn `title`, `sectionId`, `files` (nhiều tệp, mỗi tệp tối đa 10MB). 201 + chi tiết đơn |
 | POST | `/requests/{id}/cancel` | Hủy đơn đang chờ duyệt, trả chi tiết đơn; đơn không còn chờ duyệt: 400 `BUSINESS_ERROR` |
 
-`ScheduleItem`: `{date, startTime, endTime, subjectCode, subjectName, sectionCode, roomCode, teacherName, status, note}`. `summary` (chuyên cần): `{present, late, absentExcused, absentUnexcused, totalSessions, attendanceRate, absentRate, warning}` (tỷ lệ là phần trăm, `warning` = vượt ngưỡng vắng).
+`ScheduleItem`: `{date, startTime, endTime, subjectCode, subjectName, sectionCode, roomCode, teacherName, status, note}`. `summary` (chuyên cần): `{present, absentExcused, absentUnexcused, totalSessions, attendanceRate, absentRate, warning}` (tỷ lệ là phần trăm, `warning` = vượt ngưỡng vắng).
 
 ### Giảng viên (`/teacher`, vai trò TEACHER hoặc HEAD_OF_DEPARTMENT)
 Chỉ lớp mình dạy và đơn mình phụ trách duyệt; lớp hoặc đơn khác: 403 `FORBIDDEN`. Trưởng bộ môn dùng như giảng viên; quản lý cả bộ môn, nhập điểm, gửi thông báo làm trên web.
@@ -73,11 +73,13 @@ Chỉ lớp mình dạy và đơn mình phụ trách duyệt; lớp hoặc đơn
 | GET | `/teacher/exams?semesterId=&page=` | Lịch thi các lớp mình dạy |
 | GET | `/teacher/sections?semesterId=&page=` | `{semester, data: Page<{id, code, subjectCode, subjectName, semesterCode, status}>}` |
 | GET | `/teacher/sections/{id}/attendance?sessionPage=&studentPage=` | `{section, sessions: Page<{id, sessionNo, date, startTime, endTime, roomCode, status, note, hasAttendance}>, students: Page<{studentId, studentCode, fullName, summary}>, totalSessions, thresholdPercent}` |
-| GET | `/teacher/sections/{id}/sessions/{sessionId}/attendance` | Bảng điểm danh: `{sectionId, sectionCode, subjectCode, subjectName, sessionId, sessionNo, date, startTime, endTime, roomCode, marked, rows[{studentId, studentCode, fullName, status, note, approvedLeave}]}` |
-| POST | `/teacher/sections/{id}/sessions/{sessionId}/attendance` | Body `{"statuses": {"<studentId>": "PRESENT", ...}, "reason": "..."}`: phải đủ mọi sinh viên trong `rows`; `reason` (tối đa 255 ký tự) bắt buộc khi `marked = true`. Trả `{firstTime, changed, sheet}` |
+| GET | `/teacher/sections/{id}/sessions/{sessionId}/attendance` | Bảng điểm danh: `{sectionId, sectionCode, subjectCode, subjectName, sessionId, sessionNo, date, startTime, endTime, roomCode, marked, editableUntil, locked, reasonRequired, rows[{studentId, studentCode, fullName, status, note, approvedLeave}]}`. `editableUntil`: hạn điểm danh, sửa của giáo viên; `locked = true` là đã quá hạn, chỉ xem. Học sinh `approvedLeave = true` nên chọn sẵn `ABSENT_EXCUSED` |
+| POST | `/teacher/sections/{id}/sessions/{sessionId}/attendance` | Body `{"statuses": {"<studentId>": "PRESENT", ...}, "notes": {"<studentId>": "Đi muộn 10 phút"}, "reason": "..."}`: `statuses` phải đủ mọi học sinh trong `rows`; `notes` tùy chọn (tối đa 255 ký tự, chuỗi rỗng là xóa, học sinh không có trong `notes` giữ nguyên ghi chú); `reason` (tối đa 255 ký tự) bắt buộc khi đổi trạng thái của buổi đã điểm danh, chỉ ghi vào nhật ký. Trả `{firstTime, changed, sheet}` |
 | GET | `/teacher/requests?status=&page=` | Đơn cần duyệt: `status` bỏ trống là `PENDING`; `APPROVED`, `REJECTED`, `CANCELLED` hoặc `ALL` |
 | GET | `/teacher/requests/{id}` | Chi tiết đơn (`canReview` cho biết còn duyệt được không) |
 | POST | `/teacher/requests/{id}/review` | Body `{"decision": "APPROVED" hoặc "REJECTED", "comment": "..."}`: từ chối bắt buộc có `comment` (tối đa 500 ký tự). Trả `{decision, excusedSessions, request}`; `excusedSessions` là số buổi vắng không phép được chuyển thành vắng có phép |
+
+**Hạn 24 giờ:** giáo viên điểm danh lần đầu được tới giờ kết thúc buổi + 24 giờ, sửa được tới lần điểm danh đầu + 24 giờ; quá hạn thì lưu bị 400 `BUSINESS_ERROR` ("Đã hết hạn điểm danh, chỉnh sửa..."), chỉ quản trị viên sửa được trên web.
 
 Lỗi thường gặp khi điểm danh: buổi chưa diễn ra, buổi hoặc lớp đã hủy, thiếu sinh viên, thiếu lý do khi sửa, người khác vừa lưu cùng lúc (tải lại bảng rồi thử lại): đều là 400 `BUSINESS_ERROR` kèm câu tiếng Việt. Trạng thái không thuộc danh sách enum: 400 `VALIDATION_FAILED`. Buổi không thuộc lớp: 404 `NOT_FOUND`.
 
@@ -87,7 +89,7 @@ Trả dạng mã; mobile hiển thị chữ tiếng Việt như web:
 | Enum | Mã → chữ |
 |---|---|
 | `status` của buổi học, `sessionStatus` | `SCHEDULED` Đã lên lịch, `DONE` Đã học, `CANCELLED` Đã hủy, `MAKEUP` Học bù |
-| `status` điểm danh | `PRESENT` Có mặt, `LATE` Đi muộn, `ABSENT_EXCUSED` Vắng có phép, `ABSENT_UNEXCUSED` Vắng không phép; null là chưa điểm danh |
+| `status` điểm danh | `PRESENT` Có mặt (đi muộn cũng là có mặt, ghi trong `note`), `ABSENT_EXCUSED` Vắng có phép, `ABSENT_UNEXCUSED` Vắng không phép; null là chưa điểm danh. Không còn `LATE` |
 | `examType` | `MIDTERM` Giữa kỳ, `FINAL` Cuối kỳ, `RETAKE` Thi lại |
 | `type` của đơn | `LEAVE` Xin nghỉ học, `TRANSCRIPT` Xin bảng điểm, `CERTIFICATE` Xác nhận sinh viên, `OTHER` Đơn khác |
 | `status` của đơn | `PENDING` Chờ duyệt, `APPROVED` Đã duyệt, `REJECTED` Từ chối, `CANCELLED` Đã hủy |
