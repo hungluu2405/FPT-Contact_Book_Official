@@ -126,11 +126,11 @@ class AttendanceViewServiceTest {
         when(parentStudentRepository.existsByIdParentIdAndIdStudentId(1L, 1L)).thenReturn(true);
         when(enrollmentRepository.findAttendedInSemester(1L, 1L)).thenReturn(List.of(
                 CatalogTestData.enrollment(1L, section, se190001, EnrollmentStatus.ENROLLED)));
-        // 10 buổi chưa hủy; SE190001: 6 có mặt, 1 muộn, 1 vắng có phép, 2 vắng không phép → vắng 30%.
+        // 10 buổi chưa hủy; SE190001: 7 có mặt, 1 vắng có phép, 2 vắng không phép → vắng 30%.
         when(classSessionRepository.countActiveBySections(anyCollection()))
                 .thenReturn(List.<Object[]>of(new Object[]{10L, 10L}));
         when(attendanceRepository.countBySectionAndStatus(anyLong(), anyCollection())).thenReturn(List.of(
-                new Object[]{10L, AttendanceStatus.PRESENT, 6L}, new Object[]{10L, AttendanceStatus.LATE, 1L},
+                new Object[]{10L, AttendanceStatus.PRESENT, 7L},
                 new Object[]{10L, AttendanceStatus.ABSENT_EXCUSED, 1L},
                 new Object[]{10L, AttendanceStatus.ABSENT_UNEXCUSED, 2L}));
     }

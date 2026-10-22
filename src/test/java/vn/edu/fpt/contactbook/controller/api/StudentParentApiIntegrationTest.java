@@ -211,8 +211,8 @@ class StudentParentApiIntegrationTest {
             JsonNode prj301 = find(overview.get("sections"), "sectionId", "1");
             assertThat(fieldNames(prj301)).containsExactlyInAnyOrder("sectionId", "sectionCode", "subjectCode",
                     "subjectName", "summary");
-            assertThat(fieldNames(prj301.get("summary"))).contains("present", "late", "absentExcused",
-                    "absentUnexcused");
+            assertThat(fieldNames(prj301.get("summary"))).containsExactlyInAnyOrder("present", "absentExcused",
+                    "absentUnexcused", "totalSessions", "attendanceRate", "absentRate", "warning");
 
             JsonNode history = api.json(api.perform(get(CHILD + "/attendance/1"), TestAccounts.PARENT)
                     .andExpect(status().isOk()));

@@ -358,10 +358,11 @@ class RequestServiceTest {
             ReviewResult result = service.review(TEACHER, View.TEACHER, 7L, ReviewDecision.APPROVED, null, "1.2.3.4");
 
             assertThat(result.excusedSessions()).isEqualTo(2);
-            assertThat(List.of(a1, a2)).allSatisfy(a -> {
-                assertThat(a.getStatus()).isEqualTo(AttendanceStatus.ABSENT_EXCUSED);
-                assertThat(a.getNote()).isEqualTo("Vắng có phép theo đơn #7");
-            });
+            assertThat(List.of(a1, a2)).allSatisfy(a ->
+                    assertThat(a.getStatus()).isEqualTo(AttendanceStatus.ABSENT_EXCUSED));
+            // Ghi chú của giáo viên được giữ, tham chiếu đơn nối thêm phía sau.
+            assertThat(a1.getNote()).isEqualTo("Vắng có phép theo đơn #7");
+            assertThat(a2.getNote()).isEqualTo("Không báo trước · Vắng có phép theo đơn #7");
             verify(attendanceRepository).saveAllAndFlush(List.of(a1, a2));
             ArgumentCaptor<RequestReview> review = ArgumentCaptor.forClass(RequestReview.class);
             verify(reviewRepository).save(review.capture());

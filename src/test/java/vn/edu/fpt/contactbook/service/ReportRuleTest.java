@@ -89,11 +89,11 @@ class ReportRuleTest {
     @Test
     @DisplayName("Cộng số buổi theo trạng thái của nhiều sinh viên; trạng thái thiếu coi là 0")
     void sumCounts() {
-        Map<AttendanceStatus, Long> a = new EnumMap<>(Map.of(AttendanceStatus.PRESENT, 3L, AttendanceStatus.LATE, 1L));
+        Map<AttendanceStatus, Long> a = new EnumMap<>(Map.of(AttendanceStatus.PRESENT, 3L, AttendanceStatus.ABSENT_EXCUSED, 1L));
         Map<AttendanceStatus, Long> b = Map.of(AttendanceStatus.PRESENT, 2L, AttendanceStatus.ABSENT_UNEXCUSED, 1L);
 
         assertThat(ReportRule.sum(List.of(a, b))).containsExactlyInAnyOrderEntriesOf(Map.of(
-                AttendanceStatus.PRESENT, 5L, AttendanceStatus.LATE, 1L, AttendanceStatus.ABSENT_UNEXCUSED, 1L));
+                AttendanceStatus.PRESENT, 5L, AttendanceStatus.ABSENT_EXCUSED, 1L, AttendanceStatus.ABSENT_UNEXCUSED, 1L));
         assertThat(ReportRule.sum(List.of())).isEmpty();
     }
 

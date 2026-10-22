@@ -62,9 +62,9 @@ class AttendanceRuleTest {
     }
 
     @Test
-    @DisplayName("Đi muộn không tính là vắng nhưng vẫn tính là chuyên cần")
-    void lateIsNotAbsent() {
-        AttendanceSummary summary = rule.summarize(Map.of(AttendanceStatus.LATE, 5L), 10);
+    @DisplayName("Chỉ có mặt (đi muộn cũng điểm danh là có mặt): không vắng, chuyên cần 100%")
+    void presentOnlyIsNotAbsent() {
+        AttendanceSummary summary = rule.summarize(Map.of(AttendanceStatus.PRESENT, 5L), 10);
 
         assertThat(summary.absentRate()).isEqualByComparingTo("0.0");
         assertThat(summary.warning()).isFalse();
@@ -72,9 +72,9 @@ class AttendanceRuleTest {
     }
 
     @Test
-    @DisplayName("Chuyên cần = (có mặt + muộn) / số buổi đã điểm danh, làm tròn 1 chữ số")
+    @DisplayName("Chuyên cần = có mặt / số buổi đã điểm danh, làm tròn 1 chữ số")
     void attendanceRateUsesMarkedSessions() {
-        AttendanceSummary summary = rule.summarize(Map.of(AttendanceStatus.PRESENT, 1L, AttendanceStatus.LATE, 1L,
+        AttendanceSummary summary = rule.summarize(Map.of(AttendanceStatus.PRESENT, 2L,
                 AttendanceStatus.ABSENT_EXCUSED, 1L), 12);
 
         assertThat(summary.markedSessions()).isEqualTo(3);
