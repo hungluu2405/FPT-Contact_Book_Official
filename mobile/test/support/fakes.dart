@@ -4,9 +4,14 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/auth_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/notification_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/profile_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/student_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/token_storage.dart';
 
 /// Kho token trong bộ nhớ thay cho secure storage.
@@ -139,6 +144,30 @@ Map<String, dynamic> tokenJson({
   'user': user ?? userJson(),
 };
 
+Map<String, dynamic> childJson({
+  int id = 1,
+  String code = 'SE190001',
+  String name = 'Nguyễn Văn An',
+}) => {'id': id, 'code': code, 'name': name};
+
+Map<String, dynamic> profileJson({
+  String fullName = 'Nguyễn Văn An',
+  String? email = 'an.nv@fpt.edu.vn',
+  List<Map<String, dynamic>> roles = const [
+    {'roleCode': 'STUDENT', 'departmentCode': null, 'departmentName': null},
+  ],
+}) => {
+  'phone': '0900000004',
+  'fullName': fullName,
+  'email': email,
+  'gender': 'MALE',
+  'dateOfBirth': '2005-03-15',
+  'address': 'Hà Nội',
+  'hasAvatar': false,
+  'lastLoginAt': '2026-10-22T08:00:00',
+  'roles': roles,
+};
+
 /// Bộ đối tượng thật nối với tầng HTTP giả.
 class TestApp {
   final FakeHttpAdapter http = FakeHttpAdapter();
@@ -153,10 +182,30 @@ class TestApp {
   late final PasswordResetController resetController = PasswordResetController(
     authService,
   );
+  late final HomeController homeController = HomeController(
+    StudentService(apiClient),
+    NotificationService(apiClient),
+  );
+  late final ProfileController profileController = ProfileController(
+    ProfileService(apiClient),
+  );
 
   TestApp({String? accessToken, String? refreshToken})
     : storage = MemoryTokenStorage(
         accessToken: accessToken,
         refreshToken: refreshToken,
       );
+
+  /// Trả lời các request của trang chủ: số chưa đọc và (PH) danh sách con.
+  void stubHome({
+    int unread = 0,
+    List<Map<String, dynamic>> children = const [],
+  }) {
+    http.reply(
+      'GET',
+      '/notifications/unread-count',
+      FakeReply(200, {'count': unread}),
+    );
+    http.reply('GET', '/parent/children', FakeReply(200, children));
+  }
 }

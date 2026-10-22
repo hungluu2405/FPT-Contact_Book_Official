@@ -72,7 +72,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeScreen), findsOneWidget);
-    expect(find.text('Xin chào, Nguyễn Văn An'), findsOneWidget);
+    expect(find.text('Xin chào,'), findsOneWidget);
+    expect(find.text('Nguyễn Văn An'), findsOneWidget);
     expect(find.text('Sinh viên'), findsOneWidget);
   });
 
@@ -121,16 +122,22 @@ void main() {
   ) async {
     final app = TestApp(accessToken: 'a', refreshToken: 'r');
     app.http.reply('GET', '/me', FakeReply(200, userJson()));
+    app.http.reply('GET', '/me/profile', FakeReply(200, profileJson()));
     app.http.reply('POST', '/auth/logout', const FakeReply(204));
+    app.stubHome();
     await pumpApp(tester, app: app);
+    await tester.tap(find.text('Tài khoản'));
+    await tester.pumpAndSettle();
+    final logout = find.widgetWithText(OutlinedButton, 'Đăng xuất');
 
-    await tester.tap(find.byTooltip('Đăng xuất'));
+    await tester.ensureVisible(logout);
+    await tester.tap(logout);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Hủy'));
     await tester.pumpAndSettle();
     expect(find.byType(HomeScreen), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Đăng xuất'));
+    await tester.tap(logout);
     await tester.pumpAndSettle();
     await tapButton(tester, 'Đăng xuất');
 

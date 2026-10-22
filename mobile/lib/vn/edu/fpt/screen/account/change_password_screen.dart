@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dart';
 
-/// Bắt buộc đổi mật khẩu trước khi vào app (`mustChangePassword`).
-/// Đây là màn hình gốc nên không có nút quay lại; chỉ đổi mật khẩu hoặc đăng xuất.
+/// Đổi mật khẩu. [forced] = true: bắt buộc đổi trước khi vào app
+/// (`mustChangePassword`), là màn hình gốc nên chỉ có đổi mật khẩu hoặc đăng
+/// xuất. [forced] = false: mở từ tab Tài khoản, đổi xong thì đóng và trả `true`.
 /// Quy tắc mật khẩu do backend kiểm tra, lỗi hiện cạnh từng ô.
 class ChangePasswordScreen extends StatefulWidget {
   final AuthController controller;
+  final bool forced;
 
-  const ChangePasswordScreen({super.key, required this.controller});
+  const ChangePasswordScreen({
+    super.key,
+    required this.controller,
+    this.forced = true,
+  });
 
   @override
   State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
@@ -26,6 +32,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   AuthController get _controller => widget.controller;
 
   @override
+  void initState() {
+    super.initState();
+    if (!widget.forced) {
+      // Bỏ lỗi còn lại của lần đổi trước; gọi sau khung hình đầu vì
+      // clearErrors báo cho các màn hình đang nghe controller.
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _controller.clearErrors(),
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _currentCtrl.dispose();
     _newCtrl.dispose();
@@ -38,11 +56,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    await _controller.changePassword(
+    final changed = await _controller.changePassword(
       currentPassword: _currentCtrl.text,
       newPassword: _newCtrl.text,
       confirmPassword: _confirmCtrl.text,
     );
+    if (changed && !widget.forced && mounted) {
+      Navigator.of(context).pop(true);
+    }
   }
 
   String? Function(String?) _required(String message) =>
@@ -52,7 +73,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return AuthScaffold(
       title: 'Đổi mật khẩu',
-      subtitle: 'Bạn cần đổi mật khẩu trước khi sử dụng ứng dụng',
+      subtitle: widget.forced
+          ? 'Bạn cần đổi mật khẩu trước khi sử dụng ứng dụng'
+          : 'Nhập mật khẩu hiện tại và mật khẩu mới',
       child: ListenableBuilder(
         listenable: _controller,
         builder: (context, _) {
@@ -117,10 +140,20 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   onPressed: _submit,
                 ),
                 const SizedBox(height: 8),
-                TextButton(
-                  onPressed: _controller.isLoading ? null : _controller.logout,
-                  child: const Text('Đăng xuất'),
-                ),
+                if (widget.forced)
+                  TextButton(
+                    onPressed: _controller.isLoading
+                        ? null
+                        : _controller.logout,
+                    child: const Text('Đăng xuất'),
+                  )
+                else
+                  TextButton(
+                    onPressed: _controller.isLoading
+                        ? null
+                        : () => Navigator.of(context).pop(false),
+                    child: const Text('Quay lại'),
+                  ),
               ],
             ),
           );

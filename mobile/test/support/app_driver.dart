@@ -16,6 +16,8 @@ Future<TestApp> pumpApp(WidgetTester tester, {TestApp? app}) async {
     MyApp(
       authController: testApp.controller,
       passwordResetController: testApp.resetController,
+      homeController: testApp.homeController,
+      profileController: testApp.profileController,
     ),
   );
   await tester.pumpAndSettle();
