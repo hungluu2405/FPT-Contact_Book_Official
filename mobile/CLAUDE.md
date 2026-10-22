@@ -47,5 +47,8 @@ Package Dart `fpt_contact_book_mobile`, applicationId `vn.edu.fpt.contactbook`. 
 ## 7. KIỂM THỬ VÀ HOÀN THÀNH
 - Chạy trong `mobile/`: `flutter analyze` (không có error/warning mới) và `flutter test` (PASSED).
 - Unit test cho model và repository (mock ở ranh giới HTTP), widget test cho màn hình chính; không test rỗng.
+- Golden test (`test/golden/`): mỗi màn hình mới hoặc trạng thái quan trọng có một ảnh mẫu ở kích thước Pixel 6a. Đổi giao diện có chủ đích thì chạy `flutter test --update-goldens test/golden`, mở xem từng ảnh mới rồi mới commit. Mọi `TextStyle` tự tạo trong theme phải ghi `fontFamily` (`kAppFontFamily`), nếu không ảnh golden hiện ô vuông.
+- Contract test (`test_contract/`): gọi backend thật trên localhost bằng chính service và model của app, chạy riêng bằng `flutter test test_contract` khi backend đang chạy (biến môi trường `API_BASE_URL`, mặc định `http://localhost:8080`, chỉ chấp nhận localhost). Không viết contract test làm đổi dữ liệu mẫu (đổi mật khẩu thành công, khóa tài khoản mẫu). Backend không chạy thì báo NOT RUN kèm lệnh.
+- Máy ảo hoặc điện thoại thật chỉ dùng cho phần riêng của Android (manifest, cleartext, secure storage, bàn phím), nhiều nhất một lần cuối mỗi giai đoạn và hỏi chủ dự án trước.
 - Thay đổi chạm vào backend thì chạy thêm `mvn clean verify` ở gốc theo `CLAUDE.md` gốc.
 - Nhánh `feature/phase-<số>-<mô-tả>`, commit theo rule global, không push.
