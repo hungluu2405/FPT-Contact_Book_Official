@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/auth_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/token_storage.dart';
@@ -149,6 +150,9 @@ class TestApp {
   );
   late final AuthService authService = AuthService(apiClient, storage);
   late final AuthController controller = AuthController(authService);
+  late final PasswordResetController resetController = PasswordResetController(
+    authService,
+  );
 
   TestApp({String? accessToken, String? refreshToken})
     : storage = MemoryTokenStorage(

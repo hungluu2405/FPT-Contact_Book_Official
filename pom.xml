@@ -49,6 +49,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+        <!-- Gui ma dat lai mat khau qua email (quen mat khau) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
 
         <!-- REST API cho mobile (giai doan 9b): JWT qua resource server cua Spring Security, tai lieu OpenAPI -->
         <dependency>

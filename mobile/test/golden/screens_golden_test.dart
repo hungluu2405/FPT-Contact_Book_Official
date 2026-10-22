@@ -153,6 +153,59 @@ void main() {
     await expectScreen(tester, 'logout_dialog');
   });
 
+  testWidgets('forgot password screen', (tester) async {
+    usePhoneScreen(tester);
+    await pumpApp(tester);
+
+    await tester.tap(find.widgetWithText(TextButton, 'Quên mật khẩu?'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'forgot_password');
+  });
+
+  testWidgets('reset password screen after the code is sent', (tester) async {
+    usePhoneScreen(tester);
+    final app = await pumpApp(tester);
+    app.http.reply(
+      'POST',
+      '/auth/password-reset/request',
+      const FakeReply(202),
+    );
+    app.http.reply(
+      'POST',
+      '/auth/password-reset/confirm',
+      FakeReply.error(
+        400,
+        'BUSINESS_ERROR',
+        'Mã xác nhận không đúng hoặc đã hết hạn',
+        fieldErrors: [
+          {
+            'field': 'code',
+            'message': 'Mã xác nhận không đúng hoặc đã hết hạn',
+          },
+        ],
+      ),
+    );
+    await tester.tap(find.widgetWithText(TextButton, 'Quên mật khẩu?'));
+    await tester.pumpAndSettle();
+    await enter(tester, 'Số điện thoại', '0900000004');
+    await tapButton(tester, 'Gửi mã xác nhận');
+
+    await expectScreen(tester, 'reset_password_sent');
+
+    await enter(tester, 'Mã xác nhận (6 chữ số)', '000000');
+    await enter(tester, 'Mật khẩu mới', 'Moi@12345');
+    await enter(tester, 'Nhập lại mật khẩu mới', 'Moi@12345');
+    await tapButton(tester, 'Đặt lại mật khẩu');
+    await tester.scrollUntilVisible(
+      find.text('Đặt lại mật khẩu').first,
+      -200,
+      scrollable: find.byType(Scrollable).first,
+    );
+
+    await expectScreen(tester, 'reset_password_wrong_code');
+  });
+
   testWidgets('network error on startup', (tester) async {
     usePhoneScreen(tester);
     final app = TestApp(accessToken: 'a', refreshToken: 'r');

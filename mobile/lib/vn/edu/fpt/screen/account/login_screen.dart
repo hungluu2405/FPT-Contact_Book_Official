@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/forgot_password_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dart';
-import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_colors.dart';
 
 class LoginScreen extends StatefulWidget {
   final AuthController controller;
+  final PasswordResetController passwordResetController;
 
-  const LoginScreen({super.key, required this.controller});
+  const LoginScreen({
+    super.key,
+    required this.controller,
+    required this.passwordResetController,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -34,6 +40,16 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     await _controller.login(_phoneCtrl.text, _passCtrl.text);
+  }
+
+  void _openForgotPassword() {
+    _controller.clearErrors();
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            ForgotPasswordScreen(controller: widget.passwordResetController),
+      ),
+    );
   }
 
   @override
@@ -88,12 +104,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   loading: _controller.isLoading,
                   onPressed: _submit,
                 ),
-                const SizedBox(height: 16),
-                // Mobile không có chức năng quên mật khẩu (SRS mục 8).
-                const Text(
-                  'Quên mật khẩu? Vui lòng liên hệ quản trị viên nhà trường.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 14),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: _controller.isLoading ? null : _openForgotPassword,
+                  child: const Text('Quên mật khẩu?'),
                 ),
               ],
             ),

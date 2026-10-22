@@ -73,10 +73,10 @@ Lưu ý: `pom.xml` hiện còn H2 và chưa có driver SQL Server, cần thêm `
 ### 2.4 Đăng nhập và mật khẩu
 
 - Tên đăng nhập là **số điện thoại**: 10 chữ số, bắt đầu bằng 0, không trùng trong toàn hệ thống. Số dạng +84… được chuẩn hóa về 0… trước khi tra cứu.
-- Email không dùng để đăng nhập, chỉ là thông tin liên hệ và không bắt buộc.
+- Email không dùng để đăng nhập và không bắt buộc; ngoài liên hệ, email còn dùng để nhận mã khi quên mật khẩu.
 - Tài khoản do ADMIN tạo; người dùng không tự đăng ký.
 - Mật khẩu lưu dạng băm BCrypt. Mật khẩu tạm bắt buộc đổi ở lần đăng nhập đầu.
-- Không có chức năng quên mật khẩu tự động (không dùng email hay SMS). Người dùng liên hệ ADMIN để được **đặt lại mật khẩu**.
+- **Quên mật khẩu** (FR-AUTH-07, UC-03b): người dùng nhập số điện thoại, hệ thống gửi mã 6 chữ số tới email của tài khoản (không dùng SMS); nhập đúng mã thì tự đặt mật khẩu mới. Tài khoản chưa có email vẫn liên hệ ADMIN để được **đặt lại mật khẩu** (UC-03). Ai đọc được email của người dùng thì đặt lại được mật khẩu, nên email phải là hộp thư của chính người dùng.
 - Khóa tài khoản bằng cờ `is_active`, không xóa thật.
 
 ### 2.5 Ràng buộc và giả định
@@ -101,6 +101,7 @@ Cột **Ưu tiên**: **C** = cao (bản đầu tiên), **TB** = trung bình, **T
 | FR-AUTH-04 | Phân quyền | Gộp quyền từ mọi vai trò; giới hạn dữ liệu theo bộ môn, lớp, con đã liên kết | Tất cả | C |
 | FR-AUTH-05 | Hồ sơ cá nhân | Xem thông tin; sửa email, địa chỉ, ảnh đại diện (số điện thoại do AD quản lý) | Tất cả | TB |
 | FR-AUTH-06 | Ghi nhớ đăng nhập | Giữ phiên trên thiết bị tin cậy | Tất cả | T |
+| FR-AUTH-07 | Quên mật khẩu | Nhận mã 6 chữ số qua email (hiệu lực khoảng 10 phút, dùng một lần) rồi tự đặt mật khẩu mới; luôn báo cùng một câu dù số điện thoại có tồn tại hay không; giới hạn gửi mã và khóa 15 phút sau 5 lần nhập sai mã; ghi nhật ký; có trên Web và Mobile | Tất cả (có email) | C |
 
 ### 3.2 Quản lý người dùng (FR-USER)
 
@@ -286,6 +287,8 @@ Cơ sở dữ liệu được định nghĩa trong script `fpt_contact_book.sql`
 
 **UC-03 Admin đặt lại mật khẩu.** Người dùng liên hệ AD. AD chọn tài khoản, hệ thống tạo mật khẩu tạm, đặt cờ bắt buộc đổi mật khẩu và ghi nhật ký. Ở lần đăng nhập kế tiếp người dùng phải tự đặt mật khẩu mới.
 
+**UC-03b Người dùng tự đặt lại mật khẩu qua email.** Ở trang đăng nhập (web hoặc app), người dùng bấm Quên mật khẩu và nhập số điện thoại. Nếu tài khoản đang hoạt động và có email, hệ thống gửi mã 6 chữ số tới email; dù có hay không, màn hình luôn báo cùng một câu. Người dùng nhập mã và mật khẩu mới (cùng quy tắc với đổi mật khẩu). Mã đúng thì hệ thống đổi mật khẩu, bỏ cờ bắt buộc đổi mật khẩu, làm mất hiệu lực các phiên đăng nhập mobile cũ và ghi nhật ký. Gửi mã tối đa 1 lần mỗi phút, 5 lần mỗi giờ; nhập sai mã 5 lần thì khóa 15 phút.
+
 **UC-04 Giảng viên điểm danh.** GV mở buổi học hôm nay của lớp học phần mình, đánh dấu trạng thái từng sinh viên và lưu. Hệ thống ghi người điểm danh, thời điểm điểm danh, và cảnh báo nếu có sinh viên vắng vượt ngưỡng.
 
 **UC-05 Gửi và duyệt đơn nghỉ.** SV (hoặc PH) tạo đơn kèm minh chứng. GV lớp học phần nhận thông báo, duyệt hoặc từ chối kèm ghi chú. Người gửi nhận kết quả; nếu duyệt thì các buổi vắng trong khoảng ngày được chuyển thành vắng có phép.
@@ -314,7 +317,7 @@ Với đồ án môn học, nên chốt trước các mục ưu tiên **C** làm
 
 - Mobile gọi REST API của chính backend này; không có cơ sở dữ liệu cục bộ, chỉ lưu token đăng nhập và cài đặt giao diện.
 - Màn hình đăng nhập Flutter đã dựng cần đổi nhãn Email thành Số điện thoại và dùng bàn phím số.
-- Mobile không có chức năng tạo tài khoản, đăng ký hay quên mật khẩu.
+- Mobile không có chức năng tạo tài khoản hay đăng ký. Quên mật khẩu qua email có trên Mobile như Web (FR-AUTH-07).
 - Các thao tác tạo, sửa, xóa dữ liệu gốc (người dùng, danh mục, lịch, điểm) chỉ có trên Web.
 - Quyền được kiểm tra ở backend cho mọi API.
 - Dữ liệu đổi trên Web hiện trên Mobile ở lần tải kế tiếp; khi mất mạng Mobile báo lỗi và cho thử lại, không có chế độ ngoại tuyến.

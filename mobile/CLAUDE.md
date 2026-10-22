@@ -29,7 +29,8 @@ Package Dart `fpt_contact_book_mobile`, applicationId `vn.edu.fpt.contactbook`. 
 - SV: thời khóa biểu, lịch thi, điểm (chỉ cột đã công bố), điểm danh, thông báo, đơn nghỉ.
 - PH: như SV, cho từng con đã liên kết; có chọn con.
 - GV: lịch dạy, điểm danh một buổi, duyệt đơn nghỉ.
-- Ngoài phạm vi: đăng ký, quên mật khẩu (hiện "Liên hệ quản trị viên"), nhập hoặc sửa điểm, lịch, danh mục, offline. Push notification, tin nhắn, CLB chỉ làm khi được duyệt.
+- Quên mật khẩu: nhận mã qua email rồi đặt mật khẩu mới (`/auth/password-reset/*`, SRS FR-AUTH-07); tài khoản không có email vẫn liên hệ quản trị viên.
+- Ngoài phạm vi: đăng ký, nhập hoặc sửa điểm, lịch, danh mục, offline. Push notification, tin nhắn, CLB chỉ làm khi được duyệt.
 - Đăng nhập bằng số điện thoại. Lỗi đăng nhập hiển thị đúng thông báo backend trả về. `must_change_password` bắt buộc đổi mật khẩu trước khi vào app.
 
 ## 5. GIAO DIỆN

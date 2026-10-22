@@ -12,7 +12,12 @@ import 'fakes.dart';
 Future<TestApp> pumpApp(WidgetTester tester, {TestApp? app}) async {
   final testApp = app ?? TestApp();
   unawaited(testApp.controller.restoreSession());
-  await tester.pumpWidget(MyApp(authController: testApp.controller));
+  await tester.pumpWidget(
+    MyApp(
+      authController: testApp.controller,
+      passwordResetController: testApp.resetController,
+    ),
+  );
   await tester.pumpAndSettle();
   return testApp;
 }

@@ -35,7 +35,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/login", "/css/**", "/js/**", "/webjars/**", "/images/**", "/error",
-                        "/favicon.ico").permitAll()
+                        "/favicon.ico", "/forgot-password", "/reset-password").permitAll()
                 // Danh sách và chi tiết người dùng mở cho trưởng bộ môn (phạm vi bộ môn kiểm tra ở UserService);
                 // \d+ để /admin/users/new không lọt vào đây. Mọi URL /admin còn lại chỉ ADMIN.
                 .requestMatchers(HttpMethod.GET, "/admin/users", "/admin/users/{id:\\d+}")

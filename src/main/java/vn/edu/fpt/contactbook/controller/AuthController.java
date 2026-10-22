@@ -14,6 +14,7 @@ public class AuthController {
     public String login(@AuthenticationPrincipal AppUserPrincipal principal,
                         @RequestParam(value = "error", required = false) String error,
                         @RequestParam(value = "logout", required = false) String logout,
+                        @RequestParam(value = "reset", required = false) String reset,
                         Model model) {
         if (principal != null) {
             return "redirect:/";
@@ -29,6 +30,9 @@ public class AuthController {
         }
         if (logout != null) {
             model.addAttribute("infoMessageKey", "auth.logout.success");
+        }
+        if (reset != null) {
+            model.addAttribute("infoMessageKey", "forgot.reset.success");
         }
         return "auth/login";
     }

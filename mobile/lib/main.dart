@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/change_password_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/login_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/home/home_screen.dart';
@@ -17,15 +18,25 @@ void main() {
     baseUrl: AppConfig.apiRoot,
     tokenStorage: tokenStorage,
   );
-  final authController = AuthController(AuthService(apiClient, tokenStorage))
-    ..restoreSession();
-  runApp(MyApp(authController: authController));
+  final authService = AuthService(apiClient, tokenStorage);
+  final authController = AuthController(authService)..restoreSession();
+  runApp(
+    MyApp(
+      authController: authController,
+      passwordResetController: PasswordResetController(authService),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   final AuthController authController;
+  final PasswordResetController passwordResetController;
 
-  const MyApp({super.key, required this.authController});
+  const MyApp({
+    super.key,
+    required this.authController,
+    required this.passwordResetController,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +49,10 @@ class MyApp extends StatelessWidget {
         listenable: authController,
         builder: (context, _) => switch (authController.status) {
           AuthStatus.unknown => SplashScreen(controller: authController),
-          AuthStatus.unauthenticated => LoginScreen(controller: authController),
+          AuthStatus.unauthenticated => LoginScreen(
+            controller: authController,
+            passwordResetController: passwordResetController,
+          ),
           AuthStatus.mustChangePassword => ChangePasswordScreen(
             controller: authController,
           ),
