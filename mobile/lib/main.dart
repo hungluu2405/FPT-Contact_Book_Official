@@ -1,34 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:myfschoolse1945/vn/edu/fpt/screen/account/login_screen.dart';
-
-const Color fptNavy = Color(0xFF0A1930); // nền header + card phía trên
-const Color fptOrange = Color(0xFFF97316); // nút, chữ cam
-const Color fptBackground = Color(0xFFF8F7F4); // nền trang
-const Color fptBlue = Color(0xFF0066B3);
-const Color fptGreen = Color(0xFF00A651);
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/change_password_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/login_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/home/home_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/home/splash_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/auth_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/token_storage.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_config.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  final tokenStorage = SecureTokenStorage();
+  final apiClient = ApiClient(
+    baseUrl: AppConfig.apiRoot,
+    tokenStorage: tokenStorage,
+  );
+  final authController = AuthController(AuthService(apiClient, tokenStorage))
+    ..restoreSession();
+  runApp(MyApp(authController: authController));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthController authController;
+
+  const MyApp({super.key, required this.authController});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Sổ liên lạc điện tử FPT',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: fptBackground,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: fptOrange,
-          primary: fptOrange,
-          secondary: fptNavy,
-        ),
+      theme: buildAppTheme(),
+      // Màn hình gốc đổi theo trạng thái phiên đăng nhập.
+      home: ListenableBuilder(
+        listenable: authController,
+        builder: (context, _) => switch (authController.status) {
+          AuthStatus.unknown => SplashScreen(controller: authController),
+          AuthStatus.unauthenticated => LoginScreen(controller: authController),
+          AuthStatus.mustChangePassword => ChangePasswordScreen(
+            controller: authController,
+          ),
+          AuthStatus.authenticated => HomeScreen(controller: authController),
+        },
       ),
-      home: const LoginScreen(),
     );
   }
 }
