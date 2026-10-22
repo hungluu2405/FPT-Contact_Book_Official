@@ -2,43 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpt_contact_book_mobile/main.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/change_password_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/login_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/home/home_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dart';
 
+import 'support/app_driver.dart';
 import 'support/fakes.dart';
-
-/// Khởi động app với tầng HTTP giả, giống main(): khôi phục phiên rồi
-/// hiện màn hình theo trạng thái. Request chạy trong lúc pump nên các
-/// timer của Dio chạy theo đồng hồ giả của test.
-Future<TestApp> pumpApp(WidgetTester tester, {TestApp? app}) async {
-  final testApp = app ?? TestApp();
-  unawaited(testApp.controller.restoreSession());
-  await tester.pumpWidget(MyApp(authController: testApp.controller));
-  await tester.pumpAndSettle();
-  return testApp;
-}
-
-Finder field(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(Column)).first;
-
-Future<void> enter(WidgetTester tester, String label, String text) async {
-  final input = find.descendant(
-    of: field(label),
-    matching: find.byType(TextFormField),
-  );
-  await tester.ensureVisible(input);
-  await tester.enterText(input, text);
-}
-
-Future<void> tapButton(WidgetTester tester, String label) async {
-  final button = find.widgetWithText(FilledButton, label);
-  await tester.ensureVisible(button);
-  await tester.tap(button);
-  await tester.pumpAndSettle();
-}
 
 void main() {
   testWidgets('app starts on the login screen without a saved session', (
