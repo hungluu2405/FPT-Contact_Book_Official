@@ -60,7 +60,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
 - **11: kiểm thử tổng và đóng gói**: chạy trên máy ảo và máy thật; rà soát bảo mật; build APK release; viết hướng dẫn cài đặt và cấu hình địa chỉ server.
 
 ## 4. Ngoài phạm vi
-Đăng ký, quên mật khẩu, nhập/sửa điểm, lịch và danh mục trên mobile; chế độ offline; push notification; tin nhắn và CLB trên mobile. Các mục này có thể thêm sau nếu duyệt.
+Đăng ký, nhập/sửa điểm, lịch và danh mục trên mobile (quên mật khẩu qua email đã thêm, giả định 154–156); chế độ offline; push notification; tin nhắn và CLB trên mobile. Các mục này có thể thêm sau nếu duyệt.
 
 ## 5. Ràng buộc vẫn giữ
 - Không push.

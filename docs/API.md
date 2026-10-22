@@ -28,6 +28,8 @@ Phản hồi đăng nhập, làm mới và đổi mật khẩu:
 | POST | `/auth/login` | Không | Đăng nhập |
 | POST | `/auth/refresh` | Không | Đổi refresh token lấy cặp token mới |
 | POST | `/auth/logout` | Có | 204 |
+| POST | `/auth/password-reset/request` | Không | `{phone}`: gửi mã 6 chữ số tới email của tài khoản. Luôn 202 dù số có tồn tại hay không; gửi quá dày: 400 `BUSINESS_ERROR` gắn ô `phone` |
+| POST | `/auth/password-reset/confirm` | Không | `{phone, code, newPassword, confirmPassword}`: 204. Mã sai, hết hạn hoặc đã dùng: 400 `BUSINESS_ERROR` gắn ô `code`; sai quy tắc mật khẩu: gắn ô `newPassword`/`confirmPassword`; sai 5 lần: khóa 15 phút. Thành công thì refresh token cũ hết hiệu lực |
 | GET | `/me` | Có | `{id, phone, fullName, roles, mustChangePassword}` |
 | POST | `/me/password` | Có | `{currentPassword, newPassword, confirmPassword}`, trả cặp token mới |
 
