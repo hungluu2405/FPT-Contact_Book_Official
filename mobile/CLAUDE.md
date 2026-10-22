@@ -31,7 +31,7 @@ App Android cho sinh viên (SV), phụ huynh (PH) và giảng viên (GV). File n
 ## 5. GIAO DIỆN
 - Chữ trên giao diện bằng tiếng Việt. Tên lớp, biến, hàm, log, commit bằng tiếng Anh.
 - Ngày `dd/MM/yyyy`, giờ `HH:mm`, múi giờ `Asia/Ho_Chi_Minh`.
-- Màu như web: navy `#0A1930`, cam `#F97316`, nền `#F8F7F4`, chữ `#1F2937`.
+- Màu như web (mục 6 `CLAUDE.md` gốc): nền trắng, mọi nút chính màu cam `#F97316`, cam đậm `#C2410C` cho link chữ nhỏ, cam nhạt `#FFF7ED` cho mảng nền, navy `#0A1930` chỉ cho chữ tiêu đề lớn, chữ `#1F2937`, chữ phụ `#6B7280`.
 - Chữ rõ, nút lớn (phụ huynh lớn tuổi dùng). Mọi màn hình có trạng thái đang tải, rỗng, lỗi kèm nút thử lại.
 - Danh sách dài thì tải theo trang, đúng với phân trang của API.
 

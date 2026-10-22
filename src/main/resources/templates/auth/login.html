@@ -9,45 +9,47 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body class="login-body">
-<!--/* Logo: chưa có static/images/fpt_logo.png nên tạm dùng chữ. */-->
-<header class="login-hero">
-    <div class="login-brand" th:text="#{app.brand}">FPT University</div>
-    <h1 class="login-title" th:text="#{auth.login.title}">Đăng nhập</h1>
-    <p class="login-subtitle" th:text="#{auth.login.subtitle}">Sổ liên lạc điện tử dành cho sinh viên</p>
-</header>
+<!--/* Cùng phong cách với màn hình đăng nhập của app mobile: nền trắng, logo, dải ba màu FPT, nút cam. */-->
+<main class="login-panel">
+    <img class="brand-logo login-logo" th:src="@{/images/fpt_schools_logo.png}" th:alt="#{app.brand}" alt="FPT Schools">
+    <div class="brand-stripe" aria-hidden="true"><span></span><span></span><span></span></div>
 
-<main class="login-card-wrap">
-    <div class="login-card">
-        <div th:if="${errorMessageKey}" class="alert alert-danger" role="alert" th:text="#{${errorMessageKey}}">
-            Số điện thoại hoặc mật khẩu không đúng
-        </div>
-        <div th:if="${infoMessageKey}" class="alert alert-success" role="status" th:text="#{${infoMessageKey}}">
-            Bạn đã đăng xuất
-        </div>
+    <h1 class="login-greeting" th:text="#{auth.login.greeting}">Xin chào!</h1>
 
-        <form th:action="@{/login}" method="post" novalidate>
-            <div class="mb-3">
-                <label for="phone" class="form-label" th:text="#{auth.login.phone}">Số điện thoại</label>
-                <input type="tel" id="phone" name="phone" class="form-control form-control-lg"
+    <div th:if="${errorMessageKey}" class="alert alert-danger" role="alert" th:text="#{${errorMessageKey}}">
+        Số điện thoại hoặc mật khẩu không đúng
+    </div>
+    <div th:if="${infoMessageKey}" class="alert alert-success" role="status" th:text="#{${infoMessageKey}}">
+        Bạn đã đăng xuất
+    </div>
+
+    <form class="login-form" th:action="@{/login}" method="post" novalidate>
+        <div class="mb-3">
+            <label for="phone" class="form-label" th:text="#{auth.login.phone}">Số điện thoại</label>
+            <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                <input type="tel" id="phone" name="phone" class="form-control"
                        placeholder="0901234567" autocomplete="username" inputmode="tel" required autofocus>
             </div>
-            <div class="mb-4">
-                <label for="password" class="form-label" th:text="#{auth.login.password}">Mật khẩu</label>
-                <div class="input-group input-group-lg">
-                    <input type="password" id="password" name="password" class="form-control"
-                           autocomplete="current-password" required>
-                    <button type="button" class="btn btn-outline-secondary" data-toggle-password="#password"
-                            th:attr="aria-label=#{auth.login.show-password}">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                </div>
+        </div>
+        <div class="mb-4">
+            <label for="password" class="form-label" th:text="#{auth.login.password}">Mật khẩu</label>
+            <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" id="password" name="password" class="form-control"
+                       autocomplete="current-password" required>
+                <button type="button" class="btn btn-outline-secondary" data-toggle-password="#password"
+                        th:attr="aria-label=#{auth.login.show-password}">
+                    <i class="bi bi-eye"></i>
+                </button>
             </div>
-            <button type="submit" class="btn btn-orange btn-lg w-100" th:text="#{auth.login.submit}">Đăng nhập</button>
-        </form>
+        </div>
+        <button type="submit" class="btn btn-orange btn-lg w-100 login-submit" th:text="#{auth.login.submit}">Đăng nhập</button>
+    </form>
 
-        <p class="login-forgot" th:text="#{auth.login.forgot}">Quên mật khẩu? Vui lòng liên hệ quản trị viên.</p>
-    </div>
+    <p class="login-forgot" th:text="#{auth.login.forgot}">Quên mật khẩu? Vui lòng liên hệ quản trị viên.</p>
 </main>
+<footer class="login-footer" th:text="#{app.copyright}">© FPT Education</footer>
 <script th:src="@{/js/password-toggle.js}"></script>
 </body>
 </html>

@@ -8,8 +8,7 @@
         <i class="bi bi-list"></i>
     </button>
     <a class="app-brand" th:href="@{/}">
-        <i class="bi bi-mortarboard-fill"></i>
-        <span th:text="#{app.brand}">FPT University</span>
+        <img class="brand-logo" th:src="@{/images/fpt_schools_logo.png}" th:alt="#{app.brand}" alt="FPT Schools">
     </a>
     <div class="app-user" sec:authorize="isAuthenticated()">
         <!--/* Số chưa đọc do MenuBadgeInterceptor đưa vào Model sau khi xử lý trang (một truy vấn đếm). */-->
@@ -24,7 +23,7 @@
             <span sec:authentication="principal.fullName">Họ tên</span>
         </span>
         <form th:action="@{/logout}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-light btn-sm">
+            <button type="submit" class="btn btn-outline-primary btn-sm">
                 <i class="bi bi-box-arrow-right"></i>
                 <span th:text="#{auth.logout}">Đăng xuất</span>
             </button>
