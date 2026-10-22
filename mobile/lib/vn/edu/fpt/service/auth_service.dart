@@ -55,6 +55,35 @@ class AuthService {
     return _saveTokens(data);
   }
 
+  /// Quên mật khẩu, bước 1: server gửi mã 6 chữ số tới email của tài khoản.
+  /// Server luôn trả 202 dù số điện thoại có tồn tại hay không.
+  Future<void> requestPasswordReset(String phone) async {
+    await _apiClient.post(
+      '/auth/password-reset/request',
+      data: {'phone': phone},
+      authenticated: false,
+    );
+  }
+
+  /// Quên mật khẩu, bước 2: đặt mật khẩu mới bằng mã nhận qua email.
+  Future<void> confirmPasswordReset({
+    required String phone,
+    required String code,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    await _apiClient.post(
+      '/auth/password-reset/confirm',
+      data: {
+        'phone': phone,
+        'code': code,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      },
+      authenticated: false,
+    );
+  }
+
   /// Báo server rồi xóa token; mất mạng hay token hết hạn vẫn xóa token.
   Future<void> logout() async {
     try {

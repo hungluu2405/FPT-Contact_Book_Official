@@ -167,6 +167,43 @@ void main() {
     });
   });
 
+  group('forgot password (no data change)', () {
+    test('unknown phone is accepted without revealing anything', () async {
+      // Không ném lỗi: server trả 202 như với số có thật.
+      await ContractClient().auth.requestPasswordReset(randomUnknownPhone());
+    });
+
+    test('wrong code is reported on the code field', () async {
+      await expectLater(
+        ContractClient().auth.confirmPasswordReset(
+          phone: randomUnknownPhone(),
+          code: '000000',
+          newPassword: 'Moi@123456',
+          confirmPassword: 'Moi@123456',
+        ),
+        throwsA(
+          apiError('BUSINESS_ERROR', field: 'code').having(
+            (e) => e.fieldErrors['code'],
+            'message',
+            'Mã xác nhận không đúng hoặc đã hết hạn',
+          ),
+        ),
+      );
+    });
+
+    test('weak new password is reported before the code is checked', () async {
+      await expectLater(
+        ContractClient().auth.confirmPasswordReset(
+          phone: randomUnknownPhone(),
+          code: '000000',
+          newPassword: 'ngan',
+          confirmPassword: 'ngan',
+        ),
+        throwsA(apiError('BUSINESS_ERROR', field: 'newPassword')),
+      );
+    });
+  });
+
   test('logout returns 204 and clears the stored tokens', () async {
     final client = ContractClient();
     await client.auth.login('0900000003', kSeedPassword);

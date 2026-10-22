@@ -177,6 +177,43 @@ class AuthErrorBanner extends StatelessWidget {
   }
 }
 
+/// Hộp thông tin (nền cam nhạt) phía trên form, ví dụ đã gửi mã xác nhận.
+class AuthInfoBanner extends StatelessWidget {
+  final String message;
+
+  const AuthInfoBanner({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.orangeLight,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.orange.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.mark_email_read_outlined,
+            color: AppColors.orangeDark,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: AppColors.text, fontSize: 15),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Nút chính, hiện vòng xoay và khóa nút khi đang gửi.
 class AuthSubmitButton extends StatelessWidget {
   final String label;

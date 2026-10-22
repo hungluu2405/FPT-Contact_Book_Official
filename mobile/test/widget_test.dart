@@ -17,8 +17,7 @@ void main() {
     await pumpApp(tester);
 
     expect(find.byType(LoginScreen), findsOneWidget);
-    expect(find.textContaining('liên hệ quản trị viên'), findsOneWidget);
-    expect(find.text('Quên mật khẩu?'), findsNothing);
+    expect(find.widgetWithText(TextButton, 'Quên mật khẩu?'), findsOneWidget);
   });
 
   testWidgets('empty login shows a message next to each field', (tester) async {
