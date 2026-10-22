@@ -326,14 +326,14 @@ class LoginIntegrationTest {
     }
 
     @Test
-    @DisplayName("Trang đăng nhập có CSRF, không có Đăng ký")
+    @DisplayName("Trang đăng nhập có CSRF, link Quên mật khẩu, không có Đăng ký")
     void loginPageRenders() throws Exception {
         mockMvc.perform(get("/login"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(allOf(
                         containsString("name=\"_csrf\""),
                         containsString("type=\"tel\""),
-                        containsString("Quên mật khẩu? Vui lòng liên hệ quản trị viên."),
+                        containsString("<a href=\"/forgot-password\">Quên mật khẩu?</a>"),
                         not(containsString("Đăng ký")))));
     }
 

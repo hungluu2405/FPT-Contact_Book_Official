@@ -47,7 +47,7 @@
         <button type="submit" class="btn btn-orange btn-lg w-100 login-submit" th:text="#{auth.login.submit}">Đăng nhập</button>
     </form>
 
-    <p class="login-forgot" th:text="#{auth.login.forgot}">Quên mật khẩu? Vui lòng liên hệ quản trị viên.</p>
+    <p class="login-forgot"><a th:href="@{/forgot-password}" th:text="#{auth.login.forgot}">Quên mật khẩu?</a></p>
 </main>
 <footer class="login-footer" th:text="#{app.copyright}">© FPT Education</footer>
 <script th:src="@{/js/password-toggle.js}"></script>

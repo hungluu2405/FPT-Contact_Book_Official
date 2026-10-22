@@ -23,6 +23,10 @@ public final class AuditActions {
     public static final String LOCK_USER = "LOCK_USER";
     public static final String UNLOCK_USER = "UNLOCK_USER";
     public static final String RESET_PASSWORD = "RESET_PASSWORD";
+    /** Gửi mã quên mật khẩu tới email của tài khoản. */
+    public static final String PASSWORD_RESET_REQUESTED = "PASSWORD_RESET_REQUESTED";
+    /** Người dùng tự đặt lại mật khẩu bằng mã nhận qua email. */
+    public static final String PASSWORD_RESET_BY_EMAIL = "PASSWORD_RESET_BY_EMAIL";
     public static final String LINK_PARENT = "LINK_PARENT";
     public static final String UNLINK_PARENT = "UNLINK_PARENT";
     public static final String IMPORT_USERS = "IMPORT_USERS";
