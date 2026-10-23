@@ -1,0 +1,7 @@
+# Copy to android/key.properties (ignored by git) and fill in your own values.
+# storeFile is relative to the android/ folder; keep the keystore outside git.
+# See docs/INSTALL_MOBILE.md for the keytool command that creates it.
+storeFile=../../../keystore/fpt-contact-book-release.jks
+storePassword=
+keyAlias=fpt-contact-book
+keyPassword=
