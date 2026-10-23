@@ -28,6 +28,10 @@ class RequestReviewController extends ChangeNotifier {
   ApiErrorModel? _error;
   int? _pendingCount;
 
+  /// Đơn đã rời hàng đợi "Chờ duyệt" sau khi tải trang: backend phân trang
+  /// theo vị trí nên trang kế tiếp đã dồn lên, phải tải lại từ đầu.
+  bool _shifted = false;
+
   RequestDetailModel? _detail;
   bool _loadingDetail = false;
   ApiErrorModel? _detailError;
@@ -82,6 +86,7 @@ class RequestReviewController extends ChangeNotifier {
     _items.clear();
     _page = -1;
     _hasMore = true;
+    _shifted = false;
     _loading = false;
     _error = null;
     _pendingCount = null;
@@ -108,6 +113,7 @@ class RequestReviewController extends ChangeNotifier {
     _items.clear();
     _page = -1;
     _hasMore = true;
+    _shifted = false;
     _loading = false;
     _error = null;
     return loadMore();
@@ -117,6 +123,9 @@ class RequestReviewController extends ChangeNotifier {
   Future<void> loadMore() async {
     if (_loading || !_hasMore) {
       return;
+    }
+    if (_shifted) {
+      return reload();
     }
     final generation = _listGeneration;
     _loading = true;
@@ -254,6 +263,7 @@ class RequestReviewController extends ChangeNotifier {
     if (index >= 0) {
       if (_filter == pending) {
         _items.removeAt(index);
+        _shifted = _hasMore;
       } else {
         _items[index].status = updated.status;
       }

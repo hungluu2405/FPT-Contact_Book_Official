@@ -108,6 +108,52 @@ void main() {
       return app;
     }
 
+    test('loading more after an approval skips no pending request', () async {
+      // Backend phân trang theo vị trí: đơn vừa duyệt rời hàng đợi thì các
+      // đơn sau dồn lên một chỗ.
+      final pending = List<int>.generate(21, (index) => index + 1);
+      final app = TestApp(accessToken: 'a', refreshToken: 'r');
+      app.http.on('GET', '/teacher/requests', (request) async {
+        final page = request.queryParameters['page'] as int;
+        final ids = pending.skip(page * 20).take(20);
+        return FakeReply(
+          200,
+          pageJson(
+            [for (final id in ids) requestJson(id: id)],
+            page: page,
+            totalPages: (pending.length + 19) ~/ 20,
+            totalElements: pending.length,
+          ),
+        );
+      });
+      app.http.reply(
+        'GET',
+        '/teacher/requests/1',
+        FakeReply(200, requestDetailJson(canCancel: false, canReview: true)),
+      );
+      app.http.on('POST', '/teacher/requests/1/review', (request) async {
+        pending.remove(1);
+        return FakeReply(200, {
+          'decision': 'APPROVED',
+          'excusedSessions': 0,
+          'request': requestDetailJson(status: 'APPROVED', canCancel: false),
+        });
+      });
+      final controller = app.requestReviewController;
+      await controller.open();
+      expect(controller.items, hasLength(20));
+      await controller.openRequest(1);
+      await controller.review(approve: true, comment: '');
+
+      await controller.loadMore();
+
+      expect(
+        controller.items.map((item) => item.id),
+        List<int>.generate(20, (index) => index + 2),
+      );
+      expect(controller.hasMore, isFalse);
+    });
+
     test('approving updates the detail, the queue and the count', () async {
       final app = await openDetail();
       app.http.reply(
