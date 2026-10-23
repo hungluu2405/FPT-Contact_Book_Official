@@ -3,16 +3,19 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/attachment_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/auth_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/club_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/notification_service.dart';
@@ -109,8 +112,18 @@ class FakeHttpAdapter implements HttpClientAdapter {
       throw StateError('No fake reply for ${options.method} ${options.path}');
     }
     final reply = await handler(options);
-    if (reply.body == null) {
+    final body = reply.body;
+    if (body == null) {
       return ResponseBody.fromString('', reply.status);
+    }
+    if (body is Uint8List) {
+      return ResponseBody.fromBytes(
+        body,
+        reply.status,
+        headers: {
+          Headers.contentTypeHeader: ['application/octet-stream'],
+        },
+      );
     }
     return ResponseBody.fromString(
       jsonEncode(reply.body),
@@ -479,6 +492,45 @@ Map<String, dynamic> myClubJson({
   'status': status,
 };
 
+Map<String, dynamic> notificationJson({
+  int id = 1,
+  String title = 'Lịch nghỉ lễ 20/11',
+  String priority = 'NORMAL',
+  String createdAt = '2026-10-20T08:30:00',
+  bool read = false,
+}) => {
+  'id': id,
+  'title': title,
+  'senderName': 'Phòng Công tác học sinh',
+  'priority': priority,
+  'createdAt': createdAt,
+  'read': read,
+};
+
+Map<String, dynamic> attachmentJson({
+  int id = 11,
+  String fileName = 'lich-nghi-le.pdf',
+  int sizeBytes = 245760,
+}) => {'id': id, 'fileName': fileName, 'sizeBytes': sizeBytes};
+
+Map<String, dynamic> notificationDetailJson({
+  int id = 1,
+  String title = 'Lịch nghỉ lễ 20/11',
+  String priority = 'NORMAL',
+  List<Map<String, dynamic>> files = const [],
+}) => {
+  'id': id,
+  'title': title,
+  'content':
+      'Nhà trường thông báo học sinh nghỉ học ngày 20/11 để tham dự lễ '
+      'kỷ niệm Ngày Nhà giáo Việt Nam.',
+  'priority': priority,
+  'targetLabel': 'Toàn trường',
+  'senderName': 'Phòng Công tác học sinh',
+  'createdAt': '2026-10-20T08:30:00',
+  'files': files,
+};
+
 /// Bộ đối tượng thật nối với tầng HTTP giả.
 class TestApp {
   final FakeHttpAdapter http = FakeHttpAdapter();
@@ -517,6 +569,33 @@ class TestApp {
   late final ClubController clubController = ClubController(
     ClubService(apiClient),
   );
+
+  /// Đường dẫn các tệp đã "mở" bằng ứng dụng ngoài, và kết quả trả về.
+  final List<String> openedFiles = [];
+  OpenResult openResult = OpenResult();
+
+  /// Thư mục tạm thật thay cho thư mục cache của Android, chỉ được tạo khi
+  /// tải tệp; test nào tải tệp thì tự xóa bằng [deleteAttachmentDir].
+  late final Directory attachmentDir = Directory(
+    '${Directory.systemTemp.path}/fpt_attachments_'
+    '${DateTime.now().microsecondsSinceEpoch}_${identityHashCode(this)}',
+  );
+  late final AttachmentService attachmentService = AttachmentService(
+    apiClient,
+    directory: () async => attachmentDir,
+    opener: (path) async {
+      openedFiles.add(path);
+      return openResult;
+    },
+  );
+  late final NotificationController notificationController =
+      NotificationController(NotificationService(apiClient), attachmentService);
+
+  void deleteAttachmentDir() {
+    if (attachmentDir.existsSync()) {
+      attachmentDir.deleteSync(recursive: true);
+    }
+  }
 
   TestApp({String? accessToken, String? refreshToken})
     : storage = MemoryTokenStorage(

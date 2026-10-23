@@ -1,8 +1,10 @@
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/api_error_model.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/notification_model.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/page_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
 
-/// API thông báo. Giai đoạn 10b chỉ dùng số chưa đọc; danh sách và chi tiết
-/// thêm ở 10c. Lỗi ném [ApiErrorModel].
+/// API thông báo đã nhận (docs/API.md mục "Dùng chung"). Lỗi ném
+/// [ApiErrorModel].
 class NotificationService {
   final ApiClient _apiClient;
 
@@ -12,4 +14,31 @@ class NotificationService {
     final data = await _apiClient.get('/notifications/unread-count');
     return ((data as Map<String, dynamic>)['count'] as num).toInt();
   }
+
+  /// Hộp thư, mới nhất trước; [page] đếm từ 0.
+  Future<PageModel<NotificationModel>> fetchNotifications({
+    int page = 0,
+  }) async {
+    final data = await _apiClient.get('/notifications', query: {'page': page});
+    return PageModel.fromJson(
+      data as Map<String, dynamic>,
+      NotificationModel.fromJson,
+    );
+  }
+
+  /// Chi tiết; lần đầu mở thì backend đánh dấu đã đọc.
+  Future<NotificationDetailModel> fetchNotification(int id) async {
+    final data = await _apiClient.get('/notifications/$id');
+    return NotificationDetailModel.fromJson(data as Map<String, dynamic>);
+  }
+
+  /// Đánh dấu tất cả đã đọc, trả số chưa đọc còn lại.
+  Future<int> markAllRead() async {
+    final data = await _apiClient.post('/notifications/read-all');
+    return ((data as Map<String, dynamic>)['count'] as num).toInt();
+  }
+
+  /// Đường dẫn tải tệp đính kèm, dùng với `AttachmentService`.
+  static String filePath(int notificationId, int fileId) =>
+      '/notifications/$notificationId/files/$fileId';
 }

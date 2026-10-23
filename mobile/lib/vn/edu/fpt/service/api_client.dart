@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/api_error_model.dart';
@@ -45,6 +46,17 @@ class ApiClient {
 
   Future<dynamic> get(String path, {Map<String, dynamic>? query}) {
     return _send(() => _dio.get<dynamic>(path, queryParameters: query));
+  }
+
+  /// Tải nội dung nhị phân (tệp đính kèm) vào bộ nhớ.
+  Future<Uint8List> getBytes(String path) async {
+    final data = await _send(
+      () => _dio.get<dynamic>(
+        path,
+        options: Options(responseType: ResponseType.bytes),
+      ),
+    );
+    return Uint8List.fromList(data as List<int>);
   }
 
   /// [authenticated] = false cho các request không cần token (đăng nhập).

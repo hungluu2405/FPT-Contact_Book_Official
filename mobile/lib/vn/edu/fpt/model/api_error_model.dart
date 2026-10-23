@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 /// Lỗi trả về từ API (dạng ApiError trong docs/API.md) hoặc lỗi mạng.
@@ -64,7 +66,7 @@ class ApiErrorModel implements Exception {
       );
     }
     final status = response.statusCode ?? 0;
-    final data = response.data;
+    final data = _decodeBytes(response.data);
     if (data is Map<String, dynamic> && data['code'] is String) {
       return ApiErrorModel.fromJson(data);
     }
@@ -87,6 +89,19 @@ class ApiErrorModel implements Exception {
       code: internalError,
       message: internalMessage,
     );
+  }
+
+  /// Request tải tệp nhận body dạng byte, kể cả khi lỗi: đọc lại thành JSON
+  /// để vẫn lấy được thông báo của backend.
+  static Object? _decodeBytes(Object? data) {
+    if (data is! List<int>) {
+      return data;
+    }
+    try {
+      return jsonDecode(utf8.decode(data));
+    } on FormatException {
+      return null;
+    }
   }
 
   Map<String, dynamic> toJson() => {

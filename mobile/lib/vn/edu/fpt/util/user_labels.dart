@@ -41,3 +41,10 @@ const Map<String, String> kClubStatusLabels = {
   'REJECTED': 'Bị từ chối',
   'LEFT': 'Đã rời',
 };
+
+/// Mức độ thông báo (giống `notification-priority.*` của web).
+const Map<String, String> kNotificationPriorityLabels = {
+  'NORMAL': 'Thường',
+  'IMPORTANT': 'Quan trọng',
+  'URGENT': 'Khẩn',
+};

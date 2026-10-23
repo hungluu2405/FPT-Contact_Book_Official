@@ -11,6 +11,14 @@ String formatApiDate(String? value) {
   return '${parts[2]}/${parts[1]}/${parts[0]}';
 }
 
+/// Thời điểm `yyyy-MM-ddTHH:mm[:ss]` của API thành `dd/MM/yyyy HH:mm`.
+/// Thiếu phần giờ thì chỉ trả ngày.
+String formatApiDateTime(String? value) {
+  final parts = (value ?? '').split('T');
+  final date = formatApiDate(parts[0]);
+  return parts.length < 2 ? date : '$date ${formatApiTime(parts[1])}';
+}
+
 /// Đọc ngày `yyyy-MM-dd` của API (không có giờ, không có múi giờ).
 /// Sai dạng thì trả null.
 DateTime? parseApiDate(String? value) {

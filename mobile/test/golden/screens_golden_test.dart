@@ -667,4 +667,88 @@ void main() {
 
     await expectScreen(tester, 'club_detail');
   });
+
+  /// Hộp thư 4 thông báo: khẩn và quan trọng chưa đọc, hai thông báo đã đọc.
+  void stubNotifications(TestApp app) {
+    app.http.reply(
+      'GET',
+      '/notifications',
+      FakeReply(
+        200,
+        pageJson([
+          notificationJson(
+            title: 'Nghỉ học do bão số 7 ngày 24/10',
+            priority: 'URGENT',
+            createdAt: '2026-10-21T07:15:00',
+          ),
+          notificationJson(
+            id: 2,
+            title: 'Lịch kiểm tra giữa kỳ I môn Toán',
+            priority: 'IMPORTANT',
+            createdAt: '2026-10-20T16:40:00',
+          ),
+          notificationJson(id: 3, read: true),
+          notificationJson(
+            id: 4,
+            title: 'Họp phụ huynh đầu năm học 2026–2027',
+            createdAt: '2026-09-12T10:00:00',
+            read: true,
+          ),
+        ]),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/notifications/1',
+      FakeReply(
+        200,
+        notificationDetailJson(
+          title: 'Nghỉ học do bão số 7 ngày 24/10',
+          priority: 'URGENT',
+          files: [
+            attachmentJson(fileName: 'cong-van-nghi-hoc.pdf'),
+            attachmentJson(
+              id: 12,
+              fileName: 'lich-hoc-bu.xlsx',
+              sizeBytes: 1572864,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> openNotificationTab(WidgetTester tester) async {
+    usePhoneScreen(tester);
+    final app = TestApp(accessToken: 'a', refreshToken: 'r');
+    app.http.reply(
+      'GET',
+      '/me',
+      FakeReply(200, userJson(fullName: 'Lưu Khánh Hưng')),
+    );
+    app.stubHome(unread: 2, today: kGoldenToday);
+    stubNotifications(app);
+    await pumpApp(tester, app: app);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Thông báo'),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('notification list', (tester) async {
+    await openNotificationTab(tester);
+
+    await expectScreen(tester, 'notification_list');
+  });
+
+  testWidgets('notification detail with attachments', (tester) async {
+    await openNotificationTab(tester);
+    await tester.tap(find.text('Nghỉ học do bão số 7 ngày 24/10'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'notification_detail');
+  });
 }
