@@ -60,7 +60,7 @@ Phản hồi đăng nhập, làm mới và đổi mật khẩu:
 | GET | `/requests?page=` | `Page<{id, type, title, studentCode, studentName, requesterName, sectionCode, fromDate, toDate, status, createdAt}>` (mọi loại đơn) |
 | GET | `/requests/{id}` | Chi tiết đơn (RequestDetail): `{..., files[], reviews[], canCancel, canReview}` |
 | GET | `/requests/leave-options` | `{studentId, studentCode, studentName, sections[{id, code, name}]}` |
-| POST | `/requests/leave` | `multipart/form-data`: `fromDate`, `toDate` (yyyy-MM-dd hoặc dd/MM/yyyy), `reason`, tùy chọn `title`, `sectionId`, `files` (nhiều tệp, mỗi tệp tối đa 10MB). 201 + chi tiết đơn |
+| POST | `/requests/leave` | `multipart/form-data`: `fromDate`, `toDate` (yyyy-MM-dd hoặc dd/MM/yyyy), `reason`, tùy chọn `title`, `sectionId`, `files` (tối đa 5 tệp, mỗi tệp tối đa 5 MB; PDF, JPG, PNG, DOCX, XLSX, `Content-Type` của từng tệp phải khớp đuôi tệp). 201 + chi tiết đơn |
 | POST | `/requests/{id}/cancel` | Hủy đơn đang chờ duyệt, trả chi tiết đơn; đơn không còn chờ duyệt: 400 `BUSINESS_ERROR` |
 | GET | `/clubs` | CLB của học sinh (của mình / của con): `[{clubId, code, name, clubStatus, role, status}]`, gồm đang chờ duyệt, đang tham gia, bị từ chối |
 

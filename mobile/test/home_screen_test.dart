@@ -29,9 +29,7 @@ Future<void> tapOutlined(WidgetTester tester, String label) async {
 }
 
 void main() {
-  testWidgets('student sees six features, one still coming soon', (
-    tester,
-  ) async {
+  testWidgets('student sees six working features', (tester) async {
     await pumpHome(tester, unread: 3);
 
     for (final label in [
@@ -44,19 +42,30 @@ void main() {
     ]) {
       expect(find.widgetWithText(FeatureTileWidget, label), findsOneWidget);
     }
-    expect(find.text('Sắp có'), findsOneWidget);
+    expect(find.text('Sắp có'), findsNothing);
     expect(find.text('3'), findsOneWidget);
     expect(find.textContaining('Đang xem'), findsNothing);
   });
 
-  testWidgets('a coming-soon tile opens nothing', (tester) async {
-    await pumpHome(tester);
+  testWidgets('the requests tile opens the requests of the student', (
+    tester,
+  ) async {
+    final app = TestApp(accessToken: 'a', refreshToken: 'r');
+    app.http.reply('GET', '/me', FakeReply(200, userJson()));
+    app.stubHome();
+    app.http.reply(
+      'GET',
+      '/student/requests',
+      FakeReply(200, pageJson([requestJson()])),
+    );
+    await pumpApp(tester, app: app);
 
     await tester.ensureVisible(find.text('Đơn từ'));
     await tester.tap(find.text('Đơn từ'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(FeatureTileWidget), findsNWidgets(6));
+    expect(find.text('Đơn của tôi'), findsOneWidget);
+    expect(app.http.count('GET', '/student/requests'), 1);
   });
 
   testWidgets('parent with one child sees the child without a picker', (

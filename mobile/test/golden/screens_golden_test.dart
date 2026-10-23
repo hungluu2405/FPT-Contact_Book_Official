@@ -751,4 +751,101 @@ void main() {
 
     await expectScreen(tester, 'notification_detail');
   });
+
+  /// Ba đơn của HS: đơn nghỉ chờ duyệt, đơn nghỉ đã duyệt (có minh chứng và
+  /// ghi chú của GV), đơn xin bảng điểm bị từ chối.
+  void stubRequests(TestApp app) {
+    app.http.reply(
+      'GET',
+      '/student/requests',
+      FakeReply(
+        200,
+        pageJson([
+          requestJson(),
+          requestJson(
+            id: 2,
+            title: 'Xin nghỉ đi khám răng',
+            status: 'APPROVED',
+            fromDate: '2026-10-12',
+            toDate: '2026-10-12',
+          ),
+          requestJson(
+            id: 3,
+            type: 'TRANSCRIPT',
+            title: 'Xin bảng điểm năm học 2025–2026',
+            status: 'REJECTED',
+            fromDate: null,
+            toDate: null,
+          ),
+        ]),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/student/requests/2',
+      FakeReply(
+        200,
+        requestDetailJson(
+          id: 2,
+          status: 'APPROVED',
+          canCancel: false,
+          files: [
+            attachmentJson(
+              fileName: 'giay-hen-nha-khoa.jpg',
+              sizeBytes: 812000,
+            ),
+          ],
+          reviews: [reviewJson()],
+        ),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/student/requests/leave-options',
+      FakeReply(200, leaveOptionsJson()),
+    );
+  }
+
+  testWidgets('request list', (tester) async {
+    await openFromHome(tester, 'Đơn từ', stub: stubRequests);
+
+    await expectScreen(tester, 'request_list');
+  });
+
+  testWidgets('request detail with a review', (tester) async {
+    await openFromHome(tester, 'Đơn từ', stub: stubRequests);
+    await tester.tap(find.text('Xin nghỉ đi khám răng'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'request_detail');
+  });
+
+  testWidgets('leave form', (tester) async {
+    await openFromHome(tester, 'Đơn từ', stub: stubRequests);
+    await tester.tap(find.text('Gửi đơn nghỉ'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'leave_form');
+  });
+
+  testWidgets('leave form with errors', (tester) async {
+    final app = await openFromHome(tester, 'Đơn từ', stub: stubRequests);
+    await tester.tap(find.text('Gửi đơn nghỉ'));
+    await tester.pumpAndSettle();
+    app.pickedFiles = [pickedFile('giay-kham-benh.pdf', size: 245760)];
+    await tester.ensureVisible(find.text('Chọn tệp'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Chọn tệp'));
+    await tester.pumpAndSettle();
+    final submit = find.widgetWithText(FilledButton, 'Gửi đơn');
+    await tester.ensureVisible(submit);
+    await tester.pumpAndSettle();
+    await tester.tap(submit);
+    await tester.pumpAndSettle();
+    // Về đầu form để thấy lỗi của các ô ngày.
+    await tester.drag(find.byType(ListView).last, const Offset(0, 2000));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'leave_form_errors');
+  });
 }

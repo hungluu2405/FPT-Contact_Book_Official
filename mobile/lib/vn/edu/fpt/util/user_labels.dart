@@ -48,3 +48,19 @@ const Map<String, String> kNotificationPriorityLabels = {
   'IMPORTANT': 'Quan trọng',
   'URGENT': 'Khẩn',
 };
+
+/// Loại đơn (giống `request-type.*` của web).
+const Map<String, String> kRequestTypeLabels = {
+  'LEAVE': 'Xin nghỉ học',
+  'TRANSCRIPT': 'Xin bảng điểm',
+  'CERTIFICATE': 'Xác nhận học sinh',
+  'OTHER': 'Đơn khác',
+};
+
+/// Trạng thái đơn và quyết định duyệt (giống `request-status.*` của web).
+const Map<String, String> kRequestStatusLabels = {
+  'PENDING': 'Chờ duyệt',
+  'APPROVED': 'Đã duyệt',
+  'REJECTED': 'Từ chối',
+  'CANCELLED': 'Đã hủy',
+};

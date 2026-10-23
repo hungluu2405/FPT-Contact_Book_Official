@@ -61,7 +61,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - 10b-4 (đã xong, nhánh `feature/phase-10b-clubs`, giả định 169–170): CLB chỉ đọc, 5 API ở backend (`/clubs`, chi tiết, thành viên, hoạt động sắp tới, CLB của tôi / của con) và hai màn hình mobile.
 - **10c: thông báo và đơn nghỉ** (nhánh `feature/phase-10c-notifications-requests`)
   - 10c-1 (đã xong, giả định 171–173): tab Thông báo (hộp thư theo trang, chi tiết, đánh dấu tất cả đã đọc), tải và mở tệp đính kèm.
-  - 10c-2: đơn từ của HS/PH (danh sách, chi tiết, hủy), gửi đơn nghỉ kèm ảnh hoặc tệp minh chứng.
+  - 10c-2 (đã xong, giả định 174–176): đơn từ của HS/PH (danh sách, chi tiết, hủy), gửi đơn nghỉ kèm ảnh hoặc tệp minh chứng.
 - **10d: màn hình GV**: lịch dạy, điểm danh một buổi, duyệt đơn nghỉ.
 - **11: kiểm thử tổng và đóng gói**: chạy trên máy ảo và máy thật; rà soát bảo mật; build APK release; viết hướng dẫn cài đặt và cấu hình địa chỉ server.
 

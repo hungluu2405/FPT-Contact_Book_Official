@@ -13,13 +13,16 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.da
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/picked_file_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/attachment_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/auth_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/club_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/notification_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/profile_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/request_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/student_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/token_storage.dart';
 
@@ -531,6 +534,92 @@ Map<String, dynamic> notificationDetailJson({
   'files': files,
 };
 
+Map<String, dynamic> requestJson({
+  int id = 1,
+  String type = 'LEAVE',
+  String title = 'Đơn xin nghỉ học từ 22/10/2026 đến 23/10/2026',
+  String status = 'PENDING',
+  String? fromDate = '2026-10-22',
+  String? toDate = '2026-10-23',
+  String requesterName = 'Nguyễn Văn An',
+}) => {
+  'id': id,
+  'type': type,
+  'title': title,
+  'studentCode': 'HS260001',
+  'studentName': 'Nguyễn Văn An',
+  'requesterName': requesterName,
+  'sectionCode': null,
+  'fromDate': fromDate,
+  'toDate': toDate,
+  'status': status,
+  'createdAt': '2026-10-21T08:15:00',
+};
+
+Map<String, dynamic> reviewJson({
+  String decision = 'APPROVED',
+  String? comment = 'Đã nhận giấy khám bệnh',
+}) => {
+  'reviewerName': 'Giang NT',
+  'decision': decision,
+  'comment': comment,
+  'reviewedAt': '2026-10-21T15:30:00',
+};
+
+Map<String, dynamic> requestDetailJson({
+  int id = 1,
+  String type = 'LEAVE',
+  String status = 'PENDING',
+  bool canCancel = true,
+  bool sentByParent = false,
+  List<Map<String, dynamic>> files = const [],
+  List<Map<String, dynamic>> reviews = const [],
+}) => {
+  'id': id,
+  'type': type,
+  'title': 'Đơn xin nghỉ học từ 22/10/2026 đến 23/10/2026',
+  'reason': 'Em bị sốt, có giấy khám bệnh kèm theo.',
+  'studentCode': 'HS260001',
+  'studentName': 'Nguyễn Văn An',
+  'requesterName': sentByParent ? 'Nguyễn Văn Bình' : 'Nguyễn Văn An',
+  'sentByParent': sentByParent,
+  'sectionLabel': null,
+  'fromDate': type == 'LEAVE' ? '2026-10-22' : null,
+  'toDate': type == 'LEAVE' ? '2026-10-23' : null,
+  'status': status,
+  'createdAt': '2026-10-21T08:15:00',
+  'updatedAt': '2026-10-21T08:15:00',
+  'reviewerName': 'Giang NT',
+  'files': files,
+  'reviews': reviews,
+  'canCancel': canCancel,
+  'canReview': false,
+};
+
+Map<String, dynamic> leaveOptionsJson() => {
+  'studentId': 1,
+  'studentCode': 'HS260001',
+  'studentName': 'Nguyễn Văn An',
+  'sections': [
+    {
+      'id': 5,
+      'code': 'TOAN10_10A1',
+      'name': 'TOAN10 - Toán 10 (HK1-2627)',
+      'groupId': null,
+    },
+    {
+      'id': 6,
+      'code': 'TIN11_10A1',
+      'name': 'TIN11 - Tin học 11 (HK1-2627)',
+      'groupId': null,
+    },
+  ],
+};
+
+/// Tệp minh chứng giả có [size] byte.
+PickedFileModel pickedFile(String name, {int size = 3}) =>
+    PickedFileModel.fromBytes(name, Uint8List(size));
+
 /// Bộ đối tượng thật nối với tầng HTTP giả.
 class TestApp {
   final FakeHttpAdapter http = FakeHttpAdapter();
@@ -580,6 +669,13 @@ class TestApp {
     '${Directory.systemTemp.path}/fpt_attachments_'
     '${DateTime.now().microsecondsSinceEpoch}_${identityHashCode(this)}',
   );
+
+  /// Kết quả của trình chọn tệp và máy ảnh giả; [pickError] khác null thì
+  /// cả hai ném lỗi đó.
+  List<PickedFileModel> pickedFiles = [];
+  PickedFileModel? photo;
+  Object? pickError;
+
   late final AttachmentService attachmentService = AttachmentService(
     apiClient,
     directory: () async => attachmentDir,
@@ -587,9 +683,26 @@ class TestApp {
       openedFiles.add(path);
       return openResult;
     },
+    filesPicker: () async {
+      if (pickError != null) {
+        throw pickError!;
+      }
+      return pickedFiles;
+    },
+    photoTaker: () async {
+      if (pickError != null) {
+        throw pickError!;
+      }
+      return photo;
+    },
   );
   late final NotificationController notificationController =
       NotificationController(NotificationService(apiClient), attachmentService);
+  late final RequestController requestController = RequestController(
+    RequestService(apiClient),
+    attachmentService,
+    clock: () => kTestNow,
+  );
 
   void deleteAttachmentDir() {
     if (attachmentDir.existsSync()) {

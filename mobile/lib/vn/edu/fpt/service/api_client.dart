@@ -123,6 +123,11 @@ class ApiClient {
         return;
       }
       options.extra[_retriedKey] = true;
+      // FormData chỉ gửi được một lần; gửi lại thì dùng bản sao.
+      final body = options.data;
+      if (body is FormData) {
+        options.data = body.clone();
+      }
       handler.resolve(await _dio.fetch<dynamic>(options));
     } on DioException catch (retryError) {
       handler.next(retryError);
