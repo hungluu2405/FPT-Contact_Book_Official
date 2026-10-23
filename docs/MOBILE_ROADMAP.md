@@ -63,6 +63,10 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - 10c-1 (đã xong, giả định 171–173): tab Thông báo (hộp thư theo trang, chi tiết, đánh dấu tất cả đã đọc), tải và mở tệp đính kèm.
   - 10c-2 (đã xong, giả định 174–176): đơn từ của HS/PH (danh sách, chi tiết, hủy), gửi đơn nghỉ kèm ảnh hoặc tệp minh chứng.
 - **10d: màn hình GV**: lịch dạy, điểm danh một buổi, duyệt đơn nghỉ.
+- **10e: tổ trưởng chuyên môn** (làm trước 10d, nhánh `feature/phase-10e-head-of-department`, giả định 177–179)
+  - 10e-1 (đã xong): API `/head/**` (tổ phụ trách, giáo viên trong tổ, gửi thông báo nội bộ) và thông báo đã gửi kèm thống kê đã đọc.
+  - 10e-2: khối "Tổ chuyên môn" trên trang chủ của tổ trưởng, danh sách và chi tiết giáo viên.
+  - 10e-3: gửi thông báo cho cả tổ hoặc riêng một giáo viên, thông báo đã gửi và thống kê đã đọc.
 - **11: kiểm thử tổng và đóng gói**: chạy trên máy ảo và máy thật; rà soát bảo mật; build APK release; viết hướng dẫn cài đặt và cấu hình địa chỉ server.
 
 ## 4. Ngoài phạm vi

@@ -45,6 +45,8 @@ Phản hồi đăng nhập, làm mới và đổi mật khẩu:
 | POST | `/notifications/read-all` | Đánh dấu tất cả đã đọc, trả `{count}` còn lại |
 | GET | `/notifications/{id}/files/{fileId}` | Tải tệp đính kèm |
 | GET | `/requests/{id}/files/{fileId}` | Tải tệp đính kèm của đơn |
+| GET | `/notifications/sent?page=` | Thông báo mình đã gửi (phân trang): `{id, title, priority, targetType, createdAt, recipientCount, readCount}` |
+| GET | `/notifications/sent/{id}?read=&page=` | Thông báo mình đã gửi: `{id, title, content, priority, targetType, targetLabel, createdAt, files[], recipientCount, readCount, recipients: Page<{fullName, read, readAt}>}`; `read=true` chỉ người đã đọc, `false` chưa đọc. Không phải người gửi: 403 `FORBIDDEN` (không đánh dấu đã đọc) |
 
 ### Học sinh (`/student`, vai trò STUDENT) và phụ huynh (`/parent/children/{studentId}`, vai trò PARENT)
 `GET /parent/children` trả các con đã liên kết `[{id, code, name}]` (`id` là `studentId`). Mọi đường dẫn dưới đây có ở cả hai gốc; phụ huynh xem con chưa liên kết bị 403 `FORBIDDEN`. `semesterId` bỏ trống: học kỳ hiện tại.
@@ -67,7 +69,7 @@ Phản hồi đăng nhập, làm mới và đổi mật khẩu:
 `ScheduleItem`: `{date, startTime, endTime, subjectCode, subjectName, sectionCode, roomCode, teacherName, status, note}`. `summary` (chuyên cần): `{present, absentExcused, absentUnexcused, totalSessions, attendanceRate, absentRate, warning}` (tỷ lệ là phần trăm, `warning` = vượt ngưỡng vắng).
 
 ### Giáo viên (`/teacher`, vai trò TEACHER hoặc HEAD_OF_DEPARTMENT)
-Chỉ lớp mình dạy và đơn mình phụ trách duyệt; lớp hoặc đơn khác: 403 `FORBIDDEN`. Tổ trưởng chuyên môn dùng như giáo viên; quản lý cả tổ chuyên môn, nhập điểm, gửi thông báo làm trên web.
+Chỉ lớp mình dạy và đơn mình phụ trách duyệt; lớp hoặc đơn khác: 403 `FORBIDDEN`. Tổ trưởng chuyên môn dùng như giáo viên, thêm các API ở mục "Tổ trưởng chuyên môn"; quản lý môn học, lớp môn học, nhập và công bố điểm vẫn làm trên web.
 
 | Method | Đường dẫn | Trả về |
 |---|---|---|
@@ -85,6 +87,16 @@ Chỉ lớp mình dạy và đơn mình phụ trách duyệt; lớp hoặc đơn
 **Hạn 24 giờ:** giáo viên điểm danh lần đầu được tới giờ kết thúc buổi + 24 giờ, sửa được tới lần điểm danh đầu + 24 giờ; quá hạn thì lưu bị 400 `BUSINESS_ERROR` ("Đã hết hạn điểm danh, chỉnh sửa..."), chỉ quản trị viên sửa được trên web.
 
 Lỗi thường gặp khi điểm danh: buổi chưa diễn ra, buổi hoặc lớp đã hủy, thiếu học sinh, thiếu lý do khi sửa, người khác vừa lưu cùng lúc (tải lại bảng rồi thử lại): đều là 400 `BUSINESS_ERROR` kèm câu tiếng Việt. Trạng thái không thuộc danh sách enum: 400 `VALIDATION_FAILED`. Buổi không thuộc lớp: 404 `NOT_FOUND`.
+
+### Tổ trưởng chuyên môn (`/head`, vai trò HEAD_OF_DEPARTMENT)
+Chỉ các tổ mình làm tổ trưởng (`user_roles.department_id`); giáo viên hoặc tổ khác: 403 `FORBIDDEN`.
+
+| Method | Đường dẫn | Trả về |
+|---|---|---|
+| GET | `/head/departments` | `[{id, code, name, teacherCount}]` |
+| GET | `/head/teachers?departmentId=&q=&page=` | `Page<{userId, teacherCode, fullName, phone, active, head}>` theo họ tên; `departmentId` trống: mọi tổ mình phụ trách; `q` tìm theo tên, mã, số điện thoại; `head` = cũng là tổ trưởng |
+| GET | `/head/teachers/{userId}` | `{userId, teacherCode, fullName, academicTitle, departmentName, phone, email, active, lastLoginAt, roles[]}` |
+| POST | `/head/notifications` | `multipart/form-data`: `title` (tối đa 200 ký tự), `content`, `priority` (mặc định `NORMAL`), `departmentId` (gửi cả tổ) hoặc `teacherUserId` (gửi riêng một giáo viên trong tổ), tùy chọn `files` (như đơn nghỉ: tối đa 5 tệp, mỗi tệp 5 MB). 201 + dạng `/notifications/sent/{id}`. Lỗi theo ô: `title`, `content`, `priority`, `departmentId`; không còn người nhận nào (ví dụ gửi cho chính mình): 400 `BUSINESS_ERROR` |
 
 ### Câu lạc bộ (`/clubs`, mọi vai trò, chỉ đọc)
 Gửi yêu cầu tham gia, đăng ký hoạt động và các thao tác quản lý vẫn làm trên web.
