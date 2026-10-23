@@ -81,7 +81,7 @@ class GradeComponentServiceTest {
         service = new GradeComponentService(subjectService, gradeComponentRepository, gradeRepository, auditService);
 
         Department se = CatalogTestData.department(1L, "SE");
-        seSubject = CatalogTestData.subject(1L, "PRJ301", se);
+        seSubject = CatalogTestData.subject(1L, "TOAN10", se);
         Subject iaSubject = CatalogTestData.subject(50L, "IAO201", CatalogTestData.department(38L, "IA"));
         when(subjectRepository.findById(1L)).thenReturn(Optional.of(seSubject));
         when(subjectRepository.findById(50L)).thenReturn(Optional.of(iaSubject));
@@ -217,7 +217,7 @@ class GradeComponentServiceTest {
     }
 
     @Test
-    @DisplayName("Đầu điểm của môn khác trên URL → 404; HEAD với môn bộ môn khác → 403 trước khi tra đầu điểm")
+    @DisplayName("Đầu điểm của môn khác trên URL → 404; HEAD với môn tổ chuyên môn khác → 403 trước khi tra đầu điểm")
     void componentMustBelongToSubjectInScope() {
         assertThatThrownBy(() -> service.editForm(ADMIN, 1L, 70L)).isInstanceOf(NotFoundException.class);
         assertThatThrownBy(() -> service.editForm(HEAD_SE, 50L, 70L)).isInstanceOf(AccessDeniedException.class);

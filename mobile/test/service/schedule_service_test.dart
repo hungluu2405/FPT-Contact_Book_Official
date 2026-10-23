@@ -48,7 +48,7 @@ void main() {
 
     expect(sessions.data.page, 1);
     expect(sessions.data.hasMore, isFalse);
-    expect(exams.data.items.single.subjectCode, 'PRM393');
+    expect(exams.data.items.single.subjectCode, 'TIN11');
     expect(app.http.requests.first.queryParameters, {'page': 1});
     expect(app.http.requests.last.queryParameters, {'page': 0});
   });

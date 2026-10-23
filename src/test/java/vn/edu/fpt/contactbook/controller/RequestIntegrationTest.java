@@ -55,9 +55,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Đơn từ trên FptContactBook_test. Dữ liệu mẫu: SE190001 (students.id 1, users.id 4) học lớp học phần 1 do GV
- * 0900000003 (users.id 3) dạy, lớp hành chính SE1901 cũng do GV này chủ nhiệm; phụ huynh 0900000005 (users.id 5)
- * liên kết SE190001; students.id 2 (SE180101, 0933112233) không liên kết phụ huynh này. GV 0900000002 không dạy lớp 1.
+ * Đơn từ trên FptContactBook_test. Dữ liệu mẫu: HS260001 (students.id 1, users.id 4) học lớp học phần 1 do GV
+ * 0900000003 (users.id 3) dạy, lớp hành chính 10A1 cũng do GV này chủ nhiệm; phụ huynh 0900000005 (users.id 5)
+ * liên kết HS260001; students.id 2 (HS250101, 0933112233) không liên kết phụ huynh này. GV 0900000002 không dạy lớp 1.
  */
 @IntegrationTest
 class RequestIntegrationTest {
@@ -82,11 +82,11 @@ class RequestIntegrationTest {
     class Send {
 
         @Test
-        @DisplayName("SV gửi đơn nghỉ kèm minh chứng: PENDING, tiêu đề tự điền, GV lớp nhận thông báo, có audit")
+        @DisplayName("HS gửi đơn nghỉ kèm minh chứng: PENDING, tiêu đề tự điền, GV lớp nhận thông báo, có audit")
         void studentSendsLeave() throws Exception {
             mockMvc.perform(get("/student/requests/new").with(as(TestAccounts.STUDENT)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("PRJ301-SE1901-FA26")));
+                    .andExpect(content().string(containsString("TOAN10-HK1-2627-01")));
             long teacherUnread = recipientRepository.countUnread(TestAccounts.TEACHER_ID);
 
             Long id = sendLeave(leave("/student/requests/new", AppTime.today(), AppTime.today().plusDays(1), "1")
@@ -125,7 +125,7 @@ class RequestIntegrationTest {
         }
 
         @Test
-        @DisplayName("PH gửi thay con đã liên kết: người gửi là PH; SV thấy đơn trong danh sách của mình")
+        @DisplayName("PH gửi thay con đã liên kết: người gửi là PH; HS thấy đơn trong danh sách của mình")
         void parentSendsForChild() throws Exception {
             Long id = sendLeave(leave("/parent/children/1/requests/new", AppTime.today(), AppTime.today(), "")
                     .with(as(TestAccounts.PARENT)), "/parent/children/1/requests/");
@@ -142,7 +142,7 @@ class RequestIntegrationTest {
         }
 
         @Test
-        @DisplayName("PH gửi hoặc xem đơn của SV chưa liên kết → 403")
+        @DisplayName("PH gửi hoặc xem đơn của HS chưa liên kết → 403")
         void parentUnlinkedChildForbidden() throws Exception {
             long before = requestRepository.count();
 
@@ -155,10 +155,10 @@ class RequestIntegrationTest {
         }
 
         @Test
-        @DisplayName("SV gửi đơn khác: ADMIN thấy trong /admin/requests và duyệt được")
+        @DisplayName("HS gửi đơn khác: ADMIN thấy trong /admin/requests và duyệt được")
         void otherRequestGoesToAdmin() throws Exception {
             MvcResult result = mockMvc.perform(multipart("/student/requests/new-other").with(csrf())
-                            .param("requestType", "TRANSCRIPT").param("title", "Xin bảng điểm học kỳ FA26")
+                            .param("requestType", "TRANSCRIPT").param("title", "Xin bảng điểm học kỳ HK1-2627")
                             .param("reason", "Nộp hồ sơ học bổng").with(as(TestAccounts.STUDENT)))
                     .andExpect(redirectedUrlPattern("/student/requests/*"))
                     .andReturn();
@@ -166,7 +166,7 @@ class RequestIntegrationTest {
 
             mockMvc.perform(get("/admin/requests").with(as(TestAccounts.ADMIN)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("Xin bảng điểm học kỳ FA26")));
+                    .andExpect(content().string(containsString("Xin bảng điểm học kỳ HK1-2627")));
             mockMvc.perform(get("/teacher/requests/" + id).with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isForbidden());
             mockMvc.perform(post("/admin/requests/" + id + "/review").with(csrf()).param("decision", "APPROVED")
@@ -207,7 +207,7 @@ class RequestIntegrationTest {
 
         @Test
         @DisplayName("GV duyệt: chỉ vắng không phép trong khoảng ngày, đúng lớp thành vắng có phép; có audit; "
-                + "SV nhận thông báo; bảng điểm danh hiện nhãn; đơn đã duyệt không hủy được")
+                + "HS nhận thông báo; bảng điểm danh hiện nhãn; đơn đã duyệt không hủy được")
         void approveExcusesAbsences() throws Exception {
             LocalDate today = AppTime.today();
             Attendance inRange = attendance(session(1L, today.minusDays(5)), AttendanceStatus.ABSENT_UNEXCUSED);
@@ -309,7 +309,7 @@ class RequestIntegrationTest {
         }
 
         @Test
-        @DisplayName("Tệp minh chứng: SV, PH liên kết, GV duyệt, ADMIN tải được; người không liên quan → 403")
+        @DisplayName("Tệp minh chứng: HS, PH liên kết, GV duyệt, ADMIN tải được; người không liên quan → 403")
         void attachmentAccess() throws Exception {
             Long id = sendLeave(leave("/student/requests/new", AppTime.today(), AppTime.today(), "1")
                     .file(new MockMultipartFile("files", "giay-kham.pdf", "application/pdf", PDF))

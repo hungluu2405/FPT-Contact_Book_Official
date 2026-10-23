@@ -64,7 +64,7 @@ void main() {
   ) async {
     await pumpHome(tester, roles: ['PARENT'], children: [childJson()]);
 
-    expect(find.textContaining('Nguyễn Văn An · SE190001'), findsOneWidget);
+    expect(find.textContaining('Nguyễn Văn An · HS260001'), findsOneWidget);
     expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
   });
 
@@ -124,7 +124,7 @@ void main() {
   testWidgets('teacher-only account waits for phase 10d', (tester) async {
     await pumpHome(tester, roles: ['TEACHER']);
 
-    expect(find.textContaining('Chức năng giảng viên'), findsOneWidget);
+    expect(find.textContaining('Chức năng giáo viên'), findsOneWidget);
     expect(find.byType(FeatureTileWidget), findsNothing);
   });
 

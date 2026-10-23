@@ -148,7 +148,7 @@ Map<String, dynamic> tokenJson({
 
 Map<String, dynamic> childJson({
   int id = 1,
-  String code = 'SE190001',
+  String code = 'HS260001',
   String name = 'Nguyễn Văn An',
 }) => {'id': id, 'code': code, 'name': name};
 
@@ -175,8 +175,8 @@ final DateTime kTestNow = DateTime(2026, 10, 21, 9, 45);
 
 Map<String, dynamic> semesterJson() => {
   'id': 3,
-  'code': 'FA26',
-  'name': 'Học kỳ Thu 2026',
+  'code': 'HK1-2627',
+  'name': 'Học kỳ I năm học 2026–2027',
   'startDate': '2026-09-07',
   'endDate': '2026-12-27',
   'current': true,
@@ -186,8 +186,8 @@ Map<String, dynamic> sessionJson({
   String date = '2026-10-21',
   String start = '07:30:00',
   String end = '09:20:00',
-  String subjectCode = 'MAD101',
-  String subjectName = 'Toán rời rạc',
+  String subjectCode = 'TOAN10',
+  String subjectName = 'Toán 10',
   String room = 'DE205',
   String teacher = 'Giang NT',
   String status = 'SCHEDULED',
@@ -198,7 +198,7 @@ Map<String, dynamic> sessionJson({
   'endTime': end,
   'subjectCode': subjectCode,
   'subjectName': subjectName,
-  'sectionCode': '${subjectCode}_SE1901',
+  'sectionCode': '${subjectCode}_10A1',
   'roomCode': room,
   'teacherName': teacher,
   'status': status,
@@ -236,12 +236,12 @@ Map<String, dynamic> examJson({
   int id = 1,
   String date = '2026-10-30',
   String type = 'MIDTERM',
-  String subjectCode = 'PRM393',
-  String subjectName = 'Lập trình di động',
+  String subjectCode = 'TIN11',
+  String subjectName = 'Tin học 11',
   String room = 'BE202',
 }) => {
   'id': id,
-  'sectionCode': '${subjectCode}_SE1901',
+  'sectionCode': '${subjectCode}_10A1',
   'subjectCode': subjectCode,
   'subjectName': subjectName,
   'examType': type,

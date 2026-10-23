@@ -49,7 +49,7 @@ class ReportRuleTest {
     }
 
     @Test
-    @DisplayName("Sinh viên chưa đủ điểm không vào phổ điểm, tỷ lệ đạt hay trung bình, chỉ đếm riêng")
+    @DisplayName("Học sinh chưa đủ điểm không vào phổ điểm, tỷ lệ đạt hay trung bình, chỉ đếm riêng")
     void incompleteExcluded() {
         GradeStats stats = ReportRule.gradeStats(averages("8.0", null, "6.0", null));
 
@@ -87,7 +87,7 @@ class ReportRuleTest {
     }
 
     @Test
-    @DisplayName("Cộng số buổi theo trạng thái của nhiều sinh viên; trạng thái thiếu coi là 0")
+    @DisplayName("Cộng số buổi theo trạng thái của nhiều học sinh; trạng thái thiếu coi là 0")
     void sumCounts() {
         Map<AttendanceStatus, Long> a = new EnumMap<>(Map.of(AttendanceStatus.PRESENT, 3L, AttendanceStatus.ABSENT_EXCUSED, 1L));
         Map<AttendanceStatus, Long> b = Map.of(AttendanceStatus.PRESENT, 2L, AttendanceStatus.ABSENT_UNEXCUSED, 1L);

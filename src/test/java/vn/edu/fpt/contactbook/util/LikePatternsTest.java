@@ -31,7 +31,7 @@ class LikePatternsTest {
 
     @ParameterizedTest
     @CsvSource(delimiter = '|', value = {
-            "PRJ301-FA26-|PRJ301-FA26-%",
+            "TOAN10-HK1-2627-|TOAN10-HK1-2627-%",
             "SE_1%|SE\\_1\\%%",
             "A[B|A\\[B%"
     })

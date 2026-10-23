@@ -95,7 +95,7 @@ public class ClassSectionController {
         if (!bindingResult.hasErrors()) {
             try {
                 Long id = classSectionService.create(actor, form, request.getRemoteAddr());
-                redirectAttributes.addFlashAttribute("successMessage", "Đã thêm lớp học phần");
+                redirectAttributes.addFlashAttribute("successMessage", "Đã thêm lớp môn học");
                 return "redirect:" + BASE + "/" + id;
             } catch (BusinessException e) {
                 FormErrors.apply(bindingResult, e);
@@ -161,7 +161,7 @@ public class ClassSectionController {
         if (!bindingResult.hasErrors()) {
             try {
                 classSectionService.update(actor, id, form, request.getRemoteAddr());
-                redirectAttributes.addFlashAttribute("successMessage", "Đã lưu lớp học phần");
+                redirectAttributes.addFlashAttribute("successMessage", "Đã lưu lớp môn học");
                 return "redirect:" + BASE + "/" + id;
             } catch (BusinessException e) {
                 FormErrors.apply(bindingResult, e);

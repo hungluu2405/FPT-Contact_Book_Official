@@ -167,7 +167,7 @@ public class UserService {
         }
         if (roleCodes.contains(RoleCodes.HEAD_OF_DEPARTMENT)
                 && roleProfiles.department(form.getHeadDepartmentId()) == null) {
-            errors.putIfAbsent("headDepartmentId", "Vui lòng chọn bộ môn cho vai trò trưởng bộ môn");
+            errors.putIfAbsent("headDepartmentId", "Vui lòng chọn tổ chuyên môn cho vai trò tổ trưởng chuyên môn");
         }
         RoleProfileForm profile = form.getProfile();
         RoleProfiles.normalize(profile);

@@ -83,11 +83,11 @@ class SubjectIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE: thấy và mở được môn bộ môn SE, danh sách không có môn bộ môn khác")
+        @DisplayName("Tổ trưởng chuyên môn SE: thấy và mở được môn tổ chuyên môn SE, danh sách không có môn tổ chuyên môn khác")
         void headSeesOwnDepartment() throws Exception {
             mockMvc.perform(get("/admin/subjects").with(as(TestAccounts.TEACHER_HEAD)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("PRJ301"), containsString("SWP391"),
+                    .andExpect(content().string(allOf(containsString("TOAN10"), containsString("STEM"),
                             not(containsString("IAO201")))));
             mockMvc.perform(get("/admin/subjects").param("groupId", "38").with(as(TestAccounts.TEACHER_HEAD)))
                     .andExpect(content().string(not(containsString("IAO201"))));
@@ -100,7 +100,7 @@ class SubjectIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE gõ thẳng URL môn bộ môn IA (xem, sửa, đầu điểm) → 403, dữ liệu không đổi")
+        @DisplayName("Tổ trưởng chuyên môn SE gõ thẳng URL môn tổ chuyên môn IA (xem, sửa, đầu điểm) → 403, dữ liệu không đổi")
         void headForbiddenOnOtherDepartmentByUrl() throws Exception {
             String base = "/admin/subjects/" + iaSubjectId;
             RequestPostProcessor head = as(TestAccounts.TEACHER_HEAD);
@@ -130,14 +130,14 @@ class SubjectIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE tạo môn hoặc chuyển môn SE sang bộ môn IA → 403")
+        @DisplayName("Tổ trưởng chuyên môn SE tạo môn hoặc chuyển môn SE sang tổ chuyên môn IA → 403")
         void headCannotUseOtherDepartmentInForm() throws Exception {
             mockMvc.perform(post("/admin/subjects/new").with(as(TestAccounts.TEACHER_HEAD)).with(csrf())
                             .param("departmentId", "38").param("code", "IAO999").param("name", "X")
                             .param("credits", "3"))
                     .andExpect(status().isForbidden());
             mockMvc.perform(post("/admin/subjects/1/edit").with(as(TestAccounts.TEACHER_HEAD)).with(csrf())
-                            .param("departmentId", "38").param("code", "PRJ301").param("name", "X")
+                            .param("departmentId", "38").param("code", "TOAN10").param("name", "X")
                             .param("credits", "3"))
                     .andExpect(status().isForbidden());
             assertThat(subjectRepository.existsByCode("IAO999")).isFalse();
@@ -166,7 +166,7 @@ class SubjectIntegrationTest {
     class Manage {
 
         @Test
-        @DisplayName("Trưởng bộ môn tạo môn ở bộ môn mình; mã trùng → lỗi cạnh ô")
+        @DisplayName("Tổ trưởng chuyên môn tạo môn ở tổ chuyên môn mình; mã trùng → lỗi cạnh ô")
         void headCreatesSubject() throws Exception {
             mockMvc.perform(post("/admin/subjects/new").with(as(TestAccounts.TEACHER_HEAD)).with(csrf())
                             .param("departmentId", "1").param("code", " swd392 ").param("name", "Kiến trúc phần mềm")
@@ -177,7 +177,7 @@ class SubjectIntegrationTest {
             assertThat(lastAudit().getEntityType()).isEqualTo("Subject");
 
             mockMvc.perform(post("/admin/subjects/new").with(as(TestAccounts.TEACHER_HEAD)).with(csrf())
-                            .param("departmentId", "1").param("code", "prj301").param("name", "Trùng")
+                            .param("departmentId", "1").param("code", "toan10").param("name", "Trùng")
                             .param("credits", "3"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(containsString("Mã môn học đã tồn tại"),
@@ -185,20 +185,20 @@ class SubjectIntegrationTest {
         }
 
         @Test
-        @DisplayName("PRJ301 đã có lớp học phần: không đổi được bộ môn")
+        @DisplayName("TOAN10 đã có lớp môn học: không đổi được tổ chuyên môn")
         void subjectWithClassSectionsKeepsDepartment() throws Exception {
             mockMvc.perform(post("/admin/subjects/1/edit").with(as(TestAccounts.ADMIN)).with(csrf())
-                            .param("departmentId", "38").param("code", "PRJ301")
+                            .param("departmentId", "38").param("code", "TOAN10")
                             .param("name", "Java Web Application Development").param("credits", "3"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("Môn học đã có lớp học phần nên không đổi được bộ môn")));
+                    .andExpect(content().string(containsString("Môn học đã có lớp môn học nên không đổi được tổ chuyên môn")));
         }
 
         @Test
-        @DisplayName("Trang môn PRJ301: tổng trọng số 100%, không cảnh báo")
+        @DisplayName("Trang môn TOAN10: tổng trọng số 100%, không cảnh báo")
         void totalWeightComplete() throws Exception {
             mockMvc.perform(get("/admin/subjects/1").with(as(TestAccounts.TEACHER_HEAD)))
-                    .andExpect(content().string(allOf(containsString("Assignment"), containsString("Final"),
+                    .andExpect(content().string(allOf(containsString("Kiểm tra thường xuyên"), containsString("Cuối kỳ"),
                             containsString("100,00%"), not(containsString("id=\"weightWarning\"")))));
         }
 
@@ -232,7 +232,7 @@ class SubjectIntegrationTest {
         @DisplayName("Đầu điểm trùng tên, trọng số sai, quá 2 chữ số thập phân → lỗi cạnh ô")
         void componentValidation() throws Exception {
             mockMvc.perform(post("/admin/subjects/1/components").with(as(TestAccounts.ADMIN)).with(csrf())
-                            .param("name", "assignment").param("weight", "10").param("maxScore", "10"))
+                            .param("name", "kiểm tra thường xuyên").param("weight", "10").param("maxScore", "10"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("Môn học đã có đầu điểm cùng tên")));
             mockMvc.perform(post("/admin/subjects/1/components").with(as(TestAccounts.ADMIN)).with(csrf())
@@ -249,7 +249,7 @@ class SubjectIntegrationTest {
         }
 
         @Test
-        @DisplayName("Đầu điểm đã có điểm (PRN211 Assignment 1) → không có nút xóa, gửi thẳng thì bị chặn")
+        @DisplayName("Đầu điểm đã có điểm (TIN11 Thường xuyên 1) → không có nút xóa, gửi thẳng thì bị chặn")
         void componentWithGradesCannotBeDeleted() throws Exception {
             mockMvc.perform(get("/admin/subjects/31").with(as(TestAccounts.ADMIN)))
                     .andExpect(content().string(allOf(containsString("Đã có điểm"),
@@ -265,7 +265,7 @@ class SubjectIntegrationTest {
         @Test
         void editComponent() throws Exception {
             mockMvc.perform(post("/admin/subjects/1/components/1/edit").with(as(TestAccounts.TEACHER_HEAD))
-                            .with(csrf()).param("name", "Assignment").param("weight", "25").param("maxScore", "9.5"))
+                            .with(csrf()).param("name", "Kiểm tra thường xuyên").param("weight", "25").param("maxScore", "9.5"))
                     .andExpect(redirectedUrl("/admin/subjects/1"));
             GradeComponent edited = gradeComponentRepository.findById(1L).orElseThrow();
             assertThat(edited.getWeight()).isEqualByComparingTo("25");

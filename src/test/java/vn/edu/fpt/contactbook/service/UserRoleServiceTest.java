@@ -124,7 +124,7 @@ class UserRoleServiceTest {
     }
 
     @Test
-    @DisplayName("Gán trùng cặp (vai trò, bộ môn) bị từ chối")
+    @DisplayName("Gán trùng cặp (vai trò, tổ chuyên môn) bị từ chối")
     void duplicatePairIsRejected() {
         when(parentRepository.findByUserId(7L)).thenReturn(Optional.of(new Parent()));
         when(userRoleRepository.existsByUserIdAndRoleIdAndDepartmentIsNull(7L, 5L)).thenReturn(true);
@@ -137,7 +137,7 @@ class UserRoleServiceTest {
     }
 
     @Test
-    @DisplayName("Gán HEAD_OF_DEPARTMENT thiếu bộ môn bị từ chối")
+    @DisplayName("Gán HEAD_OF_DEPARTMENT thiếu tổ chuyên môn bị từ chối")
     void headNeedsDepartment() {
         RoleAssignForm form = new RoleAssignForm();
         form.setRoleCode(RoleCodes.HEAD_OF_DEPARTMENT);

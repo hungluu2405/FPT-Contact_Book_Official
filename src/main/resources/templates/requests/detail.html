@@ -17,7 +17,7 @@
         <dl class="row mb-0">
             <dt class="col-sm-3" th:text="#{request.type}">Loại đơn</dt>
             <dd class="col-sm-9" th:text="#{'request-type.' + ${item.type}}">Xin nghỉ</dd>
-            <dt class="col-sm-3" th:text="#{request.student}">Sinh viên</dt>
+            <dt class="col-sm-3" th:text="#{request.student}">Học sinh</dt>
             <dd class="col-sm-9" th:text="${item.studentName} + ' (' + ${item.studentCode} + ')'">Nguyễn Văn A</dd>
             <dt class="col-sm-3" th:text="#{request.requester}">Người gửi</dt>
             <dd class="col-sm-9">
@@ -27,7 +27,7 @@
             <th:block th:if="${item.fromDate != null}">
                 <dt class="col-sm-3" th:text="#{request.dates}">Thời gian nghỉ</dt>
                 <dd class="col-sm-9"><span th:replace="~{fragments/requests :: dates(${item.fromDate}, ${item.toDate})}"></span></dd>
-                <dt class="col-sm-3" th:text="#{request.section}">Lớp học phần</dt>
+                <dt class="col-sm-3" th:text="#{request.section}">Lớp môn học</dt>
                 <dd class="col-sm-9" th:text="${item.sectionLabel} ?: #{request.section.all}">Tất cả các lớp</dd>
             </th:block>
             <dt class="col-sm-3" th:text="#{request.reviewer}">Người duyệt</dt>

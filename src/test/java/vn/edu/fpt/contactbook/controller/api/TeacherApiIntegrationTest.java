@@ -41,8 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static vn.edu.fpt.contactbook.support.ApiClient.fieldNames;
 
 /**
- * API của giảng viên (giai đoạn 9d). Dữ liệu mẫu: GV 0900000003 dạy lớp 1 (PRJ301-SE1901-FA26, buổi 1, sinh viên
- * students.id 1 = SE190001); lớp 27 (buổi 41) của giảng viên khác; 0922334455 là giảng viên không phụ trách lớp 1.
+ * API của giảng viên (giai đoạn 9d). Dữ liệu mẫu: GV 0900000003 dạy lớp 1 (TOAN10-HK1-2627-01, buổi 1, sinh viên
+ * students.id 1 = HS260001); lớp 27 (buổi 41) của giảng viên khác; 0922334455 là giảng viên không phụ trách lớp 1.
  */
 @IntegrationTest
 class TeacherApiIntegrationTest {
@@ -89,14 +89,14 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Lịch dạy tuần này có PRJ301 (buổi 1 đưa về hôm nay); lịch thi và danh sách buổi phân trang")
+        @DisplayName("Lịch dạy tuần này có TOAN10 (buổi 1 đưa về hôm nay); lịch thi và danh sách buổi phân trang")
         void schedule() throws Exception {
             JsonNode week = api.json(api.perform(get(API + "/schedule/week").param("date", AppTime.today().toString()),
                     TestAccounts.TEACHER).andExpect(status().isOk())).get("data");
             List<String> subjects = new ArrayList<>();
             week.get("days").forEach(day -> day.get("items").forEach(item -> subjects.add(
                     item.get("subjectCode").asString())));
-            assertThat(subjects).contains("PRJ301");
+            assertThat(subjects).contains("TOAN10");
 
             JsonNode sessions = api.json(api.perform(get(API + "/schedule/sessions"), TestAccounts.TEACHER)
                     .andExpect(status().isOk())).get("data");
@@ -105,7 +105,7 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Danh sách lớp chỉ gồm lớp mình dạy; thống kê lớp có buổi và chuyên cần từng sinh viên")
+        @DisplayName("Danh sách lớp chỉ gồm lớp mình dạy; thống kê lớp có buổi và chuyên cần từng học sinh")
         void sections() throws Exception {
             JsonNode sections = api.json(api.perform(get(API + "/sections"), TestAccounts.TEACHER)
                     .andExpect(status().isOk())).get("data");
@@ -115,7 +115,7 @@ class TeacherApiIntegrationTest {
                         "semesterCode", "status");
                 codes.add(item.get("code").asString());
             });
-            assertThat(codes).contains("PRJ301-SE1901-FA26").doesNotContain("PRN211_FA26_01");
+            assertThat(codes).contains("TOAN10-HK1-2627-01").doesNotContain("TIN11-HK1-2627-01");
 
             JsonNode stats = api.json(api.perform(get(API + "/sections/1/attendance"), TestAccounts.TEACHER)
                     .andExpect(status().isOk()));
@@ -126,11 +126,11 @@ class TeacherApiIntegrationTest {
             JsonNode student = stats.get("students").get("items").get(0);
             assertThat(fieldNames(student)).containsExactlyInAnyOrder("studentId", "studentCode", "fullName",
                     "summary");
-            assertThat(student.get("studentCode").asString()).isEqualTo("SE190001");
+            assertThat(student.get("studentCode").asString()).isEqualTo("HS260001");
         }
 
         @Test
-        @DisplayName("Lớp, buổi của giảng viên khác: 403, không ghi gì; buổi không thuộc lớp: 404")
+        @DisplayName("Lớp, buổi của giáo viên khác: 403, không ghi gì; buổi không thuộc lớp: 404")
         void otherSection() throws Exception {
             api.perform(get(API + "/sections/27/attendance"), TestAccounts.TEACHER).andExpect(status().isForbidden());
             api.perform(get(API + "/sections/27/sessions/41/attendance"), TestAccounts.TEACHER)
@@ -152,7 +152,7 @@ class TeacherApiIntegrationTest {
     class Marking {
 
         @Test
-        @DisplayName("Bảng điểm danh buổi 1: thông tin buổi và từng sinh viên, chưa điểm danh")
+        @DisplayName("Bảng điểm danh buổi 1: thông tin buổi và từng học sinh, chưa điểm danh")
         void sheet() throws Exception {
             JsonNode sheet = api.json(api.perform(get(SHEET), TestAccounts.TEACHER).andExpect(status().isOk()));
 
@@ -171,7 +171,7 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Lần đầu không cần lý do; sửa lại thiếu lý do 400; có lý do thì lưu, audit, SV thấy ngay")
+        @DisplayName("Lần đầu không cần lý do; sửa lại thiếu lý do 400; có lý do thì lưu, audit, HS thấy ngay")
         void markThenAdjust() throws Exception {
             JsonNode first = api.json(api.perform(save(SHEET, Map.of("1", "PRESENT"), null), TestAccounts.TEACHER)
                     .andExpect(status().isOk()));
@@ -202,7 +202,7 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trạng thái không hợp lệ hoặc thiếu sinh viên: 400, không ghi")
+        @DisplayName("Trạng thái không hợp lệ hoặc thiếu học sinh: 400, không ghi")
         void invalidInput() throws Exception {
             JsonNode badStatus = api.json(api.perform(save(SHEET, Map.of("1", "HACKED"), null), TestAccounts.TEACHER)
                     .andExpect(status().isBadRequest()));
@@ -289,7 +289,7 @@ class TeacherApiIntegrationTest {
     class Review {
 
         @Test
-        @DisplayName("SV gửi đơn lớp 1; GV phụ trách thấy trong PENDING, duyệt được; SV thấy APPROVED; duyệt lại 400")
+        @DisplayName("HS gửi đơn lớp 1; GV phụ trách thấy trong PENDING, duyệt được; HS thấy APPROVED; duyệt lại 400")
         void approve() throws Exception {
             long id = sendLeave();
 
@@ -337,7 +337,7 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Giảng viên không phụ trách mở hoặc duyệt đơn: 403")
+        @DisplayName("Giáo viên không phụ trách mở hoặc duyệt đơn: 403")
         void otherTeacher() throws Exception {
             long id = sendLeave();
 

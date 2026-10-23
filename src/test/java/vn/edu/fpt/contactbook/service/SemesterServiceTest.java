@@ -65,8 +65,8 @@ class SemesterServiceTest {
     void setUp() {
         service = new SemesterService(semesterRepository, new UserAccessPolicy(teacherRepository),
                 new AuditService(auditLogRepository, userRepository));
-        fall = semester(1L, "FA26", true);
-        spring = semester(38L, "SP27", false);
+        fall = semester(1L, "HK1-2627", true);
+        spring = semester(38L, "HK2-2627", false);
         when(semesterRepository.findById(1L)).thenReturn(Optional.of(fall));
         when(semesterRepository.findById(38L)).thenReturn(Optional.of(spring));
     }
@@ -77,20 +77,20 @@ class SemesterServiceTest {
         when(semesterRepository.findByCurrentTrue()).thenReturn(Optional.of(fall));
         List<String> flushedStates = new ArrayList<>();
         doAnswer(invocation -> {
-            flushedStates.add("FA26=" + fall.isCurrent() + ",SP27=" + spring.isCurrent());
+            flushedStates.add("HK1-2627=" + fall.isCurrent() + ",HK2-2627=" + spring.isCurrent());
             return null;
         }).when(semesterRepository).flush();
 
         service.setCurrent(ADMIN, 38L, "127.0.0.1");
 
-        assertThat(flushedStates).containsExactly("FA26=false,SP27=false", "FA26=false,SP27=true");
+        assertThat(flushedStates).containsExactly("HK1-2627=false,HK2-2627=false", "HK1-2627=false,HK2-2627=true");
         assertThat(List.of(fall, spring)).filteredOn(Semester::isCurrent).containsExactly(spring);
         ArgumentCaptor<AuditLog> audit = ArgumentCaptor.forClass(AuditLog.class);
         verify(auditLogRepository).save(audit.capture());
         assertThat(audit.getValue().getAction()).isEqualTo(AuditActions.SET_CURRENT_SEMESTER);
         assertThat(audit.getValue().getEntityType()).isEqualTo("Semester");
         assertThat(audit.getValue().getEntityId()).isEqualTo(38L);
-        assertThat(audit.getValue().getDetail()).contains("SP27").contains("previous=FA26");
+        assertThat(audit.getValue().getDetail()).contains("HK2-2627").contains("previous=HK1-2627");
     }
 
     @Test
@@ -176,15 +176,15 @@ class SemesterServiceTest {
         assertThat(saved.getValue().getCode()).isEqualTo("SU27");
         assertThat(saved.getValue().isCurrent()).isFalse();
 
-        when(semesterRepository.existsByCode("FA26")).thenReturn(true);
-        assertThatThrownBy(() -> service.create(ADMIN, form("fa26", "2027-05-03", "2027-08-22"), "127.0.0.1"))
+        when(semesterRepository.existsByCode("HK1-2627")).thenReturn(true);
+        assertThatThrownBy(() -> service.create(ADMIN, form("hk1-2627", "2027-05-03", "2027-08-22"), "127.0.0.1"))
                 .isInstanceOfSatisfying(BusinessException.class, e ->
                         assertThat(e.getFieldErrors()).containsEntry("code", CatalogMessages.SEMESTER_CODE_TAKEN));
     }
 
     @Test
     void updateRejectsEndBeforeStart() {
-        assertThatThrownBy(() -> service.update(ADMIN, 38L, form("SP27", "2027-04-25", "2027-01-04"), "127.0.0.1"))
+        assertThatThrownBy(() -> service.update(ADMIN, 38L, form("HK2-2627", "2027-04-25", "2027-01-04"), "127.0.0.1"))
                 .isInstanceOfSatisfying(BusinessException.class, e ->
                         assertThat(e.getFieldErrors()).containsEntry("endDate", CatalogMessages.SEMESTER_DATES));
         assertThat(spring.getStartDate()).isEqualTo(LocalDate.parse("2027-01-04"));

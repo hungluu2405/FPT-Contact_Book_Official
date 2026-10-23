@@ -2,12 +2,12 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
 <head>
-    <title th:text="(${id} ? #{section.edit} : #{section.new}) + ' - ' + #{app.title}">Lớp học phần</title>
+    <title th:text="(${id} ? #{section.edit} : #{section.new}) + ' - ' + #{app.title}">Lớp môn học</title>
 </head>
 <body>
 <section>
     <a th:replace="~{fragments/catalog :: back('/admin/sections', #{section.list})}"></a>
-    <h1 class="page-title" th:text="${id} ? #{section.edit} : #{section.new}">Thêm lớp học phần</h1>
+    <h1 class="page-title" th:text="${id} ? #{section.edit} : #{section.new}">Thêm lớp môn học</h1>
 
     <form th:action="${id} ? @{/admin/sections/{id}/edit(id=${id})} : @{/admin/sections/new}" th:object="${form}"
           method="post" novalidate id="sectionForm">

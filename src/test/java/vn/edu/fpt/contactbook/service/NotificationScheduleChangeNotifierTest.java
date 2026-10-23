@@ -39,8 +39,8 @@ class NotificationScheduleChangeNotifierTest {
     void setUp() {
         notifier = new NotificationScheduleChangeNotifier(notificationService, audience);
         Department se = CatalogTestData.department(1L, "SE");
-        ClassSection section = CatalogTestData.section(10L, "PRJ301-01", CatalogTestData.subject(1L, "PRJ301", se),
-                CatalogTestData.semester(1L, "FA26"), CatalogTestData.teacher(2L, "GV002", se), 40,
+        ClassSection section = CatalogTestData.section(10L, "TOAN10-01", CatalogTestData.subject(1L, "TOAN10", se),
+                CatalogTestData.semester(1L, "HK1-2627"), CatalogTestData.teacher(2L, "GV002", se), 40,
                 SectionStatus.OPEN);
         session = new ClassSession();
         session.setClassSection(section);
@@ -52,11 +52,11 @@ class NotificationScheduleChangeNotifierTest {
     }
 
     @Test
-    @DisplayName("Hủy buổi: thông báo quan trọng cho SV và PH của lớp")
+    @DisplayName("Hủy buổi: thông báo quan trọng cho HS và PH của lớp")
     void cancelled() {
         notifier.sessionCancelled(1L, session);
 
-        verify(notificationService).sendAutomatic(eq(1L), eq("[PRJ301-01] Hủy buổi 3 ngày 26/10/2026"),
+        verify(notificationService).sendAutomatic(eq(1L), eq("[TOAN10-01] Hủy buổi 3 ngày 26/10/2026"),
                 contains("26/10/2026 07:30–09:45 đã bị hủy"), eq(NotificationPriority.IMPORTANT),
                 eq(NotificationTargetType.CLASS_SECTION), eq(10L), eq(Set.of(4L, 5L)));
     }

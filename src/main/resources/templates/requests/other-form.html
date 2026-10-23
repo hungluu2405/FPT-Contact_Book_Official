@@ -6,7 +6,7 @@
 </head>
 <body>
 <section>
-    <!--/* Đơn khác của sinh viên (bảng điểm, xác nhận sinh viên, khác), do ADMIN xử lý. */-->
+    <!--/* Đơn khác của học sinh (bảng điểm, xác nhận học sinh, khác), do ADMIN xử lý. */-->
     <a th:replace="~{fragments/catalog :: back(${baseUrl}, #{request.back})}"></a>
     <h1 class="page-title" th:text="#{request.new-other}">Gửi đơn khác</h1>
     <form th:action="@{${baseUrl} + '/new-other'}" th:object="${form}" method="post" enctype="multipart/form-data" novalidate>

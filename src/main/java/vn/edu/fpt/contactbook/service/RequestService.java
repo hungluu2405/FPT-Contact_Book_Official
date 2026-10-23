@@ -409,7 +409,7 @@ public class RequestService {
         }
         Student student = request.getStudent();
         String content = request.getRequester().getFullName() + " đã gửi " + typeLabel(request.getRequestType())
-                + " cho sinh viên " + student.getUser().getFullName() + " (" + student.getStudentCode() + ")"
+                + " cho học sinh " + student.getUser().getFullName() + " (" + student.getStudentCode() + ")"
                 + (request.getClassSection() == null ? "" : ", lớp " + request.getClassSection().getCode())
                 + (request.getFromDate() == null ? "" : ", nghỉ từ " + request.getFromDate().format(DATE) + " đến "
                 + request.getToDate().format(DATE)) + ".\nLý do: " + request.getReason();
@@ -514,7 +514,7 @@ public class RequestService {
 
     private static String studentDetailVi(UserRequest request) {
         Student student = request.getStudent();
-        return student == null ? "" : " của sinh viên " + student.getUser().getFullName() + " ("
+        return student == null ? "" : " của học sinh " + student.getUser().getFullName() + " ("
                 + student.getStudentCode() + ")";
     }
 
@@ -522,7 +522,7 @@ public class RequestService {
         return switch (type) {
             case LEAVE -> "đơn xin nghỉ học";
             case TRANSCRIPT -> "đơn xin bảng điểm";
-            case CERTIFICATE -> "đơn xin xác nhận sinh viên";
+            case CERTIFICATE -> "đơn xin xác nhận học sinh";
             case OTHER -> "đơn khác";
         };
     }

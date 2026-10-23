@@ -31,12 +31,12 @@ void main() {
     expect(unread, greaterThanOrEqualTo(0));
   });
 
-  test('parent sees the linked child SE190001', () async {
+  test('parent sees the linked child HS260001', () async {
     final client = await signIn('0900000005');
 
     final children = await StudentService(client.api).fetchChildren();
 
-    expect(children.map((child) => child.code), contains('SE190001'));
+    expect(children.map((child) => child.code), contains('HS260001'));
     expect(children.every((child) => child.id > 0), isTrue);
     expect(children.every((child) => child.name.isNotEmpty), isTrue);
   });

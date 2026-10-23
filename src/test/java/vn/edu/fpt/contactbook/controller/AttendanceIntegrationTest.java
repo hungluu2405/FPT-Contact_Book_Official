@@ -49,17 +49,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Điểm danh trên FptContactBook_test. Dữ liệu mẫu: lớp 1 (PRJ301-SE1901-FA26, GV002 = 0900000003, buổi 1 ngày
- * 08/09/2026 chưa điểm danh, có SE190001 = students.id 1); lớp 27 (PRN211, GV003 = 0922334455, buổi 41–46, buổi
- * 41 đã điểm danh PRESENT cho SE180101 (students.id 2) và SE180102 (students.id 3)). Phụ huynh 0900000005 liên kết
- * SE190001; 0944112233 liên kết SE180101. Trưởng bộ môn 0900000002 thuộc bộ môn SE.
+ * Điểm danh trên FptContactBook_test. Dữ liệu mẫu: lớp 1 (TOAN10-HK1-2627-01, GV002 = 0900000003, buổi 1 ngày
+ * 08/09/2026 chưa điểm danh, có HS260001 = students.id 1); lớp 27 (TIN11, GV003 = 0922334455, buổi 41–46, buổi
+ * 41 đã điểm danh PRESENT cho HS250101 (students.id 2) và HS250102 (students.id 3)). Phụ huynh 0900000005 liên kết
+ * HS260001; 0944112233 liên kết HS250101. Trưởng bộ môn 0900000002 thuộc bộ môn SE.
  */
 @IntegrationTest
 class AttendanceIntegrationTest {
 
     static final String GV003 = "0922334455";
-    static final String SE180101 = "0933112233";
-    static final String PARENT_OF_SE180101 = "0944112233";
+    static final String HS250101 = "0933112233";
+    static final String PARENT_OF_HS250101 = "0944112233";
 
     @Autowired MockMvc mockMvc;
     @Autowired AppUserDetailsService userDetailsService;
@@ -153,7 +153,7 @@ class AttendanceIntegrationTest {
     }
 
     @Nested
-    @DisplayName("Giảng viên điểm danh")
+    @DisplayName("Giáo viên điểm danh")
     class TeacherMarks {
 
         @Test
@@ -161,24 +161,24 @@ class AttendanceIntegrationTest {
         void teacherOpensOwnSection() throws Exception {
             mockMvc.perform(get("/teacher/sections").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("PRJ301-SE1901-FA26"),
-                            not(containsString("PRN211_FA26_01")))));
+                    .andExpect(content().string(allOf(containsString("TOAN10-HK1-2627-01"),
+                            not(containsString("TIN11-HK1-2627-01")))));
             mockMvc.perform(get("/teacher/sections/1").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("SE190001")));
+                    .andExpect(content().string(containsString("HS260001")));
             mockMvc.perform(get("/teacher/sections/1/sessions/1/attendance").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("SE190001"),
+                    .andExpect(content().string(allOf(containsString("HS260001"),
                             containsString("statuses[1]"), containsString("_csrf"))));
         }
 
         @Test
-        @DisplayName("Lưu lần đầu: có mặt kèm ghi chú đi muộn, marked_by là giảng viên, không cần lý do, audit")
+        @DisplayName("Lưu lần đầu: có mặt kèm ghi chú đi muộn, marked_by là giáo viên, không cần lý do, audit")
         void teacherSavesFirstTime() throws Exception {
             mockMvc.perform(mark(1L, 1L, "statuses[1]", "PRESENT").param("notes[1]", " Đi muộn 10 phút ")
                             .with(as(TestAccounts.TEACHER)))
                     .andExpect(redirectedUrl("/teacher/sections/1"))
-                    .andExpect(flash().attribute("successMessage", "Đã lưu điểm danh buổi 1 (1 sinh viên)"));
+                    .andExpect(flash().attribute("successMessage", "Đã lưu điểm danh buổi 1 (1 học sinh)"));
 
             assertThat(attendanceRepository.findBySessionId(1L))
                     .extracting(a -> a.getStudent().getId(), Attendance::getStatus, a -> a.getMarkedBy().getId(),
@@ -205,13 +205,13 @@ class AttendanceIntegrationTest {
             mockMvc.perform(mark(1L, 1L, "statuses[1]", "ABSENT_EXCUSED").param("reason", "Có giấy khám bệnh")
                             .with(as(TestAccounts.TEACHER)))
                     .andExpect(redirectedUrl("/teacher/sections/1"))
-                    .andExpect(flash().attribute("successMessage", "Đã điều chỉnh điểm danh của 1 sinh viên"));
+                    .andExpect(flash().attribute("successMessage", "Đã điều chỉnh điểm danh của 1 học sinh"));
             Attendance row = attendanceRepository.findBySessionId(1L).getFirst();
             assertThat(row.getStatus()).isEqualTo(AttendanceStatus.ABSENT_EXCUSED);
             assertThat(row.getNote()).isNull();
             AuditLog audit = lastAudit(AuditActions.ADJUST_ATTENDANCE);
             assertThat(audit.getEntityId()).isEqualTo(row.getId());
-            assertThat(audit.getDetail()).contains("student=SE190001", "status=PRESENT -> ABSENT_EXCUSED",
+            assertThat(audit.getDetail()).contains("student=HS260001", "status=PRESENT -> ABSENT_EXCUSED",
                     "reason=Có giấy khám bệnh");
             // Lớp 1 chỉ có 1 buổi: vắng 1/1 vừa vượt ngưỡng 20% → cảnh báo gửi SV + PH (giai đoạn 6a).
             assertThat(lastAudit().getAction()).isEqualTo(AuditActions.SEND_NOTIFICATION);
@@ -220,7 +220,7 @@ class AttendanceIntegrationTest {
         }
 
         @Test
-        @DisplayName("0900000003 vào lớp của giảng viên khác bằng URL → 403, không ghi gì")
+        @DisplayName("0900000003 vào lớp của giáo viên khác bằng URL → 403, không ghi gì")
         void teacherDeniedOtherSection() throws Exception {
             mockMvc.perform(get("/teacher/sections/27").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isForbidden());
@@ -268,11 +268,11 @@ class AttendanceIntegrationTest {
     }
 
     @Nested
-    @DisplayName("ADMIN và trưởng bộ môn")
+    @DisplayName("ADMIN và tổ trưởng chuyên môn")
     class Managers {
 
         @Test
-        @DisplayName("ADMIN điều chỉnh buổi đã điểm danh: audit có giá trị cũ và mới cho đúng sinh viên bị đổi")
+        @DisplayName("ADMIN điều chỉnh buổi đã điểm danh: audit có giá trị cũ và mới cho đúng học sinh bị đổi")
         void adminAdjusts() throws Exception {
             long adjustAuditsBefore = auditCount(AuditActions.ADJUST_ATTENDANCE);
             long notificationAuditsBefore = auditCount(AuditActions.SEND_NOTIFICATION);
@@ -282,13 +282,13 @@ class AttendanceIntegrationTest {
                             .param("reason", "Có minh chứng đi viện").with(as(TestAccounts.ADMIN)))
                     .andExpect(redirectedUrl("/admin/sections/27/attendance"));
 
-            // Đúng một audit điều chỉnh (chỉ SE180101 bị đổi); SE180101 vắng 1/6 → 2/6 vừa vượt 20% nên có thêm
+            // Đúng một audit điều chỉnh (chỉ HS250101 bị đổi); HS250101 vắng 1/6 → 2/6 vừa vượt 20% nên có thêm
             // đúng một thông báo cảnh báo (giai đoạn 6a).
             assertThat(auditCount(AuditActions.ADJUST_ATTENDANCE)).isEqualTo(adjustAuditsBefore + 1);
             assertThat(auditCount(AuditActions.SEND_NOTIFICATION)).isEqualTo(notificationAuditsBefore + 1);
             AuditLog audit = lastAudit(AuditActions.ADJUST_ATTENDANCE);
             assertThat(audit.getUser().getId()).isEqualTo(TestAccounts.ADMIN_ID);
-            assertThat(audit.getDetail()).contains("student=SE180101", "status=PRESENT -> ABSENT_EXCUSED",
+            assertThat(audit.getDetail()).contains("student=HS250101", "status=PRESENT -> ABSENT_EXCUSED",
                     "note=Đúng giờ -> Đúng giờ", "reason=Có minh chứng đi viện");
             assertThat(attendanceRepository.findBySessionId(41L))
                     .extracting(a -> a.getStudent().getId(), Attendance::getStatus, a -> a.getMarkedBy().getId())
@@ -307,11 +307,11 @@ class AttendanceIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE xem thống kê và bảng điểm danh lớp bộ môn mình, nhưng không lưu được (403)")
+        @DisplayName("Tổ trưởng chuyên môn SE xem thống kê và bảng điểm danh lớp tổ chuyên môn mình, nhưng không lưu được (403)")
         void headViewsOnly() throws Exception {
             mockMvc.perform(get("/admin/sections/27/attendance").with(as(TestAccounts.TEACHER_HEAD)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("SE180101")));
+                    .andExpect(content().string(containsString("HS250101")));
             mockMvc.perform(get("/admin/sections/27/sessions/41/attendance").with(as(TestAccounts.TEACHER_HEAD)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(not(containsString("statuses[2]"))));
@@ -322,7 +322,7 @@ class AttendanceIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn gửi form sai định dạng vẫn nhận 403, không thấy form sửa được")
+        @DisplayName("Tổ trưởng chuyên môn gửi form sai định dạng vẫn nhận 403, không thấy form sửa được")
         void headMalformedPostIsForbidden() throws Exception {
             mockMvc.perform(post("/admin/sections/27/sessions/41/attendance").with(csrf())
                             .param("statuses[2]", "HACKED").with(as(TestAccounts.TEACHER_HEAD)))
@@ -330,7 +330,7 @@ class AttendanceIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn xem lớp học phần thuộc bộ môn khác → 403")
+        @DisplayName("Tổ trưởng chuyên môn xem lớp môn học thuộc tổ chuyên môn khác → 403")
         void headDeniedOtherDepartment() throws Exception {
             Long ia = iaSection();
 
@@ -340,7 +340,7 @@ class AttendanceIntegrationTest {
     }
 
     @Nested
-    @DisplayName("Sinh viên, phụ huynh xem điểm danh")
+    @DisplayName("Học sinh, phụ huynh xem điểm danh")
     class Viewers {
 
         @Test
@@ -350,15 +350,15 @@ class AttendanceIntegrationTest {
 
             mockMvc.perform(get("/student/attendance").with(as(TestAccounts.STUDENT)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("PRJ301"), containsString("100,0%"),
-                            not(containsString("PRN211")))));
+                    .andExpect(content().string(allOf(containsString("TOAN10"), containsString("100,0%"),
+                            not(containsString("TIN11")))));
             mockMvc.perform(get("/student/attendance/1").with(as(TestAccounts.STUDENT)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("Có mặt")));
         }
 
         @Test
-        @DisplayName("Sinh viên mở lịch sử lớp mình không học → 403")
+        @DisplayName("Học sinh mở lịch sử lớp mình không học → 403")
         void studentDeniedOtherSection() throws Exception {
             mockMvc.perform(get("/student/attendance/27").with(as(TestAccounts.STUDENT)))
                     .andExpect(status().isForbidden());
@@ -371,7 +371,7 @@ class AttendanceIntegrationTest {
                     .andExpect(redirectedUrl("/parent/children/1/attendance"));
             mockMvc.perform(get("/parent/children/1/attendance").with(as(TestAccounts.PARENT)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("PRJ301")));
+                    .andExpect(content().string(containsString("TOAN10")));
             mockMvc.perform(get("/parent/children/1/attendance/1").with(as(TestAccounts.PARENT)))
                     .andExpect(status().isOk());
             mockMvc.perform(get("/parent/children/2/attendance").with(as(TestAccounts.PARENT)))
@@ -381,9 +381,9 @@ class AttendanceIntegrationTest {
         }
 
         @Test
-        @DisplayName("Vắng vượt 20% → cảnh báo ở trang sinh viên, phụ huynh và bảng thống kê của giảng viên")
+        @DisplayName("Vắng vượt 20% → cảnh báo ở trang học sinh, phụ huynh và bảng thống kê của giáo viên")
         void absenceWarningShown() throws Exception {
-            // SE180101 ở lớp 27 (6 buổi chưa hủy) đã có 1 buổi vắng không phép (buổi 43); thêm 1 buổi vắng → 33,3%.
+            // HS250101 ở lớp 27 (6 buổi chưa hủy) đã có 1 buổi vắng không phép (buổi 43); thêm 1 buổi vắng → 33,3%.
             mockMvc.perform(post("/admin/sections/27/sessions/42/attendance").with(csrf())
                             .param("statuses[2]", "ABSENT_EXCUSED").param("statuses[3]", "PRESENT")
                             .param("reason", "Nghỉ ốm có giấy").with(as(TestAccounts.ADMIN)))
@@ -392,10 +392,10 @@ class AttendanceIntegrationTest {
             mockMvc.perform(get("/teacher/sections/27").with(as(GV003)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(containsString("33,3%"), containsString("Vắng quá 20%"))));
-            mockMvc.perform(get("/student/attendance").with(as(SE180101)))
+            mockMvc.perform(get("/student/attendance").with(as(HS250101)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("Vắng quá 20%")));
-            mockMvc.perform(get("/parent/children/2/attendance").with(as(PARENT_OF_SE180101)))
+            mockMvc.perform(get("/parent/children/2/attendance").with(as(PARENT_OF_HS250101)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("Vắng quá 20%")));
         }
@@ -452,7 +452,7 @@ class AttendanceIntegrationTest {
         subject.setCredits((short) 3);
         subjectRepository.saveAndFlush(subject);
         ClassSection section = new ClassSection();
-        section.setCode("IAO201-FA26-01");
+        section.setCode("IAO201-HK1-2627-01");
         section.setSubject(subject);
         section.setSemester(semesterRepository.findById(1L).orElseThrow());
         section.setTeacher(teacherRepository.findById(2L).orElseThrow());
@@ -478,7 +478,7 @@ class AttendanceIntegrationTest {
     class SmallScreens {
 
         @Test
-        @DisplayName("Bảng điểm danh theo môn của SV, PH: dạng thẻ, mỗi ô có nhãn, chuyên cần và tỷ lệ vắng được ưu tiên")
+        @DisplayName("Bảng điểm danh theo môn của HS, PH: dạng thẻ, mỗi ô có nhãn, chuyên cần và tỷ lệ vắng được ưu tiên")
         void subjectTableStacks() throws Exception {
             for (String url : List.of("/student/attendance", "/parent/children/1/attendance")) {
                 String phone = url.startsWith("/student") ? TestAccounts.STUDENT : TestAccounts.PARENT;
@@ -492,7 +492,7 @@ class AttendanceIntegrationTest {
         }
 
         @Test
-        @DisplayName("Bảng điểm danh một buổi: dạng thẻ, trạng thái là nút lớn (btn-check), mỗi SV đúng 3 lựa chọn cùng tên")
+        @DisplayName("Bảng điểm danh một buổi: dạng thẻ, trạng thái là nút lớn (btn-check), mỗi HS đúng 3 lựa chọn cùng tên")
         void sheetUsesButtons() throws Exception {
             String html = mockMvc.perform(get("/teacher/sections/1/sessions/1/attendance").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())

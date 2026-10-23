@@ -104,10 +104,10 @@ class ClassSessionServiceTest {
                 attendanceRepository, classSectionService, checker, notifier, auditService);
 
         Department se = CatalogTestData.department(1L, "SE");
-        Semester fa26 = CatalogTestData.semester(1L, "FA26");
-        fa26.setStartDate(LocalDate.of(2026, 9, 7));
-        fa26.setEndDate(LocalDate.of(2026, 12, 20));
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se), fa26,
+        Semester hk1 = CatalogTestData.semester(1L, "HK1-2627");
+        hk1.setStartDate(LocalDate.of(2026, 9, 7));
+        hk1.setEndDate(LocalDate.of(2026, 12, 20));
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se), hk1,
                 CatalogTestData.teacher(2L, "GV002", se), null, SectionStatus.OPEN);
         r101 = new Room();
         r101.setId(1L);
@@ -190,7 +190,7 @@ class ClassSessionServiceTest {
         @Test
         @DisplayName("Một buổi trong lịch tuần trùng phòng → không lưu buổi nào, liệt kê buổi bị trùng")
         void oneConflictSavesNothing() {
-            ClassSection other = CatalogTestData.section(27L, "PRN211_FA26_01", section.getSubject(),
+            ClassSection other = CatalogTestData.section(27L, "TIN11-HK1-2627-01", section.getSubject(),
                     section.getSemester(), CatalogTestData.teacher(8L, "GV003", section.getSubject().getDepartment()),
                     null, SectionStatus.OPEN);
             ClassSession taken = new ClassSession();
@@ -286,13 +286,13 @@ class ClassSessionServiceTest {
         }
 
         @Test
-        @DisplayName("Chỉ đổi phòng: chỉ kiểm tra trùng phòng, không chặn vì trùng giảng viên có sẵn (finding 3)")
+        @DisplayName("Chỉ đổi phòng: chỉ kiểm tra trùng phòng, không chặn vì trùng giáo viên có sẵn (finding 3)")
         void roomOnlyChangeChecksRoomOnly() {
             ClassSession session = existing(SessionStatus.DONE);
             when(attendanceRepository.existsBySessionId(41L)).thenReturn(true);
             ClassSession sameTeacher = new ClassSession();
             sameTeacher.setId(77L);
-            sameTeacher.setClassSection(CatalogTestData.section(28L, "SWP391_FA26_01", section.getSubject(),
+            sameTeacher.setClassSection(CatalogTestData.section(28L, "STEM-HK1-2627-01", section.getSubject(),
                     section.getSemester(), section.getTeacher(), null, SectionStatus.OPEN));
             sameTeacher.setSessionDate(session.getSessionDate());
             sameTeacher.setStartTime(LocalTime.of(8, 0));
@@ -339,7 +339,7 @@ class ClassSessionServiceTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE với lớp của bộ môn khác → 403, không lưu")
+        @DisplayName("Tổ trưởng chuyên môn SE với lớp của tổ chuyên môn khác → 403, không lưu")
         void headOutsideScope() {
             Department ia = CatalogTestData.department(38L, "IA");
             section.setSubject(CatalogTestData.subject(50L, "IAO201", ia));

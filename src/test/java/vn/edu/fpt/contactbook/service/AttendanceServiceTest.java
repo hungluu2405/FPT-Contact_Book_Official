@@ -128,13 +128,13 @@ class AttendanceServiceTest {
                 audience, userRequestRepository, new AttendanceEditWindow(24));
 
         Department se = CatalogTestData.department(1L, "SE");
-        Semester fa26 = CatalogTestData.semester(1L, "FA26");
+        Semester hk1 = CatalogTestData.semester(1L, "HK1-2627");
         Teacher gv002 = CatalogTestData.teacher(2L, "GV002", se);
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se), fa26,
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se), hk1,
                 gv002, 40, SectionStatus.OPEN);
         session = session(100L, section, AppTime.today(), SessionStatus.SCHEDULED);
-        s1 = CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING);
-        s2 = CatalogTestData.student(2L, "SE190002", StudentStatus.STUDYING);
+        s1 = CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING);
+        s2 = CatalogTestData.student(2L, "HS260002", StudentStatus.STUDYING);
 
         when(teacherRepository.findByUserId(3L)).thenReturn(Optional.of(gv002));
         when(teacherRepository.findByUserId(16L)).thenReturn(Optional.of(CatalogTestData.teacher(8L, "GV003", se)));
@@ -158,17 +158,17 @@ class AttendanceServiceTest {
     class Scope {
 
         @Test
-        @DisplayName("Giảng viên của lớp mở được bảng điểm danh: mọi sinh viên đang học, chưa có trạng thái")
+        @DisplayName("Giáo viên của lớp mở được bảng điểm danh: mọi học sinh đang học, chưa có trạng thái")
         void teacherOpensOwnSheet() {
             AttendanceSheet sheet = service.sheet(TEACHER, Access.TEACHER, 10L, 100L);
 
             assertThat(sheet.marked()).isFalse();
             assertThat(sheet.rows()).extracting(AttendanceSheet.Row::studentCode, AttendanceSheet.Row::status)
-                    .containsExactly(tuple("SE190001", null), tuple("SE190002", null));
+                    .containsExactly(tuple("HS260001", null), tuple("HS260002", null));
         }
 
         @Test
-        @DisplayName("Giảng viên khác (gõ URL) bị chặn 403 khi xem và khi lưu, không ghi gì")
+        @DisplayName("Giáo viên khác (gõ URL) bị chặn 403 khi xem và khi lưu, không ghi gì")
         void otherTeacherIsDenied() {
             assertThatThrownBy(() -> service.sheet(OTHER_TEACHER, Access.TEACHER, 10L, 100L))
                     .isInstanceOf(AccessDeniedException.class);
@@ -179,7 +179,7 @@ class AttendanceServiceTest {
         }
 
         @Test
-        @DisplayName("Lớp không tồn tại cũng là 403 với giảng viên, để không dò được id")
+        @DisplayName("Lớp không tồn tại cũng là 403 với giáo viên, để không dò được id")
         void missingSectionIsDeniedForTeacher() {
             when(classSectionRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -188,7 +188,7 @@ class AttendanceServiceTest {
         }
 
         @Test
-        @DisplayName("Người không có hồ sơ giảng viên bị 403")
+        @DisplayName("Người không có hồ sơ giáo viên bị 403")
         void noTeacherProfileIsDenied() {
             AppUserPrincipal headOnly = CatalogTestData.principal(15L, Set.of(RoleCodes.HEAD_OF_DEPARTMENT), Map.of());
 
@@ -243,7 +243,7 @@ class AttendanceServiceTest {
         }
 
         @Test
-        @DisplayName("Lớp học phần đã hủy không điểm danh được")
+        @DisplayName("Lớp môn học đã hủy không điểm danh được")
         void cancelledSection() {
             section.setStatus(SectionStatus.CANCELLED);
 
@@ -253,7 +253,7 @@ class AttendanceServiceTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn xem được lớp thuộc bộ môn mình nhưng không lưu được (403)")
+        @DisplayName("Tổ trưởng chuyên môn xem được lớp thuộc tổ chuyên môn mình nhưng không lưu được (403)")
         void headCanViewButNotSave() {
             when(attendanceRepository.findBySessionId(100L)).thenReturn(List.of(row(s1, AttendanceStatus.PRESENT)));
 
@@ -263,7 +263,7 @@ class AttendanceServiceTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn khác không xem được lớp ngoài bộ môn (403)")
+        @DisplayName("Tổ trưởng chuyên môn khác không xem được lớp ngoài tổ chuyên môn (403)")
         void headOfOtherDepartmentIsDenied() {
             assertThatThrownBy(() -> service.sheet(HEAD_IA, Access.MANAGER, 10L, 100L))
                     .isInstanceOf(AccessDeniedException.class);
@@ -274,7 +274,7 @@ class AttendanceServiceTest {
         void adminCannotMarkFirstTime() {
             assertThatThrownBy(() -> service.save(ADMIN, Access.MANAGER, 10L, 100L, allPresent(), "127.0.0.1"))
                     .isInstanceOf(BusinessException.class)
-                    .hasMessageStartingWith("Buổi học chưa được giảng viên điểm danh; giảng viên còn hạn điểm danh đến");
+                    .hasMessageStartingWith("Buổi học chưa được giáo viên điểm danh; giáo viên còn hạn điểm danh đến");
             verify(attendanceRepository, never()).saveAll(anyList());
         }
     }
@@ -284,7 +284,7 @@ class AttendanceServiceTest {
     class FirstTime {
 
         @Test
-        @DisplayName("Tạo một dòng cho mỗi sinh viên, marked_by là người đăng nhập, không cần lý do, ghi một audit")
+        @DisplayName("Tạo một dòng cho mỗi học sinh, marked_by là người đăng nhập, không cần lý do, ghi một audit")
         void createsRowsAndAudit() {
             AttendanceSaveResult result = service.save(TEACHER, Access.TEACHER, 10L, 100L,
                     form(Map.of(1L, AttendanceStatus.PRESENT, 2L, AttendanceStatus.ABSENT_EXCUSED), null), "10.0.0.1");
@@ -295,8 +295,8 @@ class AttendanceServiceTest {
             assertThat(saved.getValue())
                     .extracting(a -> a.getStudent().getStudentCode(), Attendance::getStatus,
                             a -> a.getMarkedBy().getId(), Attendance::getNote, Attendance::getSession)
-                    .containsExactly(tuple("SE190001", AttendanceStatus.PRESENT, 3L, null, session),
-                            tuple("SE190002", AttendanceStatus.ABSENT_EXCUSED, 3L, null, session));
+                    .containsExactly(tuple("HS260001", AttendanceStatus.PRESENT, 3L, null, session),
+                            tuple("HS260002", AttendanceStatus.ABSENT_EXCUSED, 3L, null, session));
             AuditLog audit = singleAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.MARK_ATTENDANCE);
             assertThat(audit.getEntityId()).isEqualTo(100L);
@@ -306,7 +306,7 @@ class AttendanceServiceTest {
         }
 
         @Test
-        @DisplayName("Thiếu trạng thái của một sinh viên → yêu cầu chọn đủ, không ghi gì")
+        @DisplayName("Thiếu trạng thái của một học sinh → yêu cầu chọn đủ, không ghi gì")
         void missingStatus() {
             assertThatThrownBy(() -> service.save(TEACHER, Access.TEACHER, 10L, 100L,
                     form(Map.of(1L, AttendanceStatus.PRESENT), null), "127.0.0.1"))
@@ -316,7 +316,7 @@ class AttendanceServiceTest {
         }
 
         @Test
-        @DisplayName("Có sinh viên không còn trong lớp (trang cũ) → báo danh sách đã thay đổi")
+        @DisplayName("Có học sinh không còn trong lớp (trang cũ) → báo danh sách đã thay đổi")
         void unknownStudent() {
             Map<Long, AttendanceStatus> statuses = new HashMap<>(Map.of(1L, AttendanceStatus.PRESENT,
                     2L, AttendanceStatus.PRESENT, 77L, AttendanceStatus.PRESENT));
@@ -328,7 +328,7 @@ class AttendanceServiceTest {
         }
 
         @Test
-        @DisplayName("Lớp chưa có sinh viên đang học → báo lỗi")
+        @DisplayName("Lớp chưa có học sinh đang học → báo lỗi")
         void noStudents() {
             when(enrollmentRepository.findByClassSectionIdAndStatusOrderByStudentStudentCodeAsc(10L,
                     EnrollmentStatus.ENROLLED)).thenReturn(List.of());
@@ -395,17 +395,17 @@ class AttendanceServiceTest {
             assertThat(audit.getAction()).isEqualTo(AuditActions.ADJUST_ATTENDANCE);
             assertThat(audit.getEntityType()).isEqualTo(AuditActions.ENTITY_ATTENDANCE);
             assertThat(audit.getEntityId()).isEqualTo(501L);
-            assertThat(audit.getDetail()).contains("student=SE190001", "status=PRESENT -> ABSENT_EXCUSED",
+            assertThat(audit.getDetail()).contains("student=HS260001", "status=PRESENT -> ABSENT_EXCUSED",
                     "note=Đúng giờ -> Đúng giờ", "reason=Có giấy khám bệnh");
         }
 
         @Test
-        @DisplayName("Sinh viên ghi danh sau lần lưu đầu được tạo dòng mới, audit trạng thái cũ là '-'")
+        @DisplayName("Học sinh ghi danh sau lần lưu đầu được tạo dòng mới, audit trạng thái cũ là '-'")
         void studentAddedLater() {
             when(attendanceRepository.findBySessionId(100L)).thenReturn(List.of(row1));
 
             AttendanceSaveResult result = service.save(TEACHER, Access.TEACHER, 10L, 100L,
-                    form(Map.of(1L, AttendanceStatus.PRESENT, 2L, AttendanceStatus.ABSENT_EXCUSED), "Bổ sung sinh viên mới"),
+                    form(Map.of(1L, AttendanceStatus.PRESENT, 2L, AttendanceStatus.ABSENT_EXCUSED), "Bổ sung học sinh mới"),
                     "127.0.0.1");
 
             assertThat(result.changed()).isEqualTo(1);
@@ -430,7 +430,7 @@ class AttendanceServiceTest {
         }
 
         @Test
-        @DisplayName("Mỗi sinh viên bị đổi một dòng audit")
+        @DisplayName("Mỗi học sinh bị đổi một dòng audit")
         void oneAuditPerChangedStudent() {
             service.save(TEACHER, Access.TEACHER, 10L, 100L,
                     form(Map.of(1L, AttendanceStatus.ABSENT_EXCUSED, 2L, AttendanceStatus.ABSENT_UNEXCUSED), "Nhập nhầm"),
@@ -630,7 +630,7 @@ class AttendanceServiceTest {
         }
 
         @Test
-        @DisplayName("Trước 2/10 (20%, chưa cảnh báo), sau 3/10 (30%) → gửi SV và PH một thông báo")
+        @DisplayName("Trước 2/10 (20%, chưa cảnh báo), sau 3/10 (30%) → gửi HS và PH một thông báo")
         void notifiesWhenCrossing() {
             when(attendanceRepository.countByStudentAndStatus(anyLong(), anyCollection())).thenReturn(
                     List.<Object[]>of(new Object[]{1L, AttendanceStatus.ABSENT_UNEXCUSED, 2L}),

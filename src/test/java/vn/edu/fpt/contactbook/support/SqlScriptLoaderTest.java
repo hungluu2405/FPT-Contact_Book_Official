@@ -32,13 +32,13 @@ class SqlScriptLoaderTest {
     @Test
     @DisplayName("Giải mã UTF-16 LE có BOM, kể cả tiếng Việt")
     void decodesUtf16LeWithBom() {
-        byte[] body = "Bộ môn".getBytes(StandardCharsets.UTF_16LE);
+        byte[] body = "Tổ chuyên môn".getBytes(StandardCharsets.UTF_16LE);
         byte[] bytes = new byte[body.length + 2];
         bytes[0] = (byte) 0xFF;
         bytes[1] = (byte) 0xFE;
         System.arraycopy(body, 0, bytes, 2, body.length);
 
-        assertThat(SqlScriptLoader.decodeUtf16Le(bytes)).isEqualTo("Bộ môn");
+        assertThat(SqlScriptLoader.decodeUtf16Le(bytes)).isEqualTo("Tổ chuyên môn");
     }
 
     @Test
@@ -62,7 +62,7 @@ class SqlScriptLoaderTest {
                 .contains("FptContactBook_test.mdf")
                 .contains("FptContactBook_test_log.ldf")
                 .contains("CREATE TABLE [dbo].[users]")
-                .contains("Bộ môn Kỹ thuật phần mềm");
+                .contains("Tổ Toán – Tin học");
         assertThat(batches).noneMatch(batch -> batch.lines().anyMatch(line -> line.strip().equalsIgnoreCase("GO")));
     }
 

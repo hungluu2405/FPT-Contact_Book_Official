@@ -33,7 +33,7 @@
                 </select>
             </div>
             <div class="col-6 col-md-2">
-                <label for="departmentId" class="form-label" th:text="#{user.filter.department}">Bộ môn</label>
+                <label for="departmentId" class="form-label" th:text="#{user.filter.department}">Tổ chuyên môn</label>
                 <select class="form-select" th:field="*{departmentId}">
                     <option value="" th:text="#{user.filter.all}">Tất cả</option>
                     <option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.code}">SE</option>

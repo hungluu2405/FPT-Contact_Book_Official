@@ -38,7 +38,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /** Dữ liệu của chính sinh viên đang đăng nhập (STUDENT, ApiSecurityConfig). semesterId bỏ trống: học kỳ hiện tại. */
-@Tag(name = "Student", description = "Sinh viên xem dữ liệu của mình, gửi và hủy đơn nghỉ")
+@Tag(name = "Student", description = "Học sinh xem dữ liệu của mình, gửi và hủy đơn nghỉ")
 @RestController
 @RequestMapping("/api/v1/student")
 @RequiredArgsConstructor
@@ -85,7 +85,7 @@ public class StudentApiController {
         return data.attendance(actor, Audience.STUDENT, null, semesterId);
     }
 
-    @Operation(summary = "Điểm danh từng buổi của một lớp học phần")
+    @Operation(summary = "Điểm danh từng buổi của một lớp môn học")
     @GetMapping("/attendance/{sectionId}")
     public AttendanceHistoryResponse attendanceHistory(@AuthenticationPrincipal AppUserPrincipal actor,
                                                        @PathVariable Long sectionId,
@@ -100,7 +100,7 @@ public class StudentApiController {
         return data.requests(actor, Audience.STUDENT, null, page);
     }
 
-    @Operation(summary = "Lớp học phần chọn được khi gửi đơn nghỉ")
+    @Operation(summary = "Lớp môn học chọn được khi gửi đơn nghỉ")
     @GetMapping("/requests/leave-options")
     public LeaveFormOptions leaveOptions(@AuthenticationPrincipal AppUserPrincipal actor) {
         return data.leaveOptions(actor, Audience.STUDENT, null);

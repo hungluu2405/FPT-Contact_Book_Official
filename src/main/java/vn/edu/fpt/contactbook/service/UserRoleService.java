@@ -67,7 +67,7 @@ public class UserRoleService {
         if (RoleCodes.HEAD_OF_DEPARTMENT.equals(code) || RoleCodes.TEACHER.equals(code)) {
             department = roleProfiles.department(form.getDepartmentId());
             if (department == null && RoleCodes.HEAD_OF_DEPARTMENT.equals(code)) {
-                errors.putIfAbsent("departmentId", "Vui lòng chọn bộ môn cho vai trò trưởng bộ môn");
+                errors.putIfAbsent("departmentId", "Vui lòng chọn tổ chuyên môn cho vai trò tổ trưởng chuyên môn");
             }
         }
 

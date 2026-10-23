@@ -43,7 +43,7 @@ import static vn.edu.fpt.contactbook.support.ApiClient.fieldNames;
 
 /**
  * API của sinh viên và phụ huynh (giai đoạn 9c): đúng vai trò, phạm vi dữ liệu do service kiểm tra, tên trường JSON
- * đúng hợp đồng docs/API.md. Dữ liệu mẫu: SV 0900000004 là students.id 1 (SE190001, lớp PRJ301 = class_sections.id 1);
+ * đúng hợp đồng docs/API.md. Dữ liệu mẫu: SV 0900000004 là students.id 1 (HS260001, lớp TOAN10 = class_sections.id 1);
  * PH 0900000005 chỉ liên kết với students.id 1.
  */
 @IntegrationTest
@@ -51,7 +51,7 @@ class StudentParentApiIntegrationTest {
 
     static final String CHILD = "/api/v1/parent/children/1";
     static final String OTHER_CHILD = "/api/v1/parent/children/2";
-    /** Chủ nhiệm CLB, không liên quan tới SE190001. */
+    /** Chủ nhiệm CLB, không liên quan tới HS260001. */
     static final String OUTSIDER = "0933112233";
     static final byte[] PDF = "%PDF-1.7\ngiay kham benh".getBytes(StandardCharsets.US_ASCII);
 
@@ -74,7 +74,7 @@ class StudentParentApiIntegrationTest {
     class Access {
 
         @Test
-        @DisplayName("API sinh viên chỉ cho STUDENT, API phụ huynh chỉ cho PARENT; sai vai trò 403 JSON")
+        @DisplayName("API học sinh chỉ cho STUDENT, API phụ huynh chỉ cho PARENT; sai vai trò 403 JSON")
         void rolesAreEnforced() throws Exception {
             for (String phone : List.of(TestAccounts.PARENT, TestAccounts.TEACHER, TestAccounts.ADMIN)) {
                 JsonNode error = api.json(api.perform(get("/api/v1/student/grades"), phone)
@@ -109,14 +109,14 @@ class StudentParentApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Danh sách con của phụ huynh: chỉ SE190001")
+        @DisplayName("Danh sách con của phụ huynh: chỉ HS260001")
         void children() throws Exception {
             JsonNode children = api.json(api.perform(get("/api/v1/parent/children"), TestAccounts.PARENT)
                     .andExpect(status().isOk()));
 
             assertThat(children).hasSize(1);
             assertThat(children.get(0).get("id").asLong()).isEqualTo(1);
-            assertThat(children.get(0).get("code").asString()).isEqualTo("SE190001");
+            assertThat(children.get(0).get("code").asString()).isEqualTo("HS260001");
         }
     }
 
@@ -125,7 +125,7 @@ class StudentParentApiIntegrationTest {
     class Schedule {
 
         @Test
-        @DisplayName("Tuần 07–13/09/2026 của SE190001: PRJ301 ngày 08/09 lúc 07:30–09:45, không có lớp khác; SV và PH như nhau")
+        @DisplayName("Tuần 07–13/09/2026 của HS260001: TOAN10 ngày 08/09 lúc 07:30–09:45, không có lớp khác; HS và PH như nhau")
         void week() throws Exception {
             for (String[] call : new String[][]{{"/api/v1/student", TestAccounts.STUDENT},
                     {CHILD, TestAccounts.PARENT}}) {
@@ -141,7 +141,7 @@ class StudentParentApiIntegrationTest {
                 List<JsonNode> items = new ArrayList<>();
                 week.get("days").forEach(day -> day.get("items").forEach(items::add));
                 assertThat(items).isNotEmpty().allSatisfy(item -> {
-                    assertThat(item.get("subjectCode").asString()).isEqualTo("PRJ301");
+                    assertThat(item.get("subjectCode").asString()).isEqualTo("TOAN10");
                     assertScheduleItem(item);
                 });
                 assertThat(items).anySatisfy(item -> {
@@ -185,20 +185,20 @@ class StudentParentApiIntegrationTest {
     class GradesAndAttendance {
 
         @Test
-        @DisplayName("Điểm chưa công bố không lộ qua API; công bố xong SV và PH thấy")
+        @DisplayName("Điểm chưa công bố không lộ qua API; công bố xong HS và PH thấy")
         void gradesHiddenUntilPublished() throws Exception {
             mockMvc.perform(post("/teacher/sections/1/grades").with(csrf()).with(as(TestAccounts.TEACHER))
                             .param("scores[1_1]", "8").param("scores[1_2]", "7").param("scores[1_3]", "9"))
                     .andExpect(redirectedUrl("/teacher/sections/1/grades"));
 
-            assertThat(prj301Scores("/api/v1/student/grades", TestAccounts.STUDENT)).containsOnlyNulls();
-            assertThat(prj301Scores(CHILD + "/grades", TestAccounts.PARENT)).containsOnlyNulls();
+            assertThat(toan10Scores("/api/v1/student/grades", TestAccounts.STUDENT)).containsOnlyNulls();
+            assertThat(toan10Scores(CHILD + "/grades", TestAccounts.PARENT)).containsOnlyNulls();
 
             mockMvc.perform(post("/admin/sections/1/grades/publish").with(csrf()).with(as(TestAccounts.TEACHER_HEAD)))
                     .andExpect(redirectedUrl("/admin/sections/1/grades"));
 
-            assertThat(prj301Scores("/api/v1/student/grades", TestAccounts.STUDENT)).containsExactly(8.0, 7.0, 9.0);
-            assertThat(prj301Scores(CHILD + "/grades", TestAccounts.PARENT)).containsExactly(8.0, 7.0, 9.0);
+            assertThat(toan10Scores("/api/v1/student/grades", TestAccounts.STUDENT)).containsExactly(8.0, 7.0, 9.0);
+            assertThat(toan10Scores(CHILD + "/grades", TestAccounts.PARENT)).containsExactly(8.0, 7.0, 9.0);
         }
 
         @Test
@@ -208,10 +208,10 @@ class StudentParentApiIntegrationTest {
                     .andExpect(status().isOk()));
             assertThat(fieldNames(overview)).containsExactlyInAnyOrder("semester", "thresholdPercent", "sections");
             assertThat(overview.get("thresholdPercent").asInt()).isEqualTo(20);
-            JsonNode prj301 = find(overview.get("sections"), "sectionId", "1");
-            assertThat(fieldNames(prj301)).containsExactlyInAnyOrder("sectionId", "sectionCode", "subjectCode",
+            JsonNode toan10 = find(overview.get("sections"), "sectionId", "1");
+            assertThat(fieldNames(toan10)).containsExactlyInAnyOrder("sectionId", "sectionCode", "subjectCode",
                     "subjectName", "summary");
-            assertThat(fieldNames(prj301.get("summary"))).containsExactlyInAnyOrder("present", "absentExcused",
+            assertThat(fieldNames(toan10.get("summary"))).containsExactlyInAnyOrder("present", "absentExcused",
                     "absentUnexcused", "totalSessions", "attendanceRate", "absentRate", "warning");
 
             JsonNode history = api.json(api.perform(get(CHILD + "/attendance/1"), TestAccounts.PARENT)
@@ -229,7 +229,7 @@ class StudentParentApiIntegrationTest {
     class Leave {
 
         @Test
-        @DisplayName("SV gửi đơn nghỉ kèm tệp: 201, chi tiết đơn; tải lại tệp được; người ngoài tải tệp 403")
+        @DisplayName("HS gửi đơn nghỉ kèm tệp: 201, chi tiết đơn; tải lại tệp được; người ngoài tải tệp 403")
         void studentSendsLeave() throws Exception {
             MockMultipartHttpServletRequestBuilder request = leave("/api/v1/student/requests/leave", AppTime.today(),
                     AppTime.today().plusDays(1));
@@ -243,7 +243,7 @@ class StudentParentApiIntegrationTest {
             assertThat(detail.get("type").asString()).isEqualTo("LEAVE");
             assertThat(detail.get("status").asString()).isEqualTo("PENDING");
             assertThat(detail.get("canCancel").asBoolean()).isTrue();
-            assertThat(detail.get("studentCode").asString()).isEqualTo("SE190001");
+            assertThat(detail.get("studentCode").asString()).isEqualTo("HS260001");
             JsonNode file = detail.get("files").get(0);
             assertThat(file.get("fileName").asString()).isEqualTo("giay-kham.pdf");
 
@@ -303,7 +303,7 @@ class StudentParentApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("PH gửi đơn thay con: người gửi là PH; SV thấy đơn; PH xem qua đường dẫn con khác bị 403")
+        @DisplayName("PH gửi đơn thay con: người gửi là PH; HS thấy đơn; PH xem qua đường dẫn con khác bị 403")
         void parentSendsForChild() throws Exception {
             JsonNode options = api.json(api.perform(get(CHILD + "/requests/leave-options"), TestAccounts.PARENT)
                     .andExpect(status().isOk()));
@@ -320,7 +320,7 @@ class StudentParentApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("SV mở đơn không tồn tại hoặc không phải của mình: lỗi 4xx, không lộ dữ liệu")
+        @DisplayName("HS mở đơn không tồn tại hoặc không phải của mình: lỗi 4xx, không lộ dữ liệu")
         void studentCannotOpenOthersRequest() throws Exception {
             MvcResult result = api.perform(get("/api/v1/student/requests/999999"), TestAccounts.STUDENT).andReturn();
 
@@ -353,7 +353,7 @@ class StudentParentApiIntegrationTest {
                     .andExpect(status().isOk()));
             assertThat(fieldNames(detail)).containsExactlyInAnyOrder("id", "title", "content", "priority",
                     "targetLabel", "senderName", "createdAt", "files");
-            assertThat(detail.get("content").asString()).contains("Mang theo thẻ sinh viên");
+            assertThat(detail.get("content").asString()).contains("Mang theo thẻ học sinh");
             assertThat(unreadCount(TestAccounts.STUDENT)).isEqualTo(unread - 1);
             assertThat(recipientRepository.countUnread(TestAccounts.STUDENT_ID)).isEqualTo(unread - 1);
 
@@ -430,14 +430,14 @@ class StudentParentApiIntegrationTest {
         assertThat(page.get("items").isArray()).isTrue();
     }
 
-    /** Điểm PRJ301 theo đầu điểm (null nếu chưa công bố). */
-    private List<Double> prj301Scores(String url, String phone) throws Exception {
+    /** Điểm TOAN10 theo đầu điểm (null nếu chưa công bố). */
+    private List<Double> toan10Scores(String url, String phone) throws Exception {
         JsonNode rows = api.json(api.perform(get(url), phone).andExpect(status().isOk())).get("data");
-        JsonNode prj301 = find(rows, "subjectCode", "PRJ301");
-        assertThat(fieldNames(prj301)).containsExactlyInAnyOrder("sectionCode", "subjectCode", "subjectName",
+        JsonNode toan10 = find(rows, "subjectCode", "TOAN10");
+        assertThat(fieldNames(toan10)).containsExactlyInAnyOrder("sectionCode", "subjectCode", "subjectName",
                 "cells", "average");
         List<Double> scores = new ArrayList<>();
-        prj301.get("cells").forEach(cell -> {
+        toan10.get("cells").forEach(cell -> {
             assertThat(fieldNames(cell)).containsExactlyInAnyOrder("componentName", "weight", "maxScore", "score");
             scores.add(cell.get("score").isNull() ? null : cell.get("score").asDouble());
         });
@@ -455,13 +455,13 @@ class StudentParentApiIntegrationTest {
                 .param("title", "").param("reason", "Em bị sốt, có giấy khám bệnh");
     }
 
-    /** GV 0900000003 gửi thông báo kèm PDF tới lớp PRJ301 (SV và PH nhận) qua form web; trả id. */
+    /** GV 0900000003 gửi thông báo kèm PDF tới lớp TOAN10 (SV và PH nhận) qua form web; trả id. */
     private long sendToSection1() throws Exception {
         MvcResult result = mockMvc.perform(multipart("/notifications/new")
                         .file(new MockMultipartFile("files", "de-cuong.pdf", "application/pdf", PDF))
                         .with(csrf()).with(as(TestAccounts.TEACHER))
                         .param("title", "Lịch kiểm tra giữa kỳ")
-                        .param("content", "Ôn tập chương 1–3.\nMang theo thẻ sinh viên.")
+                        .param("content", "Ôn tập chương 1–3.\nMang theo thẻ học sinh.")
                         .param("priority", "IMPORTANT").param("targetType", "CLASS_SECTION").param("sectionId", "1"))
                 .andExpect(redirectedUrlPattern("/notifications/*")).andReturn();
         String url = result.getResponse().getRedirectedUrl();

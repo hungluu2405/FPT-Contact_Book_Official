@@ -39,9 +39,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Tin nhắn trên FptContactBook_test. Dữ liệu mẫu: phụ huynh 0900000005 (users.id 5) là cha của SE190001
- * (0900000004, users.id 4), sinh viên này học lớp học phần 1 (FA26, học kỳ hiện tại) do GV 0900000003 (users.id 3,
- * "Trần Thị Giáo") dạy. GV 0900000002 (users.id 2, "Nguyễn Văn Trưởng") không dạy SE190001.
+ * Tin nhắn trên FptContactBook_test. Dữ liệu mẫu: phụ huynh 0900000005 (users.id 5) là cha của HS260001
+ * (0900000004, users.id 4), sinh viên này học lớp học phần 1 (HK1, học kỳ hiện tại) do GV 0900000003 (users.id 3,
+ * "Trần Thị Giáo") dạy. GV 0900000002 (users.id 2, "Nguyễn Văn Trưởng") không dạy HS260001.
  */
 @IntegrationTest
 class MessageIntegrationTest {
@@ -100,8 +100,8 @@ class MessageIntegrationTest {
         @DisplayName("Hết học kỳ: hội thoại cũ vẫn đọc được nhưng không gửi được tin mới")
         void relationEnded() throws Exception {
             Long id = sendTo(TestAccounts.PARENT, TestAccounts.TEACHER_ID, "Tin trước khi hết học kỳ");
-            Semester fa26 = semesterRepository.findById(1L).orElseThrow();
-            fa26.setCurrent(false);
+            Semester hk1 = semesterRepository.findById(1L).orElseThrow();
+            hk1.setCurrent(false);
             semesterRepository.flush();
 
             mockMvc.perform(get("/messages/{id}", id).with(as(TestAccounts.PARENT)))

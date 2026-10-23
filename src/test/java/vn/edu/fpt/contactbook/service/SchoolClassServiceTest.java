@@ -72,8 +72,8 @@ class SchoolClassServiceTest {
         se1901 = new SchoolClass();
         se1901.setId(1L);
         se1901.setMajor(se);
-        se1901.setCode("SE1901");
-        se1901.setName("Lớp SE1901");
+        se1901.setCode("10A1");
+        se1901.setName("Lớp 10A1");
         se1901.setIntakeYear((short) 2019);
         when(schoolClassRepository.findById(1L)).thenReturn(Optional.of(se1901));
         when(schoolClassRepository.saveAndFlush(any())).thenAnswer(invocation -> {
@@ -88,23 +88,23 @@ class SchoolClassServiceTest {
         gv001.setId(2L);
         gv001.setTeacherCode("GV001");
         User user = new User();
-        user.setFullName("Giảng viên 1");
+        user.setFullName("Giáo viên 1");
         gv001.setUser(user);
         when(teacherRepository.findByTeacherCode("GV001")).thenReturn(Optional.of(gv001));
     }
 
     @Test
-    @DisplayName("Lớp đã có sinh viên: đổi ngành bị chặn, lớp giữ nguyên")
+    @DisplayName("Lớp đã có học sinh: đổi khối bị chặn, lớp giữ nguyên")
     void majorLockedWhenClassHasStudents() {
         when(studentRepository.existsBySchoolClassId(1L)).thenReturn(true);
 
-        assertThatThrownBy(() -> service.update(ADMIN, 1L, form(14L, "SE1901", 2019, null), "127.0.0.1"))
+        assertThatThrownBy(() -> service.update(ADMIN, 1L, form(14L, "10A1", 2019, null), "127.0.0.1"))
                 .isInstanceOfSatisfying(BusinessException.class, e ->
                         assertThat(e.getFieldErrors()).containsEntry("majorId", CatalogMessages.CLASS_MAJOR_LOCKED));
         assertThat(se1901.getMajor()).isSameAs(se);
         verify(schoolClassRepository, never()).saveAndFlush(any());
 
-        service.update(ADMIN, 1L, form(1L, "SE1901", 2020, "gv001"), "127.0.0.1");
+        service.update(ADMIN, 1L, form(1L, "10A1", 2020, "gv001"), "127.0.0.1");
         assertThat(se1901.getIntakeYear()).isEqualTo((short) 2020);
         assertThat(se1901.getHomeroomTeacher().getTeacherCode()).isEqualTo("GV001");
     }
@@ -113,13 +113,13 @@ class SchoolClassServiceTest {
     void majorChangeAllowedWhenClassIsEmpty() {
         when(studentRepository.existsBySchoolClassId(1L)).thenReturn(false);
 
-        service.update(ADMIN, 1L, form(14L, "SE1901", 2019, null), "127.0.0.1");
+        service.update(ADMIN, 1L, form(14L, "10A1", 2019, null), "127.0.0.1");
 
         assertThat(se1901.getMajor()).isSameAs(ia);
     }
 
     @Test
-    @DisplayName("Tạo lớp: mã viết hoa, giảng viên chủ nhiệm tùy chọn; mã giảng viên không tồn tại → lỗi cạnh ô")
+    @DisplayName("Tạo lớp: mã viết hoa, giáo viên chủ nhiệm tùy chọn; mã giáo viên không tồn tại → lỗi cạnh ô")
     void createWithOptionalHomeroom() {
         service.create(ADMIN, form(1L, " se2001 ", 2024, null), "127.0.0.1");
         ArgumentCaptor<SchoolClass> saved = ArgumentCaptor.forClass(SchoolClass.class);
@@ -132,7 +132,7 @@ class SchoolClassServiceTest {
                         .containsEntry("homeroomTeacherCode", CatalogMessages.HOMEROOM_NOT_FOUND));
     }
 
-    @ParameterizedTest(name = "niên khóa {0} → hợp lệ = {1}")
+    @ParameterizedTest(name = "năm vào trường {0} → hợp lệ = {1}")
     @CsvSource({"1999, false", "2000, true", "2100, true", "2101, false"})
     void intakeYearBoundaries(int year, boolean valid) {
         if (valid) {
@@ -166,7 +166,7 @@ class SchoolClassServiceTest {
         Major major = new Major();
         major.setId(id);
         major.setCode(code);
-        major.setName("Ngành " + code);
+        major.setName("Khối " + code);
         return major;
     }
 }

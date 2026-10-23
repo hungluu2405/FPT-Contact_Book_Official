@@ -14,10 +14,10 @@ void main() {
     return StudentService(client.api);
   }
 
-  /// `students.id` của SE190001 theo danh sách con của phụ huynh mẫu.
+  /// `students.id` của HS260001 theo danh sách con của phụ huynh mẫu.
   Future<int> seedChildId(StudentService parent) async {
     final children = await parent.fetchChildren();
-    return children.firstWhere((child) => child.code == 'SE190001').id;
+    return children.firstWhere((child) => child.code == 'HS260001').id;
   }
 
   test('student week has seven days from Monday with valid fields', () async {
@@ -68,7 +68,7 @@ void main() {
     }
   });
 
-  test('student sees the same sessions as the parent of SE190001', () async {
+  test('student sees the same sessions as the parent of HS260001', () async {
     final student = await signIn('0900000004');
     final parent = await signIn('0900000005');
     final childId = await seedChildId(parent);

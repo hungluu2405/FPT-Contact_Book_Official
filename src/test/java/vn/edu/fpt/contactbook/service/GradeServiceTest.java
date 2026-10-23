@@ -116,11 +116,11 @@ class GradeServiceTest {
 
         Department se = CatalogTestData.department(1L, "SE");
         Teacher gv002 = CatalogTestData.teacher(2L, "GV002", se);
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se),
-                CatalogTestData.semester(1L, "FA26"), gv002, 40, SectionStatus.OPEN);
-        e1 = CatalogTestData.enrollment(100L, section, CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING),
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se),
+                CatalogTestData.semester(1L, "HK1-2627"), gv002, 40, SectionStatus.OPEN);
+        e1 = CatalogTestData.enrollment(100L, section, CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING),
                 EnrollmentStatus.ENROLLED);
-        e2 = CatalogTestData.enrollment(101L, section, CatalogTestData.student(2L, "SE190002", StudentStatus.STUDYING),
+        e2 = CatalogTestData.enrollment(101L, section, CatalogTestData.student(2L, "HS260002", StudentStatus.STUDYING),
                 EnrollmentStatus.ENROLLED);
         components = List.of(GradeRuleTest.component(1L, "20", "10"), GradeRuleTest.component(2L, "30", "10"),
                 GradeRuleTest.component(3L, "50", "10"));
@@ -141,11 +141,11 @@ class GradeServiceTest {
     }
 
     @Nested
-    @DisplayName("Giảng viên nhập điểm")
+    @DisplayName("Giáo viên nhập điểm")
     class Entry {
 
         @Test
-        @DisplayName("Bảng điểm có mọi SV đang học × đầu điểm, trung bình chỉ khi đủ điểm")
+        @DisplayName("Bảng điểm có mọi HS đang học × đầu điểm, trung bình chỉ khi đủ điểm")
         void sheetShowsAverages() {
             grades.addAll(List.of(grade(e1, 0, "8", false), grade(e1, 1, "7", true), grade(e1, 2, "9", false),
                     grade(e2, 0, "6", false)));
@@ -156,7 +156,7 @@ class GradeServiceTest {
             assertThat(sheet.weightsComplete()).isTrue();
             assertThat(sheet.publishable()).isEqualTo(3);
             assertThat(sheet.rows()).extracting(GradeSheet.Row::studentCode, GradeSheet.Row::average)
-                    .containsExactly(tuple("SE190001", new BigDecimal("8.2")), tuple("SE190002", null));
+                    .containsExactly(tuple("HS260001", new BigDecimal("8.2")), tuple("HS260002", null));
             assertThat(sheet.rows().getFirst().cells().get(1).published()).isTrue();
         }
 
@@ -177,7 +177,7 @@ class GradeServiceTest {
             assertThat(saved.getValue()).allSatisfy(g -> assertThat(g.getGradedAt()).isNotNull());
             AuditLog audit = singleAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.ENTER_GRADES);
-            assertThat(audit.getDetail()).contains("SE190001/Đầu điểm 1: - -> 8.5", "SE190002/Đầu điểm 3: - -> 10");
+            assertThat(audit.getDetail()).contains("HS260001/Đầu điểm 1: - -> 8.5", "HS260002/Đầu điểm 3: - -> 10");
         }
 
         @Test
@@ -218,7 +218,7 @@ class GradeServiceTest {
         }
 
         @Test
-        @DisplayName("Ô không thuộc lớp (sinh viên hoặc đầu điểm khác, khóa sai dạng) → danh sách đã đổi")
+        @DisplayName("Ô không thuộc lớp (học sinh hoặc đầu điểm khác, khóa sai dạng) → danh sách đã đổi")
         void unknownCell() {
             for (String key : List.of("999_1", "100_99", "abc")) {
                 assertThatThrownBy(() -> service.save(TEACHER, 10L, form(Map.of(key, "8")), "127.0.0.1"))
@@ -236,7 +236,7 @@ class GradeServiceTest {
 
             assertThat(changed).isEqualTo(1);
             assertThat(existing.getScore()).isNull();
-            assertThat(singleAudit().getDetail()).contains("SE190001/Đầu điểm 1: 8 -> -");
+            assertThat(singleAudit().getDetail()).contains("HS260001/Đầu điểm 1: 8 -> -");
         }
 
         @Test
@@ -259,7 +259,7 @@ class GradeServiceTest {
         }
 
         @Test
-        @DisplayName("Lớp học phần đã hủy → chặn nhập điểm")
+        @DisplayName("Lớp môn học đã hủy → chặn nhập điểm")
         void cancelledSectionBlocksEntry() {
             section.setStatus(SectionStatus.CANCELLED);
 
@@ -269,7 +269,7 @@ class GradeServiceTest {
         }
 
         @Test
-        @DisplayName("Giảng viên khác (gõ URL) → 403 khi xem và khi lưu")
+        @DisplayName("Giáo viên khác (gõ URL) → 403 khi xem và khi lưu")
         void otherTeacherDenied() {
             assertThatThrownBy(() -> service.sheet(OTHER_TEACHER, Access.TEACHER, 10L))
                     .isInstanceOf(AccessDeniedException.class);
@@ -278,7 +278,7 @@ class GradeServiceTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn khác xem bảng điểm lớp ngoài bộ môn → 403")
+        @DisplayName("Tổ trưởng chuyên môn khác xem bảng điểm lớp ngoài tổ chuyên môn → 403")
         void headOfOtherDepartmentDenied() {
             assertThatThrownBy(() -> service.sheet(HEAD_IA, Access.MANAGER, 10L))
                     .isInstanceOf(AccessDeniedException.class);
@@ -290,7 +290,7 @@ class GradeServiceTest {
     class Publish {
 
         @Test
-        @DisplayName("Trưởng bộ môn công bố mọi ô đã có điểm chưa công bố, lưu người và thời điểm, audit số ô")
+        @DisplayName("Tổ trưởng chuyên môn công bố mọi ô đã có điểm chưa công bố, lưu người và thời điểm, audit số ô")
         void headPublishes() {
             Grade a = grade(e1, 0, "8", false);
             Grade b = grade(e2, 2, "6", false);
@@ -333,7 +333,7 @@ class GradeServiceTest {
         }
 
         @Test
-        @DisplayName("TEACHER và trưởng bộ môn khác không công bố được (403)")
+        @DisplayName("TEACHER và tổ trưởng chuyên môn khác không công bố được (403)")
         void publishScope() {
             assertThatThrownBy(() -> service.publish(TEACHER, 10L, "127.0.0.1"))
                     .isInstanceOf(AccessDeniedException.class);
@@ -368,7 +368,7 @@ class GradeServiceTest {
             AuditLog audit = singleAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.ADJUST_GRADE);
             assertThat(audit.getEntityId()).isEqualTo(900L);
-            assertThat(audit.getDetail()).contains("student=SE190001", "score=6 -> 7.5", "oldNote=Chấm đợt 1",
+            assertThat(audit.getDetail()).contains("student=HS260001", "score=6 -> 7.5", "oldNote=Chấm đợt 1",
                     "reason=Phúc khảo");
         }
 
@@ -391,7 +391,7 @@ class GradeServiceTest {
         }
 
         @Test
-        @DisplayName("Ô chưa công bố không điều chỉnh ở đây (do giảng viên sửa)")
+        @DisplayName("Ô chưa công bố không điều chỉnh ở đây (do giáo viên sửa)")
         void notPublished() {
             published.setPublished(false);
 
@@ -400,7 +400,7 @@ class GradeServiceTest {
         }
 
         @Test
-        @DisplayName("Giảng viên không điều chỉnh được ô đã công bố (403)")
+        @DisplayName("Giáo viên không điều chỉnh được ô đã công bố (403)")
         void teacherCannotAdjust() {
             assertThatThrownBy(() -> service.adjust(TEACHER, 10L, 900L, adjustForm("7", "x"), "127.0.0.1"))
                     .isInstanceOf(AccessDeniedException.class);

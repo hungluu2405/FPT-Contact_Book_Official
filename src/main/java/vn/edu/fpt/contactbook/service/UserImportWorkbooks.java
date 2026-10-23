@@ -72,7 +72,7 @@ public class UserImportWorkbooks {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             Styles styles = new Styles(workbook);
             Sheet sheet = workbook.createSheet("Kết quả");
-            String codeHeader = type == UserImportType.STUDENT ? "Mã SV" : "Mã GV";
+            String codeHeader = type == UserImportType.STUDENT ? "Mã HS" : "Mã GV";
             List<String> headers = List.of("Số điện thoại", "Họ tên", codeHeader, "Mật khẩu tạm");
             Row header = sheet.createRow(0);
             for (int i = 0; i < headers.size(); i++) {
@@ -117,13 +117,13 @@ public class UserImportWorkbooks {
         Map<Long, String> majorCodes = majors.stream()
                 .collect(Collectors.toMap(OptionView::id, OptionView::code, (a, b) -> a));
         List<List<String>> blocks = List.of(
-                column("Mã ngành", majors, OptionView::code), column("Tên ngành", majors, OptionView::name),
+                column("Mã khối", majors, OptionView::code), column("Tên khối", majors, OptionView::name),
                 column("Mã lớp", catalogLookupService.classes(), OptionView::code),
-                column("Ngành của lớp", catalogLookupService.classes(), c -> majorCodes.getOrDefault(c.groupId(), "")),
-                column("Mã bộ môn", catalogLookupService.departments(), OptionView::code),
-                column("Tên bộ môn", catalogLookupService.departments(), OptionView::name),
+                column("Khối của lớp", catalogLookupService.classes(), c -> majorCodes.getOrDefault(c.groupId(), "")),
+                column("Mã tổ chuyên môn", catalogLookupService.departments(), OptionView::code),
+                column("Tên tổ chuyên môn", catalogLookupService.departments(), OptionView::name),
                 List.of("Giới tính", "Nam", "Nữ", "Khác"),
-                List.of("Trạng thái (sinh viên)", "Đang học", "Bảo lưu", "Đã tốt nghiệp", "Thôi học"));
+                List.of("Trạng thái (học sinh)", "Đang học", "Bảo lưu", "Đã tốt nghiệp", "Thôi học"));
         int height = blocks.stream().mapToInt(List::size).max().orElse(0);
         for (int r = 0; r < height; r++) {
             Row row = sheet.createRow(r);

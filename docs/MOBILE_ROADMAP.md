@@ -4,7 +4,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
 
 ## 1. Quyết định đã chốt
 - **Repo chung**: app Flutter nằm ở `fpt_contact_book/mobile/`.
-- **Đối tượng**: sinh viên (SV), phụ huynh (PH), giảng viên (GV). **Chỉ làm Android.**
+- **Đối tượng**: học sinh (HS), phụ huynh (PH), giáo viên (GV). **Chỉ làm Android.**
 - **Dữ liệu**: mobile chỉ gọi REST API của backend Spring Boot. API đọc và ghi đúng database SQL Server `FptContactBook` mà web đang dùng. Mobile **không có database riêng**, không có SQLite hay chế độ offline. Có thể lưu cache trên máy, nhưng không có dữ liệu nghiệp vụ nào chỉ nằm trên điện thoại.
 - **Gộp repo**: **chỉ chép file**, không giữ lịch sử git của repo cũ `hungluu2405/Fpt-Contact_Book_Flutter`. Không chép `.git`, `.dart_tool/`, `build/`, `.idea/`, `*.iml`.
 - **Thư mục nền tảng**: **giữ tất cả** (android, ios, web, windows, macos, linux), nhưng chỉ phát triển và kiểm thử Android.
@@ -20,7 +20,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
 - Màu khớp với web lúc khảo sát: navy `#0A1930`, cam `#F97316`, nền `#F8F7F4`; ngoài ra có `fptBlue` và `fptGreen`. Từ 10a app theo bộ màu trắng và cam mới (`mobile/CLAUDE.md` mục 5).
 - Những chỗ cần sửa:
   - Nút "Quên mật khẩu?": SRS mục 8 không có chức năng này trên mobile, nên bỏ và thay bằng dòng "Liên hệ quản trị viên".
-  - Phụ đề "dành cho sinh viên" là sai, vì cả SV, PH và GV đều dùng app.
+  - Phụ đề "dành cho học sinh" là sai, vì cả HS, PH và GV đều dùng app.
   - `auth_widget.dart` import `main.dart` để lấy màu: tách màu ra file theme riêng.
   - `test/widget_test.dart` vẫn là test Counter mặc định và đang FAIL.
   - Quyền `INTERNET` chỉ có trong manifest debug/profile, chưa có ở `src/main`, nên bản release không gọi được mạng.
@@ -39,7 +39,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - Đăng nhập bằng số điện thoại, dùng lại `PhoneAuthenticationProvider`, `LoginAttemptService` và audit (LOGIN_FAILED, LOGIN_LOCKED). Có refresh token, đăng xuất, đổi mật khẩu (gồm cả trường hợp `must_change_password`).
   - Chuẩn hóa dạng lỗi và dạng phân trang; OpenAPI dùng làm hợp đồng cho mobile.
   - Service dùng chung với web; dữ liệu nằm cùng database SQL Server.
-- **9c: API cho SV và PH (đã xong, nhánh `feature/phase-9c-student-parent-api`; giả định 135–138)**
+- **9c: API cho HS và PH (đã xong, nhánh `feature/phase-9c-student-parent-api`; giả định 135–138)**
   - Hồ sơ, danh sách con (PH), thời khóa biểu, lịch thi, điểm (chỉ cột đã công bố), điểm danh.
   - Thông báo: danh sách, đánh dấu đã đọc, tải tệp.
   - Đơn nghỉ: gửi, xem, hủy.
@@ -54,7 +54,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - API client: tự gắn và làm mới token; lỗi mạng hiện thông báo kèm nút thử lại.
   - Nối màn hình đăng nhập với API; thêm màn hình bắt buộc đổi mật khẩu và đăng xuất.
   - Thay test Counter bằng test thật.
-- **10b: màn hình SV và PH** (nhánh `feature/phase-10b-student-parent`, giả định 157–160)
+- **10b: màn hình HS và PH** (nhánh `feature/phase-10b-student-parent`, giả định 157–160)
   - 10b-1 (đã xong): trang chủ theo mockup (ảnh trường, lưới 6 chức năng), chọn con, thanh điều hướng dưới, tab Tài khoản.
   - 10b-2 (đã xong, nhánh `feature/phase-10b-schedule`, giả định 161–164): lịch học theo tuần theo mockup, danh sách buổi cả học kỳ, lịch thi, thẻ "Lịch học hôm nay" trên trang chủ.
   - 10b-3: điểm, điểm danh.

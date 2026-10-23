@@ -122,11 +122,11 @@ class ParentLinkServiceTest {
     }
 
     @Test
-    @DisplayName("Người dùng không có hồ sơ sinh viên thì không thêm phụ huynh được")
+    @DisplayName("Người dùng không có hồ sơ học sinh thì không thêm phụ huynh được")
     void studentProfileRequired() {
         assertThatThrownBy(() -> service.linkParent(ADMIN, 99L, new ParentLinkForm(), null))
                 .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("hồ sơ sinh viên");
+                .hasMessageContaining("hồ sơ học sinh");
     }
 
     private ParentStudent link(Parent parent, boolean primary) {

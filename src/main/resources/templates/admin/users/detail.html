@@ -76,15 +76,15 @@
                     <li th:each="role : ${user.roles}">
                         <span class="badge rounded-pill role-badge" th:text="#{'role.' + ${role.roleCode}}">Vai trò</span>
                         <span th:if="${role.departmentName}" class="text-muted"
-                              th:text="${role.departmentName} + ' (' + ${role.departmentCode} + ')'">Bộ môn</span>
+                              th:text="${role.departmentName} + ' (' + ${role.departmentCode} + ')'">Tổ chuyên môn</span>
                     </li>
                 </ul>
             </div>
             <div class="card card-custom p-4 mb-4" th:if="${user.student}">
-                <h2 class="h5 mb-3" th:text="#{user.section.student}">Hồ sơ sinh viên</h2>
+                <h2 class="h5 mb-3" th:text="#{user.section.student}">Hồ sơ học sinh</h2>
                 <dl class="profile-info mb-0">
-                    <dt th:text="#{user.student-code}">Mã SV</dt><dd th:text="${user.student.studentCode}">SE</dd>
-                    <dt th:text="#{user.major}">Ngành</dt><dd th:text="${user.student.majorName}">Ngành</dd>
+                    <dt th:text="#{user.student-code}">Mã HS</dt><dd th:text="${user.student.studentCode}">SE</dd>
+                    <dt th:text="#{user.major}">Khối</dt><dd th:text="${user.student.majorName}">Khối</dd>
                     <dt th:text="#{user.class}">Lớp</dt><dd th:text="${user.student.classCode} ?: #{user.no-class}">Lớp</dd>
                     <dt th:text="#{user.enrollment-year}">Năm nhập học</dt><dd th:text="${user.student.enrollmentYear}">2024</dd>
                     <dt th:text="#{user.student-status}">Trạng thái</dt>
@@ -92,10 +92,10 @@
                 </dl>
             </div>
             <div class="card card-custom p-4 mb-4" th:if="${user.teacher}">
-                <h2 class="h5 mb-3" th:text="#{user.section.teacher}">Hồ sơ giảng viên</h2>
+                <h2 class="h5 mb-3" th:text="#{user.section.teacher}">Hồ sơ giáo viên</h2>
                 <dl class="profile-info mb-0">
                     <dt th:text="#{user.teacher-code}">Mã GV</dt><dd th:text="${user.teacher.teacherCode}">GV</dd>
-                    <dt th:text="#{user.department}">Bộ môn</dt><dd th:text="${user.teacher.departmentName}">Bộ môn</dd>
+                    <dt th:text="#{user.department}">Tổ chuyên môn</dt><dd th:text="${user.teacher.departmentName}">Tổ chuyên môn</dd>
                     <dt th:text="#{user.academic-title}">Học hàm học vị</dt>
                     <dd th:text="${user.teacher.academicTitle} ?: #{profile.empty}">ThS.</dd>
                 </dl>
@@ -123,7 +123,7 @@
                 <p th:if="${#lists.isEmpty(user.children)}" class="text-muted mb-0" th:text="#{user.links.none}">Chưa có</p>
                 <ul class="list-unstyled mb-0">
                     <li th:each="link : ${user.children}">
-                        <a th:href="@{/admin/users/{id}(id=${link.userId})}" th:text="${link.fullName}">Sinh viên</a>
+                        <a th:href="@{/admin/users/{id}(id=${link.userId})}" th:text="${link.fullName}">Học sinh</a>
                         <span class="text-muted" th:text="'(' + ${link.studentCode} + ') · ' + #{'relationship.' + ${link.relationship}}">SE</span>
                         <span th:if="${link.primary}" class="badge text-bg-warning" th:text="#{user.links.primary}">Chính</span>
                     </li>

@@ -26,7 +26,7 @@
                 <tr th:each="n : ${items.content}">
                     <td><span th:replace="~{fragments/notifications :: priority(${n.priority})}"></span>
                         <a th:href="@{/notifications/{id}(id=${n.id})}" th:text="${n.title}">Tiêu đề</a></td>
-                    <td th:text="#{'notification-target.' + ${n.targetType}}">Lớp học phần</td>
+                    <td th:text="#{'notification-target.' + ${n.targetType}}">Lớp môn học</td>
                     <td th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}">01/10/2026</td>
                     <td class="text-center" th:text="#{notification.stats.value(${n.readCount}, ${n.recipientCount}, ${n.readPercent()})}">0 / 0 (0%)</td>
                 </tr>

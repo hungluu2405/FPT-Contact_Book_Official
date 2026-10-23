@@ -101,9 +101,9 @@ public class SchoolClassService {
                 "Tên tối đa 150 ký tự", errors);
         Integer intakeYear = form.getIntakeYear();
         if (intakeYear == null) {
-            errors.put("intakeYear", "Vui lòng nhập niên khóa");
+            errors.put("intakeYear", "Vui lòng nhập năm vào trường");
         } else if (intakeYear < MIN_INTAKE_YEAR || intakeYear > MAX_INTAKE_YEAR) {
-            errors.put("intakeYear", "Niên khóa phải từ " + MIN_INTAKE_YEAR + " đến " + MAX_INTAKE_YEAR);
+            errors.put("intakeYear", "Năm vào trường phải từ " + MIN_INTAKE_YEAR + " đến " + MAX_INTAKE_YEAR);
         }
         // Mã giảng viên được lưu viết hoa (ASSUMPTIONS 24) nên chuẩn hóa như mã danh mục trước khi tra.
         String teacherCode = CatalogSupport.normalizeCode(form.getHomeroomTeacherCode());

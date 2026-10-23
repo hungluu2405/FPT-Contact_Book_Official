@@ -48,7 +48,7 @@ public class EnrollmentController {
         try {
             boolean reEnrolled = enrollmentService.enroll(actor, id, studentId, request.getRemoteAddr());
             redirectAttributes.addFlashAttribute("successMessage",
-                    reEnrolled ? "Đã ghi danh lại sinh viên" : "Đã ghi danh sinh viên");
+                    reEnrolled ? "Đã ghi danh lại học sinh" : "Đã ghi danh học sinh");
         } catch (BusinessException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
@@ -63,7 +63,7 @@ public class EnrollmentController {
     public String drop(@AuthenticationPrincipal AppUserPrincipal actor, @PathVariable Long id,
                        @PathVariable Long studentId, HttpServletRequest request,
                        RedirectAttributes redirectAttributes) {
-        return FormErrors.runThenRedirect(detail(id), redirectAttributes, "Đã gỡ sinh viên khỏi lớp",
+        return FormErrors.runThenRedirect(detail(id), redirectAttributes, "Đã gỡ học sinh khỏi lớp",
                 () -> enrollmentService.drop(actor, id, studentId, request.getRemoteAddr()));
     }
 
@@ -74,8 +74,8 @@ public class EnrollmentController {
         try {
             EnrollClassResult result = enrollmentService.enrollClass(actor, id, classId, request.getRemoteAddr());
             redirectAttributes.addFlashAttribute("successMessage", "Đã ghi danh " + result.added()
-                    + " sinh viên mới, ghi danh lại " + result.reEnrolled() + "; bỏ qua " + result.skippedEnrolled()
-                    + " sinh viên đã có trong lớp và " + result.skippedNotStudying() + " sinh viên không đang học");
+                    + " học sinh mới, ghi danh lại " + result.reEnrolled() + "; bỏ qua " + result.skippedEnrolled()
+                    + " học sinh đã có trong lớp và " + result.skippedNotStudying() + " học sinh không đang học");
         } catch (BusinessException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
@@ -118,7 +118,7 @@ public class EnrollmentController {
             return importView(actor, id, model);
         }
         redirectAttributes.addFlashAttribute("successMessage", "Đã ghi danh " + result.added()
-                + " sinh viên mới và ghi danh lại " + result.reEnrolled() + " sinh viên từ file Excel");
+                + " học sinh mới và ghi danh lại " + result.reEnrolled() + " học sinh từ file Excel");
         return "redirect:" + detail(id);
     }
 

@@ -26,9 +26,9 @@ import static vn.edu.fpt.contactbook.service.ImportColumn.TEACHER_CODE;
  */
 public enum UserImportType {
 
-    STUDENT("Sinh viên", "sinh-vien", RoleCodes.STUDENT, List.of(PHONE, FULL_NAME, GENDER, DATE_OF_BIRTH, EMAIL,
+    STUDENT("Học sinh", "sinh-vien", RoleCodes.STUDENT, List.of(PHONE, FULL_NAME, GENDER, DATE_OF_BIRTH, EMAIL,
             ADDRESS, STUDENT_CODE, MAJOR_CODE, CLASS_CODE, ENROLLMENT_YEAR, STUDENT_STATUS)),
-    TEACHER("Giảng viên", "giang-vien", RoleCodes.TEACHER, List.of(PHONE, FULL_NAME, GENDER, DATE_OF_BIRTH, EMAIL,
+    TEACHER("Giáo viên", "giang-vien", RoleCodes.TEACHER, List.of(PHONE, FULL_NAME, GENDER, DATE_OF_BIRTH, EMAIL,
             ADDRESS, TEACHER_CODE, DEPARTMENT_CODE, ACADEMIC_TITLE));
 
     private final String label;

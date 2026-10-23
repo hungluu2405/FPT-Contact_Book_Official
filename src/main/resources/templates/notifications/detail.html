@@ -21,7 +21,7 @@
         <p class="text-muted small mb-3">
             <span th:text="#{notification.from(${item.senderName})}">Từ</span> ·
             <span th:text="${#temporals.format(item.createdAt, 'dd/MM/yyyy HH:mm')}">01/10/2026</span> ·
-            <span th:text="#{'notification-target.' + ${item.targetType}} + (${item.targetLabel} != null ? ': ' + ${item.targetLabel} : '')">Lớp học phần</span>
+            <span th:text="#{'notification-target.' + ${item.targetType}} + (${item.targetLabel} != null ? ': ' + ${item.targetLabel} : '')">Lớp môn học</span>
         </p>
         <div class="text-pre-line notification-content" th:text="${item.content}">Nội dung</div>
         <div th:unless="${#lists.isEmpty(item.files)}" class="mt-3">

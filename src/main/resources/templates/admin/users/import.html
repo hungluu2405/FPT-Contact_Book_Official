@@ -35,7 +35,7 @@
                 <label for="type" class="form-label" th:text="#{user.import.type}">Loại</label>
                 <select id="type" name="type" class="form-select">
                     <option th:each="t : ${types}" th:value="${t}" th:text="${t.label()}"
-                            th:selected="${t == type}">Sinh viên</option>
+                            th:selected="${t == type}">Học sinh</option>
                 </select>
             </div>
             <div class="col-md-8">

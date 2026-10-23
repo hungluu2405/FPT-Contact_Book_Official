@@ -74,7 +74,7 @@ void main() {
     expect(find.byType(HomeScreen), findsOneWidget);
     expect(find.text('Xin chào,'), findsOneWidget);
     expect(find.text('Nguyễn Văn An'), findsOneWidget);
-    expect(find.text('Sinh viên'), findsOneWidget);
+    expect(find.text('Học sinh'), findsOneWidget);
   });
 
   testWidgets('forced password change shows server errors per field', (

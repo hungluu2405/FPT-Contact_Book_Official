@@ -42,9 +42,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Báo cáo trên FptContactBook_test. Dữ liệu mẫu học kỳ FA26 (id 1), mọi môn thuộc bộ môn SE (id 1):
- * lớp 1 PRJ301-SE1901-FA26 (GV002 = 0900000003, chỉ SE190001); lớp 27 PRN211_FA26_01 (GV003, 2 SV ENROLLED, có điểm
- * danh và 4 ô điểm, chưa ai đủ điểm); lớp 28 SWP391_FA26_01 (GV004). Trưởng bộ môn 0900000002 thuộc SE.
+ * Báo cáo trên FptContactBook_test. Dữ liệu mẫu học kỳ HK1 (id 1), mọi môn thuộc bộ môn SE (id 1):
+ * lớp 1 TOAN10-HK1-2627-01 (GV002 = 0900000003, chỉ HS260001); lớp 27 TIN11-HK1-2627-01 (GV003, 2 SV ENROLLED, có điểm
+ * danh và 4 ô điểm, chưa ai đủ điểm); lớp 28 STEM-HK1-2627-01 (GV004). Trưởng bộ môn 0900000002 thuộc SE.
  * Lớp của bộ môn IA tạo trong test (rollback sau mỗi test).
  */
 @IntegrationTest
@@ -73,11 +73,11 @@ class ReportIntegrationTest {
             for (String report : List.of(ATTENDANCE, GRADES)) {
                 mockMvc.perform(get(report).param("sectionId", "1").with(as(TestAccounts.TEACHER)))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("PRJ301-SE1901-FA26")));
+                        .andExpect(content().string(containsString("TOAN10-HK1-2627-01")));
                 mockMvc.perform(get(report).with(as(TestAccounts.TEACHER)))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(allOf(containsString("PRJ301-SE1901-FA26"),
-                                not(containsString("PRN211_FA26_01")), not(containsString("SWP391_FA26_01")))));
+                        .andExpect(content().string(allOf(containsString("TOAN10-HK1-2627-01"),
+                                not(containsString("TIN11-HK1-2627-01")), not(containsString("STEM-HK1-2627-01")))));
             }
         }
 
@@ -101,16 +101,16 @@ class ReportIntegrationTest {
         }
 
         @Test
-        @DisplayName("TBM xem mọi lớp bộ môn mình (kể cả lớp người khác dạy); lớp, môn bộ môn khác → 403")
+        @DisplayName("TBM xem mọi lớp tổ chuyên môn mình (kể cả lớp người khác dạy); lớp, môn tổ chuyên môn khác → 403")
         void headDepartment() throws Exception {
             ClassSection ia = iaSection();
             for (String report : List.of(ATTENDANCE, GRADES)) {
                 mockMvc.perform(get(report).param("sectionId", "27").with(as(TestAccounts.TEACHER_HEAD)))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("PRN211_FA26_01")));
+                        .andExpect(content().string(containsString("TIN11-HK1-2627-01")));
                 mockMvc.perform(get(report).with(as(TestAccounts.TEACHER_HEAD)))
-                        .andExpect(content().string(allOf(containsString("PRN211_FA26_01"),
-                                containsString("SWP391_FA26_01"), not(containsString(ia.getCode())))));
+                        .andExpect(content().string(allOf(containsString("TIN11-HK1-2627-01"),
+                                containsString("STEM-HK1-2627-01"), not(containsString(ia.getCode())))));
                 for (String url : List.of(report, report + "/export")) {
                     mockMvc.perform(get(url).param("sectionId", ia.getId().toString())
                             .with(as(TestAccounts.TEACHER_HEAD))).andExpect(status().isForbidden());
@@ -134,7 +134,7 @@ class ReportIntegrationTest {
         }
 
         @Test
-        @DisplayName("SINH VIÊN, PHỤ HUYNH vào mọi trang báo cáo → 403")
+        @DisplayName("HỌC SINH, PHỤ HUYNH vào mọi trang báo cáo → 403")
         void studentParentForbidden() throws Exception {
             for (String phone : List.of(TestAccounts.STUDENT, TestAccounts.PARENT)) {
                 for (String url : List.of("/reports", ATTENDANCE, ATTENDANCE + "/export", GRADES, GRADES + "/export",
@@ -170,20 +170,20 @@ class ReportIntegrationTest {
     class Export {
 
         @Test
-        @DisplayName("Điểm danh một lớp: đúng content type, mở lại được bằng POI, đủ sinh viên, ghi EXPORT_REPORT")
+        @DisplayName("Điểm danh một lớp: đúng content type, mở lại được bằng POI, đủ học sinh, ghi EXPORT_REPORT")
         void attendanceSection() throws Exception {
             MvcResult result = mockMvc.perform(get(ATTENDANCE + "/export").param("sectionId", "27")
                             .with(as(TestAccounts.ADMIN)))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(UserImportWorkbooks.CONTENT_TYPE))
                     .andExpect(header().string("Content-Disposition",
-                            containsString("bao-cao-diem-danh-FA26-PRN211_FA26_01.xlsx")))
+                            containsString("bao-cao-diem-danh-HK1-2627-TIN11-HK1-2627-01.xlsx")))
                     .andReturn();
 
             try (XSSFWorkbook workbook = open(result)) {
-                Sheet sheet = workbook.getSheet("Sinh viên");
+                Sheet sheet = workbook.getSheet("Học sinh");
                 assertThat(sheet).isNotNull();
-                assertThat(column(sheet, "Mã SV")).hasSize(2).allSatisfy(code -> assertThat(code).startsWith("SE"));
+                assertThat(column(sheet, "Mã HS")).hasSize(2).allSatisfy(code -> assertThat(code).startsWith("HS"));
             }
             AuditLog audit = lastAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.EXPORT_REPORT);
@@ -191,12 +191,12 @@ class ReportIntegrationTest {
             assertThat(audit.getEntityType()).isEqualTo(AuditActions.ENTITY_CLASS_SECTION);
             assertThat(audit.getEntityId()).isEqualTo(27L);
             assertThat(audit.getDetail()).isEqualTo(
-                    "report=ATTENDANCE, semester=FA26, subject=PRN211, section=PRN211_FA26_01, rows=2");
+                    "report=ATTENDANCE, semester=HK1-2627, subject=TIN11, section=TIN11-HK1-2627-01, rows=2");
             assertThat(audit.getIpAddress()).isEqualTo("127.0.0.1");
         }
 
         @Test
-        @DisplayName("Điểm cả học kỳ của TBM: chỉ lớp trong bộ môn, mở lại được; GV chỉ xuất được lớp mình")
+        @DisplayName("Điểm cả học kỳ của TBM: chỉ lớp trong tổ chuyên môn, mở lại được; GV chỉ xuất được lớp mình")
         void gradesOverviewInScope() throws Exception {
             ClassSection ia = iaSection();
             MvcResult head = mockMvc.perform(get(GRADES + "/export").with(as(TestAccounts.TEACHER_HEAD)))
@@ -204,29 +204,29 @@ class ReportIntegrationTest {
                     .andExpect(content().contentType(UserImportWorkbooks.CONTENT_TYPE))
                     .andReturn();
             try (XSSFWorkbook workbook = open(head)) {
-                assertThat(column(workbook.getSheet("Lớp học phần"), "Lớp học phần"))
-                        .contains("PRJ301-SE1901-FA26", "PRN211_FA26_01", "SWP391_FA26_01")
+                assertThat(column(workbook.getSheet("Lớp môn học"), "Lớp môn học"))
+                        .contains("TOAN10-HK1-2627-01", "TIN11-HK1-2627-01", "STEM-HK1-2627-01")
                         .doesNotContain(ia.getCode());
             }
-            assertThat(lastAudit().getDetail()).startsWith("report=GRADES, semester=FA26, subject=-, section=-");
+            assertThat(lastAudit().getDetail()).startsWith("report=GRADES, semester=HK1-2627, subject=-, section=-");
 
             MvcResult teacher = mockMvc.perform(get(GRADES + "/export").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk()).andReturn();
             try (XSSFWorkbook workbook = open(teacher)) {
-                assertThat(column(workbook.getSheet("Lớp học phần"), "Lớp học phần"))
-                        .containsExactly("PRJ301-SE1901-FA26");
+                assertThat(column(workbook.getSheet("Lớp môn học"), "Lớp môn học"))
+                        .containsExactly("TOAN10-HK1-2627-01");
             }
         }
 
         @Test
-        @DisplayName("Điểm một lớp: sheet sinh viên (chưa đủ điểm ghi rõ) và sheet thống kê")
+        @DisplayName("Điểm một lớp: sheet học sinh (chưa đủ điểm ghi rõ) và sheet thống kê")
         void gradesSection() throws Exception {
             MvcResult result = mockMvc.perform(get(GRADES + "/export").param("sectionId", "27")
                             .with(as(TestAccounts.TEACHER_HEAD)))
                     .andExpect(status().isOk()).andReturn();
 
             try (XSSFWorkbook workbook = open(result)) {
-                assertThat(column(workbook.getSheet("Sinh viên"), "Trung bình môn"))
+                assertThat(column(workbook.getSheet("Học sinh"), "Trung bình môn"))
                         .containsExactly("Chưa đủ điểm", "Chưa đủ điểm");
                 assertThat(workbook.getSheet("Thống kê")).isNotNull();
             }
@@ -279,7 +279,7 @@ class ReportIntegrationTest {
         }
     }
 
-    /** Lớp của bộ môn IA (id 38), do GV003 (teachers.id 8) dạy, học kỳ FA26. */
+    /** Lớp của bộ môn IA (id 38), do GV003 (teachers.id 8) dạy, học kỳ HK1. */
     private ClassSection iaSection() {
         Subject subject = new Subject();
         subject.setDepartment(departmentRepository.findById(38L).orElseThrow());
@@ -288,7 +288,7 @@ class ReportIntegrationTest {
         subject.setCredits((short) 3);
         subjectRepository.saveAndFlush(subject);
         ClassSection section = new ClassSection();
-        section.setCode("IAO201-FA26-01");
+        section.setCode("IAO201-HK1-2627-01");
         section.setSubject(subject);
         section.setSemester(semesterRepository.findById(1L).orElseThrow());
         section.setTeacher(teacherRepository.findById(8L).orElseThrow());

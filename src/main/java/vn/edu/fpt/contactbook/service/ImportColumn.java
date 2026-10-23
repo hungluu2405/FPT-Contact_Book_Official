@@ -12,13 +12,13 @@ public enum ImportColumn {
     DATE_OF_BIRTH("Ngày sinh", "dateOfBirth", false),
     EMAIL("Email", "email", false),
     ADDRESS("Địa chỉ", "address", false),
-    STUDENT_CODE("Mã SV", "profile.studentCode", true),
-    MAJOR_CODE("Mã ngành", "profile.majorId", true),
+    STUDENT_CODE("Mã HS", "profile.studentCode", true),
+    MAJOR_CODE("Mã khối", "profile.majorId", true),
     CLASS_CODE("Mã lớp", "profile.classId", true),
     ENROLLMENT_YEAR("Năm nhập học", "profile.enrollmentYear", false),
     STUDENT_STATUS("Trạng thái", "profile.studentStatus", false),
     TEACHER_CODE("Mã GV", "profile.teacherCode", true),
-    DEPARTMENT_CODE("Mã bộ môn", "profile.teacherDepartmentId", true),
+    DEPARTMENT_CODE("Mã tổ chuyên môn", "profile.teacherDepartmentId", true),
     ACADEMIC_TITLE("Học hàm học vị", "profile.academicTitle", false);
 
     private final String header;

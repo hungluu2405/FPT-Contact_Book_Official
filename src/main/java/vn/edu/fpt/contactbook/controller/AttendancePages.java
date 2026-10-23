@@ -106,10 +106,10 @@ class AttendancePages {
 
     private static String successMessage(AttendanceSaveResult result, AttendanceSheet sheet) {
         if (result.firstTime()) {
-            return "Đã lưu điểm danh buổi " + sheet.sessionNo() + " (" + result.changed() + " sinh viên)";
+            return "Đã lưu điểm danh buổi " + sheet.sessionNo() + " (" + result.changed() + " học sinh)";
         }
         return result.changed() == 0 ? "Không có thay đổi nào để lưu"
-                : "Đã điều chỉnh điểm danh của " + result.changed() + " sinh viên";
+                : "Đã điều chỉnh điểm danh của " + result.changed() + " học sinh";
     }
 
     /** Quá hạn của giáo viên (sheet.locked) thì chỉ xem, kèm thông báo hạn. */

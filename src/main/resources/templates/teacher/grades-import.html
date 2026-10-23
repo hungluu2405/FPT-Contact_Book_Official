@@ -12,7 +12,7 @@
 
     <div class="card card-custom p-4 mb-3">
         <h2 class="h5" th:text="#{user.import.step1}">1. Tải file mẫu</h2>
-        <p class="text-muted" th:text="#{grade.import.template-hint(${maxRows})}">Cột Mã SV và các đầu điểm.</p>
+        <p class="text-muted" th:text="#{grade.import.template-hint(${maxRows})}">Cột Mã HS và các đầu điểm.</p>
         <a class="btn btn-outline-primary" th:href="@{/teacher/sections/{id}/grades/import/template(id=${sheet.section.id})}">
             <i class="bi bi-download"></i> <span th:text="#{enrollment.import.template}">Tải file mẫu</span></a>
     </div>
@@ -44,7 +44,7 @@
                 <tbody>
                 <tr th:each="error : ${importErrors}">
                     <td th:text="${error.rowNumber}">2</td>
-                    <td th:text="${error.column}">Mã SV</td>
+                    <td th:text="${error.column}">Mã HS</td>
                     <td th:text="${error.message}">Lý do</td>
                 </tr>
                 </tbody>

@@ -49,7 +49,7 @@ import java.time.LocalDate;
  * một buổi, duyệt đơn. Chỉ lớp mình dạy (Access.TEACHER, AttendanceScope) và đơn mình phụ trách (RequestService);
  * quản lý cả bộ môn, nhập điểm, gửi thông báo vẫn làm trên web.
  */
-@Tag(name = "Teacher", description = "Giảng viên: lịch dạy, điểm danh, duyệt đơn")
+@Tag(name = "Teacher", description = "Giáo viên: lịch dạy, điểm danh, duyệt đơn")
 @RestController
 @RequestMapping("/api/v1/teacher")
 @RequiredArgsConstructor
@@ -85,7 +85,7 @@ public class TeacherApiController {
         return paged(scheduleViewService.exams(actor, Audience.TEACHER, null, semesterId, page));
     }
 
-    @Operation(summary = "Lớp học phần mình dạy trong học kỳ")
+    @Operation(summary = "Lớp môn học mình dạy trong học kỳ")
     @GetMapping("/sections")
     public InSemester<PageResponse<TeacherSectionView>> sections(@AuthenticationPrincipal AppUserPrincipal actor,
                                                                  @RequestParam(required = false) Long semesterId,
@@ -93,7 +93,7 @@ public class TeacherApiController {
         return paged(attendanceViewService.teacherSections(actor, semesterId, page));
     }
 
-    @Operation(summary = "Thống kê điểm danh của lớp: các buổi và chuyên cần từng sinh viên")
+    @Operation(summary = "Thống kê điểm danh của lớp: các buổi và chuyên cần từng học sinh")
     @GetMapping("/sections/{id}/attendance")
     public SectionAttendanceResponse sectionAttendance(@AuthenticationPrincipal AppUserPrincipal actor,
                                                        @PathVariable Long id,
@@ -111,7 +111,7 @@ public class TeacherApiController {
         return attendanceService.sheet(actor, Access.TEACHER, id, sessionId);
     }
 
-    @Operation(summary = "Lưu điểm danh một buổi (đủ mọi sinh viên; buổi đã điểm danh thì bắt buộc có reason)")
+    @Operation(summary = "Lưu điểm danh một buổi (đủ mọi học sinh; buổi đã điểm danh thì bắt buộc có reason)")
     @PostMapping("/sections/{id}/sessions/{sessionId}/attendance")
     public AttendanceSaveResponse saveAttendance(@AuthenticationPrincipal AppUserPrincipal actor,
                                                  @PathVariable Long id, @PathVariable Long sessionId,

@@ -48,11 +48,11 @@
 
     <div class="card card-custom p-4">
         <h2 class="h5" th:text="#{club.president.assign}">Chỉ định chủ nhiệm</h2>
-        <p class="text-muted" th:text="#{club.president.hint}">Nhập mã sinh viên.</p>
+        <p class="text-muted" th:text="#{club.president.hint}">Nhập mã học sinh.</p>
         <form method="post" th:action="@{/admin/clubs/{id}/president(id=${item.id})}" class="row g-2 align-items-end"
               th:attr="data-confirm=#{club.president.confirm}">
             <div class="col-md-6">
-                <label for="studentCode" class="form-label" th:text="#{club.president.student-code}">Mã sinh viên</label>
+                <label for="studentCode" class="form-label" th:text="#{club.president.student-code}">Mã học sinh</label>
                 <input type="text" class="form-control text-uppercase" id="studentCode" name="studentCode" maxlength="20" required>
             </div>
             <div class="col-md-3">

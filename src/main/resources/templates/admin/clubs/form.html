@@ -19,7 +19,7 @@
                 <div th:replace="~{fragments/catalog :: textareaField('description', #{club.description}, 2000, 'col-12')}"></div>
                 <div th:replace="~{fragments/catalog :: date('foundedDate', #{club.founded}, false, 'col-md-4')}"></div>
                 <div class="col-md-8">
-                    <label for="advisorUserId" class="form-label" th:text="#{club.advisor}">Giảng viên phụ trách</label>
+                    <label for="advisorUserId" class="form-label" th:text="#{club.advisor}">Giáo viên phụ trách</label>
                     <select class="form-select" th:field="*{advisorUserId}"
                             th:classappend="${#fields.hasErrors('advisorUserId')} ? 'is-invalid'">
                         <option value="" th:text="#{club.advisor.none}">Chưa có</option>

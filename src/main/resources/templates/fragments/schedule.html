@@ -78,7 +78,7 @@
                     <div th:text="${s.subjectCode} + ' - ' + ${s.subjectName}">PRJ301</div>
                     <div class="small text-muted" th:text="${s.sectionCode}">PRJ301-FA26-01</div>
                     <div class="small"><i class="bi bi-geo-alt"></i> <span th:text="${s.roomCode} ?: #{schedule.no-room}">R101</span></div>
-                    <div class="small"><i class="bi bi-person"></i> <span th:text="${s.teacherName}">Giảng viên</span></div>
+                    <div class="small"><i class="bi bi-person"></i> <span th:text="${s.teacherName}">Giáo viên</span></div>
                     <span th:if="${s.cancelled()}" class="badge text-bg-danger" th:text="#{'session-status.CANCELLED'}">Đã hủy</span>
                     <span th:if="${s.makeup()}" class="badge text-bg-info" th:text="#{'session-status.MAKEUP'}">Học bù</span>
                 </div>
@@ -97,7 +97,7 @@
             <th th:text="#{schedule.time}">Giờ</th>
             <th th:text="#{section.subject}">Môn</th>
             <th th:text="#{schedule.room}">Phòng</th>
-            <th th:text="#{section.teacher}">Giảng viên</th>
+            <th th:text="#{section.teacher}">Giáo viên</th>
             <th th:text="#{section.status}">Trạng thái</th>
         </tr>
         </thead>
@@ -107,7 +107,7 @@
             <td th:text="${#temporals.format(s.startTime, 'HH:mm')} + '–' + ${#temporals.format(s.endTime, 'HH:mm')}">07:30–09:45</td>
             <td th:text="${s.subjectCode} + ' (' + ${s.sectionCode} + ')'">PRJ301</td>
             <td th:text="${s.roomCode} ?: #{schedule.no-room}">R101</td>
-            <td th:text="${s.teacherName}">Giảng viên</td>
+            <td th:text="${s.teacherName}">Giáo viên</td>
             <td th:text="#{'session-status.' + ${s.status}}">Đã lên lịch</td>
         </tr>
         <tr th:if="${items.empty}">

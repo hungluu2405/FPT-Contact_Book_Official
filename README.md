@@ -1,6 +1,6 @@
-# Sổ liên lạc điện tử – Đại học FPT (Phân hệ Web)
+# Sổ liên lạc điện tử – My FPT School (Phân hệ Web)
 
-Hệ thống Sổ liên lạc điện tử Đại học FPT được phát triển trên nền tảng Spring Boot và Thymeleaf, kết nối cơ sở dữ liệu Microsoft SQL Server.
+Hệ thống Sổ liên lạc điện tử My FPT School được phát triển trên nền tảng Spring Boot và Thymeleaf, kết nối cơ sở dữ liệu Microsoft SQL Server.
 
 ---
 
@@ -100,8 +100,8 @@ c:\Project\fpt_contact_book\
 │   │           ├── fragments/               # Thanh trên, menu, thông báo flash
 │   │           ├── auth/                    # Đăng nhập, đổi mật khẩu
 │   │           ├── admin/                   # Màn hình quản trị
-│   │           ├── teacher/                 # Màn hình giảng viên
-│   │           ├── student/                 # Màn hình sinh viên
+│   │           ├── teacher/                 # Màn hình giáo viên
+│   │           ├── student/                 # Màn hình học sinh
 │   │           ├── parent/                  # Màn hình phụ huynh
 │   │           ├── common/                  # Màn hình dùng chung
 │   │           └── error/                   # Trang lỗi 403, 404, 500

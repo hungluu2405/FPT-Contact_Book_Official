@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 public class GradeImportService {
 
     public static final String CONTENT_TYPE = EnrollmentImportService.CONTENT_TYPE;
-    public static final String COLUMN = "Mã SV";
+    public static final String COLUMN = "Mã HS";
     public static final int MAX_ROWS = ExcelImportReader.MAX_ROWS;
 
     private final GradeService gradeService;
@@ -96,7 +96,7 @@ public class GradeImportService {
         for (ParsedRow row : rows) {
             String code = row.studentCode();
             if (code == null) {
-                errors.add(new ImportRowError(row.rowNumber(), COLUMN, "Vui lòng nhập mã sinh viên"));
+                errors.add(new ImportRowError(row.rowNumber(), COLUMN, "Vui lòng nhập mã học sinh"));
                 continue;
             }
             Integer first = seen.putIfAbsent(code, row.rowNumber());
@@ -107,7 +107,7 @@ public class GradeImportService {
             Enrollment enrollment = enrollments.get(code);
             if (enrollment == null) {
                 errors.add(new ImportRowError(row.rowNumber(), COLUMN,
-                        "Sinh viên \"" + code + "\" không đang học lớp học phần này"));
+                        "Học sinh \"" + code + "\" không đang học lớp môn học này"));
                 continue;
             }
             for (int i = 0; i < components.size(); i++) {
@@ -119,7 +119,7 @@ public class GradeImportService {
                 } else if (cell.value() != null) {
                     Grade existing = data.grades().get(GradeSheet.key(enrollment.getId(), component.getId()));
                     error = existing != null && existing.isPublished()
-                            ? "Ô điểm đã công bố, giảng viên không sửa được (để trống ô này)"
+                            ? "Ô điểm đã công bố, giáo viên không sửa được (để trống ô này)"
                             : GradeRule.validate(cell.value(), component.getMaxScore());
                     if (error == null) {
                         updates.add(new CellUpdate(enrollment, component, cell.value()));
@@ -158,7 +158,7 @@ public class GradeImportService {
 
             Sheet guide = workbook.createSheet("Hướng dẫn");
             String[] lines = {
-                    "Mỗi dòng một sinh viên: mã sinh viên ở cột A, điểm từng đầu điểm ở các cột sau; giữ nguyên dòng tiêu đề.",
+                    "Mỗi dòng một học sinh: mã học sinh ở cột A, điểm từng đầu điểm ở các cột sau; giữ nguyên dòng tiêu đề.",
                     "Điểm từ 0 đến điểm tối đa của đầu điểm, tối đa 2 chữ số thập phân (8.5 hoặc 8,5).",
                     "Ô để trống: giữ nguyên điểm hiện tại. Ô điểm đã công bố phải để trống.",
                     "Tối đa " + MAX_ROWS + " dòng, file .xlsx tối đa 2 MB.",

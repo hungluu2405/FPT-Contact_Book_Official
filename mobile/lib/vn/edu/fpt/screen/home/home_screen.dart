@@ -172,7 +172,7 @@ class _DashboardTab extends StatelessWidget {
     }
     if (!user.isStudent && !user.isParent) {
       return const _Message(
-        'Chức năng giảng viên sẽ có trong bản cập nhật tới.',
+        'Chức năng giáo viên sẽ có trong bản cập nhật tới.',
       );
     }
     if (!user.isStudent) {

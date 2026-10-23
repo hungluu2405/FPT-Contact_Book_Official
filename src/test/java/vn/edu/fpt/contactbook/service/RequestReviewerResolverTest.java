@@ -42,11 +42,11 @@ class RequestReviewerResolverTest {
         sectionTeacher.getUser().setId(3L);
         homeroomTeacher = CatalogTestData.teacher(8L, "GV003", se);
         homeroomTeacher.getUser().setId(16L);
-        section = CatalogTestData.section(1L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se),
-                CatalogTestData.semester(1L, "FA26"), sectionTeacher, 40, SectionStatus.OPEN);
+        section = CatalogTestData.section(1L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se),
+                CatalogTestData.semester(1L, "HK1-2627"), sectionTeacher, 40, SectionStatus.OPEN);
         SchoolClass schoolClass = new SchoolClass();
         schoolClass.setHomeroomTeacher(homeroomTeacher);
-        student = CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING);
+        student = CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING);
         student.setSchoolClass(schoolClass);
     }
 
@@ -59,7 +59,7 @@ class RequestReviewerResolverTest {
     }
 
     @Test
-    @DisplayName("Đơn nghỉ có lớp học phần: giảng viên lớp đó duyệt, GVCN và ADMIN không")
+    @DisplayName("Đơn nghỉ có lớp môn học: giáo viên lớp đó duyệt, GVCN và ADMIN không")
     void sectionTeacher() {
         UserRequest request = leave(section);
 
@@ -70,7 +70,7 @@ class RequestReviewerResolverTest {
     }
 
     @Test
-    @DisplayName("Đơn nghỉ không chọn lớp: giảng viên chủ nhiệm duyệt")
+    @DisplayName("Đơn nghỉ không chọn lớp: giáo viên chủ nhiệm duyệt")
     void homeroomTeacher() {
         UserRequest request = leave(null);
 

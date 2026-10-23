@@ -48,9 +48,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Điểm số trên FptContactBook_test. Dữ liệu mẫu: lớp 1 (PRJ301-SE1901-FA26, GV002 = 0900000003, chỉ có SE190001 với
- * enrollments.id 1), môn PRJ301 có đầu điểm 1 Assignment 20%, 2 Midterm 30%, 3 Final 50% (đủ 100%), chưa có điểm.
- * Phụ huynh 0900000005 liên kết SE190001 (students.id 1); trưởng bộ môn 0900000002 thuộc bộ môn SE.
+ * Điểm số trên FptContactBook_test. Dữ liệu mẫu: lớp 1 (TOAN10-HK1-2627-01, GV002 = 0900000003, chỉ có HS260001 với
+ * enrollments.id 1), môn TOAN10 có đầu điểm 1 Kiểm tra thường xuyên 20%, 2 Giữa kỳ 30%, 3 Cuối kỳ 50% (đủ 100%), chưa có điểm.
+ * Phụ huynh 0900000005 liên kết HS260001 (students.id 1); trưởng bộ môn 0900000002 thuộc bộ môn SE.
  * Trung bình khi nhập 8 / 7 / 9 là (8×20 + 7×30 + 9×50) / 100 = 8,2.
  */
 @IntegrationTest
@@ -75,11 +75,11 @@ class GradeIntegrationTest {
     class Flow {
 
         @Test
-        @DisplayName("Trước khi công bố SV và PH không thấy điểm; 0900000002 công bố xong thì thấy")
+        @DisplayName("Trước khi công bố HS và PH không thấy điểm; 0900000002 công bố xong thì thấy")
         void hiddenUntilPublished() throws Exception {
             mockMvc.perform(get(SHEET).with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("Assignment"), containsString("scores[1_1]"))));
+                    .andExpect(content().string(allOf(containsString("Kiểm tra thường xuyên"), containsString("scores[1_1]"))));
             mockMvc.perform(enter("8", "7", "9").with(as(TestAccounts.TEACHER)))
                     .andExpect(redirectedUrl(SHEET))
                     .andExpect(flash().attribute("successMessage", "Đã lưu 3 ô điểm"));
@@ -93,7 +93,7 @@ class GradeIntegrationTest {
 
             mockMvc.perform(get("/student/grades").with(as(TestAccounts.STUDENT)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("PRJ301"), containsString("Chưa đủ điểm"),
+                    .andExpect(content().string(allOf(containsString("TOAN10"), containsString("Chưa đủ điểm"),
                             not(containsString("8,2")))));
             mockMvc.perform(get("/parent/children/1/grades").with(as(TestAccounts.PARENT)))
                     .andExpect(status().isOk())
@@ -119,7 +119,7 @@ class GradeIntegrationTest {
         }
 
         @Test
-        @DisplayName("Công bố bỏ qua ô trống: ô nhập sau vẫn chưa công bố, SV vẫn thấy Chưa đủ điểm")
+        @DisplayName("Công bố bỏ qua ô trống: ô nhập sau vẫn chưa công bố, HS vẫn thấy Chưa đủ điểm")
         void publishSkipsBlankCells() throws Exception {
             mockMvc.perform(enter("8", "7", "").with(as(TestAccounts.TEACHER))).andExpect(status().is3xxRedirection());
             mockMvc.perform(post(MANAGE + "/publish").with(csrf()).with(as(TestAccounts.ADMIN)))
@@ -199,19 +199,19 @@ class GradeIntegrationTest {
             AuditLog audit = lastAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.ADJUST_GRADE);
             assertThat(audit.getEntityId()).isEqualTo(gradeId);
-            assertThat(audit.getDetail()).contains("student=SE190001", "component=Assignment", "score=8 -> 6.5",
+            assertThat(audit.getDetail()).contains("student=HS260001", "component=Kiểm tra thường xuyên", "score=8 -> 6.5",
                     "reason=Phúc khảo");
         }
 
         @Test
-        @DisplayName("Giảng viên vào trang điều chỉnh bằng URL → 403")
+        @DisplayName("Giáo viên vào trang điều chỉnh bằng URL → 403")
         void teacherCannotOpenAdjust() throws Exception {
             mockMvc.perform(get(MANAGE + "/39/adjust").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @DisplayName("GV (kể cả GV của chính lớp), SV gửi POST điều chỉnh điểm đã công bố → 403, điểm và nhật ký "
+        @DisplayName("GV (kể cả GV của chính lớp), HS gửi POST điều chỉnh điểm đã công bố → 403, điểm và nhật ký "
                 + "không đổi (review 8a, T4)")
         void teacherCannotPostAdjust() throws Exception {
             // Ô 39: lớp 27 (GV003 = 0922334455), SV enrollments.id 17, đầu điểm 10, 8,50, đã công bố.
@@ -234,14 +234,14 @@ class GradeIntegrationTest {
     class ExcelImport {
 
         @Test
-        @DisplayName("File mẫu có tiêu đề Mã SV + đầu điểm; file hợp lệ ghi các ô có giá trị")
+        @DisplayName("File mẫu có tiêu đề Mã HS + đầu điểm; file hợp lệ ghi các ô có giá trị")
         void importValidFile() throws Exception {
             mockMvc.perform(get(SHEET + "/import/template").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
                     .andExpect(header().string("Content-Disposition", containsString("mau-nhap-diem.xlsx")));
 
-            byte[] file = ImportFiles.xlsxWithHeader(List.of("Mã SV", "Assignment", "Midterm", "Final"),
-                    List.of(ImportFiles.row("SE190001", 8.5, null, "7,5")));
+            byte[] file = ImportFiles.xlsxWithHeader(List.of("Mã HS", "Kiểm tra thường xuyên", "Giữa kỳ", "Cuối kỳ"),
+                    List.of(ImportFiles.row("HS260001", 8.5, null, "7,5")));
             mockMvc.perform(multipart(SHEET + "/import").file(new MockMultipartFile("file", "diem.xlsx", null, file))
                             .with(csrf()).with(as(TestAccounts.TEACHER)))
                     .andExpect(redirectedUrl(SHEET))
@@ -255,14 +255,14 @@ class GradeIntegrationTest {
         @Test
         @DisplayName("File có lỗi: bảng lỗi theo dòng, không ghi ô nào")
         void importInvalidFile() throws Exception {
-            byte[] file = ImportFiles.xlsxWithHeader(List.of("Mã SV", "Assignment", "Midterm", "Final"),
-                    List.of(ImportFiles.row("SE190001", 8, 11, 9), ImportFiles.row("SE180101", 5, 5, 5)));
+            byte[] file = ImportFiles.xlsxWithHeader(List.of("Mã HS", "Kiểm tra thường xuyên", "Giữa kỳ", "Cuối kỳ"),
+                    List.of(ImportFiles.row("HS260001", 8, 11, 9), ImportFiles.row("HS250101", 5, 5, 5)));
 
             mockMvc.perform(multipart(SHEET + "/import").file(new MockMultipartFile("file", "diem.xlsx", null, file))
                             .with(csrf()).with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(containsString("Điểm phải từ 0 đến 10"),
-                            containsString("không đang học lớp học phần này"))));
+                            containsString("không đang học lớp môn học này"))));
             assertThat(grades()).isEmpty();
         }
     }
@@ -291,7 +291,7 @@ class GradeIntegrationTest {
         }
 
         @Test
-        @DisplayName("TBM xem lớp thuộc bộ môn khác → 403")
+        @DisplayName("TBM xem lớp thuộc tổ chuyên môn khác → 403")
         void headOtherDepartment() throws Exception {
             Long ia = iaSection();
 
@@ -302,7 +302,7 @@ class GradeIntegrationTest {
         }
 
         @Test
-        @DisplayName("SV và PH gõ URL bảng điểm của giảng viên hoặc quản lý → 403; PH con chưa liên kết → 403")
+        @DisplayName("HS và PH gõ URL bảng điểm của giáo viên hoặc quản lý → 403; PH con chưa liên kết → 403")
         void studentParentCannotSeeUnpublished() throws Exception {
             mockMvc.perform(get(SHEET).with(as(TestAccounts.STUDENT))).andExpect(status().isForbidden());
             mockMvc.perform(get(MANAGE).with(as(TestAccounts.STUDENT))).andExpect(status().isForbidden());
@@ -327,7 +327,7 @@ class GradeIntegrationTest {
                 .param("scores[1_3]", fin);
     }
 
-    /** Điểm của SE190001 trong lớp 1, theo đầu điểm. */
+    /** Điểm của HS260001 trong lớp 1, theo đầu điểm. */
     private List<Grade> grades() {
         return gradeRepository.findBySectionId(1L).stream()
                 .sorted(Comparator.comparing(g -> g.getComponent().getId())).toList();
@@ -341,7 +341,7 @@ class GradeIntegrationTest {
         subject.setCredits((short) 3);
         subjectRepository.saveAndFlush(subject);
         ClassSection section = new ClassSection();
-        section.setCode("IAO201-FA26-01");
+        section.setCode("IAO201-HK1-2627-01");
         section.setSubject(subject);
         section.setSemester(semesterRepository.findById(1L).orElseThrow());
         section.setTeacher(teacherRepository.findById(2L).orElseThrow());

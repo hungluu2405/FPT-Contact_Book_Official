@@ -113,7 +113,7 @@ class RepositoryQueryTest {
 
         @Test
         void searchByStudentAndTeacherCode() {
-            assertThat(phones(search("se190001"))).containsExactly("0900000004");
+            assertThat(phones(search("hs260001"))).containsExactly("0900000004");
             assertThat(phones(search("gv002"))).containsExactly("0900000003");
         }
 
@@ -144,7 +144,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Lọc theo vai trò, bộ môn giảng viên, lớp, trạng thái")
+        @DisplayName("Lọc theo vai trò, tổ chuyên môn giáo viên, lớp, trạng thái")
         void filters() {
             assertThat(search(null, "TEACHER", null, null, null, PageRequest.of(0, 50)).getTotalElements())
                     .isEqualTo(5);
@@ -156,7 +156,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Phạm vi trưởng bộ môn: chỉ giảng viên thuộc các bộ môn được giao")
+        @DisplayName("Phạm vi tổ trưởng chuyên môn: chỉ giáo viên thuộc các tổ chuyên môn được giao")
         void scopedToDepartments() {
             Page<UserListRow> se = userRepository.search(null, null, null, null, null, null,
                     true, List.of(1L), PageRequest.of(0, 50));
@@ -199,7 +199,7 @@ class RepositoryQueryTest {
             assertThat(roles).allSatisfy(userRole -> {
                 assertThat(Hibernate.isInitialized(userRole.getRole())).isTrue();
                 assertThat(Hibernate.isInitialized(userRole.getDepartment())).isTrue();
-                assertThat(userRole.getDepartment().getCode()).isEqualTo("SE");
+                assertThat(userRole.getDepartment().getCode()).isEqualTo("TT");
             });
             assertThat(roles).extracting(userRole -> userRole.getRole().getCode())
                     .containsExactlyInAnyOrder(RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT);
@@ -241,7 +241,7 @@ class RepositoryQueryTest {
             assertThat(links).singleElement().satisfies(link -> {
                 assertThat(link.getRelationship()).isEqualTo(ParentRelationship.FATHER);
                 assertThat(Hibernate.isInitialized(link.getStudent().getUser())).isTrue();
-                assertThat(link.getStudent().getStudentCode()).isEqualTo("SE190001");
+                assertThat(link.getStudent().getStudentCode()).isEqualTo("HS260001");
                 assertThat(link.getStudent().getUser().getPhone()).isEqualTo("0900000004");
             });
         }
@@ -275,7 +275,7 @@ class RepositoryQueryTest {
             List<Enrollment> enrollments = enrollmentRepository.findByClassSectionId(27L);
 
             assertThat(enrollments).extracting(enrollment -> enrollment.getStudent().getStudentCode())
-                    .containsExactlyInAnyOrder("SE180101", "SE180102");
+                    .containsExactlyInAnyOrder("HS250101", "HS250102");
             assertThat(enrollments).allMatch(enrollment -> Hibernate.isInitialized(enrollment.getStudent().getUser()));
         }
 
@@ -284,7 +284,7 @@ class RepositoryQueryTest {
             List<Enrollment> enrollments = enrollmentRepository.findByStudentId(2L);
 
             assertThat(enrollments).extracting(enrollment -> enrollment.getClassSection().getCode())
-                    .containsExactlyInAnyOrder("PRN211_FA26_01", "SWP391_FA26_01", "SWP391-01-SP27");
+                    .containsExactlyInAnyOrder("TIN11-HK1-2627-01", "STEM-HK1-2627-01", "STEM-HK2-2627-01");
             assertThat(enrollments)
                     .allMatch(enrollment -> Hibernate.isInitialized(enrollment.getClassSection().getSubject()));
         }
@@ -354,8 +354,8 @@ class RepositoryQueryTest {
 
         @Test
         void searchByKeywordOnCodeOrName() {
-            assertThat(facultyRepository.search(LikePatterns.containsIgnoreCase("it"), PageRequest.of(0, 20)))
-                    .extracting(Faculty::getCode).contains("IT");
+            assertThat(facultyRepository.search(LikePatterns.containsIgnoreCase("thpt"), PageRequest.of(0, 20)))
+                    .extracting(Faculty::getCode).contains("THPT");
             assertThat(facultyRepository.search(null, PageRequest.of(0, 20)).getTotalElements()).isEqualTo(2);
             assertThat(roomRepository.search(LikePatterns.containsIgnoreCase("lab"), PageRequest.of(0, 20)))
                     .extracting(Room::getCode).containsExactly("LAB-401");
@@ -372,28 +372,30 @@ class RepositoryQueryTest {
         @Test
         void filterByGroup() {
             Page<Department> itDepartments = departmentRepository.search(null, 1L, PageRequest.of(0, 20));
-            assertThat(itDepartments).extracting(Department::getCode).containsExactly("AI", "IA", "SE");
-            assertThat(itDepartments.getContent().getFirst().getFaculty().getCode()).isEqualTo("IT");
+            assertThat(itDepartments).extracting(Department::getCode).containsExactly("NN", "NV", "TT");
+            assertThat(itDepartments.getContent().getFirst().getFaculty().getCode()).isEqualTo("THPT");
 
             assertThat(schoolClassRepository.search(null, 1L, PageRequest.of(0, 20)))
-                    .extracting(SchoolClass::getCode).containsExactly("SE1801", "SE1802", "SE1901");
+                    .extracting(SchoolClass::getCode).containsExactly("10A1");
+            assertThat(schoolClassRepository.search(null, 15L, PageRequest.of(0, 20)))
+                    .extracting(SchoolClass::getCode).containsExactly("8A1");
         }
 
         @Test
-        @DisplayName("Môn học: lọc theo phạm vi bộ môn của trưởng bộ môn")
+        @DisplayName("Môn học: lọc theo phạm vi tổ chuyên môn của tổ trưởng chuyên môn")
         void subjectSearchScoped() {
             assertThat(subjectRepository.search(null, null, true, List.of(1L), PageRequest.of(0, 20)))
-                    .extracting(Subject::getCode).containsExactly("PRJ301", "PRN211", "SWP391");
+                    .extracting(Subject::getCode).containsExactly("STEM", "TIN11", "TOAN10");
             assertThat(subjectRepository.search(null, null, true, List.of(38L), PageRequest.of(0, 20))).isEmpty();
-            assertThat(subjectRepository.search(LikePatterns.containsIgnoreCase("swp"), null, false, List.of(-1L),
-                    PageRequest.of(0, 20))).extracting(Subject::getCode).containsExactly("SWP391");
+            assertThat(subjectRepository.search(LikePatterns.containsIgnoreCase("stem"), null, false, List.of(-1L),
+                    PageRequest.of(0, 20))).extracting(Subject::getCode).containsExactly("STEM");
         }
 
         @Test
         void currentSemesterAndOrdering() {
-            assertThat(semesterRepository.findByCurrentTrue()).get().extracting(Semester::getCode).isEqualTo("FA26");
+            assertThat(semesterRepository.findByCurrentTrue()).get().extracting(Semester::getCode).isEqualTo("HK1-2627");
             assertThat(semesterRepository.search(null, PageRequest.of(0, 20)))
-                    .extracting(Semester::getCode).containsExactly("SP27", "FA26", "SU26");
+                    .extracting(Semester::getCode).containsExactly("HK2-2627", "HK1-2627", "HE-2026");
         }
 
         @Test
@@ -410,14 +412,14 @@ class RepositoryQueryTest {
 
         @Test
         void codeExistence() {
-            assertThat(subjectRepository.existsByCode("PRJ301")).isTrue();
-            assertThat(subjectRepository.existsByCodeAndIdNot("PRJ301", 1L)).isFalse();
-            assertThat(subjectRepository.existsByCodeAndIdNot("PRJ301", 31L)).isTrue();
+            assertThat(subjectRepository.existsByCode("TOAN10")).isTrue();
+            assertThat(subjectRepository.existsByCodeAndIdNot("TOAN10", 1L)).isFalse();
+            assertThat(subjectRepository.existsByCodeAndIdNot("TOAN10", 31L)).isTrue();
         }
     }
 
     @Nested
-    @DisplayName("Lớp học phần và ghi danh (Giai đoạn 4b)")
+    @DisplayName("Lớp môn học và ghi danh (Giai đoạn 4b)")
     class SectionQueries {
 
         @Autowired
@@ -431,19 +433,20 @@ class RepositoryQueryTest {
         void searchScopedAndFiltered() {
             assertThat(classSectionRepository.search(null, null, null, true, List.of(1L), PageRequest.of(0, 20)))
                     .extracting(ClassSection::getCode)
-                    .containsExactly("SWP391-01-SP27", "PRJ301-SE1901-FA26", "PRN211_FA26_01", "SWP391_FA26_01");
+                    .containsExactly("STEM-HK2-2627-01", "STEM-HK1-2627-01", "TIN11-HK1-2627-01", "TOAN10-HK1-2627-01");
             assertThat(classSectionRepository.search(null, null, null, true, List.of(38L), PageRequest.of(0, 20)))
                     .isEmpty();
-            assertThat(classSectionRepository.search(LikePatterns.containsIgnoreCase("java web"), 1L,
+            assertThat(classSectionRepository.search(LikePatterns.containsIgnoreCase("toán 10"), 1L,
                     SectionStatus.OPEN, false, List.of(-1L), PageRequest.of(0, 20)))
-                    .extracting(ClassSection::getCode).containsExactly("PRJ301-SE1901-FA26");
+                    .extracting(ClassSection::getCode).containsExactly("TOAN10-HK1-2627-01");
         }
 
         @Test
         void codesByPrefix() {
-            assertThat(classSectionRepository.findCodesLike(LikePatterns.startsWith("SWP391_")))
-                    .containsExactly("SWP391_FA26_01");
-            assertThat(classSectionRepository.findCodesLike(LikePatterns.startsWith("SWP391-"))).hasSize(1);
+            // "_" là ký tự thường, không phải ký tự đại diện của LIKE.
+            assertThat(classSectionRepository.findCodesLike(LikePatterns.startsWith("STEM_"))).isEmpty();
+            assertThat(classSectionRepository.findCodesLike(LikePatterns.startsWith("STEM-")))
+                    .containsExactlyInAnyOrder("STEM-HK1-2627-01", "STEM-HK2-2627-01");
         }
 
         @Test
@@ -454,20 +457,20 @@ class RepositoryQueryTest {
             assertThat(enrollmentRepository.countBySections(List.of(1L, 27L, 28L), EnrollmentStatus.ENROLLED))
                     .extracting(row -> row[0] + "=" + row[1]).containsExactlyInAnyOrder("1=1", "27=2", "28=2");
             assertThat(enrollmentRepository.findPageBySection(27L, null, PageRequest.of(0, 20)))
-                    .extracting(e -> e.getStudent().getStudentCode()).containsExactly("SE180101", "SE180102");
+                    .extracting(e -> e.getStudent().getStudentCode()).containsExactly("HS250101", "HS250102");
         }
 
         @Test
-        @DisplayName("Ứng viên ghi danh: SV đang học chưa có trong lớp; SV đã DROPPED vẫn hiện")
+        @DisplayName("Ứng viên ghi danh: HS đang học chưa có trong lớp; HS đã DROPPED vẫn hiện")
         void candidates() {
             assertThat(studentRepository.findCandidates(null, 27L, PageRequest.of(0, 20)))
-                    .extracting(Student::getStudentCode).containsExactly("SE180201", "SE190001");
+                    .extracting(Student::getStudentCode).containsExactly("HS240201", "HS260001");
 
             Enrollment enrollment = enrollmentRepository.findByClassSectionIdAndStudentId(27L, 2L).orElseThrow();
             enrollment.setStatus(EnrollmentStatus.DROPPED);
             enrollmentRepository.flush();
-            assertThat(studentRepository.findCandidates(LikePatterns.containsIgnoreCase("se1801"), 27L,
-                    PageRequest.of(0, 20))).extracting(Student::getStudentCode).containsExactly("SE180101");
+            assertThat(studentRepository.findCandidates(LikePatterns.containsIgnoreCase("hs2501"), 27L,
+                    PageRequest.of(0, 20))).extracting(Student::getStudentCode).containsExactly("HS250101");
         }
     }
 
@@ -490,7 +493,7 @@ class RepositoryQueryTest {
         private static final LocalDate TO = LocalDate.of(2026, 10, 21);
 
         @Test
-        @DisplayName("Xung đột theo phòng, theo giảng viên, theo lớp chung sinh viên; tham số null bị bỏ qua")
+        @DisplayName("Xung đột theo phòng, theo giáo viên, theo lớp chung học sinh; tham số null bị bỏ qua")
         void possibleConflicts() {
             assertThat(classSessionRepository.findPossibleConflicts(1L, FROM, TO, 14L, null, List.of(-1L)))
                     .extracting(ClassSession::getId).containsExactlyInAnyOrder(41L, 42L, 43L, 44L, 45L, 46L);
@@ -513,7 +516,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Buổi của lớp học phần đã hủy không còn chặn phòng, giảng viên, sinh viên (finding 2)")
+        @DisplayName("Buổi của lớp môn học đã hủy không còn chặn phòng, giáo viên, học sinh (finding 2)")
         void cancelledSectionDoesNotBlock() {
             ClassSection prn211 = classSectionRepository.findById(27L).orElseThrow();
             prn211.setStatus(SectionStatus.CANCELLED);
@@ -535,7 +538,7 @@ class RepositoryQueryTest {
     }
 
     /**
-     * Tin nhắn. Dữ liệu mẫu (FA26 là học kỳ hiện tại): lớp 1 do users.id 3 dạy SE190001 (users.id 4, phụ huynh
+     * Tin nhắn. Dữ liệu mẫu (HK1 là học kỳ hiện tại): lớp 1 do users.id 3 dạy HS260001 (users.id 4, phụ huynh
      * users.id 5); lớp 27 do users.id 16 dạy users.id 18, 19 (phụ huynh 21, 22); lớp 28 do users.id 17 dạy 18, 20.
      */
     @Nested
@@ -560,7 +563,7 @@ class RepositoryQueryTest {
         private EnrollmentRepository enrollmentRepository;
 
         @Test
-        @DisplayName("Đang dạy: SV ENROLLED ở lớp học kỳ hiện tại; phụ huynh qua con đã liên kết")
+        @DisplayName("Đang dạy: HS ENROLLED ở lớp học kỳ hiện tại; phụ huynh qua con đã liên kết")
         void teachingNow() {
             assertThat(contactRepository.teachesStudentNow(3L, 4L)).isTrue();
             assertThat(contactRepository.teachesStudentNow(16L, 18L)).isTrue();
@@ -575,8 +578,8 @@ class RepositoryQueryTest {
         @Test
         @DisplayName("Hết học kỳ (học kỳ không còn là hiện tại): không còn quan hệ")
         void semesterEnded() {
-            Semester fa26 = semesterRepository.findById(1L).orElseThrow();
-            fa26.setCurrent(false);
+            Semester hk1 = semesterRepository.findById(1L).orElseThrow();
+            hk1.setCurrent(false);
             semesterRepository.flush();
 
             assertThat(contactRepository.teachesStudentNow(3L, 4L)).isFalse();
@@ -585,7 +588,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Lớp CANCELLED hoặc sinh viên DROPPED: không còn quan hệ")
+        @DisplayName("Lớp CANCELLED hoặc học sinh DROPPED: không còn quan hệ")
         void cancelledOrDropped() {
             Enrollment enrollment = enrollmentRepository.findById(1L).orElseThrow();
             enrollment.setStatus(EnrollmentStatus.DROPPED);
@@ -601,7 +604,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Danh bạ theo vai trò: PH, SV chỉ thấy GV đang dạy; GV thấy GV khác, SV và PH lớp mình")
+        @DisplayName("Danh bạ theo vai trò: PH, HS chỉ thấy GV đang dạy; GV thấy GV khác, HS và PH lớp mình")
         void contacts() {
             PageRequest page = PageRequest.of(0, 20);
             assertThat(contactRepository.findContacts(5L, false, false, true, null, page))
@@ -731,7 +734,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Giảng viên phụ trách chọn được: TEACHER / HEAD đang hoạt động")
+        @DisplayName("Giáo viên phụ trách chọn được: TEACHER / HEAD đang hoạt động")
         void advisors() {
             List<String> roles = List.of(RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT);
             assertThat(userRoleRepository.findActiveUsersWithRole(roles)).extracting(User::getId)

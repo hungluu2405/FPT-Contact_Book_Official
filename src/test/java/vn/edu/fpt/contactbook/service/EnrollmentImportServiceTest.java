@@ -96,24 +96,24 @@ class EnrollmentImportServiceTest {
         service = new EnrollmentImportService(enrollmentService, studentRepository, userAccessPolicy, auditService);
 
         Department se = CatalogTestData.department(1L, "SE");
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se),
-                CatalogTestData.semester(1L, "FA26"), CatalogTestData.teacher(2L, "GV002", se), 10, SectionStatus.OPEN);
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se),
+                CatalogTestData.semester(1L, "HK1-2627"), CatalogTestData.teacher(2L, "GV002", se), 10, SectionStatus.OPEN);
         when(classSectionRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(section));
-        a = CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING);
-        b = CatalogTestData.student(2L, "SE180101", StudentStatus.STUDYING);
-        onLeave = CatalogTestData.student(3L, "SE180102", StudentStatus.ON_LEAVE);
+        a = CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING);
+        b = CatalogTestData.student(2L, "HS250101", StudentStatus.STUDYING);
+        onLeave = CatalogTestData.student(3L, "HS250102", StudentStatus.ON_LEAVE);
         when(studentRepository.findByStudentCodeIn(anyCollection())).thenReturn(List.of(a, b, onLeave));
         when(enrollmentRepository.findByClassSectionIdAndStudentIdIn(eq(10L), anyCollection())).thenReturn(List.of());
     }
 
     @Test
-    @DisplayName("File hợp lệ: mã được trim, viết hoa; SV DROPPED được ghi danh lại; ghi audit")
+    @DisplayName("File hợp lệ: mã được trim, viết hoa; HS DROPPED được ghi danh lại; ghi audit")
     void validFileEnrollsAll() {
         when(enrollmentRepository.findByClassSectionIdAndStudentIdIn(eq(10L), anyCollection())).thenReturn(List.of(
                 CatalogTestData.enrollment(7L, section, b, EnrollmentStatus.DROPPED)));
 
         EnrollmentImportResult result = service.importFile(ADMIN, 10L, "ds.xlsx",
-                file(row(" se190001 "), row("SE180101")), "127.0.0.1");
+                file(row(" hs260001 "), row("HS250101")), "127.0.0.1");
 
         assertThat(result.success()).isTrue();
         assertThat(result.added()).isEqualTo(1);
@@ -123,18 +123,18 @@ class EnrollmentImportServiceTest {
     }
 
     @Test
-    @DisplayName("Lỗi theo dòng: mã không tồn tại, SV không đang học, đã có trong lớp, trùng trong file; không ghi ai")
+    @DisplayName("Lỗi theo dòng: mã không tồn tại, HS không đang học, đã có trong lớp, trùng trong file; không ghi ai")
     void rowErrorsWriteNothing() {
         when(enrollmentRepository.findByClassSectionIdAndStudentIdIn(eq(10L), anyCollection())).thenReturn(List.of(
                 CatalogTestData.enrollment(7L, section, b, EnrollmentStatus.ENROLLED)));
 
         EnrollmentImportResult result = service.importFile(ADMIN, 10L, "ds.xlsx",
-                file(row("SE190001"), row("SE999999"), row("SE180102"), row("SE180101"), row("se190001")),
+                file(row("HS260001"), row("SE999999"), row("HS250102"), row("HS250101"), row("hs260001")),
                 "127.0.0.1");
 
         assertThat(result.success()).isFalse();
         assertThat(result.errors()).extracting(ImportRowError::rowNumber, ImportRowError::message).containsExactly(
-                tuple(3, "Mã sinh viên \"SE999999\" không tồn tại"),
+                tuple(3, "Mã học sinh \"SE999999\" không tồn tại"),
                 tuple(4, SectionMessages.STUDENT_NOT_STUDYING),
                 tuple(5, SectionMessages.ALREADY_ENROLLED),
                 tuple(6, "Trùng với dòng 2 trong file"));
@@ -149,45 +149,45 @@ class EnrollmentImportServiceTest {
         section.setMaxStudents((short) 2);
         when(enrollmentRepository.countByClassSectionIdAndStatus(10L, EnrollmentStatus.ENROLLED)).thenReturn(1L);
 
-        assertThatThrownBy(() -> service.importFile(ADMIN, 10L, "ds.xlsx", file(row("SE190001"), row("SE180101")),
+        assertThatThrownBy(() -> service.importFile(ADMIN, 10L, "ds.xlsx", file(row("HS260001"), row("HS250101")),
                 "127.0.0.1"))
                 .isInstanceOf(BusinessException.class)
-                .hasMessage("Không đủ chỗ: cần thêm 2 sinh viên nhưng lớp chỉ còn 1 chỗ");
+                .hasMessage("Không đủ chỗ: cần thêm 2 học sinh nhưng lớp chỉ còn 1 chỗ");
         verify(enrollmentRepository, never()).save(any());
     }
 
     @Test
     void wrongHeaderIsReported() {
-        byte[] content = ImportFiles.xlsxWithHeader(List.of("Mã sinh viên"), List.of(row("SE190001")));
+        byte[] content = ImportFiles.xlsxWithHeader(List.of("Mã học sinh"), List.of(row("HS260001")));
 
         EnrollmentImportResult result = service.importFile(ADMIN, 10L, "ds.xlsx", content, "127.0.0.1");
 
         assertThat(result.errors()).singleElement().satisfies(error -> {
             assertThat(error.rowNumber()).isEqualTo(1);
-            assertThat(error.message()).contains("Mã SV").contains("ghi danh");
+            assertThat(error.message()).contains("Mã HS").contains("ghi danh");
         });
     }
 
     @Test
     void closedSectionAndNonAdminRejected() {
         section.setStatus(SectionStatus.CLOSED);
-        assertThatThrownBy(() -> service.importFile(ADMIN, 10L, "ds.xlsx", file(row("SE190001")), "127.0.0.1"))
+        assertThatThrownBy(() -> service.importFile(ADMIN, 10L, "ds.xlsx", file(row("HS260001")), "127.0.0.1"))
                 .isInstanceOf(BusinessException.class).hasMessage(SectionMessages.SECTION_NOT_OPEN);
-        assertThatThrownBy(() -> service.importFile(HEAD_SE, 10L, "ds.xlsx", file(row("SE190001")), "127.0.0.1"))
+        assertThatThrownBy(() -> service.importFile(HEAD_SE, 10L, "ds.xlsx", file(row("HS260001")), "127.0.0.1"))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
     void notXlsxRejected() {
-        assertThatThrownBy(() -> service.importFile(ADMIN, 10L, "ds.csv", file(row("SE190001")), "127.0.0.1"))
+        assertThatThrownBy(() -> service.importFile(ADMIN, 10L, "ds.csv", file(row("HS260001")), "127.0.0.1"))
                 .isInstanceOf(BusinessException.class).hasMessage("Chỉ nhận file Excel .xlsx");
     }
 
     @Test
-    @DisplayName("File mẫu có tiêu đề Mã SV và sheet hướng dẫn, không có dòng ví dụ")
+    @DisplayName("File mẫu có tiêu đề Mã HS và sheet hướng dẫn, không có dòng ví dụ")
     void templateHasHeaderOnly() throws IOException {
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(service.template()))) {
-            assertThat(workbook.getSheetAt(0).getRow(0).getCell(0).getStringCellValue()).isEqualTo("Mã SV");
+            assertThat(workbook.getSheetAt(0).getRow(0).getCell(0).getStringCellValue()).isEqualTo("Mã HS");
             assertThat(workbook.getSheetAt(0).getLastRowNum()).isZero();
             assertThat(workbook.getSheetName(1)).isEqualTo("Hướng dẫn");
         }

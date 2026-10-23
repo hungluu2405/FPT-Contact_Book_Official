@@ -30,7 +30,7 @@
                  class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
                 <div>
                     <div class="fw-semibold" th:text="${c.fullName}">Họ tên</div>
-                    <span th:each="r : ${c.roles}" class="badge text-bg-light border me-1" th:text="#{'role.' + ${r}}">Giảng viên</span>
+                    <span th:each="r : ${c.roles}" class="badge text-bg-light border me-1" th:text="#{'role.' + ${r}}">Giáo viên</span>
                 </div>
                 <a class="btn btn-outline-primary" th:href="@{/messages/with/{id}(id=${c.userId})}">
                     <i class="bi bi-chat-dots"></i> <span th:text="#{message.contacts.message}">Nhắn tin</span></a>

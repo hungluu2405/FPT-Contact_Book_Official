@@ -52,9 +52,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Câu lạc bộ trên FptContactBook_test. Dữ liệu mẫu: CLB 1 F-CODE (chủ nhiệm SE180101 users.id 18 / 0933112233,
+ * Câu lạc bộ trên FptContactBook_test. Dữ liệu mẫu: CLB 1 F-CODE (chủ nhiệm HS250101 users.id 18 / 0933112233,
  * thành viên users.id 19 / 0933112234, users.id 20 đang chờ duyệt), CLB 2 F-GUITAR (chủ nhiệm users.id 20 /
- * 0933112235). SV 0900000004 (SE190001, users.id 4) chưa vào CLB nào.
+ * 0933112235). SV 0900000004 (HS260001, users.id 4) chưa vào CLB nào.
  */
 @IntegrationTest
 class ClubIntegrationTest {
@@ -102,7 +102,7 @@ class ClubIntegrationTest {
             assertThat(clubRepository.findById(id).orElseThrow().getStatus()).isEqualTo(ClubStatus.INACTIVE);
             mockMvc.perform(post("/admin/clubs/{id}/activate", id).with(as(TestAccounts.ADMIN)).with(csrf()))
                     .andExpect(redirectedUrl("/admin/clubs/" + id));
-            mockMvc.perform(post("/admin/clubs/{id}/president", id).param("studentCode", "se190001")
+            mockMvc.perform(post("/admin/clubs/{id}/president", id).param("studentCode", "hs260001")
                             .with(as(TestAccounts.ADMIN)).with(csrf()))
                     .andExpect(flash().attribute("successMessage", "Đã chỉ định chủ nhiệm"));
 
@@ -114,9 +114,9 @@ class ClubIntegrationTest {
         }
 
         @Test
-        @DisplayName("Chuyển giao chủ nhiệm CLB 1 cho SV khác: người cũ thành MEMBER, chỉ còn một PRESIDENT")
+        @DisplayName("Chuyển giao chủ nhiệm CLB 1 cho HS khác: người cũ thành MEMBER, chỉ còn một PRESIDENT")
         void transfer() throws Exception {
-            mockMvc.perform(post("/admin/clubs/1/president").param("studentCode", "SE180102")
+            mockMvc.perform(post("/admin/clubs/1/president").param("studentCode", "HS250102")
                     .with(as(TestAccounts.ADMIN)).with(csrf()));
 
             assertThat(memberRepository.findPresidents(1L)).extracting(m -> m.getUser().getId()).containsExactly(19L);
@@ -142,7 +142,7 @@ class ClubIntegrationTest {
     class Membership {
 
         @Test
-        @DisplayName("SV gửi yêu cầu, chủ nhiệm duyệt: ACTIVE, SV nhận thông báo; bị từ chối rồi gửi lại không lỗi trùng")
+        @DisplayName("HS gửi yêu cầu, chủ nhiệm duyệt: ACTIVE, HS nhận thông báo; bị từ chối rồi gửi lại không lỗi trùng")
         void joinApproveAndResubmit() throws Exception {
             long unreadBefore = recipientRepository.countUnread(TestAccounts.STUDENT_ID);
             join(TestAccounts.STUDENT);
@@ -167,11 +167,11 @@ class ClubIntegrationTest {
             assertThat(approved.getJoinedAt()).isNotNull();
             assertThat(recipientRepository.countUnread(TestAccounts.STUDENT_ID)).isEqualTo(unreadBefore + 2);
             mockMvc.perform(get("/clubs/my").with(as(TestAccounts.STUDENT)))
-                    .andExpect(content().string(containsString("Câu lạc bộ Lập trình FPT (F-Code)")));
+                    .andExpect(content().string(containsString("Câu lạc bộ Lập trình F-Code")));
         }
 
         @Test
-        @DisplayName("SV không phải chủ nhiệm duyệt: 403; chủ nhiệm CLB 2 duyệt cho CLB 1: 403")
+        @DisplayName("HS không phải chủ nhiệm duyệt: 403; chủ nhiệm CLB 2 duyệt cho CLB 1: 403")
         void wrongReviewer() throws Exception {
             mockMvc.perform(post("/clubs/1/members/3/approve").with(as(MEMBER)).with(csrf()))
                     .andExpect(status().isForbidden());
@@ -370,7 +370,7 @@ class ClubIntegrationTest {
                         .andExpect(status().isOk()).andExpect(content().string(containsString("F-GUITAR")));
                 mockMvc.perform(get("/clubs/1").with(as(phone)))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(allOf(containsString("Câu lạc bộ Lập trình FPT"),
+                        .andExpect(content().string(allOf(containsString("Câu lạc bộ Lập trình F-Code"),
                                 not(containsString("Gửi yêu cầu tham gia")))));
                 mockMvc.perform(post("/clubs/1/join").with(as(phone)).with(csrf())).andExpect(status().isForbidden());
                 mockMvc.perform(get("/clubs/my").with(as(phone))).andExpect(status().isForbidden());

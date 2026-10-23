@@ -11,17 +11,17 @@ final class ClubMessages {
     static final String NAME_SIZE = "Tên tối đa 150 ký tự";
     static final String DESCRIPTION_SIZE = "Mô tả tối đa " + ClubRule.MAX_DESCRIPTION + " ký tự";
     static final String FOUNDED_IN_FUTURE = "Ngày thành lập không được sau hôm nay";
-    static final String ADVISOR_INVALID = "Giảng viên phụ trách phải là giảng viên đang hoạt động";
+    static final String ADVISOR_INVALID = "Giáo viên phụ trách phải là giáo viên đang hoạt động";
     static final String ALREADY_ACTIVE = "Câu lạc bộ đang hoạt động";
     static final String ALREADY_INACTIVE = "Câu lạc bộ đã ngừng hoạt động";
     static final String CLUB_INACTIVE = "Câu lạc bộ đã ngừng hoạt động";
 
-    static final String STUDENT_CODE_REQUIRED = "Vui lòng nhập mã sinh viên";
-    static final String STUDENT_NOT_FOUND = "Không tìm thấy sinh viên có mã này";
-    static final String PRESIDENT_NOT_STUDENT = "Chủ nhiệm phải là sinh viên có tài khoản đang hoạt động";
-    static final String ALREADY_PRESIDENT = "Sinh viên này đã là chủ nhiệm câu lạc bộ";
+    static final String STUDENT_CODE_REQUIRED = "Vui lòng nhập mã học sinh";
+    static final String STUDENT_NOT_FOUND = "Không tìm thấy học sinh có mã này";
+    static final String PRESIDENT_NOT_STUDENT = "Chủ nhiệm phải là học sinh có tài khoản đang hoạt động";
+    static final String ALREADY_PRESIDENT = "Học sinh này đã là chủ nhiệm câu lạc bộ";
 
-    static final String ONLY_STUDENTS_JOIN = "Chỉ sinh viên mới tham gia được câu lạc bộ";
+    static final String ONLY_STUDENTS_JOIN = "Chỉ học sinh mới tham gia được câu lạc bộ";
     static final String ALREADY_PENDING = "Bạn đã gửi yêu cầu tham gia, vui lòng chờ chủ nhiệm duyệt";
     static final String ALREADY_MEMBER = "Bạn đã là thành viên của câu lạc bộ này";
     static final String MEMBER_NOT_PENDING = "Yêu cầu không còn ở trạng thái chờ duyệt";

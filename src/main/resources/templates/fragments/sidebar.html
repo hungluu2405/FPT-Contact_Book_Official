@@ -14,26 +14,26 @@
                 <i class="bi bi-people-fill"></i><span th:text="#{menu.users}">Người dùng</span>
             </a>
         </li>
-        <!--/* Cùng trang danh sách, UserService giới hạn vào giảng viên bộ môn của trưởng bộ môn. */-->
+        <!--/* Cùng trang danh sách, UserService giới hạn vào giáo viên tổ chuyên môn của tổ trưởng chuyên môn. */-->
         <li class="nav-item" sec:authorize="hasRole('HEAD_OF_DEPARTMENT') and !hasRole('ADMIN')">
             <a class="nav-link" th:href="@{/admin/users}" th:classappend="${activeMenu == 'users'} ? 'active'">
-                <i class="bi bi-person-video3"></i><span th:text="#{menu.department-teachers}">Giảng viên bộ môn</span>
+                <i class="bi bi-person-video3"></i><span th:text="#{menu.department-teachers}">Giáo viên tổ chuyên môn</span>
             </a>
         </li>
         <li class="nav-heading" sec:authorize="hasRole('ADMIN')" th:text="#{menu.catalog}">Danh mục</li>
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
             <a class="nav-link" th:href="@{/admin/catalog/faculties}" th:classappend="${activeMenu == 'catalog-faculties'} ? 'active'">
-                <i class="bi bi-bank"></i><span th:text="#{menu.catalog.faculties}">Khoa</span>
+                <i class="bi bi-bank"></i><span th:text="#{menu.catalog.faculties}">Cấp học</span>
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
             <a class="nav-link" th:href="@{/admin/catalog/departments}" th:classappend="${activeMenu == 'catalog-departments'} ? 'active'">
-                <i class="bi bi-diagram-3"></i><span th:text="#{menu.catalog.departments}">Bộ môn</span>
+                <i class="bi bi-diagram-3"></i><span th:text="#{menu.catalog.departments}">Tổ chuyên môn</span>
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
             <a class="nav-link" th:href="@{/admin/catalog/majors}" th:classappend="${activeMenu == 'catalog-majors'} ? 'active'">
-                <i class="bi bi-mortarboard"></i><span th:text="#{menu.catalog.majors}">Ngành</span>
+                <i class="bi bi-mortarboard"></i><span th:text="#{menu.catalog.majors}">Khối</span>
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
@@ -48,7 +48,7 @@
         </li>
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
             <a class="nav-link" th:href="@{/admin/sections}" th:classappend="${activeMenu == 'catalog-sections'} ? 'active'">
-                <i class="bi bi-collection"></i><span th:text="#{menu.catalog.sections}">Lớp học phần</span>
+                <i class="bi bi-collection"></i><span th:text="#{menu.catalog.sections}">Lớp môn học</span>
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
@@ -73,7 +73,7 @@
                 <i class="bi bi-flag"></i><span th:text="#{menu.clubs.admin}">Quản lý CLB</span>
             </a>
         </li>
-        <!--/* Trưởng bộ môn chỉ quản lý môn học, lớp học phần thuộc bộ môn mình (SubjectService, ClassSectionService). */-->
+        <!--/* Tổ trưởng chuyên môn chỉ quản lý môn học, lớp môn học thuộc tổ chuyên môn mình (SubjectService, ClassSectionService). */-->
         <li class="nav-item" sec:authorize="hasRole('HEAD_OF_DEPARTMENT') and !hasRole('ADMIN')">
             <a class="nav-link" th:href="@{/admin/subjects}" th:classappend="${activeMenu == 'catalog-subjects'} ? 'active'">
                 <i class="bi bi-journal-bookmark"></i><span th:text="#{menu.catalog.subjects}">Môn học</span>
@@ -81,12 +81,12 @@
         </li>
         <li class="nav-item" sec:authorize="hasRole('HEAD_OF_DEPARTMENT') and !hasRole('ADMIN')">
             <a class="nav-link" th:href="@{/admin/sections}" th:classappend="${activeMenu == 'catalog-sections'} ? 'active'">
-                <i class="bi bi-collection"></i><span th:text="#{menu.catalog.sections}">Lớp học phần</span>
+                <i class="bi bi-collection"></i><span th:text="#{menu.catalog.sections}">Lớp môn học</span>
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasAnyRole('TEACHER', 'HEAD_OF_DEPARTMENT')">
             <a class="nav-link" th:href="@{/teacher}" th:classappend="${activeMenu == 'teacher'} ? 'active'">
-                <i class="bi bi-easel"></i><span th:text="#{menu.teacher}">Trang giảng viên</span>
+                <i class="bi bi-easel"></i><span th:text="#{menu.teacher}">Trang giáo viên</span>
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasAnyRole('TEACHER', 'HEAD_OF_DEPARTMENT')">
@@ -113,7 +113,7 @@
         </li>
         <li class="nav-item" sec:authorize="hasRole('STUDENT')">
             <a class="nav-link" th:href="@{/student}" th:classappend="${activeMenu == 'student'} ? 'active'">
-                <i class="bi bi-backpack"></i><span th:text="#{menu.student}">Trang sinh viên</span>
+                <i class="bi bi-backpack"></i><span th:text="#{menu.student}">Trang học sinh</span>
             </a>
         </li>
         <li class="nav-item" sec:authorize="hasRole('STUDENT')">

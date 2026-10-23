@@ -75,7 +75,7 @@ class SubjectServiceTest {
                 new AuditService(auditLogRepository, userRepository));
         se = CatalogTestData.department(1L, "SE");
         ia = CatalogTestData.department(38L, "IA");
-        seSubject = CatalogTestData.subject(1L, "PRJ301", se);
+        seSubject = CatalogTestData.subject(1L, "TOAN10", se);
         iaSubject = CatalogTestData.subject(50L, "IAO201", ia);
         when(departmentRepository.findById(1L)).thenReturn(Optional.of(se));
         when(departmentRepository.findById(38L)).thenReturn(Optional.of(ia));
@@ -91,9 +91,9 @@ class SubjectServiceTest {
     }
 
     @Test
-    @DisplayName("Trưởng bộ môn xem/sửa môn bộ môn khác hoặc id không tồn tại → 403; ADMIN với id không tồn tại → 404")
+    @DisplayName("Tổ trưởng chuyên môn xem/sửa môn tổ chuyên môn khác hoặc id không tồn tại → 403; ADMIN với id không tồn tại → 404")
     void headIsLimitedToOwnDepartment() {
-        assertThat(service.detail(HEAD_SE, 1L).code()).isEqualTo("PRJ301");
+        assertThat(service.detail(HEAD_SE, 1L).code()).isEqualTo("TOAN10");
         assertThatThrownBy(() -> service.detail(HEAD_SE, 50L)).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> service.editForm(HEAD_SE, 50L)).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> service.update(HEAD_SE, 50L, form(38L, "IAO201", 3), "127.0.0.1"))
@@ -114,14 +114,14 @@ class SubjectServiceTest {
     }
 
     @Test
-    @DisplayName("Trưởng bộ môn tạo môn ở bộ môn mình được; gửi bộ môn khác → 403, không lưu")
+    @DisplayName("Tổ trưởng chuyên môn tạo môn ở tổ chuyên môn mình được; gửi tổ chuyên môn khác → 403, không lưu")
     void headCreatesOnlyInOwnDepartment() {
         service.create(HEAD_SE, form(1L, " swd392 ", 3), "127.0.0.1");
         verify(subjectRepository).saveAndFlush(any());
 
         assertThatThrownBy(() -> service.create(HEAD_SE, form(38L, "IAO202", 3), "127.0.0.1"))
                 .isInstanceOf(AccessDeniedException.class);
-        assertThatThrownBy(() -> service.update(HEAD_SE, 1L, form(38L, "PRJ301", 3), "127.0.0.1"))
+        assertThatThrownBy(() -> service.update(HEAD_SE, 1L, form(38L, "TOAN10", 3), "127.0.0.1"))
                 .isInstanceOf(AccessDeniedException.class);
         assertThat(seSubject.getDepartment()).isSameAs(se);
     }
@@ -138,17 +138,17 @@ class SubjectServiceTest {
     }
 
     @Test
-    @DisplayName("Môn đã có lớp học phần: không đổi được bộ môn, các trường khác vẫn sửa được")
+    @DisplayName("Môn đã có lớp môn học: không đổi được tổ chuyên môn, các trường khác vẫn sửa được")
     void departmentLockedWhenClassSectionsExist() {
         when(classSectionRepository.existsBySubjectId(1L)).thenReturn(true);
 
-        assertThatThrownBy(() -> service.update(ADMIN, 1L, form(38L, "PRJ301", 3), "127.0.0.1"))
+        assertThatThrownBy(() -> service.update(ADMIN, 1L, form(38L, "TOAN10", 3), "127.0.0.1"))
                 .isInstanceOfSatisfying(BusinessException.class, e -> assertThat(e.getFieldErrors())
                         .containsEntry("departmentId", CatalogMessages.SUBJECT_DEPARTMENT_LOCKED));
         assertThat(seSubject.getDepartment()).isSameAs(se);
         verify(subjectRepository, never()).saveAndFlush(any());
 
-        service.update(ADMIN, 1L, form(1L, "PRJ301", 4), "127.0.0.1");
+        service.update(ADMIN, 1L, form(1L, "TOAN10", 4), "127.0.0.1");
         assertThat(seSubject.getCredits()).isEqualTo((short) 4);
     }
 
@@ -156,12 +156,12 @@ class SubjectServiceTest {
     void departmentChangeAllowedWithoutClassSections() {
         when(classSectionRepository.existsBySubjectId(1L)).thenReturn(false);
 
-        service.update(ADMIN, 1L, form(38L, "PRJ301", 3), "127.0.0.1");
+        service.update(ADMIN, 1L, form(38L, "TOAN10", 3), "127.0.0.1");
 
         assertThat(seSubject.getDepartment()).isSameAs(ia);
     }
 
-    @ParameterizedTest(name = "{0} tín chỉ → hợp lệ = {1}")
+    @ParameterizedTest(name = "{0} tiết/tuần → hợp lệ = {1}")
     @CsvSource({"0, false", "1, true", "20, true", "21, false", "-3, false"})
     void creditsBoundaries(int credits, boolean valid) {
         if (valid) {
@@ -176,9 +176,9 @@ class SubjectServiceTest {
 
     @Test
     void duplicateCodeIsFieldError() {
-        when(subjectRepository.existsByCodeAndIdNot(eq("PRN211"), anyLong())).thenReturn(true);
+        when(subjectRepository.existsByCodeAndIdNot(eq("TIN11"), anyLong())).thenReturn(true);
 
-        assertThatThrownBy(() -> service.update(ADMIN, 1L, form(1L, "prn211", 3), "127.0.0.1"))
+        assertThatThrownBy(() -> service.update(ADMIN, 1L, form(1L, "tin11", 3), "127.0.0.1"))
                 .isInstanceOfSatisfying(BusinessException.class, e ->
                         assertThat(e.getFieldErrors()).containsEntry("code", CatalogMessages.SUBJECT_CODE_TAKEN));
     }

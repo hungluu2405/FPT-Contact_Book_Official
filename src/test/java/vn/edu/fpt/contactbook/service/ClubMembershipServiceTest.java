@@ -134,7 +134,7 @@ class ClubMembershipServiceTest {
         }
 
         @Test
-        @DisplayName("CLB INACTIVE: chặn; giảng viên, phụ huynh: 403")
+        @DisplayName("CLB INACTIVE: chặn; giáo viên, phụ huynh: 403")
         void inactiveAndRoles() {
             club.setStatus(ClubStatus.INACTIVE);
             assertThatThrownBy(() -> service.join(STUDENT, 1L)).isInstanceOf(BusinessException.class)
@@ -183,7 +183,7 @@ class ClubMembershipServiceTest {
         }
 
         @Test
-        @DisplayName("Sinh viên không phải chủ nhiệm, phó chủ nhiệm, giảng viên: 403, không khóa, không đổi")
+        @DisplayName("Học sinh không phải chủ nhiệm, phó chủ nhiệm, giáo viên: 403, không khóa, không đổi")
         void notPresident() {
             when(memberRepository.findByClubIdAndUserId(1L, 19L)).thenReturn(Optional.of(
                     member(2L, club, 19L, ClubMemberRole.VICE_PRESIDENT, ClubMemberStatus.ACTIVE)));
