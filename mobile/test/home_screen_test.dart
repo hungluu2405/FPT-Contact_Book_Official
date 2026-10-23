@@ -29,7 +29,7 @@ Future<void> tapOutlined(WidgetTester tester, String label) async {
 }
 
 void main() {
-  testWidgets('student sees six features, two still coming soon', (
+  testWidgets('student sees six features, one still coming soon', (
     tester,
   ) async {
     await pumpHome(tester, unread: 3);
@@ -44,7 +44,7 @@ void main() {
     ]) {
       expect(find.widgetWithText(FeatureTileWidget, label), findsOneWidget);
     }
-    expect(find.text('Sắp có'), findsNWidgets(2));
+    expect(find.text('Sắp có'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
     expect(find.textContaining('Đang xem'), findsNothing);
   });
@@ -52,8 +52,8 @@ void main() {
   testWidgets('a coming-soon tile opens nothing', (tester) async {
     await pumpHome(tester);
 
-    await tester.ensureVisible(find.text('Câu lạc bộ'));
-    await tester.tap(find.text('Câu lạc bộ'));
+    await tester.ensureVisible(find.text('Đơn từ'));
+    await tester.tap(find.text('Đơn từ'));
     await tester.pumpAndSettle();
 
     expect(find.byType(FeatureTileWidget), findsNWidgets(6));

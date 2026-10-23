@@ -22,6 +22,7 @@ import vn.edu.fpt.contactbook.dto.ExamView;
 import vn.edu.fpt.contactbook.dto.InSemester;
 import vn.edu.fpt.contactbook.dto.LeaveFormOptions;
 import vn.edu.fpt.contactbook.dto.LeaveRequestForm;
+import vn.edu.fpt.contactbook.dto.MyClubRow;
 import vn.edu.fpt.contactbook.dto.RequestDetail;
 import vn.edu.fpt.contactbook.dto.RequestListItem;
 import vn.edu.fpt.contactbook.dto.ScheduleItem;
@@ -91,6 +92,12 @@ public class StudentApiController {
                                                        @PathVariable Long sectionId,
                                                        @RequestParam(defaultValue = "0") int page) {
         return data.attendanceHistory(actor, Audience.STUDENT, null, sectionId, page);
+    }
+
+    @Operation(summary = "Câu lạc bộ của mình: đang chờ duyệt, đang tham gia, bị từ chối")
+    @GetMapping("/clubs")
+    public List<MyClubRow> clubs(@AuthenticationPrincipal AppUserPrincipal actor) {
+        return data.clubs(actor, Audience.STUDENT, null);
     }
 
     @Operation(summary = "Danh sách đơn (mọi loại đơn)")

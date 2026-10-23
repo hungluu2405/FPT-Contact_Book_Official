@@ -590,4 +590,81 @@ void main() {
 
     await expectScreen(tester, 'attendance_detail');
   });
+
+  void stubClubs(TestApp app) {
+    app.http.reply(
+      'GET',
+      '/student/clubs',
+      FakeReply(200, [
+        myClubJson(),
+        myClubJson(
+          clubId: 2,
+          code: 'F-GUITAR',
+          name: 'Câu lạc bộ Âm nhạc F-Guitar',
+          status: 'PENDING',
+        ),
+      ]),
+    );
+    app.http.reply(
+      'GET',
+      '/clubs',
+      FakeReply(
+        200,
+        pageJson([
+          clubJson(),
+          clubJson(
+            id: 2,
+            code: 'F-GUITAR',
+            name: 'Câu lạc bộ Âm nhạc F-Guitar',
+            members: 1,
+          ),
+        ]),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/clubs/1',
+      FakeReply(200, clubDetailJson(myStatus: 'ACTIVE', myRole: 'MEMBER')),
+    );
+    app.http.reply(
+      'GET',
+      '/clubs/1/activities',
+      FakeReply(200, [
+        clubActivityJson(myStatus: 'REGISTERED'),
+        clubActivityJson(
+          id: 2,
+          title: 'Giao lưu dự án nhóm',
+          start: '2026-10-31T08:00:00',
+          end: '2026-10-31T11:00:00',
+          max: null,
+          taken: 8,
+        ),
+      ]),
+    );
+    app.http.reply(
+      'GET',
+      '/clubs/1/members',
+      FakeReply(
+        200,
+        pageJson([
+          clubMemberJson(),
+          clubMemberJson(name: 'Vũ Thị Mai', role: 'MEMBER'),
+        ]),
+      ),
+    );
+  }
+
+  testWidgets('club list', (tester) async {
+    await openFromHome(tester, 'Câu lạc bộ', stub: stubClubs);
+
+    await expectScreen(tester, 'club_list');
+  });
+
+  testWidgets('club detail', (tester) async {
+    await openFromHome(tester, 'Câu lạc bộ', stub: stubClubs);
+    await tester.tap(find.text('Câu lạc bộ Lập trình F-Code').first);
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'club_detail');
+  });
 }

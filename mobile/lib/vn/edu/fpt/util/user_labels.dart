@@ -27,3 +27,17 @@ String initialOf(String fullName) {
   final last = words.isEmpty ? '' : words.last;
   return last.isEmpty ? '?' : last.characters.first.toUpperCase();
 }
+
+/// Vai trò trong câu lạc bộ (giống web).
+const Map<String, String> kClubRoleLabels = {
+  'PRESIDENT': 'Chủ nhiệm',
+  'VICE_PRESIDENT': 'Phó chủ nhiệm',
+  'MEMBER': 'Thành viên',
+};
+
+/// Trạng thái tham gia câu lạc bộ khác "đang tham gia".
+const Map<String, String> kClubStatusLabels = {
+  'PENDING': 'Chờ duyệt',
+  'REJECTED': 'Bị từ chối',
+  'LEFT': 'Đã rời',
+};
