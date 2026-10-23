@@ -85,6 +85,29 @@ class LeaveRule {
     return null;
   }
 
+  /// Thêm các tệp vừa chọn vào [files] (tối đa [maxFiles]); trả lý do của
+  /// các tệp bị bỏ. Dùng chung cho đơn nghỉ và thông báo của tổ trưởng vì
+  /// backend kiểm tra tệp đính kèm như nhau.
+  static List<String> addFiles(
+    List<PickedFileModel> files,
+    List<PickedFileModel> picked,
+  ) {
+    final rejected = <String>[];
+    for (final file in picked) {
+      final error = fileError(file);
+      if (error != null) {
+        rejected.add(error);
+      } else if (files.length >= maxFiles) {
+        if (!rejected.contains(tooManyFiles)) {
+          rejected.add(tooManyFiles);
+        }
+      } else {
+        files.add(file);
+      }
+    }
+    return rejected;
+  }
+
   static DateTime? _dateOnly(DateTime? value) =>
       value == null ? null : DateTime(value.year, value.month, value.day);
 

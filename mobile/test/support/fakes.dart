@@ -7,6 +7,8 @@ import 'package:open_filex/open_filex.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
@@ -20,6 +22,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/attachment_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/auth_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/club_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/department_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/notification_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/profile_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/request_service.dart';
@@ -616,6 +619,110 @@ Map<String, dynamic> leaveOptionsJson() => {
   ],
 };
 
+Map<String, dynamic> departmentJson({
+  int id = 1,
+  String code = 'TT',
+  String name = 'Tổ Toán – Tin học',
+  int teacherCount = 4,
+}) => {'id': id, 'code': code, 'name': name, 'teacherCount': teacherCount};
+
+Map<String, dynamic> teacherJson({
+  int userId = 3,
+  String code = 'GV002',
+  String fullName = 'Nguyễn Thị Giáo',
+  String phone = '0900000003',
+  bool active = true,
+  bool head = false,
+}) => {
+  'userId': userId,
+  'teacherCode': code,
+  'fullName': fullName,
+  'phone': phone,
+  'active': active,
+  'head': head,
+};
+
+Map<String, dynamic> teacherDetailJson({
+  int userId = 3,
+  String code = 'GV002',
+  String fullName = 'Nguyễn Thị Giáo',
+  String? academicTitle = 'Thạc sĩ',
+  String? email = 'teacher@fpt.edu.vn',
+  bool active = true,
+  String? lastLoginAt = '2026-10-22T07:05:00',
+  List<String> roles = const ['TEACHER'],
+}) => {
+  'userId': userId,
+  'teacherCode': code,
+  'fullName': fullName,
+  'academicTitle': academicTitle,
+  'departmentName': 'Tổ Toán – Tin học',
+  'phone': '0900000003',
+  'email': email,
+  'active': active,
+  'lastLoginAt': lastLoginAt,
+  'roles': roles,
+};
+
+Map<String, dynamic> sentJson({
+  int id = 70,
+  String title = 'Họp tổ chuyên môn tháng 11',
+  String priority = 'IMPORTANT',
+  String targetType = 'DEPARTMENT',
+  int recipients = 3,
+  int read = 1,
+}) => {
+  'id': id,
+  'title': title,
+  'priority': priority,
+  'targetType': targetType,
+  'createdAt': '2026-10-23T09:00:00',
+  'recipientCount': recipients,
+  'readCount': read,
+};
+
+Map<String, dynamic> recipientJson({
+  String name = 'Nguyễn Thị Giáo',
+  bool read = true,
+}) => {
+  'fullName': name,
+  'read': read,
+  'readAt': read ? '2026-10-23T09:30:00' : null,
+};
+
+Map<String, dynamic> sentDetailJson({
+  int id = 70,
+  String targetType = 'DEPARTMENT',
+  String targetLabel = 'TT - Tổ Toán – Tin học',
+  int recipients = 3,
+  int read = 1,
+  List<Map<String, dynamic>>? rows,
+  int page = 0,
+  int totalPages = 1,
+  List<Map<String, dynamic>> files = const [],
+}) => {
+  'id': id,
+  'title': 'Họp tổ chuyên môn tháng 11',
+  'content': 'Kính gửi các thầy cô: họp tổ lúc 14:00 thứ Năm tại phòng 204.',
+  'priority': 'IMPORTANT',
+  'targetType': targetType,
+  'targetLabel': targetLabel,
+  'createdAt': '2026-10-23T09:00:00',
+  'files': files,
+  'recipientCount': recipients,
+  'readCount': read,
+  'recipients': pageJson(
+    rows ??
+        [
+          recipientJson(),
+          recipientJson(name: 'Hoàng Văn Code', read: false),
+          recipientJson(name: 'Đỗ Thị Thuật', read: false),
+        ],
+    page: page,
+    totalPages: totalPages,
+  ),
+};
+
 /// Tệp minh chứng giả có [size] byte.
 PickedFileModel pickedFile(String name, {int size = 3}) =>
     PickedFileModel.fromBytes(name, Uint8List(size));
@@ -698,6 +805,15 @@ class TestApp {
   );
   late final NotificationController notificationController =
       NotificationController(NotificationService(apiClient), attachmentService);
+  late final DepartmentController departmentController = DepartmentController(
+    DepartmentService(apiClient),
+  );
+  late final DepartmentNotificationController departmentNotificationController =
+      DepartmentNotificationController(
+        DepartmentService(apiClient),
+        NotificationService(apiClient),
+        attachmentService,
+      );
   late final RequestController requestController = RequestController(
     RequestService(apiClient),
     attachmentService,

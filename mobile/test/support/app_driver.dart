@@ -25,6 +25,9 @@ Future<TestApp> pumpApp(WidgetTester tester, {TestApp? app}) async {
       clubController: testApp.clubController,
       notificationController: testApp.notificationController,
       requestController: testApp.requestController,
+      departmentController: testApp.departmentController,
+      departmentNotificationController:
+          testApp.departmentNotificationController,
     ),
   );
   await tester.pumpAndSettle();

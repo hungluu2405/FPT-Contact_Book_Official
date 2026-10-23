@@ -223,6 +223,21 @@ public class NotificationService {
                 recipients);
     }
 
+    /**
+     * Chi tiết cho người gửi: thống kê và một trang người nhận (read như open). Người không phải người gửi (kể cả
+     * người nhận, id không tồn tại) → 403 trước khi đọc gì, nên không bị đánh dấu đã đọc.
+     */
+    @Transactional
+    public NotificationDetail sentDetail(AppUserPrincipal actor, Long notificationId, Boolean read, int page) {
+        boolean sender = notificationRepository.findById(notificationId)
+                .map(n -> Objects.equals(n.getSender().getId(), actor.getUserId()))
+                .orElse(false);
+        if (!sender) {
+            throw new AccessDeniedException("Notification not sent by actor");
+        }
+        return open(actor, notificationId, read, page);
+    }
+
     /** Thông báo đã gửi kèm thống kê đã đọc (một truy vấn gộp cho cả trang). */
     @Transactional(readOnly = true)
     public Page<SentNotificationRow> sent(AppUserPrincipal actor, int page) {

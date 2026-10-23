@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/api_error_model.dart';
@@ -10,6 +11,16 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/leave_rule.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
+
+/// Một tệp đã chọn thành phần `files` của request multipart, kèm kiểu nội
+/// dung theo đuôi tệp (backend so cả đuôi và kiểu).
+MultipartFile multipartFileOf(PickedFileModel file) => MultipartFile.fromBytes(
+  file.bytes ?? const [],
+  filename: file.fileName,
+  contentType: DioMediaType.parse(
+    LeaveRule.contentTypes[file.extension] ?? 'application/octet-stream',
+  ),
+);
 
 /// Mở một tệp trên máy bằng ứng dụng ngoài (xem ảnh, đọc PDF...).
 typedef FileOpener = Future<OpenResult> Function(String path);

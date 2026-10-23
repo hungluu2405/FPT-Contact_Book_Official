@@ -848,4 +848,182 @@ void main() {
 
     await expectScreen(tester, 'leave_form_errors');
   });
+
+  /// Tổ trưởng tổ Toán – Tin học (cũng là giáo viên) đã đăng nhập.
+  Future<TestApp> pumpHead(WidgetTester tester) async {
+    usePhoneScreen(tester);
+    final app = TestApp(accessToken: 'a', refreshToken: 'r');
+    app.http.reply(
+      'GET',
+      '/me',
+      FakeReply(
+        200,
+        userJson(
+          id: 2,
+          fullName: 'Trần Thị Giáo',
+          roles: ['TEACHER', 'HEAD_OF_DEPARTMENT'],
+        ),
+      ),
+    );
+    app.stubHome(unread: 1);
+    app.http.reply(
+      'GET',
+      '/head/departments',
+      FakeReply(200, [departmentJson()]),
+    );
+    app.http.reply(
+      'GET',
+      '/head/teachers',
+      FakeReply(
+        200,
+        pageJson([
+          teacherJson(
+            userId: 2,
+            code: 'GV001',
+            fullName: 'Trần Thị Giáo',
+            phone: '0900000002',
+            head: true,
+          ),
+          teacherJson(),
+          teacherJson(
+            userId: 16,
+            code: 'GV003',
+            fullName: 'Hoàng Văn Code',
+            phone: '0922334455',
+          ),
+          teacherJson(
+            userId: 17,
+            code: 'GV004',
+            fullName: 'Đỗ Thị Thuật',
+            phone: '0922334456',
+            active: false,
+          ),
+        ]),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/head/teachers/3',
+      FakeReply(200, teacherDetailJson()),
+    );
+    await pumpApp(tester, app: app);
+    return app;
+  }
+
+  Future<void> openTeacherList(WidgetTester tester) async {
+    final tile = find.text('Giáo viên trong tổ');
+    await tester.ensureVisible(tile);
+    await tester.pumpAndSettle();
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('head of department home', (tester) async {
+    await pumpHead(tester);
+    final panel = find.text('Tổ chuyên môn');
+    await tester.ensureVisible(panel);
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'home_head');
+  });
+
+  testWidgets('teacher list of the department', (tester) async {
+    await pumpHead(tester);
+    await openTeacherList(tester);
+
+    await expectScreen(tester, 'teacher_list');
+  });
+
+  testWidgets('teacher detail', (tester) async {
+    await pumpHead(tester);
+    await openTeacherList(tester);
+    await tester.tap(find.text('Nguyễn Thị Giáo'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'teacher_detail');
+  });
+
+  /// Thông báo đã gửi của tổ trưởng: một cho cả tổ, một gửi riêng.
+  void stubSent(TestApp app) {
+    app.http.reply(
+      'GET',
+      '/notifications/sent',
+      FakeReply(
+        200,
+        pageJson([
+          sentJson(),
+          sentJson(
+            id: 71,
+            title: 'Nhắc nộp đề kiểm tra giữa kỳ',
+            priority: 'NORMAL',
+            targetType: 'USER',
+            recipients: 1,
+            read: 0,
+          ),
+        ]),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/notifications/sent/70',
+      FakeReply(
+        200,
+        sentDetailJson(
+          files: [attachmentJson(fileName: 'lich-du-gio-thang-11.pdf')],
+        ),
+      ),
+    );
+  }
+
+  testWidgets('department notification form', (tester) async {
+    final app = await pumpHead(tester);
+    final action = find.text('Gửi thông báo tổ');
+    await tester.ensureVisible(action);
+    await tester.pumpAndSettle();
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+    await enter(tester, 'Tiêu đề', 'Họp tổ chuyên môn tháng 11');
+    await enter(
+      tester,
+      'Nội dung',
+      'Kính gửi các thầy cô: họp tổ lúc 14:00 thứ Năm tại phòng 204.',
+    );
+    await tester.tap(find.text('Quan trọng'));
+    app.pickedFiles = [pickedFile('lich-du-gio-thang-11.pdf', size: 245760)];
+    await tester.ensureVisible(find.text('Chọn tệp'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Chọn tệp'));
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView).last, const Offset(0, 2000));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'department_notification_form');
+  });
+
+  testWidgets('sent notification list', (tester) async {
+    final app = await pumpHead(tester);
+    stubSent(app);
+    final action = find.text('Thông báo đã gửi');
+    await tester.ensureVisible(action);
+    await tester.pumpAndSettle();
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'sent_notification_list');
+  });
+
+  testWidgets('sent notification detail with read stats', (tester) async {
+    final app = await pumpHead(tester);
+    stubSent(app);
+    final action = find.text('Thông báo đã gửi');
+    await tester.ensureVisible(action);
+    await tester.pumpAndSettle();
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Họp tổ chuyên môn tháng 11'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'sent_notification_detail');
+  });
 }

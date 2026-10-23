@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
@@ -12,6 +14,9 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controlle
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/view_profile_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/attendance/list_attendance_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/club/list_club_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/department/add_department_notification_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/department/list_sent_notification_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/department/list_teacher_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/grade/view_grade_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/notification/list_notification_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/request/list_request_screen.dart';
@@ -20,6 +25,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/view_schedule
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/app_shell_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/child_selector_widget.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/department_panel_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/error_retry_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/feature_tile_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/home_banner_widget.dart';
@@ -40,6 +46,8 @@ class HomeScreen extends StatefulWidget {
   final ClubController clubController;
   final NotificationController notificationController;
   final RequestController requestController;
+  final DepartmentController departmentController;
+  final DepartmentNotificationController departmentNotificationController;
 
   const HomeScreen({
     super.key,
@@ -53,6 +61,8 @@ class HomeScreen extends StatefulWidget {
     required this.clubController,
     required this.notificationController,
     required this.requestController,
+    required this.departmentController,
+    required this.departmentNotificationController,
   });
 
   @override
@@ -71,9 +81,14 @@ class _HomeScreenState extends State<HomeScreen> {
       ..reset()
       ..onUnreadChanged = widget.homeController.reloadUnreadCount;
     widget.requestController.reset();
+    widget.departmentController.reset();
+    widget.departmentNotificationController.reset();
     final user = widget.controller.currentUser;
     if (user != null) {
       widget.homeController.start(user);
+      if (user.isHead) {
+        widget.departmentController.loadDepartments();
+      }
     }
   }
 
@@ -84,6 +99,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ..onUnreadChanged = null
       ..reset();
     widget.requestController.reset();
+    widget.departmentController.reset();
+    widget.departmentNotificationController.reset();
     super.dispose();
   }
 
@@ -113,6 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
             attendanceController: widget.attendanceController,
             clubController: widget.clubController,
             requestController: widget.requestController,
+            departmentController: widget.departmentController,
+            departmentNotificationController:
+                widget.departmentNotificationController,
           ),
         ),
         AppShellTab(
@@ -148,6 +168,8 @@ class _DashboardTab extends StatelessWidget {
   final AttendanceController attendanceController;
   final ClubController clubController;
   final RequestController requestController;
+  final DepartmentController departmentController;
+  final DepartmentNotificationController departmentNotificationController;
 
   const _DashboardTab({
     required this.controller,
@@ -157,6 +179,8 @@ class _DashboardTab extends StatelessWidget {
     required this.attendanceController,
     required this.clubController,
     required this.requestController,
+    required this.departmentController,
+    required this.departmentNotificationController,
   });
 
   /// Tên người đang được xem: con đang chọn, hoặc chính SV.
@@ -223,6 +247,48 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
+  void _openTeachers(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ListTeacherScreen(
+          controller: departmentController,
+          notificationController: departmentNotificationController,
+          currentUserId: controller.user?.id,
+        ),
+      ),
+    );
+  }
+
+  void _composeDepartment(BuildContext context) {
+    departmentNotificationController.startCompose(
+      department: departmentController.selectedDepartment,
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AddDepartmentNotificationScreen(
+          controller: departmentNotificationController,
+        ),
+      ),
+    );
+  }
+
+  void _openSent(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ListSentNotificationScreen(
+          controller: departmentNotificationController,
+        ),
+      ),
+    );
+  }
+
+  /// Tải lại trang chủ; tổ trưởng tải lại cả khối "Tổ chuyên môn".
+  Future<void> _refresh() => Future.wait([
+    controller.refresh(),
+    if (controller.user?.isHead ?? false)
+      departmentController.loadDepartments(),
+  ]);
+
   void _openExams(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -242,7 +308,7 @@ class _DashboardTab extends StatelessWidget {
         listenable: controller,
         builder: (context, _) => RefreshIndicator(
           color: AppColors.orange,
-          onRefresh: controller.refresh,
+          onRefresh: _refresh,
           // Nội dung ngắn nên dựng hết một lần thay cho ListView.
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -270,6 +336,27 @@ class _DashboardTab extends StatelessWidget {
         'Tài khoản quản trị dùng trên trang web của nhà trường.',
       );
     }
+    if (!user.isHead) {
+      return _roleBody(context);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        DepartmentPanelWidget(
+          controller: departmentController,
+          onOpenTeachers: () => _openTeachers(context),
+          onSendNotification: () => _composeDepartment(context),
+          onOpenSent: () => _openSent(context),
+        ),
+        const SizedBox(height: 20),
+        _roleBody(context),
+      ],
+    );
+  }
+
+  /// Phần theo vai trò HS, PH, GV (tổ trưởng có thêm khối phía trên).
+  Widget _roleBody(BuildContext context) {
+    final user = controller.user!;
     if (!user.isStudent && !user.isParent) {
       return const _Message(
         'Chức năng giáo viên sẽ có trong bản cập nhật tới.',
