@@ -36,23 +36,23 @@ Future<void> expectScreen(WidgetTester tester, String name) async {
   );
 }
 
-/// Ba buổi của thứ Tư 21/10/2026 như mockup; lúc 09:45 buổi PRM393 đang
+/// Ba buổi của thứ Tư 21/10/2026 như mockup; lúc 09:45 buổi TIN11 đang
 /// diễn ra.
 final List<Map<String, dynamic>> kGoldenToday = [
   sessionJson(),
   sessionJson(
     start: '09:30:00',
     end: '11:00:00',
-    subjectCode: 'PRM393',
-    subjectName: 'Lập trình di động',
+    subjectCode: 'TIN11',
+    subjectName: 'Tin học 11',
     room: 'BE202',
     teacher: 'TungVQ',
   ),
   sessionJson(
     start: '13:00:00',
     end: '14:30:00',
-    subjectCode: 'JPD113',
-    subjectName: 'Tiếng Nhật sơ cấp 1',
+    subjectCode: 'ANH10',
+    subjectName: 'Tiếng Anh 10',
     room: 'BE205',
     teacher: 'HaTH',
   ),
@@ -370,8 +370,8 @@ void main() {
             '2026-10-27': [
               sessionJson(
                 date: '2026-10-27',
-                subjectCode: 'SWE201',
-                subjectName: 'Nhập môn kỹ thuật phần mềm',
+                subjectCode: 'VAN10',
+                subjectName: 'Ngữ văn 10',
                 status: 'MAKEUP',
                 note: 'Học bù cho buổi 13/10',
               ),
@@ -409,8 +409,8 @@ void main() {
             ...kGoldenToday,
             sessionJson(
               date: '2026-10-22',
-              subjectCode: 'SWE201',
-              subjectName: 'Nhập môn kỹ thuật phần mềm',
+              subjectCode: 'VAN10',
+              subjectName: 'Ngữ văn 10',
               status: 'CANCELLED',
             ),
           ]),
@@ -436,8 +436,8 @@ void main() {
             examJson(
               id: 1,
               date: '2026-10-12',
-              subjectCode: 'MAD101',
-              subjectName: 'Toán rời rạc',
+              subjectCode: 'TOAN10',
+              subjectName: 'Toán 10',
               room: 'DE205',
             ),
             examJson(id: 2, date: '2026-10-30'),
@@ -445,15 +445,15 @@ void main() {
               id: 3,
               date: '2026-12-15',
               type: 'FINAL',
-              subjectCode: 'JPD113',
-              subjectName: 'Tiếng Nhật sơ cấp 1',
+              subjectCode: 'ANH10',
+              subjectName: 'Tiếng Anh 10',
             ),
             examJson(
               id: 4,
               date: '2026-12-28',
               type: 'RETAKE',
-              subjectCode: 'MAD101',
-              subjectName: 'Toán rời rạc',
+              subjectCode: 'TOAN10',
+              subjectName: 'Toán 10',
             ),
           ]),
         ),

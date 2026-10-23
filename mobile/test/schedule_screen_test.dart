@@ -32,14 +32,14 @@ final List<Map<String, dynamic>> kToday = [
   sessionJson(
     start: '09:30:00',
     end: '11:00:00',
-    subjectCode: 'PRM393',
+    subjectCode: 'TIN11',
     room: 'BE202',
     teacher: 'TungVQ',
   ),
   sessionJson(
     start: '13:00:00',
     end: '14:30:00',
-    subjectCode: 'JPD113',
+    subjectCode: 'ANH10',
     teacher: 'HaTH',
     status: 'CANCELLED',
   ),
@@ -51,7 +51,7 @@ void main() {
 
     expect(find.text('Lịch học hôm nay'), findsOneWidget);
     expect(find.text('07:30–09:20'), findsOneWidget);
-    expect(find.text('PRM393'), findsOneWidget);
+    expect(find.text('TIN11'), findsOneWidget);
   });
 
   testWidgets('home card says when there is no session today', (tester) async {
@@ -69,7 +69,7 @@ void main() {
 
     expect(find.byType(ViewScheduleScreen), findsOneWidget);
     expect(find.text('Hôm nay, 21 tháng 10'), findsOneWidget);
-    expect(find.text('Thứ Tư · Học kỳ Thu 2026'), findsOneWidget);
+    expect(find.text('Thứ Tư · Học kỳ I năm học 2026–2027'), findsOneWidget);
     expect(find.text('Lịch học hôm nay'), findsOneWidget);
     expect(find.text('Đang diễn ra'), findsOneWidget);
     expect(find.text('Đã hủy'), findsOneWidget);
@@ -114,7 +114,7 @@ void main() {
         200,
         pagedJson([
           sessionJson(),
-          sessionJson(date: '2026-10-22', subjectCode: 'SWE201'),
+          sessionJson(date: '2026-10-22', subjectCode: 'VAN10'),
         ]),
       ),
     );
@@ -124,7 +124,7 @@ void main() {
 
     expect(find.byType(ListSessionScreen), findsOneWidget);
     expect(find.text('Thứ Tư, 21/10/2026'), findsOneWidget);
-    expect(find.text('SWE201'), findsOneWidget);
+    expect(find.text('VAN10'), findsOneWidget);
   });
 
   testWidgets('exam tile lists exams with the next one marked', (tester) async {
@@ -135,7 +135,7 @@ void main() {
       FakeReply(
         200,
         pagedJson([
-          examJson(id: 1, date: '2026-10-10', subjectCode: 'MAD101'),
+          examJson(id: 1, date: '2026-10-10', subjectCode: 'TOAN10'),
           examJson(id: 2, date: '2026-10-30', type: 'FINAL'),
         ]),
       ),

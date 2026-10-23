@@ -47,9 +47,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Buổi học, lịch thi và trang xem lịch trên FptContactBook_test. Dữ liệu mẫu: lớp 1 (PRJ301, GV002, phòng R101,
- * buổi 08/09/2026, có SE190001); lớp 27 (PRN211, GV003, phòng 14, buổi 05–21/10/2026, có SE180101 và SE180102);
- * lớp 28 (SWP391) có chung SE180101 với lớp 27. Phụ huynh 0900000005 liên kết với SE190001 (students.id 1).
+ * Buổi học, lịch thi và trang xem lịch trên FptContactBook_test. Dữ liệu mẫu: lớp 1 (TOAN10, GV002, phòng R101,
+ * buổi 08/09/2026, có HS260001); lớp 27 (TIN11, GV003, phòng 14, buổi 05–21/10/2026, có HS250101 và HS250102);
+ * lớp 28 (STEM) có chung HS250101 với lớp 27. Phụ huynh 0900000005 liên kết với HS260001 (students.id 1).
  */
 @IntegrationTest
 class ScheduleIntegrationTest {
@@ -90,34 +90,34 @@ class ScheduleIntegrationTest {
         }
 
         @Test
-        @DisplayName("Buổi trùng phòng 14 (giờ chồng một phần với PRN211) → từ chối, bảng xung đột tiếng Việt")
+        @DisplayName("Buổi trùng phòng 14 (giờ chồng một phần với TIN11) → từ chối, bảng xung đột tiếng Việt")
         void roomConflictPartialOverlap() throws Exception {
             mockMvc.perform(single(1L, OCT19, "09:00", "11:00", "14").with(as(TestAccounts.ADMIN)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(containsString("Trùng phòng"),
-                            containsString("PRN211_FA26_01"), containsString("07:30–09:50"),
+                            containsString("TIN11-HK1-2627-01"), containsString("07:30–09:50"),
                             containsString("chưa lưu gì"))));
             assertThat(classSessionRepository.findByClassSectionIdAndSessionDateBetween(1L, OCT19, OCT19)).isEmpty();
         }
 
         @Test
-        @DisplayName("Buổi trùng giảng viên GV003 (đang dạy PRN211 lúc đó) → từ chối")
+        @DisplayName("Buổi trùng giảng viên GV003 (đang dạy TIN11 lúc đó) → từ chối")
         void teacherConflict() throws Exception {
-            ClassSection sameTeacher = section("PRJ301-FA26-77", subjectRepository.findById(1L).orElseThrow(), 8L);
+            ClassSection sameTeacher = section("TOAN10-HK1-2627-77", subjectRepository.findById(1L).orElseThrow(), 8L);
 
             mockMvc.perform(single(sameTeacher.getId(), OCT19, "08:00", "09:00", null).with(as(TestAccounts.ADMIN)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(containsString("Trùng giảng viên"),
-                            containsString("Giảng viên đang dạy lớp PRN211_FA26_01"))));
+                            containsString("Giảng viên đang dạy lớp TIN11-HK1-2627-01"))));
         }
 
         @Test
-        @DisplayName("Sinh viên SE180101 học cả SWP391 và PRN211 → buổi SWP391 chồng giờ bị từ chối")
+        @DisplayName("Sinh viên HS250101 học cả STEM và TIN11 → buổi STEM chồng giờ bị từ chối")
         void studentConflict() throws Exception {
             mockMvc.perform(single(28L, OCT19, "08:00", "09:00", null).with(as(TestAccounts.ADMIN)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(containsString("Trùng sinh viên"),
-                            containsString("1 sinh viên của lớp này cũng học lớp PRN211_FA26_01"))));
+                            containsString("1 sinh viên của lớp này cũng học lớp TIN11-HK1-2627-01"))));
         }
 
         @Test
@@ -280,12 +280,12 @@ class ScheduleIntegrationTest {
     class ViewSchedule {
 
         @Test
-        @DisplayName("Sinh viên 0900000004 xem lịch tuần và danh sách của mình (PRJ301), không thấy lớp khác")
+        @DisplayName("Sinh viên 0900000004 xem lịch tuần và danh sách của mình (TOAN10), không thấy lớp khác")
         void studentSeesOwnSchedule() throws Exception {
             mockMvc.perform(get("/student/schedule").param("week", "2026-09-08").with(as(TestAccounts.STUDENT)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("PRJ301"), containsString("07:30–09:45"),
-                            containsString("07/09/2026"), not(containsString("PRN211")))));
+                    .andExpect(content().string(allOf(containsString("TOAN10"), containsString("07:30–09:45"),
+                            containsString("07/09/2026"), not(containsString("TIN11")))));
             mockMvc.perform(get("/student/schedule").param("view", "list").with(as(TestAccounts.STUDENT)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(containsString("08/09/2026"), containsString("R101"))));
@@ -299,7 +299,7 @@ class ScheduleIntegrationTest {
             mockMvc.perform(get("/parent/children/1/schedule").param("week", "2026-09-08")
                             .with(as(TestAccounts.PARENT)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("PRJ301"), containsString("SE190001"))));
+                    .andExpect(content().string(allOf(containsString("TOAN10"), containsString("HS260001"))));
             mockMvc.perform(get("/parent/children/2/schedule").with(as(TestAccounts.PARENT)))
                     .andExpect(status().isForbidden());
             mockMvc.perform(get("/parent/children/2/exams").with(as(TestAccounts.PARENT)))
@@ -308,11 +308,11 @@ class ScheduleIntegrationTest {
         }
 
         @Test
-        @DisplayName("Giảng viên GV002 (0900000003) xem lịch dạy: có PRJ301, không có PRN211 của GV003")
+        @DisplayName("Giảng viên GV002 (0900000003) xem lịch dạy: có TOAN10, không có TIN11 của GV003")
         void teacherSeesOwnTeaching() throws Exception {
             mockMvc.perform(get("/teacher/schedule").param("week", "2026-09-08").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("PRJ301"), not(containsString("PRN211")))));
+                    .andExpect(content().string(allOf(containsString("TOAN10"), not(containsString("TIN11")))));
             mockMvc.perform(get("/teacher/exams").with(as(TestAccounts.TEACHER))).andExpect(status().isOk());
         }
 
@@ -366,7 +366,7 @@ class ScheduleIntegrationTest {
         subject.setName("Nhập môn an toàn thông tin");
         subject.setCredits((short) 3);
         subjectRepository.saveAndFlush(subject);
-        return section("IAO201-FA26-01", subject, 2L).getId();
+        return section("IAO201-HK1-2627-01", subject, 2L).getId();
     }
 
     private AuditLog lastAudit() {

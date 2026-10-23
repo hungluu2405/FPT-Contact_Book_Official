@@ -163,7 +163,7 @@ class ClubServiceTest {
         void adminOnly() {
             assertThatThrownBy(() -> service.create(STUDENT, form("X", null), null, null))
                     .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> service.assignPresident(STUDENT, 1L, "SE190001", null))
+            assertThatThrownBy(() -> service.assignPresident(STUDENT, 1L, "HS260001", null))
                     .isInstanceOf(AccessDeniedException.class);
         }
     }
@@ -180,14 +180,14 @@ class ClubServiceTest {
             when(memberRepository.findPresidents(1L)).thenReturn(List.of(oldPresident));
             Student student = new Student();
             student.setUser(user(4L));
-            when(studentRepository.findByStudentCode("SE190001")).thenReturn(Optional.of(student));
+            when(studentRepository.findByStudentCode("HS260001")).thenReturn(Optional.of(student));
             when(userRoleRepository.isActiveWithRole(4L, List.of(RoleCodes.STUDENT))).thenReturn(true);
         }
 
         @Test
         @DisplayName("Người mới chưa có dòng: tạo ACTIVE / PRESIDENT; chủ nhiệm cũ thành MEMBER; có audit from/to")
         void transferToNewcomer() {
-            service.assignPresident(ADMIN, 1L, " se190001 ", null);
+            service.assignPresident(ADMIN, 1L, " hs260001 ", null);
 
             ArgumentCaptor<ClubMember> saved = ArgumentCaptor.forClass(ClubMember.class);
             verify(memberRepository).saveAndFlush(saved.capture());
@@ -207,7 +207,7 @@ class ClubServiceTest {
             ClubMember left = member(9L, club, 4L, ClubMemberRole.MEMBER, ClubMemberStatus.LEFT);
             when(memberRepository.findByClubIdAndUserId(1L, 4L)).thenReturn(Optional.of(left));
 
-            service.assignPresident(ADMIN, 1L, "SE190001", null);
+            service.assignPresident(ADMIN, 1L, "HS260001", null);
 
             verify(memberRepository).saveAndFlush(left);
             assertThat(left.getId()).isEqualTo(9L);
@@ -219,7 +219,7 @@ class ClubServiceTest {
         @DisplayName("Không phải sinh viên đang hoạt động, mã không tồn tại, đã là chủ nhiệm: báo lỗi, không đổi ai")
         void guards() {
             when(userRoleRepository.isActiveWithRole(4L, List.of(RoleCodes.STUDENT))).thenReturn(false);
-            assertThatThrownBy(() -> service.assignPresident(ADMIN, 1L, "SE190001", null))
+            assertThatThrownBy(() -> service.assignPresident(ADMIN, 1L, "HS260001", null))
                     .hasMessage(ClubMessages.PRESIDENT_NOT_STUDENT);
             assertThatThrownBy(() -> service.assignPresident(ADMIN, 1L, "SE999999", null))
                     .hasMessage(ClubMessages.STUDENT_NOT_FOUND);
@@ -228,9 +228,9 @@ class ClubServiceTest {
 
             Student president = new Student();
             president.setUser(user(18L));
-            when(studentRepository.findByStudentCode("SE180101")).thenReturn(Optional.of(president));
+            when(studentRepository.findByStudentCode("HS250101")).thenReturn(Optional.of(president));
             when(userRoleRepository.isActiveWithRole(18L, List.of(RoleCodes.STUDENT))).thenReturn(true);
-            assertThatThrownBy(() -> service.assignPresident(ADMIN, 1L, "SE180101", null))
+            assertThatThrownBy(() -> service.assignPresident(ADMIN, 1L, "HS250101", null))
                     .hasMessage(ClubMessages.ALREADY_PRESIDENT);
 
             assertThat(oldPresident.getMemberRole()).isEqualTo(ClubMemberRole.PRESIDENT);

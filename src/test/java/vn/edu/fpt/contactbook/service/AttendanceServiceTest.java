@@ -128,13 +128,13 @@ class AttendanceServiceTest {
                 audience, userRequestRepository, new AttendanceEditWindow(24));
 
         Department se = CatalogTestData.department(1L, "SE");
-        Semester fa26 = CatalogTestData.semester(1L, "FA26");
+        Semester hk1 = CatalogTestData.semester(1L, "HK1-2627");
         Teacher gv002 = CatalogTestData.teacher(2L, "GV002", se);
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se), fa26,
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se), hk1,
                 gv002, 40, SectionStatus.OPEN);
         session = session(100L, section, AppTime.today(), SessionStatus.SCHEDULED);
-        s1 = CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING);
-        s2 = CatalogTestData.student(2L, "SE190002", StudentStatus.STUDYING);
+        s1 = CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING);
+        s2 = CatalogTestData.student(2L, "HS260002", StudentStatus.STUDYING);
 
         when(teacherRepository.findByUserId(3L)).thenReturn(Optional.of(gv002));
         when(teacherRepository.findByUserId(16L)).thenReturn(Optional.of(CatalogTestData.teacher(8L, "GV003", se)));
@@ -164,7 +164,7 @@ class AttendanceServiceTest {
 
             assertThat(sheet.marked()).isFalse();
             assertThat(sheet.rows()).extracting(AttendanceSheet.Row::studentCode, AttendanceSheet.Row::status)
-                    .containsExactly(tuple("SE190001", null), tuple("SE190002", null));
+                    .containsExactly(tuple("HS260001", null), tuple("HS260002", null));
         }
 
         @Test
@@ -295,8 +295,8 @@ class AttendanceServiceTest {
             assertThat(saved.getValue())
                     .extracting(a -> a.getStudent().getStudentCode(), Attendance::getStatus,
                             a -> a.getMarkedBy().getId(), Attendance::getNote, Attendance::getSession)
-                    .containsExactly(tuple("SE190001", AttendanceStatus.PRESENT, 3L, null, session),
-                            tuple("SE190002", AttendanceStatus.ABSENT_EXCUSED, 3L, null, session));
+                    .containsExactly(tuple("HS260001", AttendanceStatus.PRESENT, 3L, null, session),
+                            tuple("HS260002", AttendanceStatus.ABSENT_EXCUSED, 3L, null, session));
             AuditLog audit = singleAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.MARK_ATTENDANCE);
             assertThat(audit.getEntityId()).isEqualTo(100L);
@@ -395,7 +395,7 @@ class AttendanceServiceTest {
             assertThat(audit.getAction()).isEqualTo(AuditActions.ADJUST_ATTENDANCE);
             assertThat(audit.getEntityType()).isEqualTo(AuditActions.ENTITY_ATTENDANCE);
             assertThat(audit.getEntityId()).isEqualTo(501L);
-            assertThat(audit.getDetail()).contains("student=SE190001", "status=PRESENT -> ABSENT_EXCUSED",
+            assertThat(audit.getDetail()).contains("student=HS260001", "status=PRESENT -> ABSENT_EXCUSED",
                     "note=Đúng giờ -> Đúng giờ", "reason=Có giấy khám bệnh");
         }
 

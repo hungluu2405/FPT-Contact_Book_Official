@@ -93,9 +93,9 @@ class RequestServiceTest {
     /** users.id 16: giảng viên GV003 (teachers.id 8), chủ nhiệm lớp hành chính của sinh viên. */
     static final AppUserPrincipal HOMEROOM = CatalogTestData.principal(16L, Set.of(RoleCodes.TEACHER), Map.of());
     static final AppUserPrincipal ADMIN = CatalogTestData.principal(1L, Set.of(RoleCodes.ADMIN), Map.of());
-    /** users.id 4: sinh viên SE190001 (students.id 1). */
+    /** users.id 4: sinh viên HS260001 (students.id 1). */
     static final AppUserPrincipal STUDENT = CatalogTestData.principal(4L, Set.of(RoleCodes.STUDENT), Map.of());
-    /** users.id 5: phụ huynh (parents.id 1) đã liên kết SE190001. */
+    /** users.id 5: phụ huynh (parents.id 1) đã liên kết HS260001. */
     static final AppUserPrincipal PARENT = CatalogTestData.principal(5L, Set.of(RoleCodes.PARENT), Map.of());
     static final AppUserPrincipal OUTSIDER = CatalogTestData.principal(18L, Set.of(RoleCodes.STUDENT), Map.of());
 
@@ -136,11 +136,11 @@ class RequestServiceTest {
         gv002.getUser().setId(3L);
         Teacher gv003 = CatalogTestData.teacher(8L, "GV003", se);
         gv003.getUser().setId(16L);
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se),
-                CatalogTestData.semester(1L, "FA26"), gv002, 40, SectionStatus.OPEN);
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se),
+                CatalogTestData.semester(1L, "HK1-2627"), gv002, 40, SectionStatus.OPEN);
         SchoolClass schoolClass = new SchoolClass();
         schoolClass.setHomeroomTeacher(gv003);
-        student = CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING);
+        student = CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING);
         student.setSchoolClass(schoolClass);
         studentUser = student.getUser();
         studentUser.setId(4L);

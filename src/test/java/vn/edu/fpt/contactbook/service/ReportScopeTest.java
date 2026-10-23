@@ -45,16 +45,16 @@ class ReportScopeTest {
 
     static final Department SE = CatalogTestData.department(1L, "SE");
     static final Department IA = CatalogTestData.department(38L, "IA");
-    static final Semester FA26 = CatalogTestData.semester(1L, "FA26");
-    static final Semester SP27 = CatalogTestData.semester(38L, "SP27");
-    static final Subject PRJ = CatalogTestData.subject(1L, "PRJ301", SE);
+    static final Semester HK1 = CatalogTestData.semester(1L, "HK1-2627");
+    static final Semester HK2 = CatalogTestData.semester(38L, "HK2-2627");
+    static final Subject PRJ = CatalogTestData.subject(1L, "TOAN10", SE);
     static final Subject SEC = CatalogTestData.subject(50L, "SEC101", IA);
     static final Teacher ME = CatalogTestData.teacher(2L, "GV002", SE);
     static final Teacher OTHER = CatalogTestData.teacher(8L, "GV003", IA);
-    static final ClassSection MINE = CatalogTestData.section(1L, "PRJ301-01", PRJ, FA26, ME, 40, SectionStatus.OPEN);
-    static final ClassSection SE_OTHER = CatalogTestData.section(27L, "PRJ301-02", PRJ, SP27, OTHER, 40,
+    static final ClassSection MINE = CatalogTestData.section(1L, "TOAN10-01", PRJ, HK1, ME, 40, SectionStatus.OPEN);
+    static final ClassSection SE_OTHER = CatalogTestData.section(27L, "TOAN10-02", PRJ, HK2, OTHER, 40,
             SectionStatus.OPEN);
-    static final ClassSection IA_OTHER = CatalogTestData.section(60L, "SEC101-01", SEC, FA26, OTHER, 40,
+    static final ClassSection IA_OTHER = CatalogTestData.section(60L, "SEC101-01", SEC, HK1, OTHER, 40,
             SectionStatus.OPEN);
 
     static final AppUserPrincipal ADMIN = CatalogTestData.principal(1L, Set.of(RoleCodes.ADMIN), Map.of());
@@ -84,7 +84,7 @@ class ReportScopeTest {
         when(classSectionRepository.findById(IA_OTHER.getId())).thenReturn(Optional.of(IA_OTHER));
         when(subjectRepository.findById(PRJ.getId())).thenReturn(Optional.of(PRJ));
         when(subjectRepository.findById(SEC.getId())).thenReturn(Optional.of(SEC));
-        when(scheduleViewService.resolveSemester(any())).thenReturn(FA26);
+        when(scheduleViewService.resolveSemester(any())).thenReturn(HK1);
     }
 
     @Nested
@@ -139,9 +139,9 @@ class ReportScopeTest {
         @Test
         @DisplayName("Có sectionId thì học kỳ và môn lấy theo lớp, bỏ qua semesterId/subjectId trên URL")
         void sectionWins() {
-            Context context = scope.resolve(HEAD, new ReportFilter(FA26.getId(), 77L, SE_OTHER.getId()));
+            Context context = scope.resolve(HEAD, new ReportFilter(HK1.getId(), 77L, SE_OTHER.getId()));
 
-            assertThat(context.semester()).isSameAs(SP27);
+            assertThat(context.semester()).isSameAs(HK2);
             assertThat(context.subject()).isSameAs(PRJ);
             assertThat(context.sections()).containsExactly(SE_OTHER);
             verify(scheduleViewService, never()).resolveSemester(any());
@@ -192,14 +192,14 @@ class ReportScopeTest {
         @Test
         @DisplayName("Có môn thì chỉ giữ lớp của môn đó; ô chọn lớp cũng chỉ còn lớp của môn")
         void filtersSections() {
-            when(classSectionRepository.findForReport(eq(FA26.getId()), eq(true), any(), any()))
+            when(classSectionRepository.findForReport(eq(HK1.getId()), eq(true), any(), any()))
                     .thenReturn(List.of(MINE, IA_OTHER));
 
-            Context context = scope.resolve(ADMIN, new ReportFilter(FA26.getId(), SEC.getId(), null));
+            Context context = scope.resolve(ADMIN, new ReportFilter(HK1.getId(), SEC.getId(), null));
 
             assertThat(context.sections()).containsExactly(IA_OTHER);
             assertThat(context.selection().sections()).extracting("id").containsExactly(IA_OTHER.getId());
-            assertThat(context.selection().subjects()).extracting("id").containsExactly(PRJ.getId(), SEC.getId());
+            assertThat(context.selection().subjects()).extracting("id").containsExactly(SEC.getId(), PRJ.getId());
         }
     }
 
@@ -210,18 +210,18 @@ class ReportScopeTest {
         @Test
         @DisplayName("Giảng viên: truy vấn theo hồ sơ giảng viên, không mở theo bộ môn")
         void teacherQuery() {
-            scope.resolve(TEACHER, new ReportFilter(FA26.getId(), null, null));
+            scope.resolve(TEACHER, new ReportFilter(HK1.getId(), null, null));
 
-            verify(classSectionRepository).findForReport(eq(FA26.getId()), eq(false), eq(ME.getId()),
+            verify(classSectionRepository).findForReport(eq(HK1.getId()), eq(false), eq(ME.getId()),
                     eq(CatalogSupport.NO_IDS));
         }
 
         @Test
         @DisplayName("Trưởng bộ môn chưa có hồ sơ giảng viên: truy vấn theo bộ môn, teacherId null")
         void headQuery() {
-            scope.resolve(HEAD, new ReportFilter(FA26.getId(), null, null));
+            scope.resolve(HEAD, new ReportFilter(HK1.getId(), null, null));
 
-            verify(classSectionRepository).findForReport(eq(FA26.getId()), eq(false), eq(null), eq(Set.of(1L)));
+            verify(classSectionRepository).findForReport(eq(HK1.getId()), eq(false), eq(null), eq(Set.of(1L)));
         }
 
         @Test

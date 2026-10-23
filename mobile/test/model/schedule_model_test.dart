@@ -20,7 +20,7 @@ void main() {
         (data) => ScheduleWeekModel.fromJson(data as Map<String, dynamic>),
       );
 
-      expect(result.semester.name, 'Học kỳ Thu 2026');
+      expect(result.semester.name, 'Học kỳ I năm học 2026–2027');
       expect(result.data.days, hasLength(7));
       expect(result.data.weekStart, '2026-10-19');
       expect(result.data.previous, '2026-10-12');

@@ -32,7 +32,7 @@ void main() {
       expect(app.scheduleController.selectedDate, '2026-10-21');
       expect(app.scheduleController.selectedDay!.items, hasLength(1));
       expect(app.scheduleController.isCurrentWeek, isTrue);
-      expect(app.scheduleController.semester!.name, 'Học kỳ Thu 2026');
+      expect(app.scheduleController.semester!.name, 'Học kỳ I năm học 2026–2027');
     });
 
     test('another week selects the first day with sessions', () async {

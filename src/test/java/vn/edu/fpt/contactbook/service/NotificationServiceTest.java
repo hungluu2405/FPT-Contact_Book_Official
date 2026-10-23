@@ -105,8 +105,8 @@ class NotificationServiceTest {
         Department se = CatalogTestData.department(1L, "SE");
         Teacher gv002 = CatalogTestData.teacher(2L, "GV002", se);
         when(teacherRepository.findByUserId(3L)).thenReturn(Optional.of(gv002));
-        when(classSectionRepository.findById(10L)).thenReturn(Optional.of(CatalogTestData.section(10L, "PRJ301-01",
-                CatalogTestData.subject(1L, "PRJ301", se), CatalogTestData.semester(1L, "FA26"), gv002, 40,
+        when(classSectionRepository.findById(10L)).thenReturn(Optional.of(CatalogTestData.section(10L, "TOAN10-01",
+                CatalogTestData.subject(1L, "TOAN10", se), CatalogTestData.semester(1L, "HK1-2627"), gv002, 40,
                 SectionStatus.OPEN)));
         when(audienceRepository.studentsOfSection(10L)).thenReturn(List.of(4L, 3L));
         when(audienceRepository.parentsOfSection(10L)).thenReturn(List.of(5L));

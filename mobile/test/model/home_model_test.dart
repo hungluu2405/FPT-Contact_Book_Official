@@ -26,8 +26,8 @@ void main() {
           roles: [
             {
               'roleCode': 'HEAD_OF_DEPARTMENT',
-              'departmentCode': 'SE',
-              'departmentName': 'Kỹ thuật phần mềm',
+              'departmentCode': 'TT',
+              'departmentName': 'Tổ Toán – Tin học',
             },
           ],
         ),
@@ -38,7 +38,7 @@ void main() {
       expect(profile.gender, 'MALE');
       expect(profile.dateOfBirth, '2005-03-15');
       expect(profile.roles.single.roleCode, 'HEAD_OF_DEPARTMENT');
-      expect(profile.roles.single.departmentName, 'Kỹ thuật phần mềm');
+      expect(profile.roles.single.departmentName, 'Tổ Toán – Tin học');
     });
 
     test('keeps missing optional fields as null', () {

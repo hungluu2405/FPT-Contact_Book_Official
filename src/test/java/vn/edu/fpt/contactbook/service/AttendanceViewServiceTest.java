@@ -88,7 +88,7 @@ class AttendanceViewServiceTest {
 
     private AttendanceViewService service;
     private ClassSection section;
-    private Student se190001;
+    private Student hs260001;
 
     @BeforeEach
     void setUp() {
@@ -109,24 +109,24 @@ class AttendanceViewServiceTest {
                 enrollmentRepository, attendanceRepository);
 
         Department se = CatalogTestData.department(1L, "SE");
-        Semester fa26 = CatalogTestData.semester(1L, "FA26");
-        fa26.setStartDate(LocalDate.of(2026, 9, 7));
-        fa26.setEndDate(LocalDate.of(2026, 12, 20));
-        fa26.setCurrent(true);
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se), fa26,
+        Semester hk1 = CatalogTestData.semester(1L, "HK1-2627");
+        hk1.setStartDate(LocalDate.of(2026, 9, 7));
+        hk1.setEndDate(LocalDate.of(2026, 12, 20));
+        hk1.setCurrent(true);
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se), hk1,
                 CatalogTestData.teacher(2L, "GV002", se), 40, SectionStatus.OPEN);
-        se190001 = CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING);
+        hs260001 = CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING);
 
-        when(semesterRepository.findByCurrentTrue()).thenReturn(Optional.of(fa26));
+        when(semesterRepository.findByCurrentTrue()).thenReturn(Optional.of(hk1));
         when(classSectionRepository.findById(10L)).thenReturn(Optional.of(section));
-        when(studentRepository.findByUserId(4L)).thenReturn(Optional.of(se190001));
+        when(studentRepository.findByUserId(4L)).thenReturn(Optional.of(hs260001));
         Parent parent = new Parent();
         parent.setId(1L);
         when(parentRepository.findByUserId(5L)).thenReturn(Optional.of(parent));
         when(parentStudentRepository.existsByIdParentIdAndIdStudentId(1L, 1L)).thenReturn(true);
         when(enrollmentRepository.findAttendedInSemester(1L, 1L)).thenReturn(List.of(
-                CatalogTestData.enrollment(1L, section, se190001, EnrollmentStatus.ENROLLED)));
-        // 10 buổi chưa hủy; SE190001: 7 có mặt, 1 vắng có phép, 2 vắng không phép → vắng 30%.
+                CatalogTestData.enrollment(1L, section, hs260001, EnrollmentStatus.ENROLLED)));
+        // 10 buổi chưa hủy; HS260001: 7 có mặt, 1 vắng có phép, 2 vắng không phép → vắng 30%.
         when(classSessionRepository.countActiveBySections(anyCollection()))
                 .thenReturn(List.<Object[]>of(new Object[]{10L, 10L}));
         when(attendanceRepository.countBySectionAndStatus(anyLong(), anyCollection())).thenReturn(List.of(
@@ -141,7 +141,7 @@ class AttendanceViewServiceTest {
         List<StudentAttendanceRow> rows = service.student(STUDENT, Audience.STUDENT, 999L, null).data();
 
         assertThat(rows).singleElement().satisfies(row -> {
-            assertThat(row.subjectCode()).isEqualTo("PRJ301");
+            assertThat(row.subjectCode()).isEqualTo("TOAN10");
             assertThat(row.summary().absent()).isEqualTo(3);
             assertThat(row.summary().absentRate()).isEqualByComparingTo("30.0");
             assertThat(row.summary().attendanceRate()).isEqualByComparingTo("70.0");
@@ -189,7 +189,7 @@ class AttendanceViewServiceTest {
                 .isInstanceOf(AccessDeniedException.class);
 
         when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L)).thenReturn(Optional.of(
-                CatalogTestData.enrollment(1L, section, se190001, EnrollmentStatus.DROPPED)));
+                CatalogTestData.enrollment(1L, section, hs260001, EnrollmentStatus.DROPPED)));
         assertThatThrownBy(() -> service.history(STUDENT, Audience.STUDENT, null, 10L, 0))
                 .isInstanceOf(AccessDeniedException.class);
     }
@@ -198,7 +198,7 @@ class AttendanceViewServiceTest {
     @DisplayName("Lịch sử môn đang học: tổng hợp cùng công thức với trang theo môn")
     void historyOfOwnSection() {
         when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L)).thenReturn(Optional.of(
-                CatalogTestData.enrollment(1L, section, se190001, EnrollmentStatus.ENROLLED)));
+                CatalogTestData.enrollment(1L, section, hs260001, EnrollmentStatus.ENROLLED)));
         when(classSessionRepository.findByClassSectionIdOrderBySessionDateAscStartTimeAsc(anyLong(), any()))
                 .thenReturn(Page.empty());
         when(classSessionRepository.countByClassSectionIdAndStatusNot(10L, SessionStatus.CANCELLED)).thenReturn(10L);
@@ -240,7 +240,7 @@ class AttendanceViewServiceTest {
                 .thenReturn(new PageImpl<>(List.of(section)));
 
         assertThat(service.teacherSections(teacher, null, 0).data())
-                .extracting(TeacherSectionView::code).containsExactly("PRJ301-FA26-01");
+                .extracting(TeacherSectionView::code).containsExactly("TOAN10-HK1-2627-01");
         verify(classSectionRepository)
                 .findByTeacherIdAndSemesterIdOrderByCodeAsc(eq(2L), eq(1L), any());
     }

@@ -176,7 +176,7 @@ class UserManagementIntegrationTest {
                     .andExpect(header().string("Cache-Control", containsString("no-store")))
                     .andExpect(content().string(allOf(containsString(temporaryPassword),
                             containsString("Trưởng bộ môn"), containsString("Giảng viên"),
-                            containsString("Bộ môn Kỹ thuật phần mềm (SE)"), containsString("GV900"))));
+                            containsString("Tổ Toán – Tin học (TT)"), containsString("GV900"))));
             mockMvc.perform(get(detailUrl).with(as(TestAccounts.ADMIN)))
                     .andExpect(content().string(not(containsString(temporaryPassword))));
 
@@ -184,7 +184,7 @@ class UserManagementIntegrationTest {
             assertThat(user.isMustChangePassword()).isTrue();
             assertThat(userRoleRepository.findByUserId(user.getId()))
                     .extracting(ur -> ur.getRole().getCode() + "@" + ur.getDepartment().getCode())
-                    .containsExactlyInAnyOrder("HEAD_OF_DEPARTMENT@SE", "TEACHER@SE");
+                    .containsExactlyInAnyOrder("HEAD_OF_DEPARTMENT@TT", "TEACHER@TT");
             assertThat(auditLogRepository.count()).isEqualTo(auditBefore + 1);
             assertNoAuditContains(temporaryPassword);
 
@@ -214,7 +214,7 @@ class UserManagementIntegrationTest {
 
             mockMvc.perform(post("/admin/users/new").with(as(TestAccounts.ADMIN)).with(csrf())
                             .param("phone", "0911000113").param("fullName", "SV trùng mã").param("roles", "STUDENT")
-                            .param("profile.studentCode", "se190001").param("profile.majorId", "1")
+                            .param("profile.studentCode", "hs260001").param("profile.majorId", "1")
                             .param("profile.classId", "1").param("profile.enrollmentYear", "2026"))
                     .andExpect(content().string(containsString("Mã sinh viên đã tồn tại")));
 
@@ -409,7 +409,7 @@ class UserManagementIntegrationTest {
         @Test
         @DisplayName("Thêm phụ huynh chính mới bỏ cờ chính của phụ huynh cũ; gỡ liên kết")
         void linkParentsWithSinglePrimary() throws Exception {
-            // SE190001 (students.id = 1) đang có phụ huynh chính là parents.id = 1 (0900000005).
+            // HS260001 (students.id = 1) đang có phụ huynh chính là parents.id = 1 (0900000005).
             mockMvc.perform(post("/admin/users/4/parents").with(as(TestAccounts.ADMIN)).with(csrf())
                             .param("otherKey", "0944 112 233").param("relationship", "GUARDIAN")
                             .param("primary", "true"))
@@ -436,12 +436,12 @@ class UserManagementIntegrationTest {
         @DisplayName("Từ trang phụ huynh: thêm con theo mã sinh viên")
         void linkChildByStudentCode() throws Exception {
             mockMvc.perform(post("/admin/users/5/children").with(as(TestAccounts.ADMIN)).with(csrf())
-                            .param("otherKey", "se180101").param("relationship", "FATHER"))
+                            .param("otherKey", "hs250101").param("relationship", "FATHER"))
                     .andExpect(redirectedUrl("/admin/users/5/children"));
 
             assertThat(parentStudentRepository.existsById(new ParentStudentId(1L, 2L))).isTrue();
             mockMvc.perform(get("/admin/users/5").with(as(TestAccounts.ADMIN)))
-                    .andExpect(content().string(containsString("SE180101")));
+                    .andExpect(content().string(containsString("HS250101")));
         }
 
         @Test

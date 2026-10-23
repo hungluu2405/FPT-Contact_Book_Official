@@ -39,12 +39,12 @@ class GradeImportServiceTest {
     @BeforeEach
     void setUp() {
         Department se = CatalogTestData.department(1L, "SE");
-        ClassSection section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301",
-                se), CatalogTestData.semester(1L, "FA26"), CatalogTestData.teacher(2L, "GV002", se), 40,
+        ClassSection section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10",
+                se), CatalogTestData.semester(1L, "HK1-2627"), CatalogTestData.teacher(2L, "GV002", se), 40,
                 SectionStatus.OPEN);
-        e1 = CatalogTestData.enrollment(100L, section, CatalogTestData.student(1L, "SE190001",
+        e1 = CatalogTestData.enrollment(100L, section, CatalogTestData.student(1L, "HS260001",
                 StudentStatus.STUDYING), EnrollmentStatus.ENROLLED);
-        Enrollment e2 = CatalogTestData.enrollment(101L, section, CatalogTestData.student(2L, "SE190002",
+        Enrollment e2 = CatalogTestData.enrollment(101L, section, CatalogTestData.student(2L, "HS260002",
                 StudentStatus.STUDYING), EnrollmentStatus.ENROLLED);
         List<GradeComponent> components = List.of(GradeRuleTest.component(1L, "40", "10"),
                 GradeRuleTest.component(2L, "60", "5"));
@@ -57,8 +57,8 @@ class GradeImportServiceTest {
         List<CellUpdate> updates = new ArrayList<>();
 
         List<ImportRowError> errors = GradeImportService.validate(List.of(
-                row(2, "SE190001", cell("8.5"), blank()),
-                row(3, "SE190002", blank(), cell("4"))), data, updates);
+                row(2, "HS260001", cell("8.5"), blank()),
+                row(3, "HS260002", blank(), cell("4"))), data, updates);
 
         assertThat(errors).isEmpty();
         assertThat(updates).extracting(u -> u.enrollment().getId(), u -> u.component().getId(), CellUpdate::score)
@@ -70,8 +70,8 @@ class GradeImportServiceTest {
     void rowErrors() {
         List<ImportRowError> errors = GradeImportService.validate(List.of(
                 row(2, null, cell("8"), blank()),
-                row(3, "SE190001", cell("8"), blank()),
-                row(4, "SE190001", cell("9"), blank()),
+                row(3, "HS260001", cell("8"), blank()),
+                row(4, "HS260001", cell("9"), blank()),
                 row(5, "SE999999", cell("9"), blank())), data, new ArrayList<>());
 
         assertThat(errors).extracting(ImportRowError::rowNumber, ImportRowError::column)
@@ -83,8 +83,8 @@ class GradeImportServiceTest {
     @DisplayName("Lỗi theo ô: không phải số, vượt max_score của đầu điểm (max 5), quá 2 chữ số thập phân")
     void cellErrors() {
         List<ImportRowError> errors = GradeImportService.validate(List.of(
-                row(2, "SE190001", invalid(), cell("5.5")),
-                row(3, "SE190002", cell("8.125"), blank())), data, new ArrayList<>());
+                row(2, "HS260001", invalid(), cell("5.5")),
+                row(3, "HS260002", cell("8.125"), blank())), data, new ArrayList<>());
 
         assertThat(errors).extracting(ImportRowError::rowNumber, ImportRowError::column, ImportRowError::message)
                 .containsExactly(tuple(2, "Đầu điểm 1", GradeMessages.SCORE_INVALID),
@@ -99,9 +99,9 @@ class GradeImportServiceTest {
         published.setPublished(true);
         grades.put(GradeSheet.key(100L, 1L), published);
 
-        List<ImportRowError> errors = GradeImportService.validate(List.of(row(2, "SE190001", cell("9"), blank())),
+        List<ImportRowError> errors = GradeImportService.validate(List.of(row(2, "HS260001", cell("9"), blank())),
                 data, new ArrayList<>());
-        List<ImportRowError> blankOk = GradeImportService.validate(List.of(row(2, "SE190001", blank(), cell("3"))),
+        List<ImportRowError> blankOk = GradeImportService.validate(List.of(row(2, "HS260001", blank(), cell("3"))),
                 data, new ArrayList<>());
 
         assertThat(errors).singleElement().satisfies(e -> assertThat(e.message()).contains("đã công bố"));

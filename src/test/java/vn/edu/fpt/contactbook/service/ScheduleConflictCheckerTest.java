@@ -64,13 +64,13 @@ class ScheduleConflictCheckerTest {
     void setUp() {
         checker = new ScheduleConflictChecker(classSessionRepository, examRepository, enrollmentRepository);
         Department se = CatalogTestData.department(1L, "SE");
-        Semester fa26 = CatalogTestData.semester(1L, "FA26");
+        Semester hk1 = CatalogTestData.semester(1L, "HK1-2627");
         gv002 = CatalogTestData.teacher(2L, "GV002", se);
         Teacher gv003 = CatalogTestData.teacher(8L, "GV003", se);
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se), fa26,
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se), hk1,
                 gv002, null, SectionStatus.OPEN);
-        otherSection = CatalogTestData.section(27L, "PRN211_FA26_01", CatalogTestData.subject(31L, "PRN211", se),
-                fa26, gv003, null, SectionStatus.OPEN);
+        otherSection = CatalogTestData.section(27L, "TIN11-HK1-2627-01", CatalogTestData.subject(31L, "TIN11", se),
+                hk1, gv003, null, SectionStatus.OPEN);
         r101 = room(1L, "R101");
         when(enrollmentRepository.countSharedStudents(anyLong())).thenReturn(List.of());
         when(classSessionRepository.findByClassSectionIdAndSessionDateBetween(anyLong(), any(), any()))
@@ -109,7 +109,7 @@ class ScheduleConflictCheckerTest {
             List<ScheduleConflict> conflicts = check(r101, "09:00", "11:00");
 
             assertThat(conflicts).extracting(ScheduleConflict::type).containsExactly(Type.ROOM);
-            assertThat(conflicts.getFirst().detail()).contains("R101").contains("PRN211_FA26_01").contains("07:30–09:50");
+            assertThat(conflicts.getFirst().detail()).contains("R101").contains("TIN11-HK1-2627-01").contains("07:30–09:50");
         }
 
         @Test
@@ -123,7 +123,7 @@ class ScheduleConflictCheckerTest {
         @Test
         @DisplayName("Cùng giảng viên ở lớp khác, khác phòng → xung đột giảng viên")
         void teacherConflict() {
-            ClassSection sameTeacher = CatalogTestData.section(28L, "SWP391_FA26_01", otherSection.getSubject(),
+            ClassSection sameTeacher = CatalogTestData.section(28L, "STEM-HK1-2627-01", otherSection.getSubject(),
                     section.getSemester(), gv002, null, SectionStatus.OPEN);
             whenOthers(session(50L, sameTeacher, room(14L, "BE-301"), "08:00", "09:00", SessionStatus.SCHEDULED));
 
@@ -148,7 +148,7 @@ class ScheduleConflictCheckerTest {
         @DisplayName("Một buổi vừa trùng phòng, giảng viên và sinh viên → liệt kê đủ ba xung đột")
         void allTypesTogether() {
             when(enrollmentRepository.countSharedStudents(10L)).thenReturn(List.<Object[]>of(new Object[]{28L, 1L}));
-            ClassSection sameTeacher = CatalogTestData.section(28L, "SWP391_FA26_01", otherSection.getSubject(),
+            ClassSection sameTeacher = CatalogTestData.section(28L, "STEM-HK1-2627-01", otherSection.getSubject(),
                     section.getSemester(), gv002, null, SectionStatus.OPEN);
             whenOthers(session(50L, sameTeacher, r101, "07:30", "09:45", SessionStatus.SCHEDULED));
 

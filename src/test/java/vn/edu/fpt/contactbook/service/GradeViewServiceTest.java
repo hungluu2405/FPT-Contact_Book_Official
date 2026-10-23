@@ -85,18 +85,18 @@ class GradeViewServiceTest {
                 gradeRepository);
 
         Department se = CatalogTestData.department(1L, "SE");
-        Subject prj301 = CatalogTestData.subject(1L, "PRJ301", se);
-        Semester fa26 = CatalogTestData.semester(1L, "FA26");
-        fa26.setCurrent(true);
-        ClassSection section = CatalogTestData.section(10L, "PRJ301-FA26-01", prj301, fa26,
+        Subject toan10 = CatalogTestData.subject(1L, "TOAN10", se);
+        Semester hk1 = CatalogTestData.semester(1L, "HK1-2627");
+        hk1.setCurrent(true);
+        ClassSection section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", toan10, hk1,
                 CatalogTestData.teacher(2L, "GV002", se), 40, SectionStatus.OPEN);
         enrollment = CatalogTestData.enrollment(100L, section,
-                CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING), EnrollmentStatus.ENROLLED);
+                CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING), EnrollmentStatus.ENROLLED);
         components = List.of(GradeRuleTest.component(1L, "20", "10"), GradeRuleTest.component(2L, "30", "10"),
                 GradeRuleTest.component(3L, "50", "10"));
-        components.forEach(c -> c.setSubject(prj301));
+        components.forEach(c -> c.setSubject(toan10));
 
-        when(semesterRepository.findByCurrentTrue()).thenReturn(Optional.of(fa26));
+        when(semesterRepository.findByCurrentTrue()).thenReturn(Optional.of(hk1));
         when(studentRepository.findByUserId(4L)).thenReturn(Optional.of(enrollment.getStudent()));
         Parent parent = new Parent();
         parent.setId(1L);

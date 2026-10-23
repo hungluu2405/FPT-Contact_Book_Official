@@ -116,11 +116,11 @@ class GradeServiceTest {
 
         Department se = CatalogTestData.department(1L, "SE");
         Teacher gv002 = CatalogTestData.teacher(2L, "GV002", se);
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se),
-                CatalogTestData.semester(1L, "FA26"), gv002, 40, SectionStatus.OPEN);
-        e1 = CatalogTestData.enrollment(100L, section, CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING),
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se),
+                CatalogTestData.semester(1L, "HK1-2627"), gv002, 40, SectionStatus.OPEN);
+        e1 = CatalogTestData.enrollment(100L, section, CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING),
                 EnrollmentStatus.ENROLLED);
-        e2 = CatalogTestData.enrollment(101L, section, CatalogTestData.student(2L, "SE190002", StudentStatus.STUDYING),
+        e2 = CatalogTestData.enrollment(101L, section, CatalogTestData.student(2L, "HS260002", StudentStatus.STUDYING),
                 EnrollmentStatus.ENROLLED);
         components = List.of(GradeRuleTest.component(1L, "20", "10"), GradeRuleTest.component(2L, "30", "10"),
                 GradeRuleTest.component(3L, "50", "10"));
@@ -156,7 +156,7 @@ class GradeServiceTest {
             assertThat(sheet.weightsComplete()).isTrue();
             assertThat(sheet.publishable()).isEqualTo(3);
             assertThat(sheet.rows()).extracting(GradeSheet.Row::studentCode, GradeSheet.Row::average)
-                    .containsExactly(tuple("SE190001", new BigDecimal("8.2")), tuple("SE190002", null));
+                    .containsExactly(tuple("HS260001", new BigDecimal("8.2")), tuple("HS260002", null));
             assertThat(sheet.rows().getFirst().cells().get(1).published()).isTrue();
         }
 
@@ -177,7 +177,7 @@ class GradeServiceTest {
             assertThat(saved.getValue()).allSatisfy(g -> assertThat(g.getGradedAt()).isNotNull());
             AuditLog audit = singleAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.ENTER_GRADES);
-            assertThat(audit.getDetail()).contains("SE190001/Đầu điểm 1: - -> 8.5", "SE190002/Đầu điểm 3: - -> 10");
+            assertThat(audit.getDetail()).contains("HS260001/Đầu điểm 1: - -> 8.5", "HS260002/Đầu điểm 3: - -> 10");
         }
 
         @Test
@@ -236,7 +236,7 @@ class GradeServiceTest {
 
             assertThat(changed).isEqualTo(1);
             assertThat(existing.getScore()).isNull();
-            assertThat(singleAudit().getDetail()).contains("SE190001/Đầu điểm 1: 8 -> -");
+            assertThat(singleAudit().getDetail()).contains("HS260001/Đầu điểm 1: 8 -> -");
         }
 
         @Test
@@ -368,7 +368,7 @@ class GradeServiceTest {
             AuditLog audit = singleAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.ADJUST_GRADE);
             assertThat(audit.getEntityId()).isEqualTo(900L);
-            assertThat(audit.getDetail()).contains("student=SE190001", "score=6 -> 7.5", "oldNote=Chấm đợt 1",
+            assertThat(audit.getDetail()).contains("student=HS260001", "score=6 -> 7.5", "oldNote=Chấm đợt 1",
                     "reason=Phúc khảo");
         }
 

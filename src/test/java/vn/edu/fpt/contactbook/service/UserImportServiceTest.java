@@ -92,7 +92,7 @@ class UserImportServiceTest {
 
         Major se = major(1L, "SE");
         Major ia = major(14L, "IA");
-        SchoolClass se1901 = schoolClass(1L, "SE1901", se);
+        SchoolClass se1901 = schoolClass(1L, "10A1", se);
         SchoolClass ia01 = schoolClass(20L, "IA1801", ia);
         Department seDepartment = new Department();
         seDepartment.setId(1L);
@@ -283,9 +283,9 @@ class UserImportServiceTest {
         return service.importUsers(ADMIN, UserImportType.STUDENT, "sinh-vien.xlsx", file, "10.0.0.1");
     }
 
-    /** Dòng sinh viên hợp lệ (ngành SE, lớp SE1901); phone/dob có thể là chữ, số hoặc ngày. */
+    /** Dòng sinh viên hợp lệ (ngành SE, lớp 10A1); phone/dob có thể là chữ, số hoặc ngày. */
     private static List<Object> student(Object phone, Object dateOfBirth, String code) {
-        return new ArrayList<>(row(phone, "Sinh Viên Mới", "Nam", dateOfBirth, null, null, code, "SE", "SE1901",
+        return new ArrayList<>(row(phone, "Sinh Viên Mới", "Nam", dateOfBirth, null, null, code, "SE", "10A1",
                 "2026", null));
     }
 

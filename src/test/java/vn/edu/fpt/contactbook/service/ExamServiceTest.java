@@ -90,8 +90,8 @@ class ExamServiceTest {
         service = new ExamService(examRepository, classSessionService, classSectionService, checker, auditService);
 
         Department se = CatalogTestData.department(1L, "SE");
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se),
-                CatalogTestData.semester(1L, "FA26"), CatalogTestData.teacher(2L, "GV002", se), null,
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se),
+                CatalogTestData.semester(1L, "HK1-2627"), CatalogTestData.teacher(2L, "GV002", se), null,
                 SectionStatus.OPEN);
         when(classSectionRepository.findById(10L)).thenReturn(Optional.of(section));
         when(classSectionRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(section));

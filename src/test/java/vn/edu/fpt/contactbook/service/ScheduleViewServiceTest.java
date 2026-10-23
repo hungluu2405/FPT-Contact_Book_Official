@@ -70,11 +70,11 @@ class ScheduleViewServiceTest {
         service = new ScheduleViewService(semesterRepository, teacherRepository, studentRepository, parentRepository,
                 parentStudentRepository, classSectionRepository, enrollmentRepository, classSessionRepository,
                 examRepository);
-        Semester fa26 = CatalogTestData.semester(1L, "FA26");
-        fa26.setStartDate(LocalDate.of(2026, 9, 7));
-        fa26.setEndDate(LocalDate.of(2026, 12, 20));
-        when(semesterRepository.findByCurrentTrue()).thenReturn(Optional.of(fa26));
-        when(semesterRepository.findById(1L)).thenReturn(Optional.of(fa26));
+        Semester hk1 = CatalogTestData.semester(1L, "HK1-2627");
+        hk1.setStartDate(LocalDate.of(2026, 9, 7));
+        hk1.setEndDate(LocalDate.of(2026, 12, 20));
+        when(semesterRepository.findByCurrentTrue()).thenReturn(Optional.of(hk1));
+        when(semesterRepository.findById(1L)).thenReturn(Optional.of(hk1));
         Parent parent = new Parent();
         parent.setId(1L);
         when(parentRepository.findByUserId(5L)).thenReturn(Optional.of(parent));
@@ -117,7 +117,7 @@ class ScheduleViewServiceTest {
     @Test
     @DisplayName("Sinh viên chỉ thấy lớp mình đang học; chưa học lớp nào thì truy vấn với id giả, không lỗi")
     void studentWithoutSections() {
-        Student me = CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING);
+        Student me = CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING);
         when(studentRepository.findByUserId(4L)).thenReturn(Optional.of(me));
         when(enrollmentRepository.findEnrolledSectionIds(1L, 1L)).thenReturn(List.of());
 

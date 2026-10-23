@@ -30,8 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Số liệu báo cáo phải khớp các màn hình đã có (cùng công thức, không có công thức thứ hai): báo cáo điểm danh một lớp
  * = bảng thống kê điểm danh của lớp (AttendanceViewService.section); trung bình môn trong báo cáo điểm = bảng điểm
- * (GradeService.sheet). Dữ liệu mẫu lớp 27 PRN211_FA26_01: 2 SV ENROLLED (enrollments 17, 18), có điểm danh; đầu
- * điểm 10..14 của PRN211 (đủ 100%), mỗi SV mới có điểm đầu điểm 10 và 14.
+ * (GradeService.sheet). Dữ liệu mẫu lớp 27 TIN11-HK1-2627-01: 2 SV ENROLLED (enrollments 17, 18), có điểm danh; đầu
+ * điểm 10..14 của TIN11 (đủ 100%), mỗi SV mới có điểm đầu điểm 10 và 14.
  */
 @IntegrationTest
 class ReportConsistencyIntegrationTest {

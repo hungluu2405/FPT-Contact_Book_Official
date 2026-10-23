@@ -17,7 +17,7 @@ File này bổ sung `~/.claude/CLAUDE.md`. Ở những điểm dưới đây, fi
 - Nghiệp vụ và chức năng: `docs/SRS.md`.
 - Hai nguồn mâu thuẫn: script SQL thắng về cấu trúc dữ liệu, SRS thắng về nghiệp vụ.
 - Phần công nghệ trong SRS (Spring Boot 3.3.4, H2) đã lỗi thời; về công nghệ thì CLAUDE.md và `pom.xml` thắng.
-- Tuyệt đối KHÔNG sửa `fpt_contact_book.sql`. Cần đổi cấu trúc dữ liệu thì dừng lại, đề xuất để duyệt.
+- Tuyệt đối KHÔNG sửa cấu trúc trong `fpt_contact_book.sql` (bảng, cột, ràng buộc). Cần đổi cấu trúc thì dừng lại, đề xuất để duyệt. Dữ liệu mẫu (các lệnh INSERT) chỉ được sửa khi chủ dự án duyệt; giữ nguyên `id`, số điện thoại, mật khẩu và ngày tháng để test không vỡ, file giữ mã hóa UTF-16 LE có BOM.
 
 ## 2. CÔNG NGHỆ (cố định)
 - Java 21, Spring Boot 4.1.x (đúng phiên bản trong `pom.xml`, không hạ xuống 3.x), Spring MVC (không WebFlux), Thymeleaf render phía máy chủ.
@@ -119,7 +119,7 @@ Tài nguyên: `templates/{layout,fragments,auth,admin,teacher,student,parent,com
 
 ## 10. DỮ LIỆU THỬ (có sẵn trong script, mật khẩu chung `Fpt@12345`, chỉ dùng cho dev/test)
 - `0900000001`: ADMIN
-- `0900000002`: TEACHER + HEAD_OF_DEPARTMENT (bộ môn SE)
+- `0900000002`: TEACHER + HEAD_OF_DEPARTMENT (tổ Toán – Tin học, mã TT)
 - `0900000003`: TEACHER
-- `0900000004`: STUDENT (SE190001)
-- `0900000005`: PARENT (cha của SE190001)
+- `0900000004`: STUDENT (HS260001)
+- `0900000005`: PARENT (cha của HS260001)

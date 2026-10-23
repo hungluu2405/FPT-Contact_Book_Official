@@ -78,7 +78,7 @@ class EnrollmentServiceTest {
 
     private EnrollmentService service;
     private ClassSection section;
-    private Student se190001;
+    private Student hs260001;
 
     @BeforeEach
     void setUp() {
@@ -94,12 +94,12 @@ class EnrollmentServiceTest {
                 schoolClassRepository, classSectionService, userAccessPolicy, auditService);
 
         Department se = CatalogTestData.department(1L, "SE");
-        section = CatalogTestData.section(10L, "PRJ301-FA26-01", CatalogTestData.subject(1L, "PRJ301", se),
-                CatalogTestData.semester(1L, "FA26"), CatalogTestData.teacher(2L, "GV002", se), 2, SectionStatus.OPEN);
-        se190001 = CatalogTestData.student(1L, "SE190001", StudentStatus.STUDYING);
+        section = CatalogTestData.section(10L, "TOAN10-HK1-2627-01", CatalogTestData.subject(1L, "TOAN10", se),
+                CatalogTestData.semester(1L, "HK1-2627"), CatalogTestData.teacher(2L, "GV002", se), 2, SectionStatus.OPEN);
+        hs260001 = CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING);
         when(classSectionRepository.findById(10L)).thenReturn(Optional.of(section));
         when(classSectionRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(section));
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(se190001));
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(hs260001));
         when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L)).thenReturn(Optional.empty());
     }
 
@@ -124,7 +124,7 @@ class EnrollmentServiceTest {
     @Test
     void duplicateEnrollmentRejected() {
         when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L)).thenReturn(Optional.of(
-                CatalogTestData.enrollment(5L, section, se190001, EnrollmentStatus.ENROLLED)));
+                CatalogTestData.enrollment(5L, section, hs260001, EnrollmentStatus.ENROLLED)));
 
         assertThatThrownBy(() -> service.enroll(ADMIN, 10L, 1L, "127.0.0.1"))
                 .isInstanceOf(BusinessException.class).hasMessage(SectionMessages.ALREADY_ENROLLED);
@@ -134,7 +134,7 @@ class EnrollmentServiceTest {
     @Test
     void completedStudentRejected() {
         when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L)).thenReturn(Optional.of(
-                CatalogTestData.enrollment(5L, section, se190001, EnrollmentStatus.COMPLETED)));
+                CatalogTestData.enrollment(5L, section, hs260001, EnrollmentStatus.COMPLETED)));
 
         assertThatThrownBy(() -> service.enroll(ADMIN, 10L, 1L, "127.0.0.1"))
                 .isInstanceOf(BusinessException.class).hasMessage(SectionMessages.ALREADY_COMPLETED);
@@ -175,7 +175,7 @@ class EnrollmentServiceTest {
     @ParameterizedTest
     @EnumSource(value = StudentStatus.class, names = {"ON_LEAVE", "GRADUATED", "DROPPED"})
     void studentNotStudyingRejected(StudentStatus status) {
-        se190001.setStatus(status);
+        hs260001.setStatus(status);
 
         assertThatThrownBy(() -> service.enroll(ADMIN, 10L, 1L, "127.0.0.1"))
                 .isInstanceOf(BusinessException.class).hasMessage(SectionMessages.STUDENT_NOT_STUDYING);
@@ -184,7 +184,7 @@ class EnrollmentServiceTest {
     @Test
     @DisplayName("SV đã DROPPED: đổi chính dòng cũ về ENROLLED, cập nhật thời điểm, không thêm dòng mới")
     void reEnrollDroppedStudent() {
-        Enrollment dropped = CatalogTestData.enrollment(5L, section, se190001, EnrollmentStatus.DROPPED);
+        Enrollment dropped = CatalogTestData.enrollment(5L, section, hs260001, EnrollmentStatus.DROPPED);
         LocalDateTime before = dropped.getEnrolledAt();
         when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L)).thenReturn(Optional.of(dropped));
         enrolledCount(1);
@@ -201,7 +201,7 @@ class EnrollmentServiceTest {
     @Test
     @DisplayName("Gỡ SV: đổi sang DROPPED, không xóa; SV không đang học trong lớp → báo lỗi")
     void dropStudent() {
-        Enrollment enrolled = CatalogTestData.enrollment(5L, section, se190001, EnrollmentStatus.ENROLLED);
+        Enrollment enrolled = CatalogTestData.enrollment(5L, section, hs260001, EnrollmentStatus.ENROLLED);
         when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L)).thenReturn(Optional.of(enrolled));
 
         service.drop(ADMIN, 10L, 1L, "127.0.0.1");
@@ -216,10 +216,10 @@ class EnrollmentServiceTest {
     @DisplayName("Ghi danh theo lớp hành chính: bỏ qua SV đã có và SV không đang học, ghi danh lại SV DROPPED")
     void enrollClassSkipsAndReEnrolls() {
         section.setMaxStudents((short) 10);
-        Student enrolled = CatalogTestData.student(2L, "SE180101", StudentStatus.STUDYING);
-        Student onLeave = CatalogTestData.student(3L, "SE180102", StudentStatus.ON_LEAVE);
-        Student fresh = CatalogTestData.student(4L, "SE180103", StudentStatus.STUDYING);
-        Student droppedBefore = CatalogTestData.student(5L, "SE180104", StudentStatus.STUDYING);
+        Student enrolled = CatalogTestData.student(2L, "HS250101", StudentStatus.STUDYING);
+        Student onLeave = CatalogTestData.student(3L, "HS250102", StudentStatus.ON_LEAVE);
+        Student fresh = CatalogTestData.student(4L, "11A103", StudentStatus.STUDYING);
+        Student droppedBefore = CatalogTestData.student(5L, "11A104", StudentStatus.STUDYING);
         Enrollment droppedRow = CatalogTestData.enrollment(9L, section, droppedBefore, EnrollmentStatus.DROPPED);
         classOf(List.of(enrolled, onLeave, fresh, droppedBefore));
         when(enrollmentRepository.findByClassSectionIdAndStudentIdIn(eq(10L), anyCollection())).thenReturn(List.of(
@@ -272,7 +272,7 @@ class EnrollmentServiceTest {
     private void classOf(List<Student> students) {
         SchoolClass schoolClass = new SchoolClass();
         schoolClass.setId(14L);
-        schoolClass.setCode("SE1801");
+        schoolClass.setCode("11A1");
         when(schoolClassRepository.findById(14L)).thenReturn(Optional.of(schoolClass));
         when(studentRepository.findBySchoolClassIdOrderByStudentCodeAsc(14L)).thenReturn(students);
     }

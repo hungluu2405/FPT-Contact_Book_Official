@@ -64,7 +64,7 @@ void main() {
   ) async {
     await pumpHome(tester, roles: ['PARENT'], children: [childJson()]);
 
-    expect(find.textContaining('Nguyễn Văn An · SE190001'), findsOneWidget);
+    expect(find.textContaining('Nguyễn Văn An · HS260001'), findsOneWidget);
     expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
   });
 

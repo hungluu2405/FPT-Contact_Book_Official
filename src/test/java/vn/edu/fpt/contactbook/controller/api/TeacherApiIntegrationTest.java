@@ -41,8 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static vn.edu.fpt.contactbook.support.ApiClient.fieldNames;
 
 /**
- * API của giảng viên (giai đoạn 9d). Dữ liệu mẫu: GV 0900000003 dạy lớp 1 (PRJ301-SE1901-FA26, buổi 1, sinh viên
- * students.id 1 = SE190001); lớp 27 (buổi 41) của giảng viên khác; 0922334455 là giảng viên không phụ trách lớp 1.
+ * API của giảng viên (giai đoạn 9d). Dữ liệu mẫu: GV 0900000003 dạy lớp 1 (TOAN10-HK1-2627-01, buổi 1, sinh viên
+ * students.id 1 = HS260001); lớp 27 (buổi 41) của giảng viên khác; 0922334455 là giảng viên không phụ trách lớp 1.
  */
 @IntegrationTest
 class TeacherApiIntegrationTest {
@@ -89,14 +89,14 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Lịch dạy tuần này có PRJ301 (buổi 1 đưa về hôm nay); lịch thi và danh sách buổi phân trang")
+        @DisplayName("Lịch dạy tuần này có TOAN10 (buổi 1 đưa về hôm nay); lịch thi và danh sách buổi phân trang")
         void schedule() throws Exception {
             JsonNode week = api.json(api.perform(get(API + "/schedule/week").param("date", AppTime.today().toString()),
                     TestAccounts.TEACHER).andExpect(status().isOk())).get("data");
             List<String> subjects = new ArrayList<>();
             week.get("days").forEach(day -> day.get("items").forEach(item -> subjects.add(
                     item.get("subjectCode").asString())));
-            assertThat(subjects).contains("PRJ301");
+            assertThat(subjects).contains("TOAN10");
 
             JsonNode sessions = api.json(api.perform(get(API + "/schedule/sessions"), TestAccounts.TEACHER)
                     .andExpect(status().isOk())).get("data");
@@ -115,7 +115,7 @@ class TeacherApiIntegrationTest {
                         "semesterCode", "status");
                 codes.add(item.get("code").asString());
             });
-            assertThat(codes).contains("PRJ301-SE1901-FA26").doesNotContain("PRN211_FA26_01");
+            assertThat(codes).contains("TOAN10-HK1-2627-01").doesNotContain("TIN11-HK1-2627-01");
 
             JsonNode stats = api.json(api.perform(get(API + "/sections/1/attendance"), TestAccounts.TEACHER)
                     .andExpect(status().isOk()));
@@ -126,7 +126,7 @@ class TeacherApiIntegrationTest {
             JsonNode student = stats.get("students").get("items").get(0);
             assertThat(fieldNames(student)).containsExactlyInAnyOrder("studentId", "studentCode", "fullName",
                     "summary");
-            assertThat(student.get("studentCode").asString()).isEqualTo("SE190001");
+            assertThat(student.get("studentCode").asString()).isEqualTo("HS260001");
         }
 
         @Test

@@ -99,7 +99,7 @@ class CatalogIntegrationTest {
             }
             mockMvc.perform(post("/admin/catalog/semesters/38/set-current").with(as(phone)).with(csrf()))
                     .andExpect(status().isForbidden());
-            assertThat(semesterRepository.findByCurrentTrue()).get().extracting(Semester::getCode).isEqualTo("FA26");
+            assertThat(semesterRepository.findByCurrentTrue()).get().extracting(Semester::getCode).isEqualTo("HK1-2627");
         }
 
         @Test
@@ -150,7 +150,7 @@ class CatalogIntegrationTest {
             long before = departmentRepository.count();
 
             mockMvc.perform(post("/admin/catalog/departments/new").with(as(TestAccounts.ADMIN)).with(csrf())
-                            .param("facultyId", "1").param("code", " se ").param("name", "Trùng"))
+                            .param("facultyId", "1").param("code", " tt ").param("name", "Trùng"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(containsString("Mã bộ môn đã tồn tại"),
                             containsString("is-invalid"))));
@@ -202,10 +202,10 @@ class CatalogIntegrationTest {
         }
 
         @Test
-        @DisplayName("Lớp SE1901 đã có sinh viên: đổi ngành bị chặn, lỗi cạnh ô ngành")
+        @DisplayName("Lớp 10A1 đã có sinh viên: đổi ngành bị chặn, lỗi cạnh ô ngành")
         void classWithStudentsKeepsMajor() throws Exception {
             mockMvc.perform(post("/admin/catalog/classes/1/edit").with(as(TestAccounts.ADMIN)).with(csrf())
-                            .param("majorId", "14").param("code", "SE1901").param("name", "Lớp SE1901")
+                            .param("majorId", "14").param("code", "10A1").param("name", "Lớp 10A1")
                             .param("intakeYear", "2019"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("Lớp đã có sinh viên nên không đổi được ngành")));
@@ -242,21 +242,21 @@ class CatalogIntegrationTest {
     class CurrentSemester {
 
         @Test
-        @DisplayName("Đặt SP27 làm hiện tại: FA26 tự bỏ cờ, luôn đúng một học kỳ hiện tại, ghi audit")
+        @DisplayName("Đặt HK2-2627 làm hiện tại: HK1-2627 tự bỏ cờ, luôn đúng một học kỳ hiện tại, ghi audit")
         void setCurrentKeepsExactlyOne() throws Exception {
             mockMvc.perform(post("/admin/catalog/semesters/38/set-current").with(as(TestAccounts.ADMIN)).with(csrf()))
                     .andExpect(redirectedUrl("/admin/catalog/semesters"))
                     .andExpect(flash().attribute("successMessage", "Đã đặt học kỳ hiện tại"));
 
             assertThat(semesterRepository.findAll()).filteredOn(Semester::isCurrent)
-                    .extracting(Semester::getCode).containsExactly("SP27");
+                    .extracting(Semester::getCode).containsExactly("HK2-2627");
             assertThat(lastAudit().getAction()).isEqualTo(AuditActions.SET_CURRENT_SEMESTER);
             assertThat(lastAudit().getEntityType()).isEqualTo("Semester");
 
             mockMvc.perform(post("/admin/catalog/semesters/1/set-current").with(as(TestAccounts.ADMIN)).with(csrf()))
                     .andExpect(redirectedUrl("/admin/catalog/semesters"));
             assertThat(semesterRepository.findAll()).filteredOn(Semester::isCurrent)
-                    .extracting(Semester::getCode).containsExactly("FA26");
+                    .extracting(Semester::getCode).containsExactly("HK1-2627");
         }
 
         @Test
@@ -283,7 +283,7 @@ class CatalogIntegrationTest {
         @DisplayName("Trùng mã lọt qua kiểm tra trước (uq_faculties_code) → lỗi ô mã")
         void uniqueCodeFromDatabase() {
             Faculty duplicate = new Faculty();
-            duplicate.setCode("IT");
+            duplicate.setCode("THPT");
             duplicate.setName("Trùng");
 
             assertThatThrownBy(() -> facultyRepository.saveAndFlush(duplicate))

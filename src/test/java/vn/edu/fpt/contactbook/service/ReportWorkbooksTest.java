@@ -23,17 +23,17 @@ class ReportWorkbooksTest {
     @DisplayName("Mở lại được bằng POI: tiêu đề, một dòng trống, tên cột, rồi dữ liệu; số là ô số, null là ô trống")
     void layoutAndTypes() throws Exception {
         byte[] content = ReportWorkbooks.write(List.of(new ReportWorkbooks.SheetData("Sinh viên",
-                List.of("Báo cáo điểm danh", "Học kỳ: FA26"), List.of("Mã SV", "Chuyên cần (%)", "Ghi chú"),
-                List.of(Arrays.asList("SE190001", new BigDecimal("87.5"), null)))));
+                List.of("Báo cáo điểm danh", "Học kỳ: HK1-2627"), List.of("Mã SV", "Chuyên cần (%)", "Ghi chú"),
+                List.of(Arrays.asList("HS260001", new BigDecimal("87.5"), null)))));
 
         try (XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(content))) {
             Sheet sheet = workbook.getSheet("Sinh viên");
             assertThat(sheet.getRow(0).getCell(0).getStringCellValue()).isEqualTo("Báo cáo điểm danh");
-            assertThat(sheet.getRow(1).getCell(0).getStringCellValue()).isEqualTo("Học kỳ: FA26");
+            assertThat(sheet.getRow(1).getCell(0).getStringCellValue()).isEqualTo("Học kỳ: HK1-2627");
             assertThat(sheet.getRow(2)).isNull();
             assertThat(sheet.getRow(3).getCell(1).getStringCellValue()).isEqualTo("Chuyên cần (%)");
             Row data = sheet.getRow(4);
-            assertThat(data.getCell(0).getStringCellValue()).isEqualTo("SE190001");
+            assertThat(data.getCell(0).getStringCellValue()).isEqualTo("HS260001");
             assertThat(data.getCell(1).getCellType()).isEqualTo(CellType.NUMERIC);
             assertThat(data.getCell(1).getNumericCellValue()).isEqualTo(87.5);
             assertThat(data.getCell(2).getCellType()).isEqualTo(CellType.BLANK);
@@ -56,8 +56,8 @@ class ReportWorkbooksTest {
     @Test
     @DisplayName("Tên file: bỏ phần trống, ký tự ngoài chữ không dấu / số / - / _ đổi thành _")
     void fileName() {
-        assertThat(ReportWorkbooks.fileName("bao-cao-diem", "FA26", null, "PRN211_FA26_01"))
-                .isEqualTo("bao-cao-diem-FA26-PRN211_FA26_01.xlsx");
+        assertThat(ReportWorkbooks.fileName("bao-cao-diem", "HK1-2627", null, "TIN11-HK1-2627-01"))
+                .isEqualTo("bao-cao-diem-HK1-2627-TIN11-HK1-2627-01.xlsx");
         assertThat(ReportWorkbooks.fileName("bao-cao", "Kỳ 1\r\n\"x\"/..")).isEqualTo("bao-cao-K__1___x____.xlsx");
     }
 }

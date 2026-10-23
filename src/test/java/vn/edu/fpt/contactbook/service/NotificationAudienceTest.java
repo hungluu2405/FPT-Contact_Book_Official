@@ -72,10 +72,10 @@ class NotificationAudienceTest {
         Teacher gv002 = CatalogTestData.teacher(2L, "GV002", se);
         when(teacherRepository.findByUserId(3L)).thenReturn(Optional.of(gv002));
         when(classSectionRepository.findById(10L)).thenReturn(Optional.of(CatalogTestData.section(10L, "SE-10",
-                CatalogTestData.subject(1L, "PRJ301", se), CatalogTestData.semester(1L, "FA26"), gv002, 40,
+                CatalogTestData.subject(1L, "TOAN10", se), CatalogTestData.semester(1L, "HK1-2627"), gv002, 40,
                 SectionStatus.OPEN)));
         when(classSectionRepository.findById(20L)).thenReturn(Optional.of(CatalogTestData.section(20L, "IA-20",
-                CatalogTestData.subject(2L, "IAO201", ia), CatalogTestData.semester(1L, "FA26"),
+                CatalogTestData.subject(2L, "IAO201", ia), CatalogTestData.semester(1L, "HK1-2627"),
                 CatalogTestData.teacher(9L, "GV009", ia), 40, SectionStatus.OPEN)));
         when(audienceRepository.isStudentOfTeacher(anyLong(), anyLong())).thenReturn(false);
         when(audienceRepository.isStudentOfTeacher(4L, 2L)).thenReturn(true);

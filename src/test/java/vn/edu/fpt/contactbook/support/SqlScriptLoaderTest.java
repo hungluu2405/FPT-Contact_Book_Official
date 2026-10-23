@@ -62,7 +62,7 @@ class SqlScriptLoaderTest {
                 .contains("FptContactBook_test.mdf")
                 .contains("FptContactBook_test_log.ldf")
                 .contains("CREATE TABLE [dbo].[users]")
-                .contains("Bộ môn Kỹ thuật phần mềm");
+                .contains("Tổ Toán – Tin học");
         assertThat(batches).noneMatch(batch -> batch.lines().anyMatch(line -> line.strip().equalsIgnoreCase("GO")));
     }
 

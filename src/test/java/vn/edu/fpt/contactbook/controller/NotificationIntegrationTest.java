@@ -48,9 +48,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Thông báo trên FptContactBook_test. Dữ liệu mẫu: lớp 1 (GV 0900000003, chỉ có SE190001 = users.id 4, phụ huynh
- * 0900000005 = users.id 5 liên kết); lớp 27 của GV khác. Thông báo mẫu 16 (toàn trường) và 17 (lớp PRN211) đã có;
- * SE180101 (0933112233) không học lớp 1.
+ * Thông báo trên FptContactBook_test. Dữ liệu mẫu: lớp 1 (GV 0900000003, chỉ có HS260001 = users.id 4, phụ huynh
+ * 0900000005 = users.id 5 liên kết); lớp 27 của GV khác. Thông báo mẫu 16 (toàn trường) và 17 (lớp TIN11) đã có;
+ * HS250101 (0933112233) không học lớp 1.
  */
 @IntegrationTest
 class NotificationIntegrationTest {
@@ -268,7 +268,7 @@ class NotificationIntegrationTest {
                     .with(as(TestAccounts.TEACHER_HEAD))).andExpect(redirectedUrl("/admin/sections/1/grades"));
 
             Notification latest = latestFor(TestAccounts.PARENT_ID);
-            assertThat(latest.getTitle()).isEqualTo("[PRJ301-SE1901-FA26] Đã công bố điểm");
+            assertThat(latest.getTitle()).isEqualTo("[TOAN10-HK1-2627-01] Đã công bố điểm");
             assertThat(latest.getSender().getId()).isEqualTo(TestAccounts.TEACHER_HEAD_ID);
             assertThat(recipientIds(latest.getId()))
                     .containsExactlyInAnyOrder(TestAccounts.STUDENT_ID, TestAccounts.PARENT_ID);
