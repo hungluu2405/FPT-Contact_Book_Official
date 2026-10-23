@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import vn.edu.fpt.contactbook.dto.ExamView;
 import vn.edu.fpt.contactbook.dto.InSemester;
 import vn.edu.fpt.contactbook.dto.LeaveFormOptions;
+import vn.edu.fpt.contactbook.dto.MyClubRow;
 import vn.edu.fpt.contactbook.dto.LeaveRequestForm;
 import vn.edu.fpt.contactbook.dto.OptionView;
 import vn.edu.fpt.contactbook.dto.RequestDetail;
@@ -108,6 +109,12 @@ public class ParentApiController {
                                                        @PathVariable Long studentId, @PathVariable Long sectionId,
                                                        @RequestParam(defaultValue = "0") int page) {
         return data.attendanceHistory(actor, Audience.PARENT, studentId, sectionId, page);
+    }
+
+    @Operation(summary = "Câu lạc bộ của con: đang chờ duyệt, đang tham gia, bị từ chối")
+    @GetMapping("/children/{studentId}/clubs")
+    public List<MyClubRow> clubs(@AuthenticationPrincipal AppUserPrincipal actor, @PathVariable Long studentId) {
+        return data.clubs(actor, Audience.PARENT, studentId);
     }
 
     @Operation(summary = "Danh sách đơn của con (mọi loại đơn)")

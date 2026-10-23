@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
@@ -13,6 +14,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/auth_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/club_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/notification_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/profile_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/student_service.dart';
@@ -398,6 +400,85 @@ Map<String, dynamic> attendanceHistoryJson(
   },
 };
 
+/// Một trang `{items, page, size, totalElements, totalPages}` không kèm học kỳ.
+Map<String, dynamic> pageJson(
+  List<Map<String, dynamic>> items, {
+  int page = 0,
+  int totalPages = 1,
+  int? totalElements,
+}) => {
+  'items': items,
+  'page': page,
+  'size': 20,
+  'totalElements': totalElements ?? items.length,
+  'totalPages': totalPages,
+};
+
+Map<String, dynamic> clubJson({
+  int id = 1,
+  String code = 'F-CODE',
+  String name = 'Câu lạc bộ Lập trình F-Code',
+  String status = 'ACTIVE',
+  int members = 2,
+}) => {
+  'id': id,
+  'code': code,
+  'name': name,
+  'description': 'Nơi học sinh yêu thích lập trình giao lưu, luyện thuật toán.',
+  'foundedDate': '2020-09-15',
+  'advisorName': 'ThS. Hoàng Văn Code',
+  'status': status,
+  'memberCount': members,
+  'presidentName': 'Nguyễn Văn Hùng',
+};
+
+Map<String, dynamic> clubDetailJson({
+  Map<String, dynamic>? club,
+  String? myStatus,
+  String? myRole,
+}) => {'club': club ?? clubJson(), 'myStatus': myStatus, 'myRole': myRole};
+
+Map<String, dynamic> clubMemberJson({
+  String name = 'Nguyễn Văn Hùng',
+  String role = 'PRESIDENT',
+}) => {'fullName': name, 'role': role, 'joinedAt': '2026-10-15T21:40:44'};
+
+Map<String, dynamic> clubActivityJson({
+  int id = 1,
+  String title = 'Luyện thuật toán',
+  String start = '2026-10-24T14:00:00',
+  String end = '2026-10-24T16:00:00',
+  int? max = 30,
+  int taken = 12,
+  String? myStatus,
+}) => {
+  'id': id,
+  'title': title,
+  'description': 'Giải đề tin học trẻ',
+  'location': 'LAB-401',
+  'startTime': start,
+  'endTime': end,
+  'maxParticipants': max,
+  'taken': taken,
+  'state': 'PLANNED',
+  'myStatus': myStatus,
+};
+
+Map<String, dynamic> myClubJson({
+  int clubId = 1,
+  String code = 'F-CODE',
+  String name = 'Câu lạc bộ Lập trình F-Code',
+  String role = 'MEMBER',
+  String status = 'ACTIVE',
+}) => {
+  'clubId': clubId,
+  'code': code,
+  'name': name,
+  'clubStatus': 'ACTIVE',
+  'role': role,
+  'status': status,
+};
+
 /// Bộ đối tượng thật nối với tầng HTTP giả.
 class TestApp {
   final FakeHttpAdapter http = FakeHttpAdapter();
@@ -432,6 +513,9 @@ class TestApp {
   );
   late final AttendanceController attendanceController = AttendanceController(
     StudentService(apiClient),
+  );
+  late final ClubController clubController = ClubController(
+    ClubService(apiClient),
   );
 
   TestApp({String? accessToken, String? refreshToken})

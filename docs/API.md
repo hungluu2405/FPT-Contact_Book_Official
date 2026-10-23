@@ -62,6 +62,7 @@ Phản hồi đăng nhập, làm mới và đổi mật khẩu:
 | GET | `/requests/leave-options` | `{studentId, studentCode, studentName, sections[{id, code, name}]}` |
 | POST | `/requests/leave` | `multipart/form-data`: `fromDate`, `toDate` (yyyy-MM-dd hoặc dd/MM/yyyy), `reason`, tùy chọn `title`, `sectionId`, `files` (nhiều tệp, mỗi tệp tối đa 10MB). 201 + chi tiết đơn |
 | POST | `/requests/{id}/cancel` | Hủy đơn đang chờ duyệt, trả chi tiết đơn; đơn không còn chờ duyệt: 400 `BUSINESS_ERROR` |
+| GET | `/clubs` | CLB của học sinh (của mình / của con): `[{clubId, code, name, clubStatus, role, status}]`, gồm đang chờ duyệt, đang tham gia, bị từ chối |
 
 `ScheduleItem`: `{date, startTime, endTime, subjectCode, subjectName, sectionCode, roomCode, teacherName, status, note}`. `summary` (chuyên cần): `{present, absentExcused, absentUnexcused, totalSessions, attendanceRate, absentRate, warning}` (tỷ lệ là phần trăm, `warning` = vượt ngưỡng vắng).
 
@@ -85,6 +86,18 @@ Chỉ lớp mình dạy và đơn mình phụ trách duyệt; lớp hoặc đơn
 
 Lỗi thường gặp khi điểm danh: buổi chưa diễn ra, buổi hoặc lớp đã hủy, thiếu học sinh, thiếu lý do khi sửa, người khác vừa lưu cùng lúc (tải lại bảng rồi thử lại): đều là 400 `BUSINESS_ERROR` kèm câu tiếng Việt. Trạng thái không thuộc danh sách enum: 400 `VALIDATION_FAILED`. Buổi không thuộc lớp: 404 `NOT_FOUND`.
 
+### Câu lạc bộ (`/clubs`, mọi vai trò, chỉ đọc)
+Gửi yêu cầu tham gia, đăng ký hoạt động và các thao tác quản lý vẫn làm trên web.
+
+| Method | Đường dẫn | Trả về |
+|---|---|---|
+| GET | `/clubs?q=&page=` | CLB đang hoạt động, `q` tìm theo mã hoặc tên: `Page<{id, code, name, description, foundedDate, advisorName, status, memberCount, presidentName}>` |
+| GET | `/clubs/{id}` | `{club, myStatus, myRole}`: CLB (kể cả đã ngừng hoạt động) và quan hệ của người xem; `myStatus`, `myRole` null khi chưa từng gửi yêu cầu |
+| GET | `/clubs/{id}/members?page=` | Thành viên đang tham gia, chủ nhiệm trước: `Page<{fullName, role, joinedAt}>` |
+| GET | `/clubs/{id}/activities` | Hoạt động sắp tới (chưa hủy, chưa kết thúc): `[{id, title, description, location, startTime, endTime, maxParticipants, taken, state, myStatus}]`; `maxParticipants` null là không giới hạn, `myStatus` null là chưa đăng ký |
+
+CLB không tồn tại: 404 `NOT_FOUND`.
+
 ## Giá trị enum
 Trả dạng mã; mobile hiển thị chữ tiếng Việt như web:
 
@@ -98,6 +111,10 @@ Trả dạng mã; mobile hiển thị chữ tiếng Việt như web:
 | `decision` duyệt đơn | `APPROVED` Duyệt, `REJECTED` Từ chối |
 | `priority` thông báo | `NORMAL` Thường, `IMPORTANT` Quan trọng, `URGENT` Khẩn |
 | `gender` | `MALE`, `FEMALE`, `OTHER` |
+| `status` của CLB, `clubStatus` | `ACTIVE` Đang hoạt động, `INACTIVE` Ngừng hoạt động |
+| `role` trong CLB, `myRole` | `PRESIDENT` Chủ nhiệm, `VICE_PRESIDENT` Phó chủ nhiệm, `MEMBER` Thành viên |
+| `status` thành viên CLB, `myStatus` của CLB | `PENDING` Chờ duyệt, `ACTIVE` Đang tham gia, `REJECTED` Bị từ chối, `LEFT` Đã rời |
+| `state` của hoạt động | `PLANNED` Sắp diễn ra, `ONGOING` Đang diễn ra, `DONE` Đã kết thúc, `CANCELLED` Đã hủy |
 
 Ngày `yyyy-MM-dd`, giờ `HH:mm:ss`, thời điểm `yyyy-MM-ddTHH:mm:ss`; số thập phân (điểm, trọng số) là số JSON.
 

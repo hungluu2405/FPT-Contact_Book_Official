@@ -21,6 +21,8 @@ import vn.edu.fpt.contactbook.security.AppUserPrincipal;
 import vn.edu.fpt.contactbook.service.AttendanceViewService;
 import vn.edu.fpt.contactbook.service.AttendanceViewService.StudentHistory;
 import vn.edu.fpt.contactbook.service.GradeViewService;
+import vn.edu.fpt.contactbook.dto.MyClubRow;
+import vn.edu.fpt.contactbook.service.ClubService;
 import vn.edu.fpt.contactbook.service.RequestService;
 import vn.edu.fpt.contactbook.service.ScheduleViewService;
 import vn.edu.fpt.contactbook.service.ScheduleViewService.Audience;
@@ -41,6 +43,7 @@ class StudentDataApi {
     private final GradeViewService gradeViewService;
     private final AttendanceViewService attendanceViewService;
     private final RequestService requestService;
+    private final ClubService clubService;
 
     InSemester<ScheduleWeek> week(AppUserPrincipal actor, Audience audience, Long studentId, Long semesterId,
                                   LocalDate date) {
@@ -72,6 +75,10 @@ class StudentDataApi {
         StudentHistory history = attendanceViewService.history(actor, audience, studentId, sectionId, page);
         return new AttendanceHistoryResponse(history.summary(), attendanceViewService.thresholdPercent(),
                 PageResponse.from(history.sessions()));
+    }
+
+    List<MyClubRow> clubs(AppUserPrincipal actor, Audience audience, Long studentId) {
+        return clubService.studentClubs(actor, audience, studentId);
     }
 
     PageResponse<RequestListItem> requests(AppUserPrincipal actor, Audience audience, Long studentId, int page) {

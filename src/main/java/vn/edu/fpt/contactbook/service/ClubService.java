@@ -30,6 +30,7 @@ import vn.edu.fpt.contactbook.repository.StudentRepository;
 import vn.edu.fpt.contactbook.repository.UserRepository;
 import vn.edu.fpt.contactbook.repository.UserRoleRepository;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
+import vn.edu.fpt.contactbook.service.ScheduleViewService.Audience;
 import vn.edu.fpt.contactbook.util.AppTime;
 import vn.edu.fpt.contactbook.util.LikePatterns;
 
@@ -62,6 +63,7 @@ public class ClubService {
     private final ClubAccessPolicy accessPolicy;
     private final UserAccessPolicy userAccessPolicy;
     private final AuditService auditService;
+    private final ScheduleViewService scheduleViewService;
 
     // ---------- ADMIN ----------
 
@@ -205,7 +207,23 @@ public class ClubService {
     @Transactional(readOnly = true)
     public List<MyClubRow> myClubs(AppUserPrincipal actor) {
         accessPolicy.requireStudent(actor);
-        return memberRepository.findByUser(actor.getUserId(), List.of(ClubMemberStatus.PENDING,
+        return memberships(actor.getUserId());
+    }
+
+    /**
+     * CLB của học sinh cho API mobile, như "CLB của tôi": STUDENT xem của mình, PARENT xem con đã liên kết (con
+     * khác → 403, ScheduleViewService.studentId).
+     */
+    @Transactional(readOnly = true)
+    public List<MyClubRow> studentClubs(AppUserPrincipal actor, Audience audience, Long studentId) {
+        Long id = scheduleViewService.studentId(actor, audience, studentId);
+        Long userId = studentRepository.findById(id).map(student -> student.getUser().getId())
+                .orElseThrow(() -> new NotFoundException(ClubMessages.STUDENT_NOT_FOUND));
+        return memberships(userId);
+    }
+
+    private List<MyClubRow> memberships(Long userId) {
+        return memberRepository.findByUser(userId, List.of(ClubMemberStatus.PENDING,
                         ClubMemberStatus.ACTIVE, ClubMemberStatus.REJECTED)).stream()
                 .map(m -> new MyClubRow(m.getClub().getId(), m.getClub().getCode(), m.getClub().getName(),
                         m.getClub().getStatus(), m.getMemberRole(), m.getStatus()))

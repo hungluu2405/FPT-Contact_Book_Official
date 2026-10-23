@@ -72,6 +72,7 @@ class ClubServiceTest {
     @Mock UserRoleRepository userRoleRepository;
     @Mock TeacherRepository teacherRepository;
     @Mock AuditLogRepository auditLogRepository;
+    @Mock ScheduleViewService scheduleViewService;
     @TempDir Path uploadDir;
 
     private ClubService service;
@@ -81,7 +82,8 @@ class ClubServiceTest {
     void setUp() {
         service = new ClubService(clubRepository, memberRepository, studentRepository, userRepository,
                 userRoleRepository, new ClubLogoStorage(uploadDir.toString()), new ClubAccessPolicy(memberRepository),
-                new UserAccessPolicy(teacherRepository), new AuditService(auditLogRepository, userRepository));
+                new UserAccessPolicy(teacherRepository), new AuditService(auditLogRepository, userRepository),
+                scheduleViewService);
         club = club(1L, ClubStatus.ACTIVE);
         when(clubRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(club));
         when(clubRepository.findWithAdvisor(1L)).thenReturn(Optional.of(club));
