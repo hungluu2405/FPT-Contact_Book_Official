@@ -849,6 +849,21 @@ void main() {
     await expectScreen(tester, 'leave_form_errors');
   });
 
+  testWidgets('leaving a typed leave form asks first', (tester) async {
+    final app = await openFromHome(tester, 'Đơn từ', stub: stubRequests);
+    await tester.tap(find.text('Gửi đơn nghỉ'));
+    await tester.pumpAndSettle();
+    app.pickedFiles = [pickedFile('giay-kham-benh.pdf', size: 245760)];
+    await tester.ensureVisible(find.text('Chọn tệp'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Chọn tệp'));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'discard_changes_dialog');
+  });
+
   /// Tổ trưởng tổ Toán – Tin học (cũng là giáo viên) đã đăng nhập.
   Future<TestApp> pumpHead(WidgetTester tester) async {
     usePhoneScreen(tester);

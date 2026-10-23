@@ -25,7 +25,7 @@ class AppShellTab {
 /// từ trong tab nằm trong ngăn của tab đó, nên thanh dưới luôn hiện.
 ///
 /// - Đổi tab giữ nguyên màn hình đang mở của từng tab; bấm lại tab đang mở
-///   thì về màn hình gốc của tab.
+///   thì về màn hình gốc của tab (màn hình đang soạn dở hỏi trước).
 /// - Nút back của hệ thống: tab còn màn hình con thì lùi trong tab; đang ở
 ///   gốc của tab khác thì về tab đầu; đang ở gốc tab đầu thì thoát app.
 /// - Tab chỉ được dựng khi mở lần đầu; [onTabOpened] báo mỗi lần chọn tab.
@@ -56,7 +56,7 @@ class _AppShellWidgetState extends State<AppShellWidget> {
 
   void _select(int index) {
     if (index == _tab) {
-      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+      _popToRoot(_navigatorKeys[index].currentState);
     } else {
       setState(() {
         _tab = index;
@@ -66,10 +66,26 @@ class _AppShellWidgetState extends State<AppShellWidget> {
     widget.onTabOpened?.call(index);
   }
 
+  /// Về màn hình gốc của tab, nhưng dừng ở màn hình đang soạn dở (không cho
+  /// đóng thẳng) và để màn hình đó hỏi: đồng ý bỏ thì chỉ đóng màn hình đó.
+  void _popToRoot(NavigatorState? navigator) {
+    if (navigator == null) {
+      return;
+    }
+    navigator.popUntil(
+      (route) =>
+          route.isFirst || route.popDisposition == RoutePopDisposition.doNotPop,
+    );
+    if (navigator.canPop()) {
+      navigator.maybePop();
+    }
+  }
+
   void _handleBack() {
     final navigator = _navigatorKeys[_tab].currentState;
     if (navigator != null && navigator.canPop()) {
-      navigator.pop();
+      // maybePop để màn hình đang soạn dở được hỏi trước khi đóng.
+      navigator.maybePop();
     } else if (_tab != 0) {
       _select(0);
     } else {

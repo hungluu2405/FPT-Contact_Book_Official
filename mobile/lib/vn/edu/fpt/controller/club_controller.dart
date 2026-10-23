@@ -75,6 +75,9 @@ class ClubController extends ChangeNotifier {
   /// và trang đầu của mọi CLB.
   Future<void> open(int? studentId) {
     _studentId = studentId;
+    // Không hiện CLB của người xem trước (con khác, tài khoản trước) trong
+    // lúc chờ phản hồi.
+    _myClubs = const [];
     _query = '';
     return Future.wait([reloadMyClubs(), _restartClubs()]);
   }

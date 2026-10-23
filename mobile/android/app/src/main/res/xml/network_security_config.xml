@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Release and profile builds: HTTPS only. The debug build and the LAN demo
+     APK override this file (src/debug/res and build/generated/demoNetworkConfig). -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

@@ -4,7 +4,6 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- Debug builds call the local backend over plain HTTP (http://10.0.2.2:8080).
-         Release builds keep the default and only allow HTTPS. -->
-    <application android:usesCleartextTraffic="true"/>
+    <!-- Plain HTTP for debug builds is allowed by src/debug/res/xml/network_security_config.xml,
+         which overrides the HTTPS-only config of src/main. -->
 </manifest>

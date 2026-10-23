@@ -45,6 +45,27 @@ void main() {
       expect(app.clubController.myClubs, isEmpty);
     });
 
+    test('switching child hides the clubs of the previous one', () async {
+      final app = TestApp(accessToken: 'a', refreshToken: 'r');
+      final slow = Completer<FakeReply>();
+      app.http.reply(
+        'GET',
+        '/parent/children/7/clubs',
+        FakeReply(200, [myClubJson()]),
+      );
+      app.http.on('GET', '/parent/children/8/clubs', (_) => slow.future);
+      app.http.reply('GET', '/clubs', FakeReply(200, pageJson([])));
+      await app.clubController.open(7);
+      expect(app.clubController.myClubs, hasLength(1));
+
+      final opening = app.clubController.open(8);
+
+      expect(app.clubController.myClubs, isEmpty);
+      expect(app.clubController.isLoadingMyClubs, isTrue);
+      slow.complete(const FakeReply(200, []));
+      await opening;
+    });
+
     test('search restarts paging and drops the older reply', () async {
       final app = TestApp(accessToken: 'a', refreshToken: 'r');
       final slow = Completer<FakeReply>();

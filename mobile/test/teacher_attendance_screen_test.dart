@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -228,6 +230,42 @@ void main() {
 
     await choose(tester, 'Lê Minh Sinh', 'Không phép');
     expect(find.text('Có mặt 1'), findsOneWidget);
+  });
+
+  testWidgets('unsaved choices ask before the sheet reloads', (tester) async {
+    final app = await pumpTeacher(tester);
+    await openSheet(tester);
+    await choose(tester, 'Trần Thị Bình', 'Không phép');
+    final refresh = tester.widget<RefreshIndicator>(
+      find.byType(RefreshIndicator),
+    );
+
+    unawaited(refresh.onRefresh());
+    await tester.pumpAndSettle();
+    expect(find.text('Tải lại bảng điểm danh?'), findsOneWidget);
+    await tester.tap(find.text('Ở lại'));
+    await tester.pumpAndSettle();
+    expect(app.http.count('GET', kSheet), 1);
+
+    unawaited(refresh.onRefresh());
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Tải lại'));
+    await tester.pumpAndSettle();
+    expect(app.http.count('GET', kSheet), 2);
+  });
+
+  testWidgets('leaving with unsaved choices asks first', (tester) async {
+    await pumpTeacher(tester);
+    await openSheet(tester);
+    await choose(tester, 'Trần Thị Bình', 'Không phép');
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Bỏ nội dung đang soạn?'), findsOneWidget);
+    await tester.tap(find.text('Bỏ nội dung'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(FilledButton, 'Lưu điểm danh'), findsNothing);
   });
 
   testWidgets('a concurrent save shows the error and can reload', (
