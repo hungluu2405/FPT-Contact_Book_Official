@@ -76,9 +76,7 @@ void main() {
     expect(find.byType(ViewScheduleScreen), findsOneWidget);
   });
 
-  testWidgets('tapping the current tab again goes to its root', (
-    tester,
-  ) async {
+  testWidgets('tapping the current tab again goes to its root', (tester) async {
     await pumpStudent(tester);
     await openTile(tester, 'Lịch học');
 

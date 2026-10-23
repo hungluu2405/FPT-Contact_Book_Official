@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/view_profile_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/attendance/list_attendance_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/grade/view_grade_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/list_exam_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/view_schedule_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/app_shell_widget.dart';
@@ -25,6 +29,8 @@ class HomeScreen extends StatefulWidget {
   final ProfileController profileController;
   final ScheduleController scheduleController;
   final ExamController examController;
+  final GradeController gradeController;
+  final AttendanceController attendanceController;
 
   const HomeScreen({
     super.key,
@@ -33,6 +39,8 @@ class HomeScreen extends StatefulWidget {
     required this.profileController,
     required this.scheduleController,
     required this.examController,
+    required this.gradeController,
+    required this.attendanceController,
   });
 
   @override
@@ -72,6 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
             controller: widget.homeController,
             scheduleController: widget.scheduleController,
             examController: widget.examController,
+            gradeController: widget.gradeController,
+            attendanceController: widget.attendanceController,
           ),
         ),
         AppShellTab(
@@ -100,11 +110,15 @@ class _DashboardTab extends StatelessWidget {
   final HomeController controller;
   final ScheduleController scheduleController;
   final ExamController examController;
+  final GradeController gradeController;
+  final AttendanceController attendanceController;
 
   const _DashboardTab({
     required this.controller,
     required this.scheduleController,
     required this.examController,
+    required this.gradeController,
+    required this.attendanceController,
   });
 
   /// Tên người đang được xem: con đang chọn, hoặc chính SV.
@@ -116,6 +130,30 @@ class _DashboardTab extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (_) => ViewScheduleScreen(
           controller: scheduleController,
+          studentId: controller.selectedStudentId,
+          viewerName: _viewerName,
+        ),
+      ),
+    );
+  }
+
+  void _openGrades(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ViewGradeScreen(
+          controller: gradeController,
+          studentId: controller.selectedStudentId,
+          viewerName: _viewerName,
+        ),
+      ),
+    );
+  }
+
+  void _openAttendance(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ListAttendanceScreen(
+          controller: attendanceController,
           studentId: controller.selectedStudentId,
           viewerName: _viewerName,
         ),
@@ -209,6 +247,8 @@ class _DashboardTab extends StatelessWidget {
         _FeatureGrid(
           onSchedule: () => _openSchedule(context),
           onExams: () => _openExams(context),
+          onGrades: () => _openGrades(context),
+          onAttendance: () => _openAttendance(context),
         ),
       ],
     );
@@ -284,13 +324,20 @@ class _Greeting extends StatelessWidget {
   }
 }
 
-/// Lưới chức năng. Các ô chưa có màn hình hiện "Sắp có": điểm và điểm danh
-/// mở ở 10b-3, CLB ở 10b-4, đơn từ ở 10c.
+/// Lưới chức năng. Các ô chưa có màn hình hiện "Sắp có": CLB ở 10b-4,
+/// đơn từ ở 10c.
 class _FeatureGrid extends StatelessWidget {
   final VoidCallback onSchedule;
   final VoidCallback onExams;
+  final VoidCallback onGrades;
+  final VoidCallback onAttendance;
 
-  const _FeatureGrid({required this.onSchedule, required this.onExams});
+  const _FeatureGrid({
+    required this.onSchedule,
+    required this.onExams,
+    required this.onGrades,
+    required this.onAttendance,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -312,8 +359,16 @@ class _FeatureGrid extends StatelessWidget {
           label: 'Lịch thi',
           onTap: onExams,
         ),
-        const FeatureTileWidget(icon: Icons.workspace_premium, label: 'Điểm'),
-        const FeatureTileWidget(icon: Icons.fact_check, label: 'Điểm danh'),
+        FeatureTileWidget(
+          icon: Icons.workspace_premium,
+          label: 'Điểm',
+          onTap: onGrades,
+        ),
+        FeatureTileWidget(
+          icon: Icons.fact_check,
+          label: 'Điểm danh',
+          onTap: onAttendance,
+        ),
         const FeatureTileWidget(icon: Icons.groups, label: 'Câu lạc bộ'),
         const FeatureTileWidget(icon: Icons.mail_outline, label: 'Đơn từ'),
       ],
