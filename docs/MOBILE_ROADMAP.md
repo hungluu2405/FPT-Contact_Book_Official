@@ -65,7 +65,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
 - **10d: màn hình GV**: lịch dạy, điểm danh một buổi, duyệt đơn nghỉ.
 - **10e: tổ trưởng chuyên môn** (làm trước 10d, nhánh `feature/phase-10e-head-of-department`, giả định 177–179)
   - 10e-1 (đã xong): API `/head/**` (tổ phụ trách, giáo viên trong tổ, gửi thông báo nội bộ) và thông báo đã gửi kèm thống kê đã đọc.
-  - 10e-2: khối "Tổ chuyên môn" trên trang chủ của tổ trưởng, danh sách và chi tiết giáo viên.
+  - 10e-2 (đã xong, giả định 180): khối "Tổ chuyên môn" trên trang chủ của tổ trưởng, danh sách và chi tiết giáo viên.
   - 10e-3: gửi thông báo cho cả tổ hoặc riêng một giáo viên, thông báo đã gửi và thống kê đã đọc.
 - **11: kiểm thử tổng và đóng gói**: chạy trên máy ảo và máy thật; rà soát bảo mật; build APK release; viết hướng dẫn cài đặt và cấu hình địa chỉ server.
 

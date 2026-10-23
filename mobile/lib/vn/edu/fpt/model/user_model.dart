@@ -70,6 +70,9 @@ class UserModel {
   bool get isTeacher =>
       hasRole(RoleCodes.teacher) || hasRole(RoleCodes.headOfDepartment);
 
+  /// Tổ trưởng chuyên môn: có thêm khối "Tổ chuyên môn" trên trang chủ.
+  bool get isHead => hasRole(RoleCodes.headOfDepartment);
+
   /// App chỉ có chức năng cho SV, PH và GV; tài khoản chỉ có ADMIN dùng web.
   bool get canUseMobile => isStudent || isParent || isTeacher;
 }

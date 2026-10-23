@@ -848,4 +848,98 @@ void main() {
 
     await expectScreen(tester, 'leave_form_errors');
   });
+
+  /// Tổ trưởng tổ Toán – Tin học (cũng là giáo viên) đã đăng nhập.
+  Future<TestApp> pumpHead(WidgetTester tester) async {
+    usePhoneScreen(tester);
+    final app = TestApp(accessToken: 'a', refreshToken: 'r');
+    app.http.reply(
+      'GET',
+      '/me',
+      FakeReply(
+        200,
+        userJson(
+          id: 2,
+          fullName: 'Trần Thị Giáo',
+          roles: ['TEACHER', 'HEAD_OF_DEPARTMENT'],
+        ),
+      ),
+    );
+    app.stubHome(unread: 1);
+    app.http.reply(
+      'GET',
+      '/head/departments',
+      FakeReply(200, [departmentJson()]),
+    );
+    app.http.reply(
+      'GET',
+      '/head/teachers',
+      FakeReply(
+        200,
+        pageJson([
+          teacherJson(
+            userId: 2,
+            code: 'GV001',
+            fullName: 'Trần Thị Giáo',
+            phone: '0900000002',
+            head: true,
+          ),
+          teacherJson(),
+          teacherJson(
+            userId: 16,
+            code: 'GV003',
+            fullName: 'Hoàng Văn Code',
+            phone: '0922334455',
+          ),
+          teacherJson(
+            userId: 17,
+            code: 'GV004',
+            fullName: 'Đỗ Thị Thuật',
+            phone: '0922334456',
+            active: false,
+          ),
+        ]),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/head/teachers/3',
+      FakeReply(200, teacherDetailJson()),
+    );
+    await pumpApp(tester, app: app);
+    return app;
+  }
+
+  Future<void> openTeacherList(WidgetTester tester) async {
+    final tile = find.text('Giáo viên trong tổ');
+    await tester.ensureVisible(tile);
+    await tester.pumpAndSettle();
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('head of department home', (tester) async {
+    await pumpHead(tester);
+    final panel = find.text('Tổ chuyên môn');
+    await tester.ensureVisible(panel);
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'home_head');
+  });
+
+  testWidgets('teacher list of the department', (tester) async {
+    await pumpHead(tester);
+    await openTeacherList(tester);
+
+    await expectScreen(tester, 'teacher_list');
+  });
+
+  testWidgets('teacher detail', (tester) async {
+    await pumpHead(tester);
+    await openTeacherList(tester);
+    await tester.tap(find.text('Nguyễn Thị Giáo'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'teacher_detail');
+  });
 }

@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
@@ -19,6 +20,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/attachment_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/auth_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/club_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/department_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/notification_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/profile_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/request_service.dart';
@@ -58,6 +60,7 @@ void main() {
         RequestService(apiClient),
         attachmentService,
       ),
+      departmentController: DepartmentController(DepartmentService(apiClient)),
     ),
   );
 }
@@ -74,6 +77,7 @@ class MyApp extends StatelessWidget {
   final ClubController clubController;
   final NotificationController notificationController;
   final RequestController requestController;
+  final DepartmentController departmentController;
 
   const MyApp({
     super.key,
@@ -88,6 +92,7 @@ class MyApp extends StatelessWidget {
     required this.clubController,
     required this.notificationController,
     required this.requestController,
+    required this.departmentController,
   });
 
   @override
@@ -124,6 +129,7 @@ class MyApp extends StatelessWidget {
             clubController: clubController,
             notificationController: notificationController,
             requestController: requestController,
+            departmentController: departmentController,
           ),
         },
       ),
