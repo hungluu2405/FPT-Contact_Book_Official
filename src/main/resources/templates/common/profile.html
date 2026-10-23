@@ -33,7 +33,7 @@
                     <dd th:text="${profile.dateOfBirth} ? ${#temporals.format(profile.dateOfBirth, 'dd/MM/yyyy')} : #{profile.empty}">01/01/2000</dd>
                     <dt th:text="#{profile.last-login}">Đăng nhập gần nhất</dt>
                     <dd th:text="${profile.lastLoginAt} ? ${#temporals.format(profile.lastLoginAt, 'dd/MM/yyyy HH:mm')} : #{profile.empty}">01/01/2026 08:00</dd>
-                    <dt th:text="#{home.roles}">Vai trò</dt>
+                    <dt th:text="#{user.roles}">Vai trò</dt>
                     <dd>
                         <span th:each="role : ${profile.roles}" class="d-block">
                             <span th:text="#{'role.' + ${role.roleCode}}">Vai trò</span>

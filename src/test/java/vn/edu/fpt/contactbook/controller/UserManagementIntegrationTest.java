@@ -154,6 +154,17 @@ class UserManagementIntegrationTest {
             mockMvc.perform(get("/teacher").with(as(TestAccounts.TEACHER)))
                     .andExpect(content().string(not(containsString("href=\"/admin/users\""))));
         }
+
+        @Test
+        @DisplayName("Danh sách, chi tiết người dùng và hồ sơ ghi 'Vai trò', không phải 'Vai trò của bạn'")
+        void roleHeadingIsNotPersonal() throws Exception {
+            for (String path : List.of("/admin/users", "/admin/users/4", "/profile")) {
+                mockMvc.perform(get(path).with(as(TestAccounts.ADMIN)))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(allOf(containsString(">Vai trò<"),
+                                not(containsString("Vai trò của bạn")))));
+            }
+        }
     }
 
     @Nested

@@ -60,7 +60,7 @@
         </div>
 
         <div class="card card-custom p-4 mb-3" th:unless="${user}">
-            <h2 class="h5 mb-3" th:text="#{home.roles} + ' *'">Vai trò</h2>
+            <h2 class="h5 mb-3" th:text="#{user.roles} + ' *'">Vai trò</h2>
             <div class="d-flex flex-wrap gap-3" th:classappend="${#fields.hasErrors('roles')} ? 'is-invalid'">
                 <div class="form-check" th:each="code : ${roleCodes}">
                     <input class="form-check-input" type="checkbox" th:field="*{roles}" th:value="${code}"
