@@ -72,11 +72,13 @@ Không có lỗi phải sửa gấp (không crash, không lộ dữ liệu sang 
 | `flutter test test_contract` (backend chạy trên localhost:8080) | PASSED: 49 run / 49 passed / 0 failed / 0 skipped |
 | `flutter build apk --debug` | PASSED; manifest đã gộp trỏ `@xml/network_security_config`, bản debug lấy cấu hình cho phép HTTP của `src/debug` |
 | Backend với `SPRINGDOC_APIDOCS_ENABLED=false`, `SPRINGDOC_SWAGGERUI_ENABLED=false` | `/v3/api-docs`, `/swagger-ui.html` trả 404 |
-| `flutter build apk --release` có khóa ký, `apksigner verify` | NOT RUN: chưa có keystore và `key.properties` (chủ dự án tạo theo `docs/INSTALL_MOBILE.md` mục 3) |
-| `tool/build_demo_apk.ps1` | NOT RUN: cùng lý do |
-| Chạy APK release/demo trên máy ảo Pixel_6a (5 tài khoản mẫu) | NOT RUN: cần APK đã ký ở hai dòng trên |
+| `flutter build apk --release` có khóa ký, `apksigner verify` | Bỏ: chủ dự án quyết định không build APK (23/10/2026) |
+| `tool/build_demo_apk.ps1` | Bỏ: cùng quyết định |
+| Chạy APK release/demo trên máy ảo Pixel_6a (5 tài khoản mẫu) | Bỏ: cùng quyết định |
 
-Khi có khóa ký, chạy trong `mobile/`:
+**Quyết định của chủ dự án (23/10/2026):** bỏ bước build APK và chạy thử trên máy ảo; giai đoạn 11 kết thúc ở phần
+đã làm. Code đóng gói (khóa ký, chặn địa chỉ server, script APK demo) và `docs/INSTALL_MOBILE.md` vẫn giữ để dùng
+khi cần. Nếu làm lại bước này, chạy trong `mobile/` sau khi tạo khóa ký:
 ```powershell
 flutter build apk --release --dart-define=API_BASE_URL=https://<tên miền>
 .\tool\build_demo_apk.ps1 -HostIp 10.0.2.2
