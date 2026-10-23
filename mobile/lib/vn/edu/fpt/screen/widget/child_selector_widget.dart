@@ -19,6 +19,7 @@ class ChildSelectorWidget extends StatelessWidget {
     final selectedId = controller.selectedStudentId;
 
     final picked = await showModalBottomSheet<_Pick>(
+      useRootNavigator: true,
       context: context,
       backgroundColor: Colors.white,
       showDragHandle: true,

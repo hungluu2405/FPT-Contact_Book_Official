@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/change_password_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/login_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/home/home_screen.dart';
@@ -24,16 +26,19 @@ void main() {
     tokenStorage: tokenStorage,
   );
   final authService = AuthService(apiClient, tokenStorage);
+  final studentService = StudentService(apiClient);
   final authController = AuthController(authService)..restoreSession();
   runApp(
     MyApp(
       authController: authController,
       passwordResetController: PasswordResetController(authService),
       homeController: HomeController(
-        StudentService(apiClient),
+        studentService,
         NotificationService(apiClient),
       ),
       profileController: ProfileController(ProfileService(apiClient)),
+      scheduleController: ScheduleController(studentService),
+      examController: ExamController(studentService),
     ),
   );
 }
@@ -43,6 +48,8 @@ class MyApp extends StatelessWidget {
   final PasswordResetController passwordResetController;
   final HomeController homeController;
   final ProfileController profileController;
+  final ScheduleController scheduleController;
+  final ExamController examController;
 
   const MyApp({
     super.key,
@@ -50,6 +57,8 @@ class MyApp extends StatelessWidget {
     required this.passwordResetController,
     required this.homeController,
     required this.profileController,
+    required this.scheduleController,
+    required this.examController,
   });
 
   @override
@@ -74,6 +83,8 @@ class MyApp extends StatelessWidget {
             controller: authController,
             homeController: homeController,
             profileController: profileController,
+            scheduleController: scheduleController,
+            examController: examController,
           ),
         },
       ),

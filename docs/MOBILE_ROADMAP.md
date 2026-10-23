@@ -56,7 +56,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - Thay test Counter bằng test thật.
 - **10b: màn hình SV và PH** (nhánh `feature/phase-10b-student-parent`, giả định 157–160)
   - 10b-1 (đã xong): trang chủ theo mockup (ảnh trường, lưới 6 chức năng), chọn con, thanh điều hướng dưới, tab Tài khoản.
-  - 10b-2: lịch học theo tuần, lịch thi.
+  - 10b-2 (đã xong, nhánh `feature/phase-10b-schedule`, giả định 161–164): lịch học theo tuần theo mockup, danh sách buổi cả học kỳ, lịch thi, thẻ "Lịch học hôm nay" trên trang chủ.
   - 10b-3: điểm, điểm danh.
   - 10b-4: CLB (API chỉ đọc ở backend và màn hình mobile, chủ dự án duyệt đưa vào 10b).
 - **10c: thông báo và đơn nghỉ**: số chưa đọc, chi tiết thông báo, tải tệp; gửi đơn nghỉ kèm ảnh hoặc tệp minh chứng.
