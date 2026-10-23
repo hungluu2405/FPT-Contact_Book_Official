@@ -5,16 +5,20 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_colors.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_theme.dart';
 
 /// Khối "Tổ chuyên môn" trên trang chủ của tổ trưởng: tổ đang phụ trách (có
-/// ô chọn khi phụ trách nhiều tổ) và các chức năng quản lý tổ. Ô chưa có màn
-/// hình hiện "Sắp có": gửi thông báo và thông báo đã gửi làm ở 10e-3.
+/// ô chọn khi phụ trách nhiều tổ) và các chức năng quản lý tổ: giáo viên
+/// trong tổ, gửi thông báo cả tổ, thông báo đã gửi.
 class DepartmentPanelWidget extends StatelessWidget {
   final DepartmentController controller;
   final VoidCallback onOpenTeachers;
+  final VoidCallback onSendNotification;
+  final VoidCallback onOpenSent;
 
   const DepartmentPanelWidget({
     super.key,
     required this.controller,
     required this.onOpenTeachers,
+    required this.onSendNotification,
+    required this.onOpenSent,
   });
 
   @override
@@ -143,16 +147,18 @@ class DepartmentPanelWidget extends StatelessWidget {
         onTap: onOpenTeachers,
       ),
       const SizedBox(height: 8),
-      const _PanelAction(
+      _PanelAction(
         icon: Icons.campaign_outlined,
         label: 'Gửi thông báo tổ',
-        description: 'Cả tổ hoặc riêng một giáo viên',
+        description: 'Gửi cả tổ; gửi riêng ở trang giáo viên',
+        onTap: onSendNotification,
       ),
       const SizedBox(height: 8),
-      const _PanelAction(
+      _PanelAction(
         icon: Icons.outbox_outlined,
         label: 'Thông báo đã gửi',
         description: 'Xem ai đã đọc, ai chưa đọc',
+        onTap: onOpenSent,
       ),
     ];
   }

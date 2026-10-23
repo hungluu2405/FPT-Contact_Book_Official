@@ -3,6 +3,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_control
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
@@ -13,6 +14,8 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controlle
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/view_profile_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/attendance/list_attendance_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/club/list_club_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/department/add_department_notification_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/department/list_sent_notification_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/department/list_teacher_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/grade/view_grade_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/notification/list_notification_screen.dart';
@@ -44,6 +47,7 @@ class HomeScreen extends StatefulWidget {
   final NotificationController notificationController;
   final RequestController requestController;
   final DepartmentController departmentController;
+  final DepartmentNotificationController departmentNotificationController;
 
   const HomeScreen({
     super.key,
@@ -58,6 +62,7 @@ class HomeScreen extends StatefulWidget {
     required this.notificationController,
     required this.requestController,
     required this.departmentController,
+    required this.departmentNotificationController,
   });
 
   @override
@@ -77,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ..onUnreadChanged = widget.homeController.reloadUnreadCount;
     widget.requestController.reset();
     widget.departmentController.reset();
+    widget.departmentNotificationController.reset();
     final user = widget.controller.currentUser;
     if (user != null) {
       widget.homeController.start(user);
@@ -94,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ..reset();
     widget.requestController.reset();
     widget.departmentController.reset();
+    widget.departmentNotificationController.reset();
     super.dispose();
   }
 
@@ -124,6 +131,8 @@ class _HomeScreenState extends State<HomeScreen> {
             clubController: widget.clubController,
             requestController: widget.requestController,
             departmentController: widget.departmentController,
+            departmentNotificationController:
+                widget.departmentNotificationController,
           ),
         ),
         AppShellTab(
@@ -160,6 +169,7 @@ class _DashboardTab extends StatelessWidget {
   final ClubController clubController;
   final RequestController requestController;
   final DepartmentController departmentController;
+  final DepartmentNotificationController departmentNotificationController;
 
   const _DashboardTab({
     required this.controller,
@@ -170,6 +180,7 @@ class _DashboardTab extends StatelessWidget {
     required this.clubController,
     required this.requestController,
     required this.departmentController,
+    required this.departmentNotificationController,
   });
 
   /// Tên người đang được xem: con đang chọn, hoặc chính SV.
@@ -239,7 +250,34 @@ class _DashboardTab extends StatelessWidget {
   void _openTeachers(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => ListTeacherScreen(controller: departmentController),
+        builder: (_) => ListTeacherScreen(
+          controller: departmentController,
+          notificationController: departmentNotificationController,
+          currentUserId: controller.user?.id,
+        ),
+      ),
+    );
+  }
+
+  void _composeDepartment(BuildContext context) {
+    departmentNotificationController.startCompose(
+      department: departmentController.selectedDepartment,
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AddDepartmentNotificationScreen(
+          controller: departmentNotificationController,
+        ),
+      ),
+    );
+  }
+
+  void _openSent(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ListSentNotificationScreen(
+          controller: departmentNotificationController,
+        ),
       ),
     );
   }
@@ -307,6 +345,8 @@ class _DashboardTab extends StatelessWidget {
         DepartmentPanelWidget(
           controller: departmentController,
           onOpenTeachers: () => _openTeachers(context),
+          onSendNotification: () => _composeDepartment(context),
+          onOpenSent: () => _openSent(context),
         ),
         const SizedBox(height: 20),
         _roleBody(context),

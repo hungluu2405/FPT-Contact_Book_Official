@@ -4,6 +4,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_control
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
@@ -40,6 +41,7 @@ void main() {
   final studentService = StudentService(apiClient);
   final notificationService = NotificationService(apiClient);
   final attachmentService = AttachmentService(apiClient);
+  final departmentService = DepartmentService(apiClient);
   final authController = AuthController(authService)..restoreSession();
   runApp(
     MyApp(
@@ -60,7 +62,12 @@ void main() {
         RequestService(apiClient),
         attachmentService,
       ),
-      departmentController: DepartmentController(DepartmentService(apiClient)),
+      departmentController: DepartmentController(departmentService),
+      departmentNotificationController: DepartmentNotificationController(
+        departmentService,
+        notificationService,
+        attachmentService,
+      ),
     ),
   );
 }
@@ -78,6 +85,7 @@ class MyApp extends StatelessWidget {
   final NotificationController notificationController;
   final RequestController requestController;
   final DepartmentController departmentController;
+  final DepartmentNotificationController departmentNotificationController;
 
   const MyApp({
     super.key,
@@ -93,6 +101,7 @@ class MyApp extends StatelessWidget {
     required this.notificationController,
     required this.requestController,
     required this.departmentController,
+    required this.departmentNotificationController,
   });
 
   @override
@@ -130,6 +139,7 @@ class MyApp extends StatelessWidget {
             notificationController: notificationController,
             requestController: requestController,
             departmentController: departmentController,
+            departmentNotificationController: departmentNotificationController,
           ),
         },
       ),

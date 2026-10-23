@@ -1,6 +1,7 @@
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/api_error_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/notification_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/page_model.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/sent_notification_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
 
 /// API thông báo đã nhận (docs/API.md mục "Dùng chung"). Lỗi ném
@@ -36,6 +37,32 @@ class NotificationService {
   Future<int> markAllRead() async {
     final data = await _apiClient.post('/notifications/read-all');
     return ((data as Map<String, dynamic>)['count'] as num).toInt();
+  }
+
+  /// Thông báo mình đã gửi, mới nhất trước, kèm số người đã đọc.
+  Future<PageModel<SentNotificationModel>> fetchSent({int page = 0}) async {
+    final data = await _apiClient.get(
+      '/notifications/sent',
+      query: {'page': page},
+    );
+    return PageModel.fromJson(
+      data as Map<String, dynamic>,
+      SentNotificationModel.fromJson,
+    );
+  }
+
+  /// Thống kê một thông báo mình đã gửi; [read] true chỉ người đã đọc, false
+  /// chưa đọc, null tất cả; [page] là trang người nhận.
+  Future<SentNotificationDetailModel> fetchSentDetail(
+    int id, {
+    bool? read,
+    int page = 0,
+  }) async {
+    final data = await _apiClient.get(
+      '/notifications/sent/$id',
+      query: {'read': ?read, 'page': page},
+    );
+    return SentNotificationDetailModel.fromJson(data as Map<String, dynamic>);
   }
 
   /// Đường dẫn tải tệp đính kèm, dùng với `AttachmentService`.

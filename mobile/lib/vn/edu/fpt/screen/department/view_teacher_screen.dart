@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/teacher_model.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/department/add_department_notification_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/error_retry_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/page_header_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/status_badge_widget.dart';
@@ -10,17 +12,36 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/date_format.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/user_labels.dart';
 
 /// Chi tiết một giáo viên trong tổ: thông tin công việc và liên lạc. Số điện
-/// thoại và email có nút sao chép. Nơi mở màn hình đã gọi
-/// [DepartmentController.openTeacher].
+/// thoại và email có nút sao chép; nút "Gửi riêng thông báo" mở form cho
+/// riêng giáo viên này (không có với chính mình và tài khoản đã khóa). Nơi
+/// mở màn hình đã gọi [DepartmentController.openTeacher].
 class ViewTeacherScreen extends StatelessWidget {
   final DepartmentController controller;
+  final DepartmentNotificationController notificationController;
   final int userId;
+  final int? currentUserId;
 
   const ViewTeacherScreen({
     super.key,
     required this.controller,
+    required this.notificationController,
     required this.userId,
+    required this.currentUserId,
   });
+
+  void _sendToTeacher(BuildContext context, TeacherDetailModel teacher) {
+    notificationController.startCompose(
+      department: controller.selectedDepartment,
+      teacherUserId: teacher.userId,
+      teacherName: teacher.fullName,
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            AddDepartmentNotificationScreen(controller: notificationController),
+      ),
+    );
+  }
 
   Future<void> _copy(BuildContext context, String label, String value) async {
     final messenger = ScaffoldMessenger.of(context);
@@ -135,6 +156,14 @@ class ViewTeacherScreen extends StatelessWidget {
                 label: 'Email',
                 value: email,
                 onCopy: () => _copy(context, 'email', email),
+              ),
+            ],
+            if (detail.active && detail.userId != currentUserId) ...[
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () => _sendToTeacher(context, detail),
+                icon: const Icon(Icons.campaign_outlined),
+                label: const Text('Gửi riêng thông báo'),
               ),
             ],
           ],

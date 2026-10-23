@@ -8,6 +8,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_control
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
@@ -663,6 +664,65 @@ Map<String, dynamic> teacherDetailJson({
   'roles': roles,
 };
 
+Map<String, dynamic> sentJson({
+  int id = 70,
+  String title = 'Họp tổ chuyên môn tháng 11',
+  String priority = 'IMPORTANT',
+  String targetType = 'DEPARTMENT',
+  int recipients = 3,
+  int read = 1,
+}) => {
+  'id': id,
+  'title': title,
+  'priority': priority,
+  'targetType': targetType,
+  'createdAt': '2026-10-23T09:00:00',
+  'recipientCount': recipients,
+  'readCount': read,
+};
+
+Map<String, dynamic> recipientJson({
+  String name = 'Nguyễn Thị Giáo',
+  bool read = true,
+}) => {
+  'fullName': name,
+  'read': read,
+  'readAt': read ? '2026-10-23T09:30:00' : null,
+};
+
+Map<String, dynamic> sentDetailJson({
+  int id = 70,
+  String targetType = 'DEPARTMENT',
+  String targetLabel = 'TT - Tổ Toán – Tin học',
+  int recipients = 3,
+  int read = 1,
+  List<Map<String, dynamic>>? rows,
+  int page = 0,
+  int totalPages = 1,
+  List<Map<String, dynamic>> files = const [],
+}) => {
+  'id': id,
+  'title': 'Họp tổ chuyên môn tháng 11',
+  'content': 'Kính gửi các thầy cô: họp tổ lúc 14:00 thứ Năm tại phòng 204.',
+  'priority': 'IMPORTANT',
+  'targetType': targetType,
+  'targetLabel': targetLabel,
+  'createdAt': '2026-10-23T09:00:00',
+  'files': files,
+  'recipientCount': recipients,
+  'readCount': read,
+  'recipients': pageJson(
+    rows ??
+        [
+          recipientJson(),
+          recipientJson(name: 'Hoàng Văn Code', read: false),
+          recipientJson(name: 'Đỗ Thị Thuật', read: false),
+        ],
+    page: page,
+    totalPages: totalPages,
+  ),
+};
+
 /// Tệp minh chứng giả có [size] byte.
 PickedFileModel pickedFile(String name, {int size = 3}) =>
     PickedFileModel.fromBytes(name, Uint8List(size));
@@ -748,6 +808,12 @@ class TestApp {
   late final DepartmentController departmentController = DepartmentController(
     DepartmentService(apiClient),
   );
+  late final DepartmentNotificationController departmentNotificationController =
+      DepartmentNotificationController(
+        DepartmentService(apiClient),
+        NotificationService(apiClient),
+        attachmentService,
+      );
   late final RequestController requestController = RequestController(
     RequestService(apiClient),
     attachmentService,

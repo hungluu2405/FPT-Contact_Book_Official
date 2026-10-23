@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/leave_option_model.dart';
-import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/picked_file_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/request/view_request_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/attachment_picker_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/error_retry_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/page_header_widget.dart';
@@ -10,7 +10,6 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_colors.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_theme.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/date_format.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/leave_rule.dart';
-import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/number_format.dart';
 
 /// Form gửi đơn xin nghỉ học cho người đang xem (HS hoặc con của PH): khoảng
 /// ngày chọn trên lịch, lớp môn học (tùy chọn), tiêu đề (tùy chọn), lý do và
@@ -257,7 +256,8 @@ class _AddLeaveScreenState extends State<AddLeaveScreen> {
               onChanged: (_) => _controller.clearFieldError('reason'),
             ),
             const SizedBox(height: 20),
-            _AttachmentSection(
+            AttachmentPickerWidget(
+              label: 'Tệp minh chứng',
               files: _controller.files,
               onRemove: _controller.removeFile,
               onTakePhoto: () => _addFiles(_controller.takePhoto),
@@ -411,102 +411,6 @@ class _SectionField extends StatelessWidget {
                 child: Text(section.name, overflow: TextOverflow.ellipsis),
               ),
           ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Tệp minh chứng đã chọn (bấm dấu x để bỏ) và hai nút thêm tệp.
-class _AttachmentSection extends StatelessWidget {
-  final List<PickedFileModel> files;
-  final ValueChanged<int> onRemove;
-  final VoidCallback onTakePhoto;
-  final VoidCallback onPickFiles;
-
-  const _AttachmentSection({
-    required this.files,
-    required this.onRemove,
-    required this.onTakePhoto,
-    required this.onPickFiles,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final full = files.length >= LeaveRule.maxFiles;
-    final buttonStyle = OutlinedButton.styleFrom(
-      foregroundColor: AppColors.orangeDark,
-      side: const BorderSide(color: AppColors.orange),
-      minimumSize: const Size(0, 48),
-      textStyle: const TextStyle(
-        fontFamily: kAppFontFamily,
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _FieldLabel('Tệp minh chứng (${files.length}/${LeaveRule.maxFiles})'),
-        for (var i = 0; i < files.length; i++)
-          Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
-            decoration: BoxDecoration(
-              color: AppColors.orangeLight,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  files[i].extension == 'pdf'
-                      ? Icons.picture_as_pdf
-                      : Icons.insert_drive_file,
-                  color: AppColors.orange,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    '${files[i].fileName} · '
-                    '${formatFileSize(files[i].sizeBytes)}',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 15, color: AppColors.text),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Bỏ tệp ${files[i].fileName}',
-                  icon: const Icon(Icons.close, color: AppColors.textMuted),
-                  onPressed: () => onRemove(i),
-                ),
-              ],
-            ),
-          ),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: full ? null : onTakePhoto,
-                icon: const Icon(Icons.photo_camera_outlined),
-                label: const Text('Chụp ảnh'),
-                style: buttonStyle,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: full ? null : onPickFiles,
-                icon: const Icon(Icons.attach_file),
-                label: const Text('Chọn tệp'),
-                style: buttonStyle,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Tối đa 5 tệp, mỗi tệp tối đa 5 MB; nhận PDF, JPG, PNG, DOCX, XLSX.',
-          style: TextStyle(fontSize: 13, color: AppColors.textMuted),
         ),
       ],
     );

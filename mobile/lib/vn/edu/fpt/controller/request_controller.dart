@@ -301,19 +301,7 @@ class RequestController extends ChangeNotifier {
   }
 
   List<String> _addFiles(List<PickedFileModel> picked) {
-    final rejected = <String>[];
-    for (final file in picked) {
-      final error = LeaveRule.fileError(file);
-      if (error != null) {
-        rejected.add(error);
-      } else if (_files.length >= LeaveRule.maxFiles) {
-        if (!rejected.contains(LeaveRule.tooManyFiles)) {
-          rejected.add(LeaveRule.tooManyFiles);
-        }
-      } else {
-        _files.add(file);
-      }
-    }
+    final rejected = LeaveRule.addFiles(_files, picked);
     if (picked.isNotEmpty) {
       _formError = null;
       notifyListeners();

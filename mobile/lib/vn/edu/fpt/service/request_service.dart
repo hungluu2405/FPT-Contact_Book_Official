@@ -5,6 +5,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/page_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/picked_file_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/request_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/attachment_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/student_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/date_format.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/leave_rule.dart';
@@ -57,17 +58,7 @@ class RequestService {
       'reason': form.reason.trim(),
       'title': ?(title.isEmpty ? null : title),
       'sectionId': ?form.sectionId,
-      'files': [
-        for (final file in files)
-          MultipartFile.fromBytes(
-            file.bytes ?? const [],
-            filename: file.fileName,
-            contentType: DioMediaType.parse(
-              LeaveRule.contentTypes[file.extension] ??
-                  'application/octet-stream',
-            ),
-          ),
-      ],
+      'files': [for (final file in files) multipartFileOf(file)],
     });
     final response = await _apiClient.post(
       '${_root(studentId)}/leave',

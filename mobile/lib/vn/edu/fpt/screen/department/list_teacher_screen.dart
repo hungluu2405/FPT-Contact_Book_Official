@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/teacher_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/department/view_teacher_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/empty_state_widget.dart';
@@ -13,8 +14,17 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/user_labels.dart';
 /// thêm; bấm để xem chi tiết.
 class ListTeacherScreen extends StatefulWidget {
   final DepartmentController controller;
+  final DepartmentNotificationController notificationController;
 
-  const ListTeacherScreen({super.key, required this.controller});
+  /// Người đang đăng nhập: không có nút "Gửi riêng" cho chính mình.
+  final int? currentUserId;
+
+  const ListTeacherScreen({
+    super.key,
+    required this.controller,
+    required this.notificationController,
+    required this.currentUserId,
+  });
 
   @override
   State<ListTeacherScreen> createState() => _ListTeacherScreenState();
@@ -44,8 +54,12 @@ class _ListTeacherScreenState extends State<ListTeacherScreen> {
     _controller.openTeacher(userId);
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            ViewTeacherScreen(controller: _controller, userId: userId),
+        builder: (_) => ViewTeacherScreen(
+          controller: _controller,
+          notificationController: widget.notificationController,
+          userId: userId,
+          currentUserId: widget.currentUserId,
+        ),
       ),
     );
   }

@@ -81,7 +81,7 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
-    expect(find.text('Sắp có'), findsNWidgets(2));
+    expect(find.text('Sắp có'), findsNothing);
     expect(
       find.text('Chức năng giáo viên sẽ có trong bản cập nhật tới.'),
       findsOneWidget,
