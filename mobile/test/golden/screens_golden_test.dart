@@ -1065,4 +1065,102 @@ void main() {
 
     await expectScreen(tester, 'teaching_schedule');
   });
+
+  /// Lớp của GV: hai lớp; lớp 1 có buổi đã và chưa điểm danh, một học sinh
+  /// vượt ngưỡng vắng; bảng buổi 2 theo [sheet].
+  void stubSections(TestApp app, {Map<String, dynamic>? sheet}) {
+    app.http.reply('GET', '/semesters', FakeReply(200, semestersJson()));
+    app.http.reply(
+      'GET',
+      '/teacher/sections',
+      FakeReply(
+        200,
+        pagedJson([
+          teacherSectionJson(),
+          teacherSectionJson(
+            id: 2,
+            code: 'TIN11-HK1-2627-01',
+            subjectCode: 'TIN11',
+            subjectName: 'Tin học 11',
+          ),
+          teacherSectionJson(
+            id: 3,
+            code: 'TOAN11-HE-2026-01',
+            subjectCode: 'TOAN11',
+            subjectName: 'Toán 11',
+            status: 'CLOSED',
+          ),
+        ]),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/teacher/sections/1/attendance',
+      FakeReply(
+        200,
+        sectionAttendanceJson(
+          sessions: [
+            sectionSessionJson(no: 1, date: '2026-10-19', hasAttendance: true),
+            sectionSessionJson(id: 2, no: 2),
+            sectionSessionJson(
+              id: 3,
+              no: 3,
+              date: '2026-10-26',
+              status: 'CANCELLED',
+            ),
+          ],
+        ),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/teacher/sections/1/sessions/2/attendance',
+      FakeReply(200, sheet ?? sheetJson()),
+    );
+  }
+
+  Future<void> tapVisible(WidgetTester tester, String text) async {
+    final target = find.text(text).last;
+    await tester.ensureVisible(target);
+    await tester.pumpAndSettle();
+    await tester.tap(target);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('section list', (tester) async {
+    final app = await pumpTeacherHome(tester);
+    stubSections(app);
+    await tapVisible(tester, 'Lớp của tôi');
+
+    await expectScreen(tester, 'section_list');
+  });
+
+  testWidgets('section detail', (tester) async {
+    final app = await pumpTeacherHome(tester);
+    stubSections(app);
+    await tapVisible(tester, 'Lớp của tôi');
+    await tapVisible(tester, 'Toán 10');
+
+    await expectScreen(tester, 'section_detail');
+  });
+
+  testWidgets('attendance sheet', (tester) async {
+    final app = await pumpTeacherHome(tester);
+    stubSections(app);
+    await tapVisible(tester, 'Lớp của tôi');
+    await tapVisible(tester, 'Toán 10');
+    await tapVisible(tester, 'Buổi 2');
+
+    await expectScreen(tester, 'attendance_sheet');
+  });
+
+  testWidgets('attendance sheet past the deadline', (tester) async {
+    final app = await pumpTeacherHome(tester);
+    stubSections(app, sheet: sheetJson(marked: true, locked: true));
+    await tapVisible(tester, 'Lớp của tôi');
+    await tapVisible(tester, 'Toán 10');
+    await tapVisible(tester, 'Buổi 2');
+
+    await expectScreen(tester, 'attendance_sheet_locked');
+  });
 }

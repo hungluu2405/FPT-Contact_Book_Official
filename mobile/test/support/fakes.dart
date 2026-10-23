@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_sheet_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_controller.dart';
@@ -17,6 +18,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_con
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/teacher_section_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/picked_file_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/attachment_service.dart';
@@ -27,6 +29,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/notification_service.
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/profile_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/request_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/student_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/teacher_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/token_storage.dart';
 
 /// Kho token trong bộ nhớ thay cho secure storage.
@@ -285,8 +288,9 @@ Map<String, dynamic> pagedJson(
   int page = 0,
   int totalPages = 1,
   int? totalElements,
+  int semesterId = 1,
 }) => {
-  'semester': semesterJson(),
+  'semester': semesterJson(id: semesterId),
   'data': {
     'items': items,
     'page': page,
@@ -723,6 +727,136 @@ Map<String, dynamic> sentDetailJson({
   ),
 };
 
+Map<String, dynamic> teacherSectionJson({
+  int id = 1,
+  String code = 'TOAN10-HK1-2627-01',
+  String subjectCode = 'TOAN10',
+  String subjectName = 'Toán 10',
+  String status = 'OPEN',
+}) => {
+  'id': id,
+  'code': code,
+  'subjectCode': subjectCode,
+  'subjectName': subjectName,
+  'semesterCode': 'HK1-2627',
+  'status': status,
+};
+
+Map<String, dynamic> sectionSessionJson({
+  int id = 1,
+  int no = 1,
+  String date = '2026-10-21',
+  String status = 'SCHEDULED',
+  bool hasAttendance = false,
+}) => {
+  'id': id,
+  'sessionNo': no,
+  'date': date,
+  'startTime': '07:30:00',
+  'endTime': '09:00:00',
+  'roomCode': 'DE205',
+  'status': status,
+  'note': null,
+  'hasAttendance': hasAttendance,
+};
+
+Map<String, dynamic> sectionStudentJson({
+  int studentId = 1,
+  String code = 'HS260001',
+  String name = 'Lê Minh Sinh',
+  Map<String, dynamic>? summary,
+}) => {
+  'studentId': studentId,
+  'studentCode': code,
+  'fullName': name,
+  'summary': summary ?? summaryJson(),
+};
+
+Map<String, dynamic> sectionAttendanceJson({
+  List<Map<String, dynamic>>? sessions,
+  List<Map<String, dynamic>>? students,
+  int sessionPages = 1,
+  int studentPages = 1,
+  int sessionPage = 0,
+  int studentPage = 0,
+}) => {
+  'section': teacherSectionJson(),
+  'sessions': pageJson(
+    sessions ??
+        [
+          sectionSessionJson(no: 1, date: '2026-10-19', hasAttendance: true),
+          sectionSessionJson(id: 2, no: 2),
+        ],
+    page: sessionPage,
+    totalPages: sessionPages,
+  ),
+  'students': pageJson(
+    students ?? [sectionStudentJson()],
+    page: studentPage,
+    totalPages: studentPages,
+  ),
+  'totalSessions': 15,
+  'thresholdPercent': 20,
+};
+
+Map<String, dynamic> sheetRowJson({
+  int studentId = 1,
+  String code = 'HS260001',
+  String name = 'Lê Minh Sinh',
+  String? status,
+  String? note,
+  bool approvedLeave = false,
+}) => {
+  'studentId': studentId,
+  'studentCode': code,
+  'fullName': name,
+  'status': status,
+  'note': note,
+  'approvedLeave': approvedLeave,
+};
+
+/// Bảng điểm danh buổi 2 của lớp 1: ba học sinh, học sinh 3 có đơn nghỉ đã
+/// duyệt; [marked] là buổi đã điểm danh (khi đó mọi hàng có trạng thái).
+Map<String, dynamic> sheetJson({
+  bool marked = false,
+  bool locked = false,
+  List<Map<String, dynamic>>? rows,
+}) => {
+  'sectionId': 1,
+  'sectionCode': 'TOAN10-HK1-2627-01',
+  'subjectCode': 'TOAN10',
+  'subjectName': 'Toán 10',
+  'sessionId': 2,
+  'sessionNo': 2,
+  'date': '2026-10-21',
+  'startTime': '07:30:00',
+  'endTime': '09:00:00',
+  'roomCode': 'DE205',
+  'marked': marked,
+  'editableUntil': '2026-10-22T09:00:00',
+  'locked': locked,
+  'reasonRequired': marked,
+  'rows':
+      rows ??
+      [
+        sheetRowJson(status: marked ? 'PRESENT' : null),
+        sheetRowJson(
+          studentId: 2,
+          code: 'HS260002',
+          name: 'Trần Thị Bình',
+          status: marked ? 'ABSENT_UNEXCUSED' : null,
+          note: marked ? 'Không báo trước' : null,
+        ),
+        sheetRowJson(
+          studentId: 3,
+          code: 'HS260003',
+          name: 'Phạm Văn Cường',
+          status: marked ? 'ABSENT_EXCUSED' : null,
+          approvedLeave: true,
+        ),
+      ],
+};
+
 /// Tệp minh chứng giả có [size] byte.
 PickedFileModel pickedFile(String name, {int size = 3}) =>
     PickedFileModel.fromBytes(name, Uint8List(size));
@@ -814,6 +948,13 @@ class TestApp {
         NotificationService(apiClient),
         attachmentService,
       );
+  late final TeacherSectionController teacherSectionController =
+      TeacherSectionController(
+        TeacherService(apiClient),
+        StudentService(apiClient),
+      );
+  late final AttendanceSheetController attendanceSheetController =
+      AttendanceSheetController(TeacherService(apiClient));
   late final RequestController requestController = RequestController(
     RequestService(apiClient),
     attachmentService,

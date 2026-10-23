@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_sheet_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/department_controller.dart';
@@ -13,6 +14,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_con
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/teacher_section_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/change_password_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/login_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/home/home_screen.dart';
@@ -26,6 +28,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/notification_service.
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/profile_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/request_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/student_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/teacher_service.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/token_storage.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_config.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_theme.dart';
@@ -42,6 +45,7 @@ void main() {
   final notificationService = NotificationService(apiClient);
   final attachmentService = AttachmentService(apiClient);
   final departmentService = DepartmentService(apiClient);
+  final teacherService = TeacherService(apiClient);
   final authController = AuthController(authService)..restoreSession();
   runApp(
     MyApp(
@@ -68,6 +72,11 @@ void main() {
         notificationService,
         attachmentService,
       ),
+      teacherSectionController: TeacherSectionController(
+        teacherService,
+        studentService,
+      ),
+      attendanceSheetController: AttendanceSheetController(teacherService),
     ),
   );
 }
@@ -86,6 +95,8 @@ class MyApp extends StatelessWidget {
   final RequestController requestController;
   final DepartmentController departmentController;
   final DepartmentNotificationController departmentNotificationController;
+  final TeacherSectionController teacherSectionController;
+  final AttendanceSheetController attendanceSheetController;
 
   const MyApp({
     super.key,
@@ -102,6 +113,8 @@ class MyApp extends StatelessWidget {
     required this.requestController,
     required this.departmentController,
     required this.departmentNotificationController,
+    required this.teacherSectionController,
+    required this.attendanceSheetController,
   });
 
   @override
@@ -140,6 +153,8 @@ class MyApp extends StatelessWidget {
             requestController: requestController,
             departmentController: departmentController,
             departmentNotificationController: departmentNotificationController,
+            teacherSectionController: teacherSectionController,
+            attendanceSheetController: attendanceSheetController,
           ),
         },
       ),

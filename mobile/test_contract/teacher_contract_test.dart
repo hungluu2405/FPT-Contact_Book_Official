@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/student_service.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/teacher_service.dart';
 
 import 'auth_contract_test.dart' show ContractClient, apiError, kSeedPassword;
 
-/// Hợp đồng lịch dạy và lịch thi của giáo viên (giai đoạn 10d-1), chỉ đọc:
+/// Hợp đồng lịch dạy, lịch thi, lớp và bảng điểm danh của giáo viên (giai
+/// đoạn 10d-1, 10d-2), chỉ đọc; không lưu điểm danh vì làm đổi dữ liệu dev:
 /// 0900000003 là giáo viên tổ Toán – Tin học, 0900000002 là tổ trưởng.
 ///
 /// Chạy: `flutter test test_contract` khi backend đang chạy ở cổng 8080.
@@ -37,6 +39,45 @@ void main() {
 
     await expectLater(
       service.fetchWeek(null, teacher: true),
+      throwsA(apiError('FORBIDDEN')),
+    );
+  });
+
+  test('a teacher reads sections, a section and a session sheet', () async {
+    final client = ContractClient();
+    await client.auth.login('0900000003', kSeedPassword);
+    final service = TeacherService(client.api);
+
+    final sections = await service.fetchSections();
+
+    expect(sections.data.items, isNotEmpty);
+    final section = sections.data.items.first;
+    final detail = await service.fetchSectionAttendance(section.id);
+    expect(detail.section.id, section.id);
+    expect(detail.sessions.totalElements, detail.totalSessions);
+    final session = detail.sessions.items.firstWhere(
+      (s) => !s.isCancelled,
+      orElse: () => detail.sessions.items.first,
+    );
+    if (!session.isCancelled) {
+      final sheet = await service.fetchSheet(section.id, session.id);
+      expect(sheet.sessionId, session.id);
+      expect(sheet.marked, session.hasAttendance);
+      for (final row in sheet.rows) {
+        expect(row.studentCode, isNotEmpty);
+        if (sheet.marked) {
+          expect(row.status, isNotNull);
+        }
+      }
+    }
+  });
+
+  test('a teacher cannot open a section taught by someone else', () async {
+    final client = ContractClient();
+    await client.auth.login('0900000003', kSeedPassword);
+
+    await expectLater(
+      TeacherService(client.api).fetchSectionAttendance(27),
       throwsA(apiError('FORBIDDEN')),
     );
   });

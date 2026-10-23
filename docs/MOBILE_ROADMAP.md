@@ -64,7 +64,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - 10c-2 (đã xong, giả định 174–176): đơn từ của HS/PH (danh sách, chi tiết, hủy), gửi đơn nghỉ kèm ảnh hoặc tệp minh chứng.
 - **10d: màn hình GV** (nhánh `feature/phase-10d-teacher`)
   - 10d-1 (đã xong, giả định 182): trang chủ giáo viên (thẻ "Lịch dạy hôm nay", lưới Lịch dạy, Lịch thi, Lớp của tôi, Duyệt đơn), lịch dạy theo tuần và theo buổi, lịch thi các lớp mình dạy.
-  - 10d-2: lớp của tôi và điểm danh một buổi.
+  - 10d-2 (đã xong, giả định 183): lớp của tôi và điểm danh một buổi.
   - 10d-3: duyệt đơn nghỉ.
 - **10e: tổ trưởng chuyên môn** (làm trước 10d, nhánh `feature/phase-10e-head-of-department`, giả định 177–179)
   - 10e-1 (đã xong): API `/head/**` (tổ phụ trách, giáo viên trong tổ, gửi thông báo nội bộ) và thông báo đã gửi kèm thống kê đã đọc.

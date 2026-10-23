@@ -81,8 +81,8 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
-    // Hai ô "Sắp có" thuộc lưới giáo viên (Lớp của tôi, Duyệt đơn).
-    expect(find.text('Sắp có'), findsNWidgets(2));
+    // Ô "Sắp có" còn lại thuộc lưới giáo viên (Duyệt đơn, làm ở 10d-3).
+    expect(find.text('Sắp có'), findsOneWidget);
     expect(find.text('Lịch dạy hôm nay'), findsOneWidget);
   });
 
