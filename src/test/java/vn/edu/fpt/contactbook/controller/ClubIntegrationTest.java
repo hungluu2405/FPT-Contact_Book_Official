@@ -114,7 +114,7 @@ class ClubIntegrationTest {
         }
 
         @Test
-        @DisplayName("Chuyển giao chủ nhiệm CLB 1 cho SV khác: người cũ thành MEMBER, chỉ còn một PRESIDENT")
+        @DisplayName("Chuyển giao chủ nhiệm CLB 1 cho HS khác: người cũ thành MEMBER, chỉ còn một PRESIDENT")
         void transfer() throws Exception {
             mockMvc.perform(post("/admin/clubs/1/president").param("studentCode", "HS250102")
                     .with(as(TestAccounts.ADMIN)).with(csrf()));
@@ -142,7 +142,7 @@ class ClubIntegrationTest {
     class Membership {
 
         @Test
-        @DisplayName("SV gửi yêu cầu, chủ nhiệm duyệt: ACTIVE, SV nhận thông báo; bị từ chối rồi gửi lại không lỗi trùng")
+        @DisplayName("HS gửi yêu cầu, chủ nhiệm duyệt: ACTIVE, HS nhận thông báo; bị từ chối rồi gửi lại không lỗi trùng")
         void joinApproveAndResubmit() throws Exception {
             long unreadBefore = recipientRepository.countUnread(TestAccounts.STUDENT_ID);
             join(TestAccounts.STUDENT);
@@ -171,7 +171,7 @@ class ClubIntegrationTest {
         }
 
         @Test
-        @DisplayName("SV không phải chủ nhiệm duyệt: 403; chủ nhiệm CLB 2 duyệt cho CLB 1: 403")
+        @DisplayName("HS không phải chủ nhiệm duyệt: 403; chủ nhiệm CLB 2 duyệt cho CLB 1: 403")
         void wrongReviewer() throws Exception {
             mockMvc.perform(post("/clubs/1/members/3/approve").with(as(MEMBER)).with(csrf()))
                     .andExpect(status().isForbidden());

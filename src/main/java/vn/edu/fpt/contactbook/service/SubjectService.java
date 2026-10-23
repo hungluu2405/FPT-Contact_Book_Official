@@ -123,7 +123,7 @@ public class SubjectService {
                 "Tên tối đa 200 ký tự", errors);
         Integer credits = form.getCredits();
         if (credits == null) {
-            errors.put("credits", "Vui lòng nhập số tín chỉ");
+            errors.put("credits", "Vui lòng nhập số tiết/tuần");
         } else if (credits < MIN_CREDITS || credits > MAX_CREDITS) {
             errors.put("credits", CatalogMessages.CREDITS_RANGE);
         }

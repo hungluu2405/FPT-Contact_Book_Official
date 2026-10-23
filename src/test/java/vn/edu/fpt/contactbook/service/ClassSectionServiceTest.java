@@ -153,7 +153,7 @@ class ClassSectionServiceTest {
     }
 
     @Test
-    @DisplayName("Giảng viên khác bộ môn của môn học → lỗi cạnh ô giảng viên, không lưu")
+    @DisplayName("Giáo viên khác tổ chuyên môn của môn học → lỗi cạnh ô giáo viên, không lưu")
     void teacherFromOtherDepartmentRejected() {
         assertThatThrownBy(() -> service.create(ADMIN, form(1L, 1L, 20L, "TOAN10-HK1-2627-09", null), "127.0.0.1"))
                 .isInstanceOfSatisfying(BusinessException.class, e -> assertThat(e.getFieldErrors())
@@ -183,7 +183,7 @@ class ClassSectionServiceTest {
     }
 
     @Test
-    @DisplayName("Giảm sĩ số dưới số SV đang ENROLLED → từ chối; khóa dòng lớp trước khi đếm")
+    @DisplayName("Giảm sĩ số dưới số HS đang ENROLLED → từ chối; khóa dòng lớp trước khi đếm")
     void cannotReduceBelowEnrolled() {
         when(enrollmentRepository.countByClassSectionIdAndStatus(10L, EnrollmentStatus.ENROLLED)).thenReturn(35L);
 
@@ -198,7 +198,7 @@ class ClassSectionServiceTest {
     }
 
     @Test
-    @DisplayName("Lớp đã có ghi danh: không đổi được môn, học kỳ; vẫn đổi được giảng viên và trạng thái")
+    @DisplayName("Lớp đã có ghi danh: không đổi được môn, học kỳ; vẫn đổi được giáo viên và trạng thái")
     void subjectAndSemesterLockedWhenEnrolled() {
         when(enrollmentRepository.existsByClassSectionId(10L)).thenReturn(true);
         Subject prn211 = CatalogTestData.subject(31L, "TIN11", toan10.getDepartment());
@@ -228,7 +228,7 @@ class ClassSectionServiceTest {
     }
 
     @Test
-    @DisplayName("Trưởng bộ môn SE: lớp của môn bộ môn khác hoặc id không tồn tại → 403; ADMIN với id lạ → 404")
+    @DisplayName("Tổ trưởng chuyên môn SE: lớp của môn tổ chuyên môn khác hoặc id không tồn tại → 403; ADMIN với id lạ → 404")
     void headScope() {
         ClassSection iaSection = CatalogTestData.section(11L, "IAO201-HK1-2627-01", iaSubject, hk1, iaTeacher, null,
                 SectionStatus.OPEN);

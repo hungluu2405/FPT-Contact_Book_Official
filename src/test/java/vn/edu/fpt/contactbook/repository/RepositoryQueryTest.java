@@ -144,7 +144,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Lọc theo vai trò, bộ môn giảng viên, lớp, trạng thái")
+        @DisplayName("Lọc theo vai trò, tổ chuyên môn giáo viên, lớp, trạng thái")
         void filters() {
             assertThat(search(null, "TEACHER", null, null, null, PageRequest.of(0, 50)).getTotalElements())
                     .isEqualTo(5);
@@ -156,7 +156,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Phạm vi trưởng bộ môn: chỉ giảng viên thuộc các bộ môn được giao")
+        @DisplayName("Phạm vi tổ trưởng chuyên môn: chỉ giáo viên thuộc các tổ chuyên môn được giao")
         void scopedToDepartments() {
             Page<UserListRow> se = userRepository.search(null, null, null, null, null, null,
                     true, List.of(1L), PageRequest.of(0, 50));
@@ -382,7 +382,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Môn học: lọc theo phạm vi bộ môn của trưởng bộ môn")
+        @DisplayName("Môn học: lọc theo phạm vi tổ chuyên môn của tổ trưởng chuyên môn")
         void subjectSearchScoped() {
             assertThat(subjectRepository.search(null, null, true, List.of(1L), PageRequest.of(0, 20)))
                     .extracting(Subject::getCode).containsExactly("STEM", "TIN11", "TOAN10");
@@ -419,7 +419,7 @@ class RepositoryQueryTest {
     }
 
     @Nested
-    @DisplayName("Lớp học phần và ghi danh (Giai đoạn 4b)")
+    @DisplayName("Lớp môn học và ghi danh (Giai đoạn 4b)")
     class SectionQueries {
 
         @Autowired
@@ -461,7 +461,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Ứng viên ghi danh: SV đang học chưa có trong lớp; SV đã DROPPED vẫn hiện")
+        @DisplayName("Ứng viên ghi danh: HS đang học chưa có trong lớp; HS đã DROPPED vẫn hiện")
         void candidates() {
             assertThat(studentRepository.findCandidates(null, 27L, PageRequest.of(0, 20)))
                     .extracting(Student::getStudentCode).containsExactly("HS240201", "HS260001");
@@ -493,7 +493,7 @@ class RepositoryQueryTest {
         private static final LocalDate TO = LocalDate.of(2026, 10, 21);
 
         @Test
-        @DisplayName("Xung đột theo phòng, theo giảng viên, theo lớp chung sinh viên; tham số null bị bỏ qua")
+        @DisplayName("Xung đột theo phòng, theo giáo viên, theo lớp chung học sinh; tham số null bị bỏ qua")
         void possibleConflicts() {
             assertThat(classSessionRepository.findPossibleConflicts(1L, FROM, TO, 14L, null, List.of(-1L)))
                     .extracting(ClassSession::getId).containsExactlyInAnyOrder(41L, 42L, 43L, 44L, 45L, 46L);
@@ -516,7 +516,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Buổi của lớp học phần đã hủy không còn chặn phòng, giảng viên, sinh viên (finding 2)")
+        @DisplayName("Buổi của lớp môn học đã hủy không còn chặn phòng, giáo viên, học sinh (finding 2)")
         void cancelledSectionDoesNotBlock() {
             ClassSection prn211 = classSectionRepository.findById(27L).orElseThrow();
             prn211.setStatus(SectionStatus.CANCELLED);
@@ -563,7 +563,7 @@ class RepositoryQueryTest {
         private EnrollmentRepository enrollmentRepository;
 
         @Test
-        @DisplayName("Đang dạy: SV ENROLLED ở lớp học kỳ hiện tại; phụ huynh qua con đã liên kết")
+        @DisplayName("Đang dạy: HS ENROLLED ở lớp học kỳ hiện tại; phụ huynh qua con đã liên kết")
         void teachingNow() {
             assertThat(contactRepository.teachesStudentNow(3L, 4L)).isTrue();
             assertThat(contactRepository.teachesStudentNow(16L, 18L)).isTrue();
@@ -588,7 +588,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Lớp CANCELLED hoặc sinh viên DROPPED: không còn quan hệ")
+        @DisplayName("Lớp CANCELLED hoặc học sinh DROPPED: không còn quan hệ")
         void cancelledOrDropped() {
             Enrollment enrollment = enrollmentRepository.findById(1L).orElseThrow();
             enrollment.setStatus(EnrollmentStatus.DROPPED);
@@ -604,7 +604,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Danh bạ theo vai trò: PH, SV chỉ thấy GV đang dạy; GV thấy GV khác, SV và PH lớp mình")
+        @DisplayName("Danh bạ theo vai trò: PH, HS chỉ thấy GV đang dạy; GV thấy GV khác, HS và PH lớp mình")
         void contacts() {
             PageRequest page = PageRequest.of(0, 20);
             assertThat(contactRepository.findContacts(5L, false, false, true, null, page))
@@ -734,7 +734,7 @@ class RepositoryQueryTest {
         }
 
         @Test
-        @DisplayName("Giảng viên phụ trách chọn được: TEACHER / HEAD đang hoạt động")
+        @DisplayName("Giáo viên phụ trách chọn được: TEACHER / HEAD đang hoạt động")
         void advisors() {
             List<String> roles = List.of(RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT);
             assertThat(userRoleRepository.findActiveUsersWithRole(roles)).extracting(User::getId)

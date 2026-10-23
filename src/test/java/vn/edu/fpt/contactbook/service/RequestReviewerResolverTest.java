@@ -59,7 +59,7 @@ class RequestReviewerResolverTest {
     }
 
     @Test
-    @DisplayName("Đơn nghỉ có lớp học phần: giảng viên lớp đó duyệt, GVCN và ADMIN không")
+    @DisplayName("Đơn nghỉ có lớp môn học: giáo viên lớp đó duyệt, GVCN và ADMIN không")
     void sectionTeacher() {
         UserRequest request = leave(section);
 
@@ -70,7 +70,7 @@ class RequestReviewerResolverTest {
     }
 
     @Test
-    @DisplayName("Đơn nghỉ không chọn lớp: giảng viên chủ nhiệm duyệt")
+    @DisplayName("Đơn nghỉ không chọn lớp: giáo viên chủ nhiệm duyệt")
     void homeroomTeacher() {
         UserRequest request = leave(null);
 

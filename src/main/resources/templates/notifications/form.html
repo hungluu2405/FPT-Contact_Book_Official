@@ -32,7 +32,7 @@
                     <select class="form-select" th:field="*{targetType}" id="targetType" data-target-type-select
                             th:classappend="${#fields.hasErrors('targetType')} ? 'is-invalid'">
                         <option value="" th:text="#{user.choose}">-- Chọn --</option>
-                        <option th:each="t : ${options.types}" th:value="${t}" th:text="#{'notification-target.' + ${t}}">Lớp học phần</option>
+                        <option th:each="t : ${options.types}" th:value="${t}" th:text="#{'notification-target.' + ${t}}">Lớp môn học</option>
                     </select>
                     <div class="invalid-feedback" th:errors="*{targetType}">Lỗi</div>
                 </div>
@@ -40,7 +40,7 @@
                     <label for="roleId" class="form-label" th:text="#{notification-target.ROLE}">Vai trò</label>
                     <select class="form-select" th:field="*{roleId}" th:classappend="${#fields.hasErrors('roleId')} ? 'is-invalid'">
                         <option value="" th:text="#{user.choose}">-- Chọn --</option>
-                        <option th:each="o : ${options.roles}" th:value="${o.id}" th:text="#{'role.' + ${o.code}}">Sinh viên</option>
+                        <option th:each="o : ${options.roles}" th:value="${o.id}" th:text="#{'role.' + ${o.code}}">Học sinh</option>
                     </select>
                     <div class="invalid-feedback" th:errors="*{roleId}">Lỗi</div>
                 </div>

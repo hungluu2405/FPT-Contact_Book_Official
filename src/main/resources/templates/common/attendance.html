@@ -6,7 +6,7 @@
 </head>
 <body>
 <section>
-    <!--/* Điểm danh theo môn của sinh viên (baseUrl /student/attendance) hoặc của con (/parent/children/{id}/attendance). */-->
+    <!--/* Điểm danh theo môn của học sinh (baseUrl /student/attendance) hoặc của con (/parent/children/{id}/attendance). */-->
     <h1 class="page-title" th:text="${pageTitle}">Điểm danh</h1>
     <p th:if="${noChildren}" class="alert alert-info" th:text="#{schedule.no-children}">Chưa liên kết con.</p>
     <th:block th:unless="${noChildren}">

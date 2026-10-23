@@ -73,7 +73,7 @@ class NotificationIntegrationTest {
     class SendAndRead {
 
         @Test
-        @DisplayName("GV gửi lớp mình: SV và PH nhận, chuông đúng số chưa đọc, thống kê đã đọc khớp")
+        @DisplayName("GV gửi lớp mình: HS và PH nhận, chuông đúng số chưa đọc, thống kê đã đọc khớp")
         void teacherSendsToOwnSection() throws Exception {
             long studentUnread = recipientRepository.countUnread(TestAccounts.STUDENT_ID);
             long parentUnread = recipientRepository.countUnread(TestAccounts.PARENT_ID);
@@ -189,7 +189,7 @@ class NotificationIntegrationTest {
     }
 
     @Nested
-    @DisplayName("Ô chọn lớp học phần trên form gửi")
+    @DisplayName("Ô chọn lớp môn học trên form gửi")
     class SectionOptions {
 
         @Test
@@ -247,7 +247,7 @@ class NotificationIntegrationTest {
     class Automatic {
 
         @Test
-        @DisplayName("Hủy buổi học → SV và PH của lớp nhận thông báo, người gửi là người hủy")
+        @DisplayName("Hủy buổi học → HS và PH của lớp nhận thông báo, người gửi là người hủy")
         void sessionCancelled() throws Exception {
             mockMvc.perform(post("/admin/sections/1/sessions/1/cancel").with(csrf()).with(as(TestAccounts.ADMIN)))
                     .andExpect(redirectedUrl("/admin/sections/1"));
@@ -260,7 +260,7 @@ class NotificationIntegrationTest {
         }
 
         @Test
-        @DisplayName("Công bố điểm → SV và PH nhận thông báo")
+        @DisplayName("Công bố điểm → HS và PH nhận thông báo")
         void gradesPublished() throws Exception {
             mockMvc.perform(post("/teacher/sections/1/grades").with(csrf()).param("scores[1_1]", "8")
                     .with(as(TestAccounts.TEACHER))).andExpect(status().is3xxRedirection());
@@ -278,7 +278,7 @@ class NotificationIntegrationTest {
     private MockMultipartHttpServletRequestBuilder sectionForm(Long sectionId) {
         return (MockMultipartHttpServletRequestBuilder) multipart("/notifications/new").with(csrf())
                 .param("title", "Lịch kiểm tra giữa kỳ")
-                .param("content", "Ôn tập chương 1–3.\nMang theo thẻ sinh viên.")
+                .param("content", "Ôn tập chương 1–3.\nMang theo thẻ học sinh.")
                 .param("priority", "IMPORTANT")
                 .param("targetType", "CLASS_SECTION")
                 .param("sectionId", sectionId.toString());

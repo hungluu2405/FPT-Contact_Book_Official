@@ -213,7 +213,7 @@ class RequestServiceTest {
         }
 
         @Test
-        @DisplayName("SV gửi đơn có lớp: PENDING, người gửi là SV, tiêu đề tự điền, báo giảng viên lớp, có audit")
+        @DisplayName("HS gửi đơn có lớp: PENDING, người gửi là HS, tiêu đề tự điền, báo giáo viên lớp, có audit")
         void studentCreatesLeave() {
             when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L))
                     .thenReturn(Optional.of(CatalogTestData.enrollment(1L, section, student, EnrollmentStatus.ENROLLED)));
@@ -245,7 +245,7 @@ class RequestServiceTest {
         }
 
         @Test
-        @DisplayName("Lớp SV không đang học (đã rút): lỗi ở ô lớp học phần, không lưu")
+        @DisplayName("Lớp HS không đang học (đã rút): lỗi ở ô lớp môn học, không lưu")
         void sectionMustBeEnrolled() {
             when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L))
                     .thenReturn(Optional.of(CatalogTestData.enrollment(1L, section, student, EnrollmentStatus.DROPPED)));
@@ -269,7 +269,7 @@ class RequestServiceTest {
         }
 
         @Test
-        @DisplayName("PH gửi thay con: người gửi là PH, SV là con; con chưa liên kết → 403")
+        @DisplayName("PH gửi thay con: người gửi là PH, HS là con; con chưa liên kết → 403")
         void parentCreatesForChild() {
             service.createLeave(PARENT, View.PARENT, 1L, form(null), List.of(), null);
 
@@ -326,7 +326,7 @@ class RequestServiceTest {
         }
 
         @Test
-        @DisplayName("Không phải người gửi (SV khi PH gửi thay, người ngoài, id không tồn tại) → 403")
+        @DisplayName("Không phải người gửi (HS khi PH gửi thay, người ngoài, id không tồn tại) → 403")
         void onlyRequester() {
             when(requestRepository.findById(7L)).thenReturn(Optional.of(
                     request(7L, RequestType.LEAVE, section, parentUser, RequestStatus.PENDING)));
@@ -343,8 +343,8 @@ class RequestServiceTest {
     class Review {
 
         @Test
-        @DisplayName("Duyệt đơn nghỉ có lớp: chỉ đổi các dòng vắng không phép của SV trong khoảng ngày, đúng lớp; "
-                + "ghi chú tham chiếu đơn; audit từng dòng; người gửi và SV nhận thông báo")
+        @DisplayName("Duyệt đơn nghỉ có lớp: chỉ đổi các dòng vắng không phép của HS trong khoảng ngày, đúng lớp; "
+                + "ghi chú tham chiếu đơn; audit từng dòng; người gửi và HS nhận thông báo")
         void approveExcusesAbsences() {
             UserRequest r = request(7L, RequestType.LEAVE, section, parentUser, RequestStatus.PENDING);
             when(requestRepository.findDetailById(7L)).thenReturn(Optional.of(r));
@@ -499,7 +499,7 @@ class RequestServiceTest {
         }
 
         @Test
-        @DisplayName("Người không liên quan (SV khác, GV không phải người duyệt), tệp không thuộc đơn → 403")
+        @DisplayName("Người không liên quan (HS khác, GV không phải người duyệt), tệp không thuộc đơn → 403")
         void denied() {
             assertThatThrownBy(() -> service.download(OUTSIDER, 7L, 70L)).isInstanceOf(AccessDeniedException.class);
             assertThatThrownBy(() -> service.download(HOMEROOM, 7L, 70L)).isInstanceOf(AccessDeniedException.class);

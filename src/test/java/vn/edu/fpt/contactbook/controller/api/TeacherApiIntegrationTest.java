@@ -105,7 +105,7 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Danh sách lớp chỉ gồm lớp mình dạy; thống kê lớp có buổi và chuyên cần từng sinh viên")
+        @DisplayName("Danh sách lớp chỉ gồm lớp mình dạy; thống kê lớp có buổi và chuyên cần từng học sinh")
         void sections() throws Exception {
             JsonNode sections = api.json(api.perform(get(API + "/sections"), TestAccounts.TEACHER)
                     .andExpect(status().isOk())).get("data");
@@ -130,7 +130,7 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Lớp, buổi của giảng viên khác: 403, không ghi gì; buổi không thuộc lớp: 404")
+        @DisplayName("Lớp, buổi của giáo viên khác: 403, không ghi gì; buổi không thuộc lớp: 404")
         void otherSection() throws Exception {
             api.perform(get(API + "/sections/27/attendance"), TestAccounts.TEACHER).andExpect(status().isForbidden());
             api.perform(get(API + "/sections/27/sessions/41/attendance"), TestAccounts.TEACHER)
@@ -152,7 +152,7 @@ class TeacherApiIntegrationTest {
     class Marking {
 
         @Test
-        @DisplayName("Bảng điểm danh buổi 1: thông tin buổi và từng sinh viên, chưa điểm danh")
+        @DisplayName("Bảng điểm danh buổi 1: thông tin buổi và từng học sinh, chưa điểm danh")
         void sheet() throws Exception {
             JsonNode sheet = api.json(api.perform(get(SHEET), TestAccounts.TEACHER).andExpect(status().isOk()));
 
@@ -171,7 +171,7 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Lần đầu không cần lý do; sửa lại thiếu lý do 400; có lý do thì lưu, audit, SV thấy ngay")
+        @DisplayName("Lần đầu không cần lý do; sửa lại thiếu lý do 400; có lý do thì lưu, audit, HS thấy ngay")
         void markThenAdjust() throws Exception {
             JsonNode first = api.json(api.perform(save(SHEET, Map.of("1", "PRESENT"), null), TestAccounts.TEACHER)
                     .andExpect(status().isOk()));
@@ -202,7 +202,7 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trạng thái không hợp lệ hoặc thiếu sinh viên: 400, không ghi")
+        @DisplayName("Trạng thái không hợp lệ hoặc thiếu học sinh: 400, không ghi")
         void invalidInput() throws Exception {
             JsonNode badStatus = api.json(api.perform(save(SHEET, Map.of("1", "HACKED"), null), TestAccounts.TEACHER)
                     .andExpect(status().isBadRequest()));
@@ -289,7 +289,7 @@ class TeacherApiIntegrationTest {
     class Review {
 
         @Test
-        @DisplayName("SV gửi đơn lớp 1; GV phụ trách thấy trong PENDING, duyệt được; SV thấy APPROVED; duyệt lại 400")
+        @DisplayName("HS gửi đơn lớp 1; GV phụ trách thấy trong PENDING, duyệt được; HS thấy APPROVED; duyệt lại 400")
         void approve() throws Exception {
             long id = sendLeave();
 
@@ -337,7 +337,7 @@ class TeacherApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Giảng viên không phụ trách mở hoặc duyệt đơn: 403")
+        @DisplayName("Giáo viên không phụ trách mở hoặc duyệt đơn: 403")
         void otherTeacher() throws Exception {
             long id = sendLeave();
 

@@ -142,11 +142,11 @@ public class UserImportService {
                 case TEACHER_CODE -> profile.setTeacherCode(text);
                 case ACADEMIC_TITLE -> profile.setAcademicTitle(text);
                 case MAJOR_CODE -> profile.setMajorId(lookup(text, catalog.majors(), Major::getId, column,
-                        "Vui lòng nhập mã ngành", "Mã ngành", errors));
+                        "Vui lòng nhập mã khối", "Mã khối", errors));
                 case CLASS_CODE -> profile.setClassId(text == null ? null
                         : lookup(text, catalog.classes(), SchoolClass::getId, column, null, "Mã lớp", errors));
                 case DEPARTMENT_CODE -> profile.setTeacherDepartmentId(lookup(text, catalog.departments(),
-                        Department::getId, column, "Vui lòng nhập mã bộ môn", "Mã bộ môn", errors));
+                        Department::getId, column, "Vui lòng nhập mã tổ chuyên môn", "Mã tổ chuyên môn", errors));
                 case ENROLLMENT_YEAR -> {
                     if (text == null) {
                         errors.put(column.field(), "Vui lòng nhập năm nhập học");

@@ -70,7 +70,7 @@ public class FacultyController {
         if (!bindingResult.hasErrors()) {
             try {
                 Long id = facultyService.create(actor, form, request.getRemoteAddr());
-                redirectAttributes.addFlashAttribute("successMessage", "Đã thêm khoa");
+                redirectAttributes.addFlashAttribute("successMessage", "Đã thêm cấp học");
                 return "redirect:" + BASE + "/" + id;
             } catch (BusinessException e) {
                 FormErrors.apply(bindingResult, e);
@@ -99,7 +99,7 @@ public class FacultyController {
         if (!bindingResult.hasErrors()) {
             try {
                 facultyService.update(actor, id, form, request.getRemoteAddr());
-                redirectAttributes.addFlashAttribute("successMessage", "Đã lưu khoa");
+                redirectAttributes.addFlashAttribute("successMessage", "Đã lưu cấp học");
                 return "redirect:" + BASE + "/" + id;
             } catch (BusinessException e) {
                 FormErrors.apply(bindingResult, e);

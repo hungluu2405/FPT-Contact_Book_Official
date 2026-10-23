@@ -18,7 +18,7 @@
                 <span>
                     <span class="badge rounded-pill role-badge" th:text="#{'role.' + ${role.roleCode}}">Vai trò</span>
                     <span th:if="${role.departmentName}" class="text-muted"
-                          th:text="${role.departmentName} + ' (' + ${role.departmentCode} + ')'">Bộ môn</span>
+                          th:text="${role.departmentName} + ' (' + ${role.departmentCode} + ')'">Tổ chuyên môn</span>
                 </span>
                 <form th:action="@{/admin/users/{id}/roles/{rid}/remove(id=${user.id}, rid=${role.id})}" method="post"
                       th:attr="data-confirm=#{user.roles.remove.confirm}">
@@ -46,7 +46,7 @@
                     <div class="invalid-feedback" th:errors="*{roleCode}">Lỗi</div>
                 </div>
                 <div class="col-md-6">
-                    <label for="departmentId" class="form-label" th:text="#{user.department}">Bộ môn</label>
+                    <label for="departmentId" class="form-label" th:text="#{user.department}">Tổ chuyên môn</label>
                     <select class="form-select" th:field="*{departmentId}"
                             th:classappend="${#fields.hasErrors('departmentId')} ? 'is-invalid'">
                         <option value="" th:text="#{user.roles.department.none}">Không</option>

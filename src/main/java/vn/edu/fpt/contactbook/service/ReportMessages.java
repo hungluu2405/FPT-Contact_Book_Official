@@ -11,8 +11,8 @@ final class ReportMessages {
     static final String GRADE_TITLE = "Báo cáo điểm";
     static final String SEMESTER = "Học kỳ: ";
     static final String SUBJECT = "Môn học: ";
-    static final String SECTION = "Lớp học phần: ";
-    static final String TEACHER = "Giảng viên: ";
+    static final String SECTION = "Lớp môn học: ";
+    static final String TEACHER = "Giáo viên: ";
     static final String THRESHOLD = "Ngưỡng cảnh báo vắng: trên %d%% số buổi";
     static final String EXPORTED_AT = "Xuất lúc: ";
     static final String ALL = "Tất cả";
@@ -22,25 +22,25 @@ final class ReportMessages {
     static final String TOTAL = "Tổng";
     static final String WHOLE_SUBJECT = "Cả môn";
 
-    static final String SHEET_STUDENTS = "Sinh viên";
-    static final String SHEET_SECTIONS = "Lớp học phần";
+    static final String SHEET_STUDENTS = "Học sinh";
+    static final String SHEET_SECTIONS = "Lớp môn học";
     static final String SHEET_STATS = "Thống kê";
 
-    static final List<String> ATTENDANCE_STUDENT_HEADERS = List.of("Mã SV", "Họ tên", "Có mặt", "Vắng có phép", "Vắng không phép", "Số buổi đã điểm danh", "Số buổi của lớp", "Chuyên cần (%)",
+    static final List<String> ATTENDANCE_STUDENT_HEADERS = List.of("Mã HS", "Họ tên", "Có mặt", "Vắng có phép", "Vắng không phép", "Số buổi đã điểm danh", "Số buổi của lớp", "Chuyên cần (%)",
             "Tỷ lệ vắng (%)", "Vượt ngưỡng");
-    static final List<String> ATTENDANCE_SECTION_HEADERS = List.of("Lớp học phần", "Mã môn", "Tên môn",
-            "Giảng viên", "Số SV", "Số buổi", "Chuyên cần (%)", "Số SV vượt ngưỡng");
-    static final List<String> GRADE_SECTION_HEADERS = List.of("Lớp học phần", "Mã môn", "Tên môn", "Giảng viên",
-            "Số SV", "Đủ điểm", "Chưa đủ điểm", "Điểm trung bình", "Số SV đạt", "Tỷ lệ đạt (%)");
+    static final List<String> ATTENDANCE_SECTION_HEADERS = List.of("Lớp môn học", "Mã môn", "Tên môn",
+            "Giáo viên", "Số HS", "Số buổi", "Chuyên cần (%)", "Số HS vượt ngưỡng");
+    static final List<String> GRADE_SECTION_HEADERS = List.of("Lớp môn học", "Mã môn", "Tên môn", "Giáo viên",
+            "Số HS", "Đủ điểm", "Chưa đủ điểm", "Điểm trung bình", "Số HS đạt", "Tỷ lệ đạt (%)");
     static final List<String> GRADE_STATS_HEADERS = List.of("Chỉ số", "Giá trị");
-    static final String STATS_STUDENTS = "Số SV";
+    static final String STATS_STUDENTS = "Số HS";
     static final String STATS_COMPLETE = "Đủ điểm";
     static final String STATS_INCOMPLETE = "Chưa đủ điểm";
     static final String STATS_MEAN = "Điểm trung bình";
-    static final String STATS_PASSED = "Số SV đạt (≥ 5,0)";
+    static final String STATS_PASSED = "Số HS đạt (≥ 5,0)";
     static final String STATS_PASS_RATE = "Tỷ lệ đạt (%)";
-    static final String STATS_BAND = "Số SV khoảng ";
-    static final String STUDENT_CODE = "Mã SV";
+    static final String STATS_BAND = "Số HS khoảng ";
+    static final String STUDENT_CODE = "Mã HS";
     static final String FULL_NAME = "Họ tên";
     static final String AVERAGE = "Trung bình môn";
 

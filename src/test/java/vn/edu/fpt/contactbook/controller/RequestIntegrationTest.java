@@ -82,7 +82,7 @@ class RequestIntegrationTest {
     class Send {
 
         @Test
-        @DisplayName("SV gửi đơn nghỉ kèm minh chứng: PENDING, tiêu đề tự điền, GV lớp nhận thông báo, có audit")
+        @DisplayName("HS gửi đơn nghỉ kèm minh chứng: PENDING, tiêu đề tự điền, GV lớp nhận thông báo, có audit")
         void studentSendsLeave() throws Exception {
             mockMvc.perform(get("/student/requests/new").with(as(TestAccounts.STUDENT)))
                     .andExpect(status().isOk())
@@ -125,7 +125,7 @@ class RequestIntegrationTest {
         }
 
         @Test
-        @DisplayName("PH gửi thay con đã liên kết: người gửi là PH; SV thấy đơn trong danh sách của mình")
+        @DisplayName("PH gửi thay con đã liên kết: người gửi là PH; HS thấy đơn trong danh sách của mình")
         void parentSendsForChild() throws Exception {
             Long id = sendLeave(leave("/parent/children/1/requests/new", AppTime.today(), AppTime.today(), "")
                     .with(as(TestAccounts.PARENT)), "/parent/children/1/requests/");
@@ -142,7 +142,7 @@ class RequestIntegrationTest {
         }
 
         @Test
-        @DisplayName("PH gửi hoặc xem đơn của SV chưa liên kết → 403")
+        @DisplayName("PH gửi hoặc xem đơn của HS chưa liên kết → 403")
         void parentUnlinkedChildForbidden() throws Exception {
             long before = requestRepository.count();
 
@@ -155,7 +155,7 @@ class RequestIntegrationTest {
         }
 
         @Test
-        @DisplayName("SV gửi đơn khác: ADMIN thấy trong /admin/requests và duyệt được")
+        @DisplayName("HS gửi đơn khác: ADMIN thấy trong /admin/requests và duyệt được")
         void otherRequestGoesToAdmin() throws Exception {
             MvcResult result = mockMvc.perform(multipart("/student/requests/new-other").with(csrf())
                             .param("requestType", "TRANSCRIPT").param("title", "Xin bảng điểm học kỳ HK1-2627")
@@ -207,7 +207,7 @@ class RequestIntegrationTest {
 
         @Test
         @DisplayName("GV duyệt: chỉ vắng không phép trong khoảng ngày, đúng lớp thành vắng có phép; có audit; "
-                + "SV nhận thông báo; bảng điểm danh hiện nhãn; đơn đã duyệt không hủy được")
+                + "HS nhận thông báo; bảng điểm danh hiện nhãn; đơn đã duyệt không hủy được")
         void approveExcusesAbsences() throws Exception {
             LocalDate today = AppTime.today();
             Attendance inRange = attendance(session(1L, today.minusDays(5)), AttendanceStatus.ABSENT_UNEXCUSED);
@@ -309,7 +309,7 @@ class RequestIntegrationTest {
         }
 
         @Test
-        @DisplayName("Tệp minh chứng: SV, PH liên kết, GV duyệt, ADMIN tải được; người không liên quan → 403")
+        @DisplayName("Tệp minh chứng: HS, PH liên kết, GV duyệt, ADMIN tải được; người không liên quan → 403")
         void attachmentAccess() throws Exception {
             Long id = sendLeave(leave("/student/requests/new", AppTime.today(), AppTime.today(), "1")
                     .file(new MockMultipartFile("files", "giay-kham.pdf", "application/pdf", PDF))

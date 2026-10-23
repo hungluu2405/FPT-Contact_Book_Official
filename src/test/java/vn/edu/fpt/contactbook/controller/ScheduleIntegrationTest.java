@@ -101,23 +101,23 @@ class ScheduleIntegrationTest {
         }
 
         @Test
-        @DisplayName("Buổi trùng giảng viên GV003 (đang dạy TIN11 lúc đó) → từ chối")
+        @DisplayName("Buổi trùng giáo viên GV003 (đang dạy TIN11 lúc đó) → từ chối")
         void teacherConflict() throws Exception {
             ClassSection sameTeacher = section("TOAN10-HK1-2627-77", subjectRepository.findById(1L).orElseThrow(), 8L);
 
             mockMvc.perform(single(sameTeacher.getId(), OCT19, "08:00", "09:00", null).with(as(TestAccounts.ADMIN)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("Trùng giảng viên"),
-                            containsString("Giảng viên đang dạy lớp TIN11-HK1-2627-01"))));
+                    .andExpect(content().string(allOf(containsString("Trùng giáo viên"),
+                            containsString("Giáo viên đang dạy lớp TIN11-HK1-2627-01"))));
         }
 
         @Test
-        @DisplayName("Sinh viên HS250101 học cả STEM và TIN11 → buổi STEM chồng giờ bị từ chối")
+        @DisplayName("Học sinh HS250101 học cả STEM và TIN11 → buổi STEM chồng giờ bị từ chối")
         void studentConflict() throws Exception {
             mockMvc.perform(single(28L, OCT19, "08:00", "09:00", null).with(as(TestAccounts.ADMIN)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("Trùng sinh viên"),
-                            containsString("1 sinh viên của lớp này cũng học lớp TIN11-HK1-2627-01"))));
+                    .andExpect(content().string(allOf(containsString("Trùng học sinh"),
+                            containsString("1 học sinh của lớp này cũng học lớp TIN11-HK1-2627-01"))));
         }
 
         @Test
@@ -164,7 +164,7 @@ class ScheduleIntegrationTest {
         }
 
         @Test
-        @DisplayName("Lịch thi trùng phòng với buổi học → từ chối; lịch thi hợp lệ hiện cho sinh viên")
+        @DisplayName("Lịch thi trùng phòng với buổi học → từ chối; lịch thi hợp lệ hiện cho học sinh")
         void exams() throws Exception {
             mockMvc.perform(post("/admin/sections/1/exams/new").with(as(TestAccounts.ADMIN)).with(csrf())
                             .param("examType", "MIDTERM").param("examDate", "2026-10-19").param("startTime", "08:00")
@@ -187,7 +187,7 @@ class ScheduleIntegrationTest {
     class ManageAccess {
 
         @Test
-        @DisplayName("Trưởng bộ môn SE quản lý được buổi của lớp bộ môn mình")
+        @DisplayName("Tổ trưởng chuyên môn SE quản lý được buổi của lớp tổ chuyên môn mình")
         void headManagesOwnDepartment() throws Exception {
             mockMvc.perform(get("/admin/sections/1/sessions/weekly").with(as(TestAccounts.TEACHER_HEAD)))
                     .andExpect(status().isOk());
@@ -197,7 +197,7 @@ class ScheduleIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE với lớp bộ môn IA (gõ thẳng URL) → 403, không lưu")
+        @DisplayName("Tổ trưởng chuyên môn SE với lớp tổ chuyên môn IA (gõ thẳng URL) → 403, không lưu")
         void headForbiddenOnOtherDepartment() throws Exception {
             Long ia = iaSection();
             RequestPostProcessor head = as(TestAccounts.TEACHER_HEAD);
@@ -212,7 +212,7 @@ class ScheduleIntegrationTest {
         }
 
         @Test
-        @DisplayName("TBM SE sửa, hủy buổi học và sửa, xóa lịch thi của lớp bộ môn IA → 403, dữ liệu không đổi "
+        @DisplayName("TBM SE sửa, hủy buổi học và sửa, xóa lịch thi của lớp tổ chuyên môn IA → 403, dữ liệu không đổi "
                 + "(review 8a, T3)")
         void headCannotChangeOtherDepartmentSchedule() throws Exception {
             ClassSection ia = classSectionRepository.findById(iaSection()).orElseThrow();
@@ -259,7 +259,7 @@ class ScheduleIntegrationTest {
 
         @ParameterizedTest
         @ValueSource(strings = {TestAccounts.TEACHER, TestAccounts.STUDENT, TestAccounts.PARENT})
-        @DisplayName("Giảng viên, sinh viên, phụ huynh POST buổi học / lịch thi → 403")
+        @DisplayName("Giáo viên, học sinh, phụ huynh POST buổi học / lịch thi → 403")
         void othersCannotManage(String phone) throws Exception {
             mockMvc.perform(single(1L, LocalDate.of(2026, 10, 24), "13:00", "15:15", null).with(as(phone)))
                     .andExpect(status().isForbidden());
@@ -280,7 +280,7 @@ class ScheduleIntegrationTest {
     class ViewSchedule {
 
         @Test
-        @DisplayName("Sinh viên 0900000004 xem lịch tuần và danh sách của mình (TOAN10), không thấy lớp khác")
+        @DisplayName("Học sinh 0900000004 xem lịch tuần và danh sách của mình (TOAN10), không thấy lớp khác")
         void studentSeesOwnSchedule() throws Exception {
             mockMvc.perform(get("/student/schedule").param("week", "2026-09-08").with(as(TestAccounts.STUDENT)))
                     .andExpect(status().isOk())
@@ -308,7 +308,7 @@ class ScheduleIntegrationTest {
         }
 
         @Test
-        @DisplayName("Giảng viên GV002 (0900000003) xem lịch dạy: có TOAN10, không có TIN11 của GV003")
+        @DisplayName("Giáo viên GV002 (0900000003) xem lịch dạy: có TOAN10, không có TIN11 của GV003")
         void teacherSeesOwnTeaching() throws Exception {
             mockMvc.perform(get("/teacher/schedule").param("week", "2026-09-08").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())

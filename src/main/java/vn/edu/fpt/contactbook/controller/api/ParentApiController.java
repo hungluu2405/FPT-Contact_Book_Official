@@ -102,7 +102,7 @@ public class ParentApiController {
         return data.attendance(actor, Audience.PARENT, studentId, semesterId);
     }
 
-    @Operation(summary = "Điểm danh từng buổi của con ở một lớp học phần")
+    @Operation(summary = "Điểm danh từng buổi của con ở một lớp môn học")
     @GetMapping("/children/{studentId}/attendance/{sectionId}")
     public AttendanceHistoryResponse attendanceHistory(@AuthenticationPrincipal AppUserPrincipal actor,
                                                        @PathVariable Long studentId, @PathVariable Long sectionId,
@@ -118,7 +118,7 @@ public class ParentApiController {
         return data.requests(actor, Audience.PARENT, studentId, page);
     }
 
-    @Operation(summary = "Lớp học phần chọn được khi gửi đơn nghỉ thay con")
+    @Operation(summary = "Lớp môn học chọn được khi gửi đơn nghỉ thay con")
     @GetMapping("/children/{studentId}/requests/leave-options")
     public LeaveFormOptions leaveOptions(@AuthenticationPrincipal AppUserPrincipal actor,
                                          @PathVariable Long studentId) {

@@ -33,7 +33,7 @@ final class CatalogTestData {
         Department department = new Department();
         department.setId(id);
         department.setCode(code);
-        department.setName("Bộ môn " + code);
+        department.setName("Tổ chuyên môn " + code);
         return department;
     }
 
@@ -47,7 +47,7 @@ final class CatalogTestData {
 
     static Teacher teacher(Long id, String code, Department department) {
         User user = new User();
-        user.setFullName("Giảng viên " + code);
+        user.setFullName("Giáo viên " + code);
         Teacher teacher = new Teacher();
         teacher.setId(id);
         teacher.setTeacherCode(code);
@@ -58,7 +58,7 @@ final class CatalogTestData {
 
     static Student student(Long id, String code, StudentStatus status) {
         User user = new User();
-        user.setFullName("Sinh viên " + code);
+        user.setFullName("Học sinh " + code);
         Student student = new Student();
         student.setId(id);
         student.setStudentCode(code);

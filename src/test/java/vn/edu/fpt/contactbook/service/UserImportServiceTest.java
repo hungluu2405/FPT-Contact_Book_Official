@@ -161,7 +161,7 @@ class UserImportServiceTest {
     }
 
     @Test
-    @DisplayName("Trùng trong file: số điện thoại (khác cách viết), email (khác hoa thường), mã SV")
+    @DisplayName("Trùng trong file: số điện thoại (khác cách viết), email (khác hoa thường), mã HS")
     void duplicatesInsideFile() {
         List<Object> first = student("0911000001", null, "SE000001");
         first.set(4, "a@fpt.edu.vn");
@@ -172,36 +172,36 @@ class UserImportServiceTest {
 
         assertThat(result.errors()).extracting(ImportRowError::rowNumber).containsOnly(3);
         assertThat(result.errors()).extracting(ImportRowError::column)
-                .containsExactly("Số điện thoại", "Email", "Mã SV");
+                .containsExactly("Số điện thoại", "Email", "Mã HS");
         assertThat(result.errors()).extracting(ImportRowError::message).containsOnly("Trùng với dòng 2 trong file");
     }
 
     @Test
-    @DisplayName("Mã ngành, mã lớp, mã bộ môn không tồn tại")
+    @DisplayName("Mã khối, mã lớp, mã tổ chuyên môn không tồn tại")
     void unknownCodes() {
         List<Object> student = student("0911000001", null, "SE000001");
         student.set(7, "XX");
         student.set(8, "ZZ99");
         UserImportResult students = importStudents(student);
         assertThat(students.errors()).extracting(ImportRowError::message).containsExactly(
-                "Mã ngành \"XX\" không tồn tại (xem sheet Danh mục)",
+                "Mã khối \"XX\" không tồn tại (xem sheet Danh mục)",
                 "Mã lớp \"ZZ99\" không tồn tại (xem sheet Danh mục)");
 
         byte[] teacherFile = ImportFiles.xlsx(UserImportType.TEACHER,
                 List.of(row("0911000002", "GV Mới", "Nữ", null, null, null, "GV900", "NOPE", null)));
         assertThat(service.importUsers(ADMIN, UserImportType.TEACHER, "g.xlsx", teacherFile, null).errors())
-                .singleElement().extracting(ImportRowError::column).isEqualTo("Mã bộ môn");
+                .singleElement().extracting(ImportRowError::column).isEqualTo("Mã tổ chuyên môn");
     }
 
     @Test
-    @DisplayName("Lớp không thuộc ngành của sinh viên")
+    @DisplayName("Lớp không thuộc khối của học sinh")
     void classOfOtherMajor() {
         List<Object> student = student("0911000001", null, "SE000001");
         student.set(8, "IA1801");
 
         assertThat(importStudents(student).errors()).singleElement().satisfies(error -> {
             assertThat(error.column()).isEqualTo("Mã lớp");
-            assertThat(error.message()).isEqualTo("Lớp không thuộc ngành đã chọn");
+            assertThat(error.message()).isEqualTo("Lớp không thuộc khối đã chọn");
         });
     }
 
@@ -218,7 +218,7 @@ class UserImportServiceTest {
                 .containsExactly(
                         tuple("Số điện thoại", "Số điện thoại đã được sử dụng"),
                         tuple("Giới tính", "Giới tính chỉ nhận Nam, Nữ hoặc Khác"),
-                        tuple("Mã SV", "Mã sinh viên đã tồn tại"),
+                        tuple("Mã HS", "Mã học sinh đã tồn tại"),
                         tuple("Năm nhập học", "Năm nhập học phải là số có 4 chữ số"));
     }
 
@@ -264,7 +264,7 @@ class UserImportServiceTest {
     }
 
     @Test
-    @DisplayName("Giảng viên: chỉ gán vai trò TEACHER")
+    @DisplayName("Giáo viên: chỉ gán vai trò TEACHER")
     void teacherImportGetsTeacherRoleOnly() {
         byte[] file = ImportFiles.xlsx(UserImportType.TEACHER,
                 List.of(row("0911000003", "GV Mới", "Nữ", "15/03/1985", null, null, "gv900", "se", "ThS.")));
@@ -285,7 +285,7 @@ class UserImportServiceTest {
 
     /** Dòng sinh viên hợp lệ (ngành SE, lớp 10A1); phone/dob có thể là chữ, số hoặc ngày. */
     private static List<Object> student(Object phone, Object dateOfBirth, String code) {
-        return new ArrayList<>(row(phone, "Sinh Viên Mới", "Nam", dateOfBirth, null, null, code, "SE", "10A1",
+        return new ArrayList<>(row(phone, "Học Sinh Mới", "Nam", dateOfBirth, null, null, code, "SE", "10A1",
                 "2026", null));
     }
 

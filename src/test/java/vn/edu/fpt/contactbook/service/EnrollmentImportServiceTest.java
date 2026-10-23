@@ -107,7 +107,7 @@ class EnrollmentImportServiceTest {
     }
 
     @Test
-    @DisplayName("File hợp lệ: mã được trim, viết hoa; SV DROPPED được ghi danh lại; ghi audit")
+    @DisplayName("File hợp lệ: mã được trim, viết hoa; HS DROPPED được ghi danh lại; ghi audit")
     void validFileEnrollsAll() {
         when(enrollmentRepository.findByClassSectionIdAndStudentIdIn(eq(10L), anyCollection())).thenReturn(List.of(
                 CatalogTestData.enrollment(7L, section, b, EnrollmentStatus.DROPPED)));
@@ -123,7 +123,7 @@ class EnrollmentImportServiceTest {
     }
 
     @Test
-    @DisplayName("Lỗi theo dòng: mã không tồn tại, SV không đang học, đã có trong lớp, trùng trong file; không ghi ai")
+    @DisplayName("Lỗi theo dòng: mã không tồn tại, HS không đang học, đã có trong lớp, trùng trong file; không ghi ai")
     void rowErrorsWriteNothing() {
         when(enrollmentRepository.findByClassSectionIdAndStudentIdIn(eq(10L), anyCollection())).thenReturn(List.of(
                 CatalogTestData.enrollment(7L, section, b, EnrollmentStatus.ENROLLED)));
@@ -134,7 +134,7 @@ class EnrollmentImportServiceTest {
 
         assertThat(result.success()).isFalse();
         assertThat(result.errors()).extracting(ImportRowError::rowNumber, ImportRowError::message).containsExactly(
-                tuple(3, "Mã sinh viên \"SE999999\" không tồn tại"),
+                tuple(3, "Mã học sinh \"SE999999\" không tồn tại"),
                 tuple(4, SectionMessages.STUDENT_NOT_STUDYING),
                 tuple(5, SectionMessages.ALREADY_ENROLLED),
                 tuple(6, "Trùng với dòng 2 trong file"));
@@ -152,19 +152,19 @@ class EnrollmentImportServiceTest {
         assertThatThrownBy(() -> service.importFile(ADMIN, 10L, "ds.xlsx", file(row("HS260001"), row("HS250101")),
                 "127.0.0.1"))
                 .isInstanceOf(BusinessException.class)
-                .hasMessage("Không đủ chỗ: cần thêm 2 sinh viên nhưng lớp chỉ còn 1 chỗ");
+                .hasMessage("Không đủ chỗ: cần thêm 2 học sinh nhưng lớp chỉ còn 1 chỗ");
         verify(enrollmentRepository, never()).save(any());
     }
 
     @Test
     void wrongHeaderIsReported() {
-        byte[] content = ImportFiles.xlsxWithHeader(List.of("Mã sinh viên"), List.of(row("HS260001")));
+        byte[] content = ImportFiles.xlsxWithHeader(List.of("Mã học sinh"), List.of(row("HS260001")));
 
         EnrollmentImportResult result = service.importFile(ADMIN, 10L, "ds.xlsx", content, "127.0.0.1");
 
         assertThat(result.errors()).singleElement().satisfies(error -> {
             assertThat(error.rowNumber()).isEqualTo(1);
-            assertThat(error.message()).contains("Mã SV").contains("ghi danh");
+            assertThat(error.message()).contains("Mã HS").contains("ghi danh");
         });
     }
 
@@ -184,10 +184,10 @@ class EnrollmentImportServiceTest {
     }
 
     @Test
-    @DisplayName("File mẫu có tiêu đề Mã SV và sheet hướng dẫn, không có dòng ví dụ")
+    @DisplayName("File mẫu có tiêu đề Mã HS và sheet hướng dẫn, không có dòng ví dụ")
     void templateHasHeaderOnly() throws IOException {
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(service.template()))) {
-            assertThat(workbook.getSheetAt(0).getRow(0).getCell(0).getStringCellValue()).isEqualTo("Mã SV");
+            assertThat(workbook.getSheetAt(0).getRow(0).getCell(0).getStringCellValue()).isEqualTo("Mã HS");
             assertThat(workbook.getSheetAt(0).getLastRowNum()).isZero();
             assertThat(workbook.getSheetName(1)).isEqualTo("Hướng dẫn");
         }

@@ -5,7 +5,7 @@
     <title th:text="(${mode == 'parents'} ? #{user.links.parents} : #{user.links.children}) + ' - ' + ${user.fullName}">Liên kết</title>
 </head>
 <body>
-<!--/* mode = parents: trang của sinh viên (thêm theo SĐT phụ huynh); children: trang của phụ huynh (thêm theo mã SV). */-->
+<!--/* mode = parents: trang của học sinh (thêm theo SĐT phụ huynh); children: trang của phụ huynh (thêm theo mã HS). */-->
 <section th:with="parentsMode=${mode == 'parents'}">
     <a th:href="@{/admin/users/{id}(id=${user.id})}" class="d-inline-block mb-2"><i class="bi bi-arrow-left"></i>
         <span th:text="${user.fullName}">Họ tên</span></a>

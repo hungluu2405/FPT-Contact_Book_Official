@@ -116,11 +116,11 @@ public class ScheduleConflictChecker {
                     conflicts.add(conflict(slot, Type.ROOM, "Phòng " + room.getCode() + " đã có lớp " + label));
                 }
                 if (teacherId != null && teacherId.equals(other.getClassSection().getTeacher().getId())) {
-                    conflicts.add(conflict(slot, Type.TEACHER, "Giảng viên đang dạy lớp " + label));
+                    conflicts.add(conflict(slot, Type.TEACHER, "Giáo viên đang dạy lớp " + label));
                 }
                 Long count = shared.get(other.getClassSection().getId());
                 if (count != null) {
-                    conflicts.add(conflict(slot, Type.STUDENT, count + " sinh viên của lớp này cũng học lớp " + label));
+                    conflicts.add(conflict(slot, Type.STUDENT, count + " học sinh của lớp này cũng học lớp " + label));
                 }
             }
             for (Exam exam : exams) {
@@ -137,7 +137,7 @@ public class ScheduleConflictChecker {
                     conflicts.add(conflict(slot, Type.SAME_SECTION, "Lớp có " + label));
                 } else if (shared.containsKey(examSectionId)) {
                     conflicts.add(conflict(slot, Type.STUDENT,
-                            shared.get(examSectionId) + " sinh viên của lớp này có " + label));
+                            shared.get(examSectionId) + " học sinh của lớp này có " + label));
                 }
             }
         }
@@ -168,7 +168,7 @@ public class ScheduleConflictChecker {
                 conflicts.add(conflict(slot, Type.SAME_SECTION, "Lớp đã có " + label));
             } else if (shared.containsKey(otherSectionId)) {
                 conflicts.add(conflict(slot, Type.STUDENT,
-                        shared.get(otherSectionId) + " sinh viên của lớp này cũng thi " + label));
+                        shared.get(otherSectionId) + " học sinh của lớp này cũng thi " + label));
             }
         }
         for (ClassSession own : classSessionRepository.findByClassSectionIdAndSessionDateBetween(section.getId(),
@@ -189,7 +189,7 @@ public class ScheduleConflictChecker {
             }
             Long count = shared.get(other.getClassSection().getId());
             if (count != null) {
-                conflicts.add(conflict(slot, Type.STUDENT, count + " sinh viên của lớp này đang học " + label));
+                conflicts.add(conflict(slot, Type.STUDENT, count + " học sinh của lớp này đang học " + label));
             }
         }
         return conflicts;

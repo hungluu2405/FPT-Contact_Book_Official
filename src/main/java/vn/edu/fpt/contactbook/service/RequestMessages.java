@@ -15,7 +15,7 @@ final class RequestMessages {
     static final String FROM_TOO_OLD = "Từ ngày không được sớm hơn " + RequestRule.MAX_PAST_DAYS
             + " ngày trước hôm nay";
     static final String SPAN_TOO_LONG = "Mỗi đơn nghỉ tối đa " + RequestRule.MAX_SPAN_DAYS + " ngày";
-    static final String SECTION_NOT_ENROLLED = "Sinh viên không đang học lớp học phần đã chọn";
+    static final String SECTION_NOT_ENROLLED = "Học sinh không đang học lớp môn học đã chọn";
     static final String TYPE_REQUIRED = "Vui lòng chọn loại đơn";
     static final String TYPE_INVALID = "Loại đơn không hợp lệ";
     static final String COMMENT_REQUIRED = "Vui lòng nhập ghi chú khi từ chối đơn";

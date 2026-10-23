@@ -101,7 +101,7 @@ class ClubServiceTest {
     class Manage {
 
         @Test
-        @DisplayName("Thêm: mã chuẩn hóa viết hoa, giảng viên phụ trách hợp lệ, logo lưu tên UUID, có audit")
+        @DisplayName("Thêm: mã chuẩn hóa viết hoa, giáo viên phụ trách hợp lệ, logo lưu tên UUID, có audit")
         void create() throws Exception {
             ClubForm form = form(" f-chess ", 16L);
 
@@ -120,7 +120,7 @@ class ClubServiceTest {
         }
 
         @Test
-        @DisplayName("Mã trùng, ngày thành lập tương lai, giảng viên phụ trách không hợp lệ: lỗi theo ô, không lưu")
+        @DisplayName("Mã trùng, ngày thành lập tương lai, giáo viên phụ trách không hợp lệ: lỗi theo ô, không lưu")
         void invalid() {
             when(clubRepository.existsByCode("F-CODE")).thenReturn(true);
             ClubForm form = form("F-CODE", 4L);
@@ -216,7 +216,7 @@ class ClubServiceTest {
         }
 
         @Test
-        @DisplayName("Không phải sinh viên đang hoạt động, mã không tồn tại, đã là chủ nhiệm: báo lỗi, không đổi ai")
+        @DisplayName("Không phải học sinh đang hoạt động, mã không tồn tại, đã là chủ nhiệm: báo lỗi, không đổi ai")
         void guards() {
             when(userRoleRepository.isActiveWithRole(4L, List.of(RoleCodes.STUDENT))).thenReturn(false);
             assertThatThrownBy(() -> service.assignPresident(ADMIN, 1L, "HS260001", null))

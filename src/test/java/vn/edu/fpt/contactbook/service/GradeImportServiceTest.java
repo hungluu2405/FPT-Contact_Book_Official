@@ -66,7 +66,7 @@ class GradeImportServiceTest {
     }
 
     @Test
-    @DisplayName("Lỗi theo dòng: thiếu mã, trùng dòng, sinh viên không thuộc lớp")
+    @DisplayName("Lỗi theo dòng: thiếu mã, trùng dòng, học sinh không thuộc lớp")
     void rowErrors() {
         List<ImportRowError> errors = GradeImportService.validate(List.of(
                 row(2, null, cell("8"), blank()),
@@ -75,7 +75,7 @@ class GradeImportServiceTest {
                 row(5, "SE999999", cell("9"), blank())), data, new ArrayList<>());
 
         assertThat(errors).extracting(ImportRowError::rowNumber, ImportRowError::column)
-                .containsExactly(tuple(2, "Mã SV"), tuple(4, "Mã SV"), tuple(5, "Mã SV"));
+                .containsExactly(tuple(2, "Mã HS"), tuple(4, "Mã HS"), tuple(5, "Mã HS"));
         assertThat(errors.get(1).message()).isEqualTo("Trùng với dòng 3 trong file");
     }
 

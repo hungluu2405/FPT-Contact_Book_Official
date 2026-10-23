@@ -300,7 +300,7 @@ public class AttendanceService {
             }
             notificationService.sendAutomatic(actor.getUserId(),
                     "[" + section.getCode() + "] Cảnh báo vắng vượt " + rule.thresholdPercent() + "%",
-                    "Sinh viên " + student.getUser().getFullName() + " (" + student.getStudentCode() + ") đã vắng "
+                    "Học sinh " + student.getUser().getFullName() + " (" + student.getStudentCode() + ") đã vắng "
                             + now.absent() + "/" + now.totalSessions() + " buổi ("
                             + now.absentRate().toPlainString().replace('.', ',') + "%) môn "
                             + section.getSubject().getCode() + " - " + section.getSubject().getName() + " (lớp "

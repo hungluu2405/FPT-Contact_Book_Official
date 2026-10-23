@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class EnrollmentImportService {
 
     public static final String CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    public static final String COLUMN = "Mã SV";
+    public static final String COLUMN = "Mã HS";
     public static final int MAX_ROWS = ExcelImportReader.MAX_ROWS;
 
     private final EnrollmentService enrollmentService;
@@ -97,7 +97,7 @@ public class EnrollmentImportService {
             if (first != null) {
                 message = "Trùng với dòng " + first + " trong file";
             } else if (student == null) {
-                message = "Mã sinh viên \"" + code + "\" không tồn tại";
+                message = "Mã học sinh \"" + code + "\" không tồn tại";
             } else if (student.getStatus() != StudentStatus.STUDYING) {
                 message = SectionMessages.STUDENT_NOT_STUDYING;
             } else {
@@ -129,10 +129,10 @@ public class EnrollmentImportService {
 
             Sheet guide = workbook.createSheet("Hướng dẫn");
             String[] lines = {
-                    "Mỗi dòng một mã sinh viên ở cột A, bắt đầu từ dòng 2; giữ nguyên dòng tiêu đề.",
+                    "Mỗi dòng một mã học sinh ở cột A, bắt đầu từ dòng 2; giữ nguyên dòng tiêu đề.",
                     "Tối đa " + MAX_ROWS + " dòng, file .xlsx tối đa 2 MB.",
-                    "Chỉ ghi danh sinh viên đang học; sinh viên đã bị gỡ khỏi lớp sẽ được ghi danh lại.",
-                    "Có bất kỳ lỗi nào thì không sinh viên nào được ghi danh; sửa lỗi theo bảng rồi tải lên lại."};
+                    "Chỉ ghi danh học sinh đang học; học sinh đã bị gỡ khỏi lớp sẽ được ghi danh lại.",
+                    "Có bất kỳ lỗi nào thì không học sinh nào được ghi danh; sửa lỗi theo bảng rồi tải lên lại."};
             for (int i = 0; i < lines.length; i++) {
                 guide.createRow(i).createCell(0).setCellValue(lines[i]);
             }

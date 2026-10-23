@@ -104,7 +104,7 @@ class EnrollmentServiceTest {
     }
 
     @Test
-    @DisplayName("Ghi danh SV mới: khóa dòng lớp trước rồi mới đếm ENROLLED, thêm dòng ENROLLED, ghi audit")
+    @DisplayName("Ghi danh HS mới: khóa dòng lớp trước rồi mới đếm ENROLLED, thêm dòng ENROLLED, ghi audit")
     void enrollNewStudent() {
         enrolledCount(1);
 
@@ -146,7 +146,7 @@ class EnrollmentServiceTest {
         enrolledCount(2);
 
         assertThatThrownBy(() -> service.enroll(ADMIN, 10L, 1L, "127.0.0.1"))
-                .isInstanceOf(BusinessException.class).hasMessage("Lớp học phần đã đủ sĩ số (2/2)");
+                .isInstanceOf(BusinessException.class).hasMessage("Lớp môn học đã đủ sĩ số (2/2)");
         verify(enrollmentRepository, never()).save(any());
     }
 
@@ -182,7 +182,7 @@ class EnrollmentServiceTest {
     }
 
     @Test
-    @DisplayName("SV đã DROPPED: đổi chính dòng cũ về ENROLLED, cập nhật thời điểm, không thêm dòng mới")
+    @DisplayName("HS đã DROPPED: đổi chính dòng cũ về ENROLLED, cập nhật thời điểm, không thêm dòng mới")
     void reEnrollDroppedStudent() {
         Enrollment dropped = CatalogTestData.enrollment(5L, section, hs260001, EnrollmentStatus.DROPPED);
         LocalDateTime before = dropped.getEnrolledAt();
@@ -199,7 +199,7 @@ class EnrollmentServiceTest {
     }
 
     @Test
-    @DisplayName("Gỡ SV: đổi sang DROPPED, không xóa; SV không đang học trong lớp → báo lỗi")
+    @DisplayName("Gỡ HS: đổi sang DROPPED, không xóa; HS không đang học trong lớp → báo lỗi")
     void dropStudent() {
         Enrollment enrolled = CatalogTestData.enrollment(5L, section, hs260001, EnrollmentStatus.ENROLLED);
         when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L)).thenReturn(Optional.of(enrolled));
@@ -213,7 +213,7 @@ class EnrollmentServiceTest {
     }
 
     @Test
-    @DisplayName("Ghi danh theo lớp hành chính: bỏ qua SV đã có và SV không đang học, ghi danh lại SV DROPPED")
+    @DisplayName("Ghi danh theo lớp hành chính: bỏ qua HS đã có và HS không đang học, ghi danh lại HS DROPPED")
     void enrollClassSkipsAndReEnrolls() {
         section.setMaxStudents((short) 10);
         Student enrolled = CatalogTestData.student(2L, "HS250101", StudentStatus.STUDYING);
@@ -245,14 +245,14 @@ class EnrollmentServiceTest {
 
         assertThatThrownBy(() -> service.enrollClass(ADMIN, 10L, 14L, "127.0.0.1"))
                 .isInstanceOf(BusinessException.class)
-                .hasMessage("Không đủ chỗ: cần thêm 3 sinh viên nhưng lớp chỉ còn 2 chỗ");
+                .hasMessage("Không đủ chỗ: cần thêm 3 học sinh nhưng lớp chỉ còn 2 chỗ");
         verify(enrollmentRepository, never()).save(any());
         verify(enrollmentRepository, never()).flush();
         verify(auditLogRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Trưởng bộ môn và giảng viên không ghi danh, gỡ, ghi danh theo lớp được")
+    @DisplayName("Tổ trưởng chuyên môn và giáo viên không ghi danh, gỡ, ghi danh theo lớp được")
     void onlyAdminEnrolls() {
         assertThatThrownBy(() -> service.enroll(HEAD_SE, 10L, 1L, "127.0.0.1"))
                 .isInstanceOf(AccessDeniedException.class);

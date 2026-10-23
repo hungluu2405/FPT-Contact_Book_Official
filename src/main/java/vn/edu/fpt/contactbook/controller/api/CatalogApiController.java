@@ -33,7 +33,7 @@ public class CatalogApiController {
         return catalogLookupService.semesters();
     }
 
-    @Operation(summary = "Tải tệp đính kèm của đơn (người gửi, sinh viên, phụ huynh liên kết, người duyệt)")
+    @Operation(summary = "Tải tệp đính kèm của đơn (người gửi, học sinh, phụ huynh liên kết, người duyệt)")
     @GetMapping("/requests/{id}/files/{fileId}")
     public ResponseEntity<Resource> requestFile(@AuthenticationPrincipal AppUserPrincipal actor,
                                                 @PathVariable Long id, @PathVariable Long fileId) {

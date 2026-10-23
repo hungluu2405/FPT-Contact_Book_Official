@@ -115,7 +115,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Tạo người dùng TEACHER + HEAD_OF_DEPARTMENT: mật khẩu tạm, bắt đổi, vai trò kèm bộ môn")
+    @DisplayName("Tạo người dùng TEACHER + HEAD_OF_DEPARTMENT: mật khẩu tạm, bắt đổi, vai trò kèm tổ chuyên môn")
     void createsTeacherAndHead() {
         UserForm form = teacherForm();
 
@@ -154,7 +154,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Trùng số điện thoại, email, mã sinh viên: báo cùng lúc, theo từng ô")
+    @DisplayName("Trùng số điện thoại, email, mã học sinh: báo cùng lúc, theo từng ô")
     void duplicatesAreReportedPerField() {
         when(userRepository.existsByPhone("0911000111")).thenReturn(true);
         when(userRepository.existsByEmailIgnoreCase("a@fpt.edu.vn")).thenReturn(true);
@@ -185,7 +185,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Lớp không thuộc ngành của sinh viên bị từ chối")
+    @DisplayName("Lớp không thuộc khối của học sinh bị từ chối")
     void classMustBelongToMajor() {
         Major se = major(1L);
         SchoolClass otherMajorClass = new SchoolClass();
@@ -198,11 +198,11 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> service.create(ADMIN, form, null))
                 .extracting(e -> ((BusinessException) e).getFieldErrors())
-                .satisfies(errors -> assertThat(errors).containsEntry("profile.classId", "Lớp không thuộc ngành đã chọn"));
+                .satisfies(errors -> assertThat(errors).containsEntry("profile.classId", "Lớp không thuộc khối đã chọn"));
     }
 
     @Test
-    @DisplayName("HEAD_OF_DEPARTMENT bắt buộc chọn bộ môn; phải chọn ít nhất một vai trò")
+    @DisplayName("HEAD_OF_DEPARTMENT bắt buộc chọn tổ chuyên môn; phải chọn ít nhất một vai trò")
     void headNeedsDepartmentAndRolesRequired() {
         UserForm head = teacherForm();
         head.setHeadDepartmentId(null);
@@ -284,7 +284,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("HEAD xem chi tiết người ngoài bộ môn bị từ chối trước khi đọc dữ liệu")
+    @DisplayName("HEAD xem chi tiết người ngoài tổ chuyên môn bị từ chối trước khi đọc dữ liệu")
     void headCannotViewOutsideScope() {
         Teacher outside = new Teacher();
         Department ia = new Department();
@@ -298,7 +298,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Danh sách của HEAD luôn bị giới hạn vào bộ môn của mình")
+    @DisplayName("Danh sách của HEAD luôn bị giới hạn vào tổ chuyên môn của mình")
     void headListIsScoped() {
         when(userRepository.search(any(), any(), any(), any(), any(), any(), anyBoolean(),
                 any(), any())).thenReturn(Page.empty());
@@ -312,7 +312,7 @@ class UserServiceTest {
     private static UserForm teacherForm() {
         UserForm form = new UserForm();
         form.setPhone("0911000111");
-        form.setFullName("Giảng viên Mới");
+        form.setFullName("Giáo viên Mới");
         form.setRoles(new LinkedHashSet<>(List.of(RoleCodes.TEACHER, RoleCodes.HEAD_OF_DEPARTMENT)));
         form.setHeadDepartmentId(1L);
         form.getProfile().setTeacherCode(" gv900 ");
@@ -324,7 +324,7 @@ class UserServiceTest {
         when(majorRepository.findById(1L)).thenReturn(Optional.of(major(1L)));
         UserForm form = new UserForm();
         form.setPhone("0911000111");
-        form.setFullName("Sinh viên Mới");
+        form.setFullName("Học sinh Mới");
         form.setRoles(Set.of(RoleCodes.STUDENT));
         form.getProfile().setStudentCode("se999");
         form.getProfile().setMajorId(1L);

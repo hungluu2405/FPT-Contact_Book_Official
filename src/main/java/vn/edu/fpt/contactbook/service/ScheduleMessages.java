@@ -12,7 +12,7 @@ final class ScheduleMessages {
     static final String OUTSIDE_SEMESTER = "Ngày phải nằm trong học kỳ (%s đến %s)";
     static final String CONFLICTS = "Lịch bị trùng, chưa lưu buổi nào";
     static final String EXAM_CONFLICTS = "Lịch thi bị trùng, chưa lưu";
-    static final String SECTION_CANCELLED = "Lớp học phần đã hủy nên không thêm được buổi học hay lịch thi";
+    static final String SECTION_CANCELLED = "Lớp môn học đã hủy nên không thêm được buổi học hay lịch thi";
     static final String SESSION_NOT_FOUND = "Không tìm thấy buổi học";
     static final String EXAM_NOT_FOUND = "Không tìm thấy lịch thi";
     static final String SESSION_CANCELLED = "Buổi học đã hủy, không sửa được";

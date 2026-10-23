@@ -77,7 +77,7 @@ public class ParentLinkController {
                            HttpServletRequest request, RedirectAttributes redirectAttributes) {
         try {
             parentLinkService.linkChild(actor, id, form, request.getRemoteAddr());
-            redirectAttributes.addFlashAttribute("successMessage", "Đã liên kết sinh viên");
+            redirectAttributes.addFlashAttribute("successMessage", "Đã liên kết học sinh");
             return "redirect:/admin/users/" + id + "/" + CHILDREN;
         } catch (BusinessException e) {
             FormErrors.apply(bindingResult, e);
@@ -116,7 +116,7 @@ public class ParentLinkController {
         boolean hasProfile = PARENTS.equals(mode) ? user.student() != null : user.parent() != null;
         if (!hasProfile) {
             redirectAttributes.addFlashAttribute("errorMessage", PARENTS.equals(mode)
-                    ? "Người dùng này chưa có hồ sơ sinh viên" : "Người dùng này chưa có hồ sơ phụ huynh");
+                    ? "Người dùng này chưa có hồ sơ học sinh" : "Người dùng này chưa có hồ sơ phụ huynh");
             return "redirect:/admin/users/" + id;
         }
         model.addAttribute("user", user);

@@ -88,11 +88,11 @@ class ReportScopeTest {
     }
 
     @Nested
-    @DisplayName("Lớp học phần trên tham số sectionId")
+    @DisplayName("Lớp môn học trên tham số sectionId")
     class Section {
 
         @Test
-        @DisplayName("Giảng viên xem lớp mình dạy; lớp người khác hoặc id không tồn tại → 403")
+        @DisplayName("Giáo viên xem lớp mình dạy; lớp người khác hoặc id không tồn tại → 403")
         void teacherOnlyOwnSections() {
             assertThat(scope.resolve(TEACHER, new ReportFilter(null, null, MINE.getId())).section()).isSameAs(MINE);
 
@@ -103,7 +103,7 @@ class ReportScopeTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn xem mọi lớp của bộ môn mình, kể cả lớp người khác dạy; bộ môn khác → 403")
+        @DisplayName("Tổ trưởng chuyên môn xem mọi lớp của tổ chuyên môn mình, kể cả lớp người khác dạy; tổ chuyên môn khác → 403")
         void headOnlyOwnDepartment() {
             assertThat(scope.resolve(HEAD, new ReportFilter(null, null, SE_OTHER.getId())).section())
                     .isSameAs(SE_OTHER);
@@ -149,7 +149,7 @@ class ReportScopeTest {
         }
 
         @Test
-        @DisplayName("Vai trò không có phạm vi báo cáo (SINH VIÊN) → 403 kể cả với lớp có thật")
+        @DisplayName("Vai trò không có phạm vi báo cáo (HỌC SINH) → 403 kể cả với lớp có thật")
         void otherRoles() {
             assertThatThrownBy(() -> scope.resolve(STUDENT, new ReportFilter(null, null, MINE.getId())))
                     .isInstanceOf(AccessDeniedException.class);
@@ -163,7 +163,7 @@ class ReportScopeTest {
     class SubjectFilter {
 
         @Test
-        @DisplayName("Giảng viên chọn môn mình có dạy (ở bất kỳ học kỳ nào); môn khác hoặc không tồn tại → 403")
+        @DisplayName("Giáo viên chọn môn mình có dạy (ở bất kỳ học kỳ nào); môn khác hoặc không tồn tại → 403")
         void teacherSubjects() {
             when(classSectionRepository.existsBySubjectIdAndTeacherId(PRJ.getId(), ME.getId())).thenReturn(true);
 
@@ -175,7 +175,7 @@ class ReportScopeTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn chọn môn của bộ môn mình; môn bộ môn khác → 403")
+        @DisplayName("Tổ trưởng chuyên môn chọn môn của tổ chuyên môn mình; môn tổ chuyên môn khác → 403")
         void headSubjects() {
             assertThat(scope.resolve(HEAD, new ReportFilter(null, PRJ.getId(), null)).subject()).isSameAs(PRJ);
             assertThatThrownBy(() -> scope.resolve(HEAD, new ReportFilter(null, SEC.getId(), null)))
@@ -208,7 +208,7 @@ class ReportScopeTest {
     class Sections {
 
         @Test
-        @DisplayName("Giảng viên: truy vấn theo hồ sơ giảng viên, không mở theo bộ môn")
+        @DisplayName("Giáo viên: truy vấn theo hồ sơ giáo viên, không mở theo tổ chuyên môn")
         void teacherQuery() {
             scope.resolve(TEACHER, new ReportFilter(HK1.getId(), null, null));
 
@@ -217,7 +217,7 @@ class ReportScopeTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn chưa có hồ sơ giảng viên: truy vấn theo bộ môn, teacherId null")
+        @DisplayName("Tổ trưởng chuyên môn chưa có hồ sơ giáo viên: truy vấn theo tổ chuyên môn, teacherId null")
         void headQuery() {
             scope.resolve(HEAD, new ReportFilter(HK1.getId(), null, null));
 
@@ -225,7 +225,7 @@ class ReportScopeTest {
         }
 
         @Test
-        @DisplayName("Giảng viên chưa có hồ sơ và không là trưởng bộ môn: danh sách rỗng, không truy vấn")
+        @DisplayName("Giáo viên chưa có hồ sơ và không là tổ trưởng chuyên môn: danh sách rỗng, không truy vấn")
         void noProfile() {
             AppUserPrincipal teacherWithoutProfile = CatalogTestData.principal(15L, Set.of(RoleCodes.TEACHER),
                     Map.of());

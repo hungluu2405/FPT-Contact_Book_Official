@@ -75,7 +75,7 @@ class GradeIntegrationTest {
     class Flow {
 
         @Test
-        @DisplayName("Trước khi công bố SV và PH không thấy điểm; 0900000002 công bố xong thì thấy")
+        @DisplayName("Trước khi công bố HS và PH không thấy điểm; 0900000002 công bố xong thì thấy")
         void hiddenUntilPublished() throws Exception {
             mockMvc.perform(get(SHEET).with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
@@ -119,7 +119,7 @@ class GradeIntegrationTest {
         }
 
         @Test
-        @DisplayName("Công bố bỏ qua ô trống: ô nhập sau vẫn chưa công bố, SV vẫn thấy Chưa đủ điểm")
+        @DisplayName("Công bố bỏ qua ô trống: ô nhập sau vẫn chưa công bố, HS vẫn thấy Chưa đủ điểm")
         void publishSkipsBlankCells() throws Exception {
             mockMvc.perform(enter("8", "7", "").with(as(TestAccounts.TEACHER))).andExpect(status().is3xxRedirection());
             mockMvc.perform(post(MANAGE + "/publish").with(csrf()).with(as(TestAccounts.ADMIN)))
@@ -204,14 +204,14 @@ class GradeIntegrationTest {
         }
 
         @Test
-        @DisplayName("Giảng viên vào trang điều chỉnh bằng URL → 403")
+        @DisplayName("Giáo viên vào trang điều chỉnh bằng URL → 403")
         void teacherCannotOpenAdjust() throws Exception {
             mockMvc.perform(get(MANAGE + "/39/adjust").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @DisplayName("GV (kể cả GV của chính lớp), SV gửi POST điều chỉnh điểm đã công bố → 403, điểm và nhật ký "
+        @DisplayName("GV (kể cả GV của chính lớp), HS gửi POST điều chỉnh điểm đã công bố → 403, điểm và nhật ký "
                 + "không đổi (review 8a, T4)")
         void teacherCannotPostAdjust() throws Exception {
             // Ô 39: lớp 27 (GV003 = 0922334455), SV enrollments.id 17, đầu điểm 10, 8,50, đã công bố.
@@ -234,13 +234,13 @@ class GradeIntegrationTest {
     class ExcelImport {
 
         @Test
-        @DisplayName("File mẫu có tiêu đề Mã SV + đầu điểm; file hợp lệ ghi các ô có giá trị")
+        @DisplayName("File mẫu có tiêu đề Mã HS + đầu điểm; file hợp lệ ghi các ô có giá trị")
         void importValidFile() throws Exception {
             mockMvc.perform(get(SHEET + "/import/template").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
                     .andExpect(header().string("Content-Disposition", containsString("mau-nhap-diem.xlsx")));
 
-            byte[] file = ImportFiles.xlsxWithHeader(List.of("Mã SV", "Kiểm tra thường xuyên", "Giữa kỳ", "Cuối kỳ"),
+            byte[] file = ImportFiles.xlsxWithHeader(List.of("Mã HS", "Kiểm tra thường xuyên", "Giữa kỳ", "Cuối kỳ"),
                     List.of(ImportFiles.row("HS260001", 8.5, null, "7,5")));
             mockMvc.perform(multipart(SHEET + "/import").file(new MockMultipartFile("file", "diem.xlsx", null, file))
                             .with(csrf()).with(as(TestAccounts.TEACHER)))
@@ -255,14 +255,14 @@ class GradeIntegrationTest {
         @Test
         @DisplayName("File có lỗi: bảng lỗi theo dòng, không ghi ô nào")
         void importInvalidFile() throws Exception {
-            byte[] file = ImportFiles.xlsxWithHeader(List.of("Mã SV", "Kiểm tra thường xuyên", "Giữa kỳ", "Cuối kỳ"),
+            byte[] file = ImportFiles.xlsxWithHeader(List.of("Mã HS", "Kiểm tra thường xuyên", "Giữa kỳ", "Cuối kỳ"),
                     List.of(ImportFiles.row("HS260001", 8, 11, 9), ImportFiles.row("HS250101", 5, 5, 5)));
 
             mockMvc.perform(multipart(SHEET + "/import").file(new MockMultipartFile("file", "diem.xlsx", null, file))
                             .with(csrf()).with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(containsString("Điểm phải từ 0 đến 10"),
-                            containsString("không đang học lớp học phần này"))));
+                            containsString("không đang học lớp môn học này"))));
             assertThat(grades()).isEmpty();
         }
     }
@@ -291,7 +291,7 @@ class GradeIntegrationTest {
         }
 
         @Test
-        @DisplayName("TBM xem lớp thuộc bộ môn khác → 403")
+        @DisplayName("TBM xem lớp thuộc tổ chuyên môn khác → 403")
         void headOtherDepartment() throws Exception {
             Long ia = iaSection();
 
@@ -302,7 +302,7 @@ class GradeIntegrationTest {
         }
 
         @Test
-        @DisplayName("SV và PH gõ URL bảng điểm của giảng viên hoặc quản lý → 403; PH con chưa liên kết → 403")
+        @DisplayName("HS và PH gõ URL bảng điểm của giáo viên hoặc quản lý → 403; PH con chưa liên kết → 403")
         void studentParentCannotSeeUnpublished() throws Exception {
             mockMvc.perform(get(SHEET).with(as(TestAccounts.STUDENT))).andExpect(status().isForbidden());
             mockMvc.perform(get(MANAGE).with(as(TestAccounts.STUDENT))).andExpect(status().isForbidden());

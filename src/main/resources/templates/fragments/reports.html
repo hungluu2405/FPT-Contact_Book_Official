@@ -20,8 +20,8 @@
 </ul>
 
 <!--/*
-  Bộ lọc học kỳ, môn, lớp học phần (chỉ gồm lựa chọn trong phạm vi người xem) và nút xuất Excel theo đúng bộ lọc
-  đang áp dụng. Có lớp học phần thì học kỳ và môn lấy theo lớp.
+  Bộ lọc học kỳ, môn, lớp môn học (chỉ gồm lựa chọn trong phạm vi người xem) và nút xuất Excel theo đúng bộ lọc
+  đang áp dụng. Có lớp môn học thì học kỳ và môn lấy theo lớp.
 */-->
 <form th:fragment="filters(selection, semesters, path)" class="card card-custom p-3 mb-3" th:action="@{${path}}"
       method="get">
@@ -42,7 +42,7 @@
             </select>
         </div>
         <div class="col-md-3">
-            <label for="sectionId" class="form-label" th:text="#{attendance.section}">Lớp học phần</label>
+            <label for="sectionId" class="form-label" th:text="#{attendance.section}">Lớp môn học</label>
             <select id="sectionId" name="sectionId" class="form-select">
                 <option value="" th:text="#{report.all}">Tất cả</option>
                 <option th:each="s : ${selection.sections()}" th:value="${s.id}"
@@ -56,7 +56,7 @@
                 <i class="bi bi-file-earmark-excel"></i> <span th:text="#{report.export}">Xuất Excel</span></a>
         </div>
     </div>
-    <p class="small text-muted mt-2 mb-0" th:text="#{report.filter.hint}">Chọn lớp học phần để xem từng sinh viên.</p>
+    <p class="small text-muted mt-2 mb-0" th:text="#{report.filter.hint}">Chọn lớp môn học để xem từng học sinh.</p>
 </form>
 
 <!--/* Biểu đồ Chart.js (WebJars); chart là Map do ReportCharts tạo, null thì không vẽ. */-->
@@ -75,7 +75,7 @@
 <!--/* Một ô số liệu tổng hợp. */-->
 <div th:fragment="stat(label, value)" class="col-6 col-md-3">
     <div class="card card-custom p-3 h-100">
-        <div class="small text-muted" th:text="${label}">Số SV</div>
+        <div class="small text-muted" th:text="${label}">Số HS</div>
         <div class="fs-4 fw-bold" th:text="${value}">0</div>
     </div>
 </div>

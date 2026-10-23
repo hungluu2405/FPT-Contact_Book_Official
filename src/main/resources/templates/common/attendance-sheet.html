@@ -6,7 +6,7 @@
 </head>
 <body>
 <section>
-    <!--/* baseUrl: trang để quay về; actionUrl: URL của chính bảng này. canSave = false là chỉ xem (trưởng bộ môn, hoặc
+    <!--/* baseUrl: trang để quay về; actionUrl: URL của chính bảng này. canSave = false là chỉ xem (tổ trưởng chuyên môn, hoặc
          giáo viên đã quá hạn). Ba trạng thái: có mặt, vắng có phép, vắng không phép; đi muộn ghi vào ô ghi chú. */-->
     <a th:replace="~{fragments/catalog :: back(${baseUrl}, ${sheet.sectionCode})}"></a>
     <h1 class="page-title" th:text="#{attendance.sheet(${sheet.sessionNo})} + ': ' + ${sheet.sectionCode}">Điểm danh</h1>
@@ -35,13 +35,13 @@
                     <i class="bi bi-check2-all"></i> <span th:text="#{attendance.all-present}">Tất cả có mặt</span></button>
             </div>
             <div class="table-responsive">
-                <!--/* table-stack: trên màn hình nhỏ mỗi sinh viên là một thẻ (app.css); chỉ có một bản HTML nên
+                <!--/* table-stack: trên màn hình nhỏ mỗi học sinh là một thẻ (app.css); chỉ có một bản HTML nên
                      mỗi statuses[...] chỉ được gửi một lần. */-->
                 <table class="table align-middle mb-0 table-stack">
                     <thead>
                     <tr>
-                        <th th:text="#{attendance.student-code}">Mã SV</th>
-                        <th th:text="#{attendance.student}">Sinh viên</th>
+                        <th th:text="#{attendance.student-code}">Mã HS</th>
+                        <th th:text="#{attendance.student}">Học sinh</th>
                         <th th:text="#{attendance.title}">Điểm danh</th>
                         <th th:text="#{attendance.note}">Ghi chú</th>
                     </tr>
@@ -79,7 +79,7 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(sheet.rows)}">
-                        <td colspan="4" class="text-center text-muted py-4" th:text="#{attendance.no-students}">Chưa có sinh viên</td>
+                        <td colspan="4" class="text-center text-muted py-4" th:text="#{attendance.no-students}">Chưa có học sinh</td>
                     </tr>
                     </tbody>
                 </table>

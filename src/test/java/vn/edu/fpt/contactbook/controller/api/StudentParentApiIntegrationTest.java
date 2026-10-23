@@ -74,7 +74,7 @@ class StudentParentApiIntegrationTest {
     class Access {
 
         @Test
-        @DisplayName("API sinh viên chỉ cho STUDENT, API phụ huynh chỉ cho PARENT; sai vai trò 403 JSON")
+        @DisplayName("API học sinh chỉ cho STUDENT, API phụ huynh chỉ cho PARENT; sai vai trò 403 JSON")
         void rolesAreEnforced() throws Exception {
             for (String phone : List.of(TestAccounts.PARENT, TestAccounts.TEACHER, TestAccounts.ADMIN)) {
                 JsonNode error = api.json(api.perform(get("/api/v1/student/grades"), phone)
@@ -125,7 +125,7 @@ class StudentParentApiIntegrationTest {
     class Schedule {
 
         @Test
-        @DisplayName("Tuần 07–13/09/2026 của HS260001: TOAN10 ngày 08/09 lúc 07:30–09:45, không có lớp khác; SV và PH như nhau")
+        @DisplayName("Tuần 07–13/09/2026 của HS260001: TOAN10 ngày 08/09 lúc 07:30–09:45, không có lớp khác; HS và PH như nhau")
         void week() throws Exception {
             for (String[] call : new String[][]{{"/api/v1/student", TestAccounts.STUDENT},
                     {CHILD, TestAccounts.PARENT}}) {
@@ -185,7 +185,7 @@ class StudentParentApiIntegrationTest {
     class GradesAndAttendance {
 
         @Test
-        @DisplayName("Điểm chưa công bố không lộ qua API; công bố xong SV và PH thấy")
+        @DisplayName("Điểm chưa công bố không lộ qua API; công bố xong HS và PH thấy")
         void gradesHiddenUntilPublished() throws Exception {
             mockMvc.perform(post("/teacher/sections/1/grades").with(csrf()).with(as(TestAccounts.TEACHER))
                             .param("scores[1_1]", "8").param("scores[1_2]", "7").param("scores[1_3]", "9"))
@@ -229,7 +229,7 @@ class StudentParentApiIntegrationTest {
     class Leave {
 
         @Test
-        @DisplayName("SV gửi đơn nghỉ kèm tệp: 201, chi tiết đơn; tải lại tệp được; người ngoài tải tệp 403")
+        @DisplayName("HS gửi đơn nghỉ kèm tệp: 201, chi tiết đơn; tải lại tệp được; người ngoài tải tệp 403")
         void studentSendsLeave() throws Exception {
             MockMultipartHttpServletRequestBuilder request = leave("/api/v1/student/requests/leave", AppTime.today(),
                     AppTime.today().plusDays(1));
@@ -303,7 +303,7 @@ class StudentParentApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("PH gửi đơn thay con: người gửi là PH; SV thấy đơn; PH xem qua đường dẫn con khác bị 403")
+        @DisplayName("PH gửi đơn thay con: người gửi là PH; HS thấy đơn; PH xem qua đường dẫn con khác bị 403")
         void parentSendsForChild() throws Exception {
             JsonNode options = api.json(api.perform(get(CHILD + "/requests/leave-options"), TestAccounts.PARENT)
                     .andExpect(status().isOk()));
@@ -320,7 +320,7 @@ class StudentParentApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("SV mở đơn không tồn tại hoặc không phải của mình: lỗi 4xx, không lộ dữ liệu")
+        @DisplayName("HS mở đơn không tồn tại hoặc không phải của mình: lỗi 4xx, không lộ dữ liệu")
         void studentCannotOpenOthersRequest() throws Exception {
             MvcResult result = api.perform(get("/api/v1/student/requests/999999"), TestAccounts.STUDENT).andReturn();
 
@@ -353,7 +353,7 @@ class StudentParentApiIntegrationTest {
                     .andExpect(status().isOk()));
             assertThat(fieldNames(detail)).containsExactlyInAnyOrder("id", "title", "content", "priority",
                     "targetLabel", "senderName", "createdAt", "files");
-            assertThat(detail.get("content").asString()).contains("Mang theo thẻ sinh viên");
+            assertThat(detail.get("content").asString()).contains("Mang theo thẻ học sinh");
             assertThat(unreadCount(TestAccounts.STUDENT)).isEqualTo(unread - 1);
             assertThat(recipientRepository.countUnread(TestAccounts.STUDENT_ID)).isEqualTo(unread - 1);
 
@@ -461,7 +461,7 @@ class StudentParentApiIntegrationTest {
                         .file(new MockMultipartFile("files", "de-cuong.pdf", "application/pdf", PDF))
                         .with(csrf()).with(as(TestAccounts.TEACHER))
                         .param("title", "Lịch kiểm tra giữa kỳ")
-                        .param("content", "Ôn tập chương 1–3.\nMang theo thẻ sinh viên.")
+                        .param("content", "Ôn tập chương 1–3.\nMang theo thẻ học sinh.")
                         .param("priority", "IMPORTANT").param("targetType", "CLASS_SECTION").param("sectionId", "1"))
                 .andExpect(redirectedUrlPattern("/notifications/*")).andReturn();
         String url = result.getResponse().getRedirectedUrl();

@@ -83,7 +83,7 @@ class SubjectIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE: thấy và mở được môn bộ môn SE, danh sách không có môn bộ môn khác")
+        @DisplayName("Tổ trưởng chuyên môn SE: thấy và mở được môn tổ chuyên môn SE, danh sách không có môn tổ chuyên môn khác")
         void headSeesOwnDepartment() throws Exception {
             mockMvc.perform(get("/admin/subjects").with(as(TestAccounts.TEACHER_HEAD)))
                     .andExpect(status().isOk())
@@ -100,7 +100,7 @@ class SubjectIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE gõ thẳng URL môn bộ môn IA (xem, sửa, đầu điểm) → 403, dữ liệu không đổi")
+        @DisplayName("Tổ trưởng chuyên môn SE gõ thẳng URL môn tổ chuyên môn IA (xem, sửa, đầu điểm) → 403, dữ liệu không đổi")
         void headForbiddenOnOtherDepartmentByUrl() throws Exception {
             String base = "/admin/subjects/" + iaSubjectId;
             RequestPostProcessor head = as(TestAccounts.TEACHER_HEAD);
@@ -130,7 +130,7 @@ class SubjectIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE tạo môn hoặc chuyển môn SE sang bộ môn IA → 403")
+        @DisplayName("Tổ trưởng chuyên môn SE tạo môn hoặc chuyển môn SE sang tổ chuyên môn IA → 403")
         void headCannotUseOtherDepartmentInForm() throws Exception {
             mockMvc.perform(post("/admin/subjects/new").with(as(TestAccounts.TEACHER_HEAD)).with(csrf())
                             .param("departmentId", "38").param("code", "IAO999").param("name", "X")
@@ -166,7 +166,7 @@ class SubjectIntegrationTest {
     class Manage {
 
         @Test
-        @DisplayName("Trưởng bộ môn tạo môn ở bộ môn mình; mã trùng → lỗi cạnh ô")
+        @DisplayName("Tổ trưởng chuyên môn tạo môn ở tổ chuyên môn mình; mã trùng → lỗi cạnh ô")
         void headCreatesSubject() throws Exception {
             mockMvc.perform(post("/admin/subjects/new").with(as(TestAccounts.TEACHER_HEAD)).with(csrf())
                             .param("departmentId", "1").param("code", " swd392 ").param("name", "Kiến trúc phần mềm")
@@ -185,13 +185,13 @@ class SubjectIntegrationTest {
         }
 
         @Test
-        @DisplayName("TOAN10 đã có lớp học phần: không đổi được bộ môn")
+        @DisplayName("TOAN10 đã có lớp môn học: không đổi được tổ chuyên môn")
         void subjectWithClassSectionsKeepsDepartment() throws Exception {
             mockMvc.perform(post("/admin/subjects/1/edit").with(as(TestAccounts.ADMIN)).with(csrf())
                             .param("departmentId", "38").param("code", "TOAN10")
                             .param("name", "Java Web Application Development").param("credits", "3"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("Môn học đã có lớp học phần nên không đổi được bộ môn")));
+                    .andExpect(content().string(containsString("Môn học đã có lớp môn học nên không đổi được tổ chuyên môn")));
         }
 
         @Test

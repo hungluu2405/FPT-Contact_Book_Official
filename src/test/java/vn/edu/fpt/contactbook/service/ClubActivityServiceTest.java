@@ -131,7 +131,7 @@ class ClubActivityServiceTest {
         }
 
         @Test
-        @DisplayName("CLB INACTIVE không tạo được; thành viên thường và giảng viên: 403")
+        @DisplayName("CLB INACTIVE không tạo được; thành viên thường và giáo viên: 403")
         void guards() {
             assertThatThrownBy(() -> service.create(MEMBER, 1L, form(AppTime.now().plusDays(1), 3, null), null))
                     .isInstanceOf(AccessDeniedException.class);
@@ -229,7 +229,7 @@ class ClubActivityServiceTest {
         }
 
         @Test
-        @DisplayName("Không phải thành viên ACTIVE (sinh viên ngoài CLB, giảng viên): 403")
+        @DisplayName("Không phải thành viên ACTIVE (học sinh ngoài CLB, giáo viên): 403")
         void notMember() {
             assertThatThrownBy(() -> service.register(OUTSIDER, 1L, 50L)).isInstanceOf(AccessDeniedException.class);
             assertThatThrownBy(() -> service.register(TEACHER, 1L, 50L)).isInstanceOf(AccessDeniedException.class);

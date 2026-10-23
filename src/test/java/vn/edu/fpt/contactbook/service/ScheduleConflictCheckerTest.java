@@ -121,7 +121,7 @@ class ScheduleConflictCheckerTest {
         }
 
         @Test
-        @DisplayName("Cùng giảng viên ở lớp khác, khác phòng → xung đột giảng viên")
+        @DisplayName("Cùng giáo viên ở lớp khác, khác phòng → xung đột giáo viên")
         void teacherConflict() {
             ClassSection sameTeacher = CatalogTestData.section(28L, "STEM-HK1-2627-01", otherSection.getSubject(),
                     section.getSemester(), gv002, null, SectionStatus.OPEN);
@@ -131,7 +131,7 @@ class ScheduleConflictCheckerTest {
         }
 
         @Test
-        @DisplayName("Sinh viên đang học cả hai lớp → xung đột sinh viên, kèm số sinh viên chung")
+        @DisplayName("Học sinh đang học cả hai lớp → xung đột học sinh, kèm số học sinh chung")
         void studentConflict() {
             when(enrollmentRepository.countSharedStudents(10L)).thenReturn(List.<Object[]>of(new Object[]{27L, 3L}));
             whenOthers(session(41L, otherSection, null, "07:00", "12:00", SessionStatus.SCHEDULED));
@@ -140,12 +140,12 @@ class ScheduleConflictCheckerTest {
 
             assertThat(conflicts).singleElement().satisfies(c -> {
                 assertThat(c.type()).isEqualTo(Type.STUDENT);
-                assertThat(c.detail()).startsWith("3 sinh viên");
+                assertThat(c.detail()).startsWith("3 học sinh");
             });
         }
 
         @Test
-        @DisplayName("Một buổi vừa trùng phòng, giảng viên và sinh viên → liệt kê đủ ba xung đột")
+        @DisplayName("Một buổi vừa trùng phòng, giáo viên và học sinh → liệt kê đủ ba xung đột")
         void allTypesTogether() {
             when(enrollmentRepository.countSharedStudents(10L)).thenReturn(List.<Object[]>of(new Object[]{28L, 1L}));
             ClassSection sameTeacher = CatalogTestData.section(28L, "STEM-HK1-2627-01", otherSection.getSubject(),
@@ -157,7 +157,7 @@ class ScheduleConflictCheckerTest {
         }
 
         @Test
-        @DisplayName("Lớp có lịch thi, hoặc lớp có chung SV có lịch thi, chồng giờ → xung đột (finding 1)")
+        @DisplayName("Lớp có lịch thi, hoặc lớp có chung HS có lịch thi, chồng giờ → xung đột (finding 1)")
         void sessionDuringExamOfOwnOrSharedSection() {
             when(enrollmentRepository.countSharedStudents(10L)).thenReturn(List.<Object[]>of(new Object[]{27L, 2L}));
             Exam ownExam = exam(section, null, "08:00", "09:00");
@@ -222,7 +222,7 @@ class ScheduleConflictCheckerTest {
     class Exams {
 
         @Test
-        @DisplayName("Sinh viên chung có lịch thi và buổi học chồng giờ → hai xung đột sinh viên")
+        @DisplayName("Học sinh chung có lịch thi và buổi học chồng giờ → hai xung đột học sinh")
         void studentExamAndSessionConflicts() {
             when(enrollmentRepository.countSharedStudents(10L)).thenReturn(List.<Object[]>of(new Object[]{27L, 2L}));
             when(examRepository.findPossibleConflicts(eq(DAY), eq(DAY), isNull(), isNull(), anyCollection()))

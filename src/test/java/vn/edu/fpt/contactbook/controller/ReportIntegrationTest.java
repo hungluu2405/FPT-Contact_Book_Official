@@ -101,7 +101,7 @@ class ReportIntegrationTest {
         }
 
         @Test
-        @DisplayName("TBM xem mọi lớp bộ môn mình (kể cả lớp người khác dạy); lớp, môn bộ môn khác → 403")
+        @DisplayName("TBM xem mọi lớp tổ chuyên môn mình (kể cả lớp người khác dạy); lớp, môn tổ chuyên môn khác → 403")
         void headDepartment() throws Exception {
             ClassSection ia = iaSection();
             for (String report : List.of(ATTENDANCE, GRADES)) {
@@ -134,7 +134,7 @@ class ReportIntegrationTest {
         }
 
         @Test
-        @DisplayName("SINH VIÊN, PHỤ HUYNH vào mọi trang báo cáo → 403")
+        @DisplayName("HỌC SINH, PHỤ HUYNH vào mọi trang báo cáo → 403")
         void studentParentForbidden() throws Exception {
             for (String phone : List.of(TestAccounts.STUDENT, TestAccounts.PARENT)) {
                 for (String url : List.of("/reports", ATTENDANCE, ATTENDANCE + "/export", GRADES, GRADES + "/export",
@@ -170,7 +170,7 @@ class ReportIntegrationTest {
     class Export {
 
         @Test
-        @DisplayName("Điểm danh một lớp: đúng content type, mở lại được bằng POI, đủ sinh viên, ghi EXPORT_REPORT")
+        @DisplayName("Điểm danh một lớp: đúng content type, mở lại được bằng POI, đủ học sinh, ghi EXPORT_REPORT")
         void attendanceSection() throws Exception {
             MvcResult result = mockMvc.perform(get(ATTENDANCE + "/export").param("sectionId", "27")
                             .with(as(TestAccounts.ADMIN)))
@@ -181,9 +181,9 @@ class ReportIntegrationTest {
                     .andReturn();
 
             try (XSSFWorkbook workbook = open(result)) {
-                Sheet sheet = workbook.getSheet("Sinh viên");
+                Sheet sheet = workbook.getSheet("Học sinh");
                 assertThat(sheet).isNotNull();
-                assertThat(column(sheet, "Mã SV")).hasSize(2).allSatisfy(code -> assertThat(code).startsWith("HS"));
+                assertThat(column(sheet, "Mã HS")).hasSize(2).allSatisfy(code -> assertThat(code).startsWith("HS"));
             }
             AuditLog audit = lastAudit();
             assertThat(audit.getAction()).isEqualTo(AuditActions.EXPORT_REPORT);
@@ -196,7 +196,7 @@ class ReportIntegrationTest {
         }
 
         @Test
-        @DisplayName("Điểm cả học kỳ của TBM: chỉ lớp trong bộ môn, mở lại được; GV chỉ xuất được lớp mình")
+        @DisplayName("Điểm cả học kỳ của TBM: chỉ lớp trong tổ chuyên môn, mở lại được; GV chỉ xuất được lớp mình")
         void gradesOverviewInScope() throws Exception {
             ClassSection ia = iaSection();
             MvcResult head = mockMvc.perform(get(GRADES + "/export").with(as(TestAccounts.TEACHER_HEAD)))
@@ -204,7 +204,7 @@ class ReportIntegrationTest {
                     .andExpect(content().contentType(UserImportWorkbooks.CONTENT_TYPE))
                     .andReturn();
             try (XSSFWorkbook workbook = open(head)) {
-                assertThat(column(workbook.getSheet("Lớp học phần"), "Lớp học phần"))
+                assertThat(column(workbook.getSheet("Lớp môn học"), "Lớp môn học"))
                         .contains("TOAN10-HK1-2627-01", "TIN11-HK1-2627-01", "STEM-HK1-2627-01")
                         .doesNotContain(ia.getCode());
             }
@@ -213,20 +213,20 @@ class ReportIntegrationTest {
             MvcResult teacher = mockMvc.perform(get(GRADES + "/export").with(as(TestAccounts.TEACHER)))
                     .andExpect(status().isOk()).andReturn();
             try (XSSFWorkbook workbook = open(teacher)) {
-                assertThat(column(workbook.getSheet("Lớp học phần"), "Lớp học phần"))
+                assertThat(column(workbook.getSheet("Lớp môn học"), "Lớp môn học"))
                         .containsExactly("TOAN10-HK1-2627-01");
             }
         }
 
         @Test
-        @DisplayName("Điểm một lớp: sheet sinh viên (chưa đủ điểm ghi rõ) và sheet thống kê")
+        @DisplayName("Điểm một lớp: sheet học sinh (chưa đủ điểm ghi rõ) và sheet thống kê")
         void gradesSection() throws Exception {
             MvcResult result = mockMvc.perform(get(GRADES + "/export").param("sectionId", "27")
                             .with(as(TestAccounts.TEACHER_HEAD)))
                     .andExpect(status().isOk()).andReturn();
 
             try (XSSFWorkbook workbook = open(result)) {
-                assertThat(column(workbook.getSheet("Sinh viên"), "Trung bình môn"))
+                assertThat(column(workbook.getSheet("Học sinh"), "Trung bình môn"))
                         .containsExactly("Chưa đủ điểm", "Chưa đủ điểm");
                 assertThat(workbook.getSheet("Thống kê")).isNotNull();
             }

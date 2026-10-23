@@ -38,7 +38,7 @@
                         <span th:each="role : ${profile.roles}" class="d-block">
                             <span th:text="#{'role.' + ${role.roleCode}}">Vai trò</span>
                             <span th:if="${role.departmentName}" class="text-muted"
-                                  th:text="'- ' + ${role.departmentName}">Bộ môn</span>
+                                  th:text="'- ' + ${role.departmentName}">Tổ chuyên môn</span>
                         </span>
                     </dd>
                 </dl>

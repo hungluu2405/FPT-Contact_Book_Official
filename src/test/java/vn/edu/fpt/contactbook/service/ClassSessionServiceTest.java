@@ -286,7 +286,7 @@ class ClassSessionServiceTest {
         }
 
         @Test
-        @DisplayName("Chỉ đổi phòng: chỉ kiểm tra trùng phòng, không chặn vì trùng giảng viên có sẵn (finding 3)")
+        @DisplayName("Chỉ đổi phòng: chỉ kiểm tra trùng phòng, không chặn vì trùng giáo viên có sẵn (finding 3)")
         void roomOnlyChangeChecksRoomOnly() {
             ClassSession session = existing(SessionStatus.DONE);
             when(attendanceRepository.existsBySessionId(41L)).thenReturn(true);
@@ -339,7 +339,7 @@ class ClassSessionServiceTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE với lớp của bộ môn khác → 403, không lưu")
+        @DisplayName("Tổ trưởng chuyên môn SE với lớp của tổ chuyên môn khác → 403, không lưu")
         void headOutsideScope() {
             Department ia = CatalogTestData.department(38L, "IA");
             section.setSubject(CatalogTestData.subject(50L, "IAO201", ia));

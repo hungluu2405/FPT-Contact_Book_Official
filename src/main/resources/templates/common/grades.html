@@ -6,7 +6,7 @@
 </head>
 <body>
 <section>
-    <!--/* Điểm ĐÃ CÔNG BỐ của sinh viên (baseUrl /student/grades) hoặc của con (/parent/children/{id}/grades).
+    <!--/* Điểm ĐÃ CÔNG BỐ của học sinh (baseUrl /student/grades) hoặc của con (/parent/children/{id}/grades).
          Service chỉ trả ô đã công bố; ô chưa công bố hiện như ô chưa có điểm. */-->
     <h1 class="page-title" th:text="${pageTitle}">Điểm</h1>
     <p th:if="${noChildren}" class="alert alert-info" th:text="#{schedule.no-children}">Chưa liên kết con.</p>

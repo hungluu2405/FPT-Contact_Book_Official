@@ -59,7 +59,7 @@ public class RoleProfiles {
     void checkStudent(RoleProfileForm form, Long existingStudentId, Map<String, String> errors) {
         String code = form.getStudentCode();
         if (code == null) {
-            errors.putIfAbsent("profile.studentCode", "Vui lòng nhập mã sinh viên");
+            errors.putIfAbsent("profile.studentCode", "Vui lòng nhập mã học sinh");
         } else if (existingStudentId == null
                 ? studentRepository.existsByStudentCode(code)
                 : studentRepository.existsByStudentCodeAndIdNot(code, existingStudentId)) {
@@ -68,14 +68,14 @@ public class RoleProfiles {
 
         Major major = form.getMajorId() == null ? null : majorRepository.findById(form.getMajorId()).orElse(null);
         if (major == null) {
-            errors.putIfAbsent("profile.majorId", "Vui lòng chọn ngành");
+            errors.putIfAbsent("profile.majorId", "Vui lòng chọn khối");
         }
         if (form.getClassId() != null) {
             SchoolClass schoolClass = schoolClassRepository.findById(form.getClassId()).orElse(null);
             if (schoolClass == null) {
                 errors.putIfAbsent("profile.classId", "Lớp không tồn tại");
             } else if (major != null && !schoolClass.getMajor().getId().equals(major.getId())) {
-                errors.putIfAbsent("profile.classId", "Lớp không thuộc ngành đã chọn");
+                errors.putIfAbsent("profile.classId", "Lớp không thuộc khối đã chọn");
             }
         }
 
@@ -90,7 +90,7 @@ public class RoleProfiles {
     void checkTeacher(RoleProfileForm form, Long existingTeacherId, Map<String, String> errors) {
         String code = form.getTeacherCode();
         if (code == null) {
-            errors.putIfAbsent("profile.teacherCode", "Vui lòng nhập mã giảng viên");
+            errors.putIfAbsent("profile.teacherCode", "Vui lòng nhập mã giáo viên");
         } else if (existingTeacherId == null
                 ? teacherRepository.existsByTeacherCode(code)
                 : teacherRepository.existsByTeacherCodeAndIdNot(code, existingTeacherId)) {
@@ -98,7 +98,7 @@ public class RoleProfiles {
         }
         if (form.getTeacherDepartmentId() == null
                 || !departmentRepository.existsById(form.getTeacherDepartmentId())) {
-            errors.putIfAbsent("profile.teacherDepartmentId", "Vui lòng chọn bộ môn của giảng viên");
+            errors.putIfAbsent("profile.teacherDepartmentId", "Vui lòng chọn tổ chuyên môn của giáo viên");
         }
     }
 

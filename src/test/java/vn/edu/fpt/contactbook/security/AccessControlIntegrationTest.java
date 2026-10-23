@@ -80,20 +80,20 @@ class AccessControlIntegrationTest {
     }
 
     @Test
-    @DisplayName("0900000002 thấy cả TEACHER và HEAD_OF_DEPARTMENT (bộ môn SE), menu không lặp")
+    @DisplayName("0900000002 thấy cả TEACHER và HEAD_OF_DEPARTMENT (tổ chuyên môn SE), menu không lặp")
     void teacherHomeShowsBothRoles() throws Exception {
         String html = mockMvc.perform(get("/teacher").with(as(TestAccounts.TEACHER_HEAD)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(allOf(
                         containsString("Nguyễn Văn Trưởng"),
-                        containsString("Giảng viên"),
-                        containsString("Trưởng bộ môn"),
+                        containsString("Giáo viên"),
+                        containsString("Tổ trưởng chuyên môn"),
                         containsString("Tổ Toán – Tin học (TT)"),
                         containsString("Sắp có"),
                         not(containsString("href=\"/admin\"")))))
                 .andReturn().getResponse().getContentAsString();
 
-        assertThat(html.split("href=\"/teacher\"", -1)).as("một mục menu giảng viên").hasSize(2);
+        assertThat(html.split("href=\"/teacher\"", -1)).as("một mục menu giáo viên").hasSize(2);
     }
 
     @Test

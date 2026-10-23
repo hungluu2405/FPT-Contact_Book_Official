@@ -136,7 +136,7 @@ class AttendanceViewServiceTest {
     }
 
     @Test
-    @DisplayName("Sinh viên xem điểm danh của chính mình theo môn, có tỷ lệ và cảnh báo")
+    @DisplayName("Học sinh xem điểm danh của chính mình theo môn, có tỷ lệ và cảnh báo")
     void studentSeesOwnSummary() {
         List<StudentAttendanceRow> rows = service.student(STUDENT, Audience.STUDENT, 999L, null).data();
 
@@ -150,7 +150,7 @@ class AttendanceViewServiceTest {
     }
 
     @Test
-    @DisplayName("Sinh viên: studentId trong request bị bỏ qua, luôn là hồ sơ của chính mình")
+    @DisplayName("Học sinh: studentId trong request bị bỏ qua, luôn là hồ sơ của chính mình")
     void studentIdFromRequestIsIgnored() {
         service.student(STUDENT, Audience.STUDENT, 2L, null);
 
@@ -158,7 +158,7 @@ class AttendanceViewServiceTest {
     }
 
     @Test
-    @DisplayName("Người không có hồ sơ sinh viên bị 403")
+    @DisplayName("Người không có hồ sơ học sinh bị 403")
     void noStudentProfile() {
         AppUserPrincipal other = CatalogTestData.principal(9L, Set.of(RoleCodes.STUDENT), Map.of());
 
@@ -182,7 +182,7 @@ class AttendanceViewServiceTest {
     }
 
     @Test
-    @DisplayName("Lịch sử môn mà sinh viên không học hoặc đã rút → 403")
+    @DisplayName("Lịch sử môn mà học sinh không học hoặc đã rút → 403")
     void historyOfOtherSectionIsDenied() {
         when(enrollmentRepository.findByClassSectionIdAndStudentId(10L, 1L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.history(STUDENT, Audience.STUDENT, null, 10L, 0))
@@ -207,7 +207,7 @@ class AttendanceViewServiceTest {
     }
 
     @Test
-    @DisplayName("Giảng viên khác xem thống kê lớp không phải của mình → 403")
+    @DisplayName("Giáo viên khác xem thống kê lớp không phải của mình → 403")
     void otherTeacherDeniedStats() {
         when(teacherRepository.findByUserId(16L)).thenReturn(Optional.of(
                 CatalogTestData.teacher(8L, "GV003", section.getSubject().getDepartment())));
@@ -217,14 +217,14 @@ class AttendanceViewServiceTest {
     }
 
     @Test
-    @DisplayName("Trưởng bộ môn khác xem thống kê lớp ngoài bộ môn → 403")
+    @DisplayName("Tổ trưởng chuyên môn khác xem thống kê lớp ngoài tổ chuyên môn → 403")
     void headOfOtherDepartmentDeniedStats() {
         assertThatThrownBy(() -> service.section(HEAD_IA, Access.MANAGER, 10L, 0, 0))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
-    @DisplayName("Người chưa có hồ sơ giảng viên thấy danh sách lớp giảng dạy rỗng")
+    @DisplayName("Người chưa có hồ sơ giáo viên thấy danh sách lớp giảng dạy rỗng")
     void teacherSectionsWithoutProfile() {
         Page<TeacherSectionView> page = service.teacherSections(HEAD_IA, null, 0).data();
 

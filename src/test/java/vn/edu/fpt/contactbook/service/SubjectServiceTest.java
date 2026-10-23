@@ -91,7 +91,7 @@ class SubjectServiceTest {
     }
 
     @Test
-    @DisplayName("Trưởng bộ môn xem/sửa môn bộ môn khác hoặc id không tồn tại → 403; ADMIN với id không tồn tại → 404")
+    @DisplayName("Tổ trưởng chuyên môn xem/sửa môn tổ chuyên môn khác hoặc id không tồn tại → 403; ADMIN với id không tồn tại → 404")
     void headIsLimitedToOwnDepartment() {
         assertThat(service.detail(HEAD_SE, 1L).code()).isEqualTo("TOAN10");
         assertThatThrownBy(() -> service.detail(HEAD_SE, 50L)).isInstanceOf(AccessDeniedException.class);
@@ -114,7 +114,7 @@ class SubjectServiceTest {
     }
 
     @Test
-    @DisplayName("Trưởng bộ môn tạo môn ở bộ môn mình được; gửi bộ môn khác → 403, không lưu")
+    @DisplayName("Tổ trưởng chuyên môn tạo môn ở tổ chuyên môn mình được; gửi tổ chuyên môn khác → 403, không lưu")
     void headCreatesOnlyInOwnDepartment() {
         service.create(HEAD_SE, form(1L, " swd392 ", 3), "127.0.0.1");
         verify(subjectRepository).saveAndFlush(any());
@@ -138,7 +138,7 @@ class SubjectServiceTest {
     }
 
     @Test
-    @DisplayName("Môn đã có lớp học phần: không đổi được bộ môn, các trường khác vẫn sửa được")
+    @DisplayName("Môn đã có lớp môn học: không đổi được tổ chuyên môn, các trường khác vẫn sửa được")
     void departmentLockedWhenClassSectionsExist() {
         when(classSectionRepository.existsBySubjectId(1L)).thenReturn(true);
 
@@ -161,7 +161,7 @@ class SubjectServiceTest {
         assertThat(seSubject.getDepartment()).isSameAs(ia);
     }
 
-    @ParameterizedTest(name = "{0} tín chỉ → hợp lệ = {1}")
+    @ParameterizedTest(name = "{0} tiết/tuần → hợp lệ = {1}")
     @CsvSource({"0, false", "1, true", "20, true", "21, false", "-3, false"})
     void creditsBoundaries(int credits, boolean valid) {
         if (valid) {

@@ -50,7 +50,7 @@ class ProfileIntegrationTest {
                         containsString("Nguyễn Văn Trưởng"),
                         containsString("0900000002"),
                         containsString("head@fpt.edu.vn"),
-                        containsString("Trưởng bộ môn"),
+                        containsString("Tổ trưởng chuyên môn"),
                         containsString("Số điện thoại do quản trị viên quản lý."),
                         containsString("enctype=\"multipart/form-data\""))));
     }

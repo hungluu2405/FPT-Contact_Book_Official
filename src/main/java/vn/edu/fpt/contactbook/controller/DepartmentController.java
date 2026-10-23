@@ -74,7 +74,7 @@ public class DepartmentController {
         if (!bindingResult.hasErrors()) {
             try {
                 Long id = departmentService.create(actor, form, request.getRemoteAddr());
-                redirectAttributes.addFlashAttribute("successMessage", "Đã thêm bộ môn");
+                redirectAttributes.addFlashAttribute("successMessage", "Đã thêm tổ chuyên môn");
                 return "redirect:" + BASE + "/" + id;
             } catch (BusinessException e) {
                 FormErrors.apply(bindingResult, e);
@@ -103,7 +103,7 @@ public class DepartmentController {
         if (!bindingResult.hasErrors()) {
             try {
                 departmentService.update(actor, id, form, request.getRemoteAddr());
-                redirectAttributes.addFlashAttribute("successMessage", "Đã lưu bộ môn");
+                redirectAttributes.addFlashAttribute("successMessage", "Đã lưu tổ chuyên môn");
                 return "redirect:" + BASE + "/" + id;
             } catch (BusinessException e) {
                 FormErrors.apply(bindingResult, e);

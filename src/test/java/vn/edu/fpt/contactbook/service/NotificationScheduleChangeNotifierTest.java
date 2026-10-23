@@ -52,7 +52,7 @@ class NotificationScheduleChangeNotifierTest {
     }
 
     @Test
-    @DisplayName("Hủy buổi: thông báo quan trọng cho SV và PH của lớp")
+    @DisplayName("Hủy buổi: thông báo quan trọng cho HS và PH của lớp")
     void cancelled() {
         notifier.sessionCancelled(1L, session);
 

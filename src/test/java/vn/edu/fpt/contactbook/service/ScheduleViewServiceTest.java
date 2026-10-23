@@ -115,7 +115,7 @@ class ScheduleViewServiceTest {
     }
 
     @Test
-    @DisplayName("Sinh viên chỉ thấy lớp mình đang học; chưa học lớp nào thì truy vấn với id giả, không lỗi")
+    @DisplayName("Học sinh chỉ thấy lớp mình đang học; chưa học lớp nào thì truy vấn với id giả, không lỗi")
     void studentWithoutSections() {
         Student me = CatalogTestData.student(1L, "HS260001", StudentStatus.STUDYING);
         when(studentRepository.findByUserId(4L)).thenReturn(Optional.of(me));

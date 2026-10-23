@@ -99,7 +99,7 @@ class ClassSectionIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE: xem lớp bộ môn mình (không có khối ghi danh), danh sách không có lớp bộ môn khác")
+        @DisplayName("Tổ trưởng chuyên môn SE: xem lớp tổ chuyên môn mình (không có khối ghi danh), danh sách không có lớp tổ chuyên môn khác")
         void headSeesOwnSectionsReadOnly() throws Exception {
             RequestPostProcessor head = as(TestAccounts.TEACHER_HEAD);
             mockMvc.perform(get("/admin/sections").with(head))
@@ -115,7 +115,7 @@ class ClassSectionIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn SE gõ thẳng URL lớp bộ môn IA (xem, sửa) → 403, dữ liệu không đổi")
+        @DisplayName("Tổ trưởng chuyên môn SE gõ thẳng URL lớp tổ chuyên môn IA (xem, sửa) → 403, dữ liệu không đổi")
         void headForbiddenOnOtherDepartment() throws Exception {
             RequestPostProcessor head = as(TestAccounts.TEACHER_HEAD);
             String base = "/admin/sections/" + iaSectionId;
@@ -132,7 +132,7 @@ class ClassSectionIntegrationTest {
         }
 
         @Test
-        @DisplayName("Trưởng bộ môn POST ghi danh, gỡ, ghi danh theo lớp, nhập Excel → 403")
+        @DisplayName("Tổ trưởng chuyên môn POST ghi danh, gỡ, ghi danh theo lớp, nhập Excel → 403")
         void headCannotEnroll() throws Exception {
             RequestPostProcessor head = as(TestAccounts.TEACHER_HEAD);
             mockMvc.perform(post("/admin/sections/1/enrollments").with(head).with(csrf())
@@ -173,7 +173,7 @@ class ClassSectionIntegrationTest {
     }
 
     @Nested
-    @DisplayName("Thêm, sửa lớp học phần")
+    @DisplayName("Thêm, sửa lớp môn học")
     class Manage {
 
         @Test
@@ -200,13 +200,13 @@ class ClassSectionIntegrationTest {
         }
 
         @Test
-        @DisplayName("Mã trùng → lỗi cạnh ô; giảm sĩ số dưới số SV đang học → lỗi cạnh ô")
+        @DisplayName("Mã trùng → lỗi cạnh ô; giảm sĩ số dưới số HS đang học → lỗi cạnh ô")
         void validationErrorsNextToFields() throws Exception {
             mockMvc.perform(post("/admin/sections/new").with(as(TestAccounts.ADMIN)).with(csrf())
                             .param("subjectId", "1").param("semesterId", "1").param("teacherId", "2")
                             .param("code", " toan10-hk1-2627-01 ").param("status", "OPEN"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(allOf(containsString("Mã lớp học phần đã tồn tại"),
+                    .andExpect(content().string(allOf(containsString("Mã lớp môn học đã tồn tại"),
                             containsString("is-invalid"))));
 
             mockMvc.perform(post("/admin/sections/27/edit").with(as(TestAccounts.ADMIN)).with(csrf())
@@ -214,14 +214,14 @@ class ClassSectionIntegrationTest {
                             .param("code", "TIN11-HK1-2627-01").param("maxStudents", "1").param("status", "OPEN"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString(
-                            "Sĩ số tối đa không được nhỏ hơn số sinh viên đang học (2)")));
+                            "Sĩ số tối đa không được nhỏ hơn số học sinh đang học (2)")));
             mockMvc.perform(post("/admin/sections/27/edit").with(as(TestAccounts.ADMIN)).with(csrf())
                             .param("subjectId", "1").param("semesterId", "38").param("teacherId", "8")
                             .param("code", "TIN11-HK1-2627-01").param("status", "OPEN"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(
-                            containsString("Lớp đã có sinh viên ghi danh nên không đổi được môn học"),
-                            containsString("Lớp đã có sinh viên ghi danh nên không đổi được học kỳ"))));
+                            containsString("Lớp đã có học sinh ghi danh nên không đổi được môn học"),
+                            containsString("Lớp đã có học sinh ghi danh nên không đổi được học kỳ"))));
             assertThat(classSectionRepository.findById(27L)).get()
                     .satisfies(s -> assertThat(s.getSubject().getId()).isEqualTo(31L));
         }
@@ -237,22 +237,22 @@ class ClassSectionIntegrationTest {
             ClassSection section = section("TOAN10-HK2-2627-09", subjectRepository.findById(1L).orElseThrow(), 1);
             String base = "/admin/sections/" + section.getId();
 
-            enroll(base, HS260001).andExpect(flash().attribute("successMessage", "Đã ghi danh sinh viên"));
+            enroll(base, HS260001).andExpect(flash().attribute("successMessage", "Đã ghi danh học sinh"));
             Enrollment first = enrollmentRepository.findByClassSectionIdAndStudentId(section.getId(), HS260001)
                     .orElseThrow();
             assertThat(lastAudit().getAction()).isEqualTo(AuditActions.ENROLL_STUDENT);
 
-            enroll(base, HS260001).andExpect(flash().attribute("errorMessage", "Sinh viên đã có trong lớp học phần"));
-            enroll(base, HS250101).andExpect(flash().attribute("errorMessage", "Lớp học phần đã đủ sĩ số (1/1)"));
+            enroll(base, HS260001).andExpect(flash().attribute("errorMessage", "Học sinh đã có trong lớp môn học"));
+            enroll(base, HS250101).andExpect(flash().attribute("errorMessage", "Lớp môn học đã đủ sĩ số (1/1)"));
 
             mockMvc.perform(post(base + "/enrollments/" + HS260001 + "/drop").with(as(TestAccounts.ADMIN)).with(csrf()))
                     .andExpect(redirectedUrl(base))
-                    .andExpect(flash().attribute("successMessage", "Đã gỡ sinh viên khỏi lớp"));
+                    .andExpect(flash().attribute("successMessage", "Đã gỡ học sinh khỏi lớp"));
             assertThat(enrollmentRepository.findById(first.getId())).get()
                     .extracting(Enrollment::getStatus).isEqualTo(EnrollmentStatus.DROPPED);
             assertThat(lastAudit().getAction()).isEqualTo(AuditActions.DROP_STUDENT);
 
-            enroll(base, HS260001).andExpect(flash().attribute("successMessage", "Đã ghi danh lại sinh viên"));
+            enroll(base, HS260001).andExpect(flash().attribute("successMessage", "Đã ghi danh lại học sinh"));
             assertThat(enrollmentRepository.findByClassSectionId(section.getId())).singleElement().satisfies(e -> {
                 assertThat(e.getId()).isEqualTo(first.getId());
                 assertThat(e.getStatus()).isEqualTo(EnrollmentStatus.ENROLLED);
@@ -271,24 +271,24 @@ class ClassSectionIntegrationTest {
             classSectionRepository.saveAndFlush(section);
 
             enroll("/admin/sections/" + section.getId(), HS260001).andExpect(flash().attribute("errorMessage",
-                    "Lớp học phần không ở trạng thái mở nên không ghi danh được"));
+                    "Lớp môn học không ở trạng thái mở nên không ghi danh được"));
             assertThat(enrollmentRepository.findByClassSectionId(section.getId())).isEmpty();
         }
 
         @Test
-        @DisplayName("Ghi danh lớp hành chính 11A1 rồi lặp lại: lần sau bỏ qua SV đã có")
+        @DisplayName("Ghi danh lớp hành chính 11A1 rồi lặp lại: lần sau bỏ qua HS đã có")
         void enrollAdministrativeClass() throws Exception {
             ClassSection section = section("TOAN10-HK2-2627-07", subjectRepository.findById(1L).orElseThrow(), null);
             String base = "/admin/sections/" + section.getId();
 
             mockMvc.perform(post(base + "/enrollments/class").with(as(TestAccounts.ADMIN)).with(csrf())
                             .param("classId", "14"))
-                    .andExpect(flash().attribute("successMessage", "Đã ghi danh 2 sinh viên mới, ghi danh lại 0; "
-                            + "bỏ qua 0 sinh viên đã có trong lớp và 0 sinh viên không đang học"));
+                    .andExpect(flash().attribute("successMessage", "Đã ghi danh 2 học sinh mới, ghi danh lại 0; "
+                            + "bỏ qua 0 học sinh đã có trong lớp và 0 học sinh không đang học"));
             mockMvc.perform(post(base + "/enrollments/class").with(as(TestAccounts.ADMIN)).with(csrf())
                             .param("classId", "14"))
-                    .andExpect(flash().attribute("successMessage", "Đã ghi danh 0 sinh viên mới, ghi danh lại 0; "
-                            + "bỏ qua 2 sinh viên đã có trong lớp và 0 sinh viên không đang học"));
+                    .andExpect(flash().attribute("successMessage", "Đã ghi danh 0 học sinh mới, ghi danh lại 0; "
+                            + "bỏ qua 2 học sinh đã có trong lớp và 0 học sinh không đang học"));
             assertThat(enrollmentRepository.countByClassSectionIdAndStatus(section.getId(), EnrollmentStatus.ENROLLED))
                     .isEqualTo(2);
             assertThat(lastAudit().getAction()).isEqualTo(AuditActions.ENROLL_CLASS);
@@ -297,7 +297,7 @@ class ClassSectionIntegrationTest {
             mockMvc.perform(post("/admin/sections/" + small.getId() + "/enrollments/class")
                             .with(as(TestAccounts.ADMIN)).with(csrf()).param("classId", "14"))
                     .andExpect(flash().attribute("errorMessage",
-                            "Không đủ chỗ: cần thêm 2 sinh viên nhưng lớp chỉ còn 1 chỗ"));
+                            "Không đủ chỗ: cần thêm 2 học sinh nhưng lớp chỉ còn 1 chỗ"));
             assertThat(enrollmentRepository.findByClassSectionId(small.getId())).isEmpty();
         }
 
@@ -307,23 +307,23 @@ class ClassSectionIntegrationTest {
             ClassSection section = section("TOAN10-HK2-2627-05", subjectRepository.findById(1L).orElseThrow(), null);
             String url = "/admin/sections/" + section.getId() + "/enrollments/import";
 
-            byte[] bad = ImportFiles.xlsxWithHeader(List.of("Mã SV"),
+            byte[] bad = ImportFiles.xlsxWithHeader(List.of("Mã HS"),
                     List.of(ImportFiles.row("HS260001"), ImportFiles.row("SE000000")));
             mockMvc.perform(multipart(url).file(new MockMultipartFile("file", "ds.xlsx", null, bad))
                             .with(as(TestAccounts.ADMIN)).with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(content().string(allOf(containsString("File có 1 lỗi"),
-                            containsString("Mã sinh viên &quot;SE000000&quot; không tồn tại"))));
+                            containsString("Mã học sinh &quot;SE000000&quot; không tồn tại"))));
             assertThat(enrollmentRepository.findByClassSectionId(section.getId())).isEmpty();
 
-            byte[] good = ImportFiles.xlsxWithHeader(List.of("Mã SV"),
+            byte[] good = ImportFiles.xlsxWithHeader(List.of("Mã HS"),
                     List.of(ImportFiles.row("hs260001"), ImportFiles.row("HS250101")));
             MvcResult result = mockMvc.perform(multipart(url).file(new MockMultipartFile("file", "ds.xlsx", null, good))
                             .with(as(TestAccounts.ADMIN)).with(csrf()))
                     .andExpect(redirectedUrl("/admin/sections/" + section.getId()))
                     .andReturn();
             assertThat(result.getFlashMap().get("successMessage"))
-                    .isEqualTo("Đã ghi danh 2 sinh viên mới và ghi danh lại 0 sinh viên từ file Excel");
+                    .isEqualTo("Đã ghi danh 2 học sinh mới và ghi danh lại 0 học sinh từ file Excel");
             assertThat(enrollmentRepository.countByClassSectionIdAndStatus(section.getId(), EnrollmentStatus.ENROLLED))
                     .isEqualTo(2);
             assertThat(lastAudit().getAction()).isEqualTo(AuditActions.IMPORT_ENROLLMENTS);

@@ -6,7 +6,7 @@
 </head>
 <body>
 <section>
-    <!--/* Trưởng bộ môn, ADMIN: xem bảng điểm (cả ô chưa công bố), công bố, điều chỉnh ô đã công bố. */-->
+    <!--/* Tổ trưởng chuyên môn, ADMIN: xem bảng điểm (cả ô chưa công bố), công bố, điều chỉnh ô đã công bố. */-->
     <a th:replace="~{fragments/catalog :: back('/admin/sections/' + ${sheet.section.id}, ${sheet.section.code})}"></a>
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
         <h1 class="page-title mb-0" th:text="#{grade.sheet} + ': ' + ${sheet.section.code}">Bảng điểm</h1>
@@ -26,8 +26,8 @@
             <table class="table align-middle mb-0">
                 <thead>
                 <tr>
-                    <th th:text="#{attendance.student-code}">Mã SV</th>
-                    <th th:text="#{attendance.student}">Sinh viên</th>
+                    <th th:text="#{attendance.student-code}">Mã HS</th>
+                    <th th:text="#{attendance.student}">Học sinh</th>
                     <th:block th:replace="~{fragments/grades :: componentHeaders(${sheet.components})}"></th:block>
                     <th class="text-center" th:text="#{grade.average}">Trung bình</th>
                 </tr>
@@ -50,7 +50,7 @@
                 </tr>
                 <tr th:if="${#lists.isEmpty(sheet.rows)}">
                     <td th:colspan="${#lists.size(sheet.components) + 3}" class="text-center text-muted py-4"
-                        th:text="#{attendance.no-students}">Chưa có sinh viên</td>
+                        th:text="#{attendance.no-students}">Chưa có học sinh</td>
                 </tr>
                 </tbody>
             </table>

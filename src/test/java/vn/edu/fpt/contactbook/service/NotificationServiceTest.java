@@ -119,7 +119,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    @DisplayName("GV gửi lớp mình: người nhận là SV + PH, loại chính người gửi; lưu tệp; audit phạm vi và số người")
+    @DisplayName("GV gửi lớp mình: người nhận là HS + PH, loại chính người gửi; lưu tệp; audit phạm vi và số người")
     void teacherSendsToOwnSection() {
         Long id = service.send(TEACHER, form(NotificationTargetType.CLASS_SECTION, 10L),
                 List.of(AttachmentStorageTest.pdf("de-cuong.pdf")), "127.0.0.1");

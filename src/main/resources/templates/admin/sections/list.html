@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
 <head>
-    <title th:text="#{section.list} + ' - ' + #{app.title}">Lớp học phần</title>
+    <title th:text="#{section.list} + ' - ' + #{app.title}">Lớp môn học</title>
 </head>
 <body>
 <section>
@@ -47,7 +47,7 @@
                 <th th:text="#{catalog.code}">Mã</th>
                 <th th:text="#{section.subject}">Môn học</th>
                 <th th:text="#{section.semester}">Học kỳ</th>
-                <th th:text="#{section.teacher}">Giảng viên</th>
+                <th th:text="#{section.teacher}">Giáo viên</th>
                 <th th:text="#{section.capacity}">Sĩ số</th>
                 <th th:text="#{section.status}">Trạng thái</th>
             </tr>
@@ -57,7 +57,7 @@
                 <td><a th:href="@{/admin/sections/{id}(id=${item.id})}" th:text="${item.code}">PRJ301-FA26-01</a></td>
                 <td th:text="${item.subjectCode} + ' - ' + ${item.subjectName}">PRJ301</td>
                 <td th:text="${item.semesterCode}">FA26</td>
-                <td th:text="${item.teacherName}">Giảng viên</td>
+                <td th:text="${item.teacherName}">Giáo viên</td>
                 <td th:text="${item.enrolledCount} + ' / ' + (${item.maxStudents} ?: #{section.unlimited})">0 / 40</td>
                 <td><span class="badge" th:classappend="${item.open()} ? 'text-bg-success' : 'text-bg-secondary'"
                           th:text="#{'section-status.' + ${item.status}}">Đang mở</span></td>

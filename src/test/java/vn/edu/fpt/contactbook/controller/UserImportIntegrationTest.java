@@ -86,13 +86,13 @@ class UserImportIntegrationTest {
             assertThat(workbook.getSheetAt(0).getRow(1).getCell(0).getStringCellValue()).isEqualTo("0900000000");
             Sheet catalog = workbook.getSheet("Danh mục");
             assertThat(catalog).isNotNull();
-            assertThat(catalog.getRow(0).getCell(0).getStringCellValue()).isEqualTo("Mã ngành");
+            assertThat(catalog.getRow(0).getCell(0).getStringCellValue()).isEqualTo("Mã khối");
             assertThat(catalog.getRow(1).getCell(0).getStringCellValue()).isNotBlank();
         }
     }
 
     @Test
-    @DisplayName("File sinh viên hợp lệ 2 dòng: trả file kết quả, tạo 2 người, mật khẩu tạm đăng nhập được và bị ép đổi")
+    @DisplayName("File học sinh hợp lệ 2 dòng: trả file kết quả, tạo 2 người, mật khẩu tạm đăng nhập được và bị ép đổi")
     void importValidStudents() throws Exception {
         long auditBefore = auditLogRepository.count();
         byte[] file = ImportFiles.xlsx(UserImportType.STUDENT, List.of(
@@ -107,7 +107,7 @@ class UserImportIntegrationTest {
                 .andReturn();
 
         List<List<String>> rows = readRows(result.getResponse().getContentAsByteArray());
-        assertThat(rows.getFirst()).containsExactly("Số điện thoại", "Họ tên", "Mã SV", "Mật khẩu tạm");
+        assertThat(rows.getFirst()).containsExactly("Số điện thoại", "Họ tên", "Mã HS", "Mật khẩu tạm");
         assertThat(rows).hasSize(3);
         assertThat(rows.get(1)).startsWith("0915000001", "Nguyễn Nhập Một", "HS900001");
         assertThat(rows.get(2).getFirst()).as("ô số vẫn giữ đủ 10 chữ số").isEqualTo("0915000002");
@@ -138,10 +138,10 @@ class UserImportIntegrationTest {
     }
 
     @Test
-    @DisplayName("File giảng viên hợp lệ: chỉ gán vai trò TEACHER (tổ TT)")
+    @DisplayName("File giáo viên hợp lệ: chỉ gán vai trò TEACHER (tổ TT)")
     void importValidTeacher() throws Exception {
         byte[] file = ImportFiles.xlsx(UserImportType.TEACHER, List.of(
-                row("0915000010", "Giảng Viên Nhập", "Nữ", "15/03/1985", "gv.nhap@fpt.edu.vn", null, "gv910", "tt",
+                row("0915000010", "Giáo Viên Nhập", "Nữ", "15/03/1985", "gv.nhap@fpt.edu.vn", null, "gv910", "tt",
                         "ThS.")));
 
         mockMvc.perform(upload(UserImportType.TEACHER, "giang-vien.xlsx", file))
@@ -169,8 +169,8 @@ class UserImportIntegrationTest {
                 .andExpect(content().string(allOf(
                         containsString("File có 1 lỗi, chưa người dùng nào được tạo"),
                         containsString("<td>3</td>"),
-                        containsString("<td>Mã ngành</td>"),
-                        containsString("Mã ngành &quot;XX&quot; không tồn tại"))));
+                        containsString("<td>Mã khối</td>"),
+                        containsString("Mã khối &quot;XX&quot; không tồn tại"))));
 
         for (String phone : List.of("0915000021", "0915000022", "0915000023")) {
             assertThat(userRepository.findByPhone(phone)).as(phone).isEmpty();
@@ -185,7 +185,7 @@ class UserImportIntegrationTest {
         mockMvc.perform(upload(UserImportType.STUDENT, "sinh-vien.xlsx", file))
                 .andExpect(content().string(allOf(
                         containsString("Số điện thoại đã được sử dụng"),
-                        containsString("Mã sinh viên đã tồn tại"))));
+                        containsString("Mã học sinh đã tồn tại"))));
     }
 
     @ParameterizedTest
@@ -250,7 +250,7 @@ class UserImportIntegrationTest {
     private static List<Object> student(Object phone, String code) {
         String name = switch (String.valueOf(phone)) {
             case "0915000001" -> "Nguyễn Nhập Một";
-            default -> "Sinh Viên Nhập";
+            default -> "Học Sinh Nhập";
         };
         return new ArrayList<>(row(phone, name, "Nam", LocalDate.of(2006, 9, 1), null, "Hà Nội", code, "K10",
                 "10A1", "2026", "Đang học"));

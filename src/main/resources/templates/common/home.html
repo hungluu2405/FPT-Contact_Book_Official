@@ -18,7 +18,7 @@
                     <li th:each="role : ${roles}">
                         <span class="badge rounded-pill role-badge" th:text="#{'role.' + ${role.roleCode}}">Vai trò</span>
                         <span th:if="${role.departmentName}" class="text-muted"
-                              th:text="${role.departmentName} + ' (' + ${role.departmentCode} + ')'">Bộ môn</span>
+                              th:text="${role.departmentName} + ' (' + ${role.departmentCode} + ')'">Tổ chuyên môn</span>
                     </li>
                 </ul>
             </div>

@@ -7,16 +7,16 @@
 */-->
 <div th:fragment="fields(showStudent, showTeacher, showParent, byRole)">
     <div class="card card-custom p-4 mb-3" th:if="${showStudent}" th:attr="data-role-section=${byRole} ? 'STUDENT' : null">
-        <h2 class="h5 mb-3" th:text="#{user.section.student}">Hồ sơ sinh viên</h2>
+        <h2 class="h5 mb-3" th:text="#{user.section.student}">Hồ sơ học sinh</h2>
         <div class="row g-3">
             <div class="col-md-4">
-                <label for="profile.studentCode" class="form-label" th:text="#{user.student-code} + ' *'">Mã SV</label>
+                <label for="profile.studentCode" class="form-label" th:text="#{user.student-code} + ' *'">Mã HS</label>
                 <input type="text" class="form-control" th:field="*{profile.studentCode}" maxlength="20"
                        th:classappend="${#fields.hasErrors('profile.studentCode')} ? 'is-invalid'">
                 <div class="invalid-feedback" th:errors="*{profile.studentCode}">Lỗi</div>
             </div>
             <div class="col-md-4">
-                <label for="profile.majorId" class="form-label" th:text="#{user.major} + ' *'">Ngành</label>
+                <label for="profile.majorId" class="form-label" th:text="#{user.major} + ' *'">Khối</label>
                 <select class="form-select" th:field="*{profile.majorId}" data-major-select
                         th:classappend="${#fields.hasErrors('profile.majorId')} ? 'is-invalid'">
                     <option value="" th:text="#{user.choose}">Chọn</option>
@@ -51,7 +51,7 @@
 
     <div class="card card-custom p-4 mb-3" th:if="${showTeacher}"
          th:attr="data-role-section=${byRole} ? 'TEACHER HEAD_OF_DEPARTMENT' : null">
-        <h2 class="h5 mb-3" th:text="#{user.section.teacher}">Hồ sơ giảng viên</h2>
+        <h2 class="h5 mb-3" th:text="#{user.section.teacher}">Hồ sơ giáo viên</h2>
         <div class="row g-3">
             <div class="col-md-4">
                 <label for="profile.teacherCode" class="form-label" th:text="#{user.teacher-code} + ' *'">Mã GV</label>
@@ -60,7 +60,7 @@
                 <div class="invalid-feedback" th:errors="*{profile.teacherCode}">Lỗi</div>
             </div>
             <div class="col-md-4">
-                <label for="profile.teacherDepartmentId" class="form-label" th:text="#{user.department} + ' *'">Bộ môn</label>
+                <label for="profile.teacherDepartmentId" class="form-label" th:text="#{user.department} + ' *'">Tổ chuyên môn</label>
                 <select class="form-select" th:field="*{profile.teacherDepartmentId}"
                         th:classappend="${#fields.hasErrors('profile.teacherDepartmentId')} ? 'is-invalid'">
                     <option value="" th:text="#{user.choose}">Chọn</option>

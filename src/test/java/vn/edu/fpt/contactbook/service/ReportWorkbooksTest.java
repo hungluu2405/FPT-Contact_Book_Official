@@ -22,12 +22,12 @@ class ReportWorkbooksTest {
     @Test
     @DisplayName("Mở lại được bằng POI: tiêu đề, một dòng trống, tên cột, rồi dữ liệu; số là ô số, null là ô trống")
     void layoutAndTypes() throws Exception {
-        byte[] content = ReportWorkbooks.write(List.of(new ReportWorkbooks.SheetData("Sinh viên",
-                List.of("Báo cáo điểm danh", "Học kỳ: HK1-2627"), List.of("Mã SV", "Chuyên cần (%)", "Ghi chú"),
+        byte[] content = ReportWorkbooks.write(List.of(new ReportWorkbooks.SheetData("Học sinh",
+                List.of("Báo cáo điểm danh", "Học kỳ: HK1-2627"), List.of("Mã HS", "Chuyên cần (%)", "Ghi chú"),
                 List.of(Arrays.asList("HS260001", new BigDecimal("87.5"), null)))));
 
         try (XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(content))) {
-            Sheet sheet = workbook.getSheet("Sinh viên");
+            Sheet sheet = workbook.getSheet("Học sinh");
             assertThat(sheet.getRow(0).getCell(0).getStringCellValue()).isEqualTo("Báo cáo điểm danh");
             assertThat(sheet.getRow(1).getCell(0).getStringCellValue()).isEqualTo("Học kỳ: HK1-2627");
             assertThat(sheet.getRow(2)).isNull();

@@ -51,7 +51,7 @@ class AuditLogIntegrationTest {
     @Autowired @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping handlerMapping;
 
     @Test
-    @DisplayName("Không phải ADMIN (GV, TBM, SV, PH) → 403 cả danh sách và chi tiết; chưa đăng nhập → /login")
+    @DisplayName("Không phải ADMIN (GV, TBM, HS, PH) → 403 cả danh sách và chi tiết; chưa đăng nhập → /login")
     void adminOnly() throws Exception {
         for (String phone : List.of(TestAccounts.TEACHER, TestAccounts.TEACHER_HEAD, TestAccounts.STUDENT,
                 TestAccounts.PARENT)) {

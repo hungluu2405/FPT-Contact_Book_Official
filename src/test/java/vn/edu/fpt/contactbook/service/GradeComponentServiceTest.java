@@ -217,7 +217,7 @@ class GradeComponentServiceTest {
     }
 
     @Test
-    @DisplayName("Đầu điểm của môn khác trên URL → 404; HEAD với môn bộ môn khác → 403 trước khi tra đầu điểm")
+    @DisplayName("Đầu điểm của môn khác trên URL → 404; HEAD với môn tổ chuyên môn khác → 403 trước khi tra đầu điểm")
     void componentMustBelongToSubjectInScope() {
         assertThatThrownBy(() -> service.editForm(ADMIN, 1L, 70L)).isInstanceOf(NotFoundException.class);
         assertThatThrownBy(() -> service.editForm(HEAD_SE, 50L, 70L)).isInstanceOf(AccessDeniedException.class);

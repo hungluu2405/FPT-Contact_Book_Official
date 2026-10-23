@@ -58,7 +58,7 @@ public class ParentLinkService {
         Parent parent = parentOf(parentUserId);
         String code = form.getOtherKey() == null ? "" : form.getOtherKey().strip().toUpperCase(Locale.ROOT);
         Student student = studentRepository.findByStudentCode(code)
-                .orElseThrow(() -> new BusinessException("Không tìm thấy sinh viên có mã này", "otherKey"));
+                .orElseThrow(() -> new BusinessException("Không tìm thấy học sinh có mã này", "otherKey"));
         link(actor, parent, student, form, ipAddress);
     }
 
@@ -99,7 +99,7 @@ public class ParentLinkService {
     /** Sinh viên ứng với user, hoặc lỗi nếu người dùng chưa có hồ sơ sinh viên. */
     private Student studentOf(Long studentUserId) {
         return studentRepository.findByUserId(studentUserId)
-                .orElseThrow(() -> new BusinessException("Người dùng này chưa có hồ sơ sinh viên"));
+                .orElseThrow(() -> new BusinessException("Người dùng này chưa có hồ sơ học sinh"));
     }
 
     private Parent parentOf(Long parentUserId) {

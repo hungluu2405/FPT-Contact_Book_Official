@@ -84,7 +84,7 @@ class NotificationAudienceTest {
     }
 
     @Test
-    @DisplayName("Giảng viên: chỉ lớp mình dạy và SV/PH của lớp mình; lớp khác, bộ môn, toàn trường (sửa form) bị 403")
+    @DisplayName("Giáo viên: chỉ lớp mình dạy và HS/PH của lớp mình; lớp khác, tổ chuyên môn, toàn trường (sửa form) bị 403")
     void teacherScope() {
         assertThat(audience.allowedTypes(TEACHER))
                 .containsExactlyInAnyOrder(NotificationTargetType.CLASS_SECTION, NotificationTargetType.USER);
@@ -105,7 +105,7 @@ class NotificationAudienceTest {
     }
 
     @Test
-    @DisplayName("Trưởng bộ môn: bộ môn mình, lớp thuộc bộ môn mình, GV bộ môn mình; bộ môn khác bị 403")
+    @DisplayName("Tổ trưởng chuyên môn: tổ chuyên môn mình, lớp thuộc tổ chuyên môn mình, GV tổ chuyên môn mình; tổ chuyên môn khác bị 403")
     void headScope() {
         assertThat(audience.allowedTypes(HEAD_SE)).containsExactlyInAnyOrder(NotificationTargetType.DEPARTMENT,
                 NotificationTargetType.CLASS_SECTION, NotificationTargetType.USER);
@@ -122,7 +122,7 @@ class NotificationAudienceTest {
     }
 
     @Test
-    @DisplayName("ADMIN gửi mọi phạm vi; sinh viên không được gửi phạm vi nào")
+    @DisplayName("ADMIN gửi mọi phạm vi; học sinh không được gửi phạm vi nào")
     void adminAndStudent() {
         assertThat(audience.allowedTypes(ADMIN)).containsExactlyInAnyOrder(NotificationTargetType.values());
         audience.requireCanSend(ADMIN, NotificationTargetType.ALL, null);
@@ -134,7 +134,7 @@ class NotificationAudienceTest {
     }
 
     @Test
-    @DisplayName("Người nhận lớp học phần = SV ENROLLED + PH liên kết, loại trùng (người vừa là SV vừa là PH)")
+    @DisplayName("Người nhận lớp môn học = HS ENROLLED + PH liên kết, loại trùng (người vừa là HS vừa là PH)")
     void sectionRecipientsDeduplicated() {
         when(audienceRepository.studentsOfSection(10L)).thenReturn(List.of(4L, 18L));
         when(audienceRepository.parentsOfSection(10L)).thenReturn(List.of(5L, 18L, 5L));
@@ -162,7 +162,7 @@ class NotificationAudienceTest {
     }
 
     @Test
-    @DisplayName("SV và PH của một nhóm sinh viên (thông báo tự động); danh sách rỗng không truy vấn")
+    @DisplayName("HS và PH của một nhóm học sinh (thông báo tự động); danh sách rỗng không truy vấn")
     void studentsAndParents() {
         when(audienceRepository.studentUsers(anyCollection())).thenReturn(List.of(4L));
         when(audienceRepository.parentUsers(anyCollection())).thenReturn(List.of(5L, 4L));
@@ -172,7 +172,7 @@ class NotificationAudienceTest {
     }
 
     @Test
-    @DisplayName("Ô chọn lớp học phần: học kỳ chưa kết thúc (end_date ≥ hôm nay) và học kỳ vừa kết thúc gần nhất, "
+    @DisplayName("Ô chọn lớp môn học: học kỳ chưa kết thúc (end_date ≥ hôm nay) và học kỳ vừa kết thúc gần nhất, "
             + "theo phạm vi người gửi")
     void sectionOptionsOpenAndLatestEnded() {
         LocalDate today = AppTime.today();
@@ -210,7 +210,7 @@ class NotificationAudienceTest {
     }
 
     @Test
-    @DisplayName("Người không có phạm vi lớp học phần (SV): rỗng, không truy vấn")
+    @DisplayName("Người không có phạm vi lớp môn học (HS): rỗng, không truy vấn")
     void sectionOptionsNoScope() {
         when(semesterRepository.findByEndDateGreaterThanEqualOrderByStartDateDesc(any()))
                 .thenReturn(List.of(semester(1L, AppTime.today())));

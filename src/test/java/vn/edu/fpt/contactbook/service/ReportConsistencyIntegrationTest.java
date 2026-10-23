@@ -49,7 +49,7 @@ class ReportConsistencyIntegrationTest {
     @Autowired UserRepository userRepository;
 
     @Test
-    @DisplayName("Điểm danh một lớp: từng sinh viên (số buổi, chuyên cần, tỷ lệ vắng, cảnh báo) giống hệt trang thống kê")
+    @DisplayName("Điểm danh một lớp: từng học sinh (số buổi, chuyên cần, tỷ lệ vắng, cảnh báo) giống hệt trang thống kê")
     void attendanceMatchesSectionStatistics() {
         AppUserPrincipal head = principal(TestAccounts.TEACHER_HEAD);
 
@@ -71,7 +71,7 @@ class ReportConsistencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("Điểm một lớp: trung bình môn từng sinh viên giống bảng điểm, kể cả khi còn thiếu điểm")
+    @DisplayName("Điểm một lớp: trung bình môn từng học sinh giống bảng điểm, kể cả khi còn thiếu điểm")
     void gradeAveragesMatchGradeSheet() {
         AppUserPrincipal head = principal(TestAccounts.TEACHER_HEAD);
         // Cho enrollment 17 đủ điểm (thêm đầu điểm 11, 12, 13, chưa công bố); enrollment 18 vẫn thiếu.

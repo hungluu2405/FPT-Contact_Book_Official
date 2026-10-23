@@ -70,7 +70,7 @@
             </div>
             <div class="text-danger small mt-1" th:if="${#fields.hasErrors('roles')}" th:errors="*{roles}">Lỗi</div>
             <div class="mt-3" data-role-section="HEAD_OF_DEPARTMENT">
-                <label for="headDepartmentId" class="form-label" th:text="#{user.head-department} + ' *'">Bộ môn</label>
+                <label for="headDepartmentId" class="form-label" th:text="#{user.head-department} + ' *'">Tổ chuyên môn</label>
                 <select class="form-select" th:field="*{headDepartmentId}"
                         th:classappend="${#fields.hasErrors('headDepartmentId')} ? 'is-invalid'">
                     <option value="" th:text="#{user.choose}">Chọn</option>

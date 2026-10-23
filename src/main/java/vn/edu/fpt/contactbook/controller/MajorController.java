@@ -74,7 +74,7 @@ public class MajorController {
         if (!bindingResult.hasErrors()) {
             try {
                 Long id = majorService.create(actor, form, request.getRemoteAddr());
-                redirectAttributes.addFlashAttribute("successMessage", "Đã thêm ngành");
+                redirectAttributes.addFlashAttribute("successMessage", "Đã thêm khối");
                 return "redirect:" + BASE + "/" + id;
             } catch (BusinessException e) {
                 FormErrors.apply(bindingResult, e);
@@ -103,7 +103,7 @@ public class MajorController {
         if (!bindingResult.hasErrors()) {
             try {
                 majorService.update(actor, id, form, request.getRemoteAddr());
-                redirectAttributes.addFlashAttribute("successMessage", "Đã lưu ngành");
+                redirectAttributes.addFlashAttribute("successMessage", "Đã lưu khối");
                 return "redirect:" + BASE + "/" + id;
             } catch (BusinessException e) {
                 FormErrors.apply(bindingResult, e);

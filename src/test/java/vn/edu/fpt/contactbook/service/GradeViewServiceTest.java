@@ -142,7 +142,7 @@ class GradeViewServiceTest {
     }
 
     @Test
-    @DisplayName("Sinh viên luôn xem của chính mình, studentId trong request bị bỏ qua")
+    @DisplayName("Học sinh luôn xem của chính mình, studentId trong request bị bỏ qua")
     void studentIdIgnored() {
         when(gradeRepository.findPublishedByEnrollmentIds(anyCollection())).thenReturn(List.of());
 

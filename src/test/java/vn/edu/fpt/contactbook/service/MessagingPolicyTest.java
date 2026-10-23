@@ -62,11 +62,11 @@ class MessagingPolicyTest {
     static Stream<Arguments> rules() {
         return Stream.of(
                 // người gửi, người nhận, đang dạy SV, đang dạy con PH, kết quả
-                Arguments.of("SV -> GV đang dạy", STUDENT, TEACHER, true, false, true),
-                Arguments.of("SV -> GV hết học kỳ / không dạy", STUDENT, TEACHER, false, false, false),
-                Arguments.of("SV -> TBM đang dạy", STUDENT, HEAD, true, false, true),
-                Arguments.of("GV -> SV đang dạy", TEACHER, STUDENT, true, false, true),
-                Arguments.of("GV -> SV hết học kỳ / không dạy", TEACHER, STUDENT, false, false, false),
+                Arguments.of("HS -> GV đang dạy", STUDENT, TEACHER, true, false, true),
+                Arguments.of("HS -> GV hết học kỳ / không dạy", STUDENT, TEACHER, false, false, false),
+                Arguments.of("HS -> TBM đang dạy", STUDENT, HEAD, true, false, true),
+                Arguments.of("GV -> HS đang dạy", TEACHER, STUDENT, true, false, true),
+                Arguments.of("GV -> HS hết học kỳ / không dạy", TEACHER, STUDENT, false, false, false),
                 Arguments.of("PH -> GV đang dạy con", PARENT, TEACHER, false, true, true),
                 Arguments.of("PH -> GV không dạy con", PARENT, TEACHER, false, false, false),
                 Arguments.of("GV -> PH có con đang học", TEACHER, PARENT, false, true, true),
@@ -74,18 +74,18 @@ class MessagingPolicyTest {
                 Arguments.of("GV -> GV", TEACHER, TEACHER, false, false, true),
                 Arguments.of("GV -> TBM", TEACHER, HEAD, false, false, true),
                 Arguments.of("TBM -> GV", HEAD, TEACHER, false, false, true),
-                Arguments.of("SV -> SV", STUDENT, STUDENT, true, true, false),
+                Arguments.of("HS -> HS", STUDENT, STUDENT, true, true, false),
                 Arguments.of("PH -> PH", PARENT, PARENT, true, true, false),
-                Arguments.of("SV -> PH", STUDENT, PARENT, true, true, false),
-                Arguments.of("PH -> SV", PARENT, STUDENT, true, true, false),
+                Arguments.of("HS -> PH", STUDENT, PARENT, true, true, false),
+                Arguments.of("PH -> HS", PARENT, STUDENT, true, true, false),
                 Arguments.of("ADMIN -> GV", ADMIN, TEACHER, true, true, false),
                 Arguments.of("GV -> ADMIN", TEACHER, ADMIN, true, true, false),
-                Arguments.of("ADMIN -> SV", ADMIN, STUDENT, true, true, false),
+                Arguments.of("ADMIN -> HS", ADMIN, STUDENT, true, true, false),
                 Arguments.of("ADMIN + GV -> GV", Set.of(RoleCodes.ADMIN, RoleCodes.TEACHER), TEACHER, false, false,
                         true),
-                Arguments.of("GV + PH -> GV (vai trò giảng viên)", Set.of(RoleCodes.TEACHER, RoleCodes.PARENT),
+                Arguments.of("GV + PH -> GV (vai trò giáo viên)", Set.of(RoleCodes.TEACHER, RoleCodes.PARENT),
                         TEACHER, false, false, true),
-                Arguments.of("PH -> GV + SV, GV đang dạy con", PARENT, Set.of(RoleCodes.TEACHER, RoleCodes.STUDENT),
+                Arguments.of("PH -> GV + HS, GV đang dạy con", PARENT, Set.of(RoleCodes.TEACHER, RoleCodes.STUDENT),
                         false, true, true)
         );
     }
@@ -103,7 +103,7 @@ class MessagingPolicyTest {
     }
 
     @Test
-    @DisplayName("Quan hệ được hỏi đúng chiều: giảng viên là bên nhận khi SV / PH gửi")
+    @DisplayName("Quan hệ được hỏi đúng chiều: giáo viên là bên nhận khi HS / PH gửi")
     void relationDirection() {
         stubRoles(TEACHER);
         when(contactRepository.teachesStudentNow(OTHER, ME)).thenReturn(true);
@@ -137,7 +137,7 @@ class MessagingPolicyTest {
     }
 
     @Test
-    @DisplayName("Vai trò dùng tin nhắn: SV, PH, GV, TBM; chỉ ADMIN thì không")
+    @DisplayName("Vai trò dùng tin nhắn: HS, PH, GV, TBM; chỉ ADMIN thì không")
     void usesMessaging() {
         assertThat(MessagingPolicy.usesMessaging(STUDENT)).isTrue();
         assertThat(MessagingPolicy.usesMessaging(PARENT)).isTrue();
