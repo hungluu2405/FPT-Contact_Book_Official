@@ -4,8 +4,9 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/teacher_service.dart'
 
 import 'auth_contract_test.dart' show ContractClient, apiError, kSeedPassword;
 
-/// Hợp đồng lịch dạy, lịch thi, lớp và bảng điểm danh của giáo viên (giai
-/// đoạn 10d-1, 10d-2), chỉ đọc; không lưu điểm danh vì làm đổi dữ liệu dev:
+/// Hợp đồng lịch dạy, lịch thi, lớp, bảng điểm danh và hàng đợi duyệt đơn của
+/// giáo viên (giai đoạn 10d), chỉ đọc; không lưu điểm danh hay duyệt đơn vì
+/// làm đổi dữ liệu dev:
 /// 0900000003 là giáo viên tổ Toán – Tin học, 0900000002 là tổ trưởng.
 ///
 /// Chạy: `flutter test test_contract` khi backend đang chạy ở cổng 8080.
@@ -78,6 +79,36 @@ void main() {
 
     await expectLater(
       TeacherService(client.api).fetchSectionAttendance(27),
+      throwsA(apiError('FORBIDDEN')),
+    );
+  });
+
+  test('the review queue matches the models for every filter', () async {
+    final client = ContractClient();
+    await client.auth.login('0900000003', kSeedPassword);
+    final service = TeacherService(client.api);
+
+    final pending = await service.fetchReviewRequests(status: 'PENDING');
+    final all = await service.fetchReviewRequests(status: 'ALL');
+
+    expect(all.totalElements, greaterThanOrEqualTo(pending.totalElements));
+    for (final item in pending.items) {
+      expect(item.status, 'PENDING');
+      final detail = await service.fetchReviewRequest(item.id);
+      expect(detail.canReview, isTrue);
+    }
+    for (final item in all.items.where((i) => i.status != 'PENDING')) {
+      final detail = await service.fetchReviewRequest(item.id);
+      expect(detail.canReview, isFalse);
+    }
+  });
+
+  test('a student cannot use the review queue', () async {
+    final client = ContractClient();
+    await client.auth.login('0900000004', kSeedPassword);
+
+    await expectLater(
+      TeacherService(client.api).fetchReviewRequests(),
       throwsA(apiError('FORBIDDEN')),
     );
   });

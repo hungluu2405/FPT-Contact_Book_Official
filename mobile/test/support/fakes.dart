@@ -17,6 +17,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/notification_contr
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_review_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/teacher_section_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/picked_file_model.dart';
@@ -578,6 +579,7 @@ Map<String, dynamic> requestDetailJson({
   String type = 'LEAVE',
   String status = 'PENDING',
   bool canCancel = true,
+  bool canReview = false,
   bool sentByParent = false,
   List<Map<String, dynamic>> files = const [],
   List<Map<String, dynamic>> reviews = const [],
@@ -600,7 +602,7 @@ Map<String, dynamic> requestDetailJson({
   'files': files,
   'reviews': reviews,
   'canCancel': canCancel,
-  'canReview': false,
+  'canReview': canReview,
 };
 
 Map<String, dynamic> leaveOptionsJson() => {
@@ -955,6 +957,8 @@ class TestApp {
       );
   late final AttendanceSheetController attendanceSheetController =
       AttendanceSheetController(TeacherService(apiClient));
+  late final RequestReviewController requestReviewController =
+      RequestReviewController(TeacherService(apiClient), attachmentService);
   late final RequestController requestController = RequestController(
     RequestService(apiClient),
     attachmentService,
@@ -974,8 +978,8 @@ class TestApp {
       );
 
   /// Trả lời các request của trang chủ: số chưa đọc, (PH) danh sách con và
-  /// lịch tuần (thẻ "Lịch học hôm nay") của SV, của từng con và lịch dạy
-  /// của GV.
+  /// lịch tuần (thẻ "Lịch học hôm nay") của SV, của từng con, lịch dạy và
+  /// số đơn chờ duyệt (không có) của GV.
   void stubHome({
     int unread = 0,
     List<Map<String, dynamic>> children = const [],
@@ -990,6 +994,7 @@ class TestApp {
     final week = FakeReply(200, weekJson(items: {'2026-10-21': today}));
     http.reply('GET', '/student/schedule/week', week);
     http.reply('GET', '/teacher/schedule/week', week);
+    http.reply('GET', '/teacher/requests', FakeReply(200, pageJson([])));
     for (final child in children) {
       http.reply('GET', '/parent/children/${child['id']}/schedule/week', week);
     }

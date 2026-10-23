@@ -30,6 +30,7 @@ Future<TestApp> pumpApp(WidgetTester tester, {TestApp? app}) async {
           testApp.departmentNotificationController,
       teacherSectionController: testApp.teacherSectionController,
       attendanceSheetController: testApp.attendanceSheetController,
+      requestReviewController: testApp.requestReviewController,
     ),
   );
   await tester.pumpAndSettle();

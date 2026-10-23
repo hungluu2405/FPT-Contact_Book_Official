@@ -84,9 +84,7 @@ class _EditAttendanceScreenState extends State<EditAttendanceScreen> {
     }
     _reasonCtrl.clear();
     messenger.showSnackBar(
-      SnackBar(
-        content: Text('Đã lưu điểm danh (${result.changed} học sinh).'),
-      ),
+      SnackBar(content: Text('Đã lưu điểm danh (${result.changed} học sinh).')),
     );
   }
 
@@ -196,7 +194,9 @@ class _EditAttendanceScreenState extends State<EditAttendanceScreen> {
               ),
             for (final row in sheet.rows)
               _StudentRow(
-                key: ValueKey('${sheet.sessionId}-${row.studentId}-${row.note}'),
+                key: ValueKey(
+                  '${sheet.sessionId}-${row.studentId}-${row.note}',
+                ),
                 row: row,
                 status: _controller.statusOf(row.studentId),
                 note: _controller.noteOf(row.studentId),

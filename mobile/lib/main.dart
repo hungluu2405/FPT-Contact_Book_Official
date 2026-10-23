@@ -13,6 +13,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/notification_contr
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_review_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/teacher_section_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/change_password_screen.dart';
@@ -77,6 +78,10 @@ void main() {
         studentService,
       ),
       attendanceSheetController: AttendanceSheetController(teacherService),
+      requestReviewController: RequestReviewController(
+        teacherService,
+        attachmentService,
+      ),
     ),
   );
 }
@@ -97,6 +102,7 @@ class MyApp extends StatelessWidget {
   final DepartmentNotificationController departmentNotificationController;
   final TeacherSectionController teacherSectionController;
   final AttendanceSheetController attendanceSheetController;
+  final RequestReviewController requestReviewController;
 
   const MyApp({
     super.key,
@@ -115,6 +121,7 @@ class MyApp extends StatelessWidget {
     required this.departmentNotificationController,
     required this.teacherSectionController,
     required this.attendanceSheetController,
+    required this.requestReviewController,
   });
 
   @override
@@ -155,6 +162,7 @@ class MyApp extends StatelessWidget {
             departmentNotificationController: departmentNotificationController,
             teacherSectionController: teacherSectionController,
             attendanceSheetController: attendanceSheetController,
+            requestReviewController: requestReviewController,
           ),
         },
       ),

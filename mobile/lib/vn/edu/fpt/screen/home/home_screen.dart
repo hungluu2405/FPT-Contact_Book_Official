@@ -10,6 +10,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.d
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_review_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/teacher_section_controller.dart';
@@ -24,6 +25,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/notification/list_noti
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/request/list_request_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/list_exam_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/view_schedule_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/teacher/list_review_request_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/teacher/list_section_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/app_shell_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dart';
@@ -53,6 +55,7 @@ class HomeScreen extends StatefulWidget {
   final DepartmentNotificationController departmentNotificationController;
   final TeacherSectionController teacherSectionController;
   final AttendanceSheetController attendanceSheetController;
+  final RequestReviewController requestReviewController;
 
   const HomeScreen({
     super.key,
@@ -70,6 +73,7 @@ class HomeScreen extends StatefulWidget {
     required this.departmentNotificationController,
     required this.teacherSectionController,
     required this.attendanceSheetController,
+    required this.requestReviewController,
   });
 
   @override
@@ -90,11 +94,15 @@ class _HomeScreenState extends State<HomeScreen> {
     widget.requestController.reset();
     widget.departmentController.reset();
     widget.departmentNotificationController.reset();
+    widget.requestReviewController.reset();
     final user = widget.controller.currentUser;
     if (user != null) {
       widget.homeController.start(user);
       if (user.isHead) {
         widget.departmentController.loadDepartments();
+      }
+      if (widget.homeController.isTeacherView) {
+        widget.requestReviewController.loadPendingCount();
       }
     }
   }
@@ -108,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
     widget.requestController.reset();
     widget.departmentController.reset();
     widget.departmentNotificationController.reset();
+    widget.requestReviewController.reset();
     super.dispose();
   }
 
@@ -142,6 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 widget.departmentNotificationController,
             teacherSectionController: widget.teacherSectionController,
             attendanceSheetController: widget.attendanceSheetController,
+            requestReviewController: widget.requestReviewController,
           ),
         ),
         AppShellTab(
@@ -181,6 +191,7 @@ class _DashboardTab extends StatelessWidget {
   final DepartmentNotificationController departmentNotificationController;
   final TeacherSectionController teacherSectionController;
   final AttendanceSheetController attendanceSheetController;
+  final RequestReviewController requestReviewController;
 
   const _DashboardTab({
     required this.controller,
@@ -194,6 +205,7 @@ class _DashboardTab extends StatelessWidget {
     required this.departmentNotificationController,
     required this.teacherSectionController,
     required this.attendanceSheetController,
+    required this.requestReviewController,
   });
 
   /// Tên người đang được xem: con đang chọn, hoặc chính SV.
@@ -295,12 +307,25 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
-  /// Tải lại trang chủ; tổ trưởng tải lại cả khối "Tổ chuyên môn".
+  /// Tải lại trang chủ; tổ trưởng tải lại cả khối "Tổ chuyên môn", GV tải
+  /// lại số đơn chờ duyệt.
   Future<void> _refresh() => Future.wait([
     controller.refresh(),
     if (controller.user?.isHead ?? false)
       departmentController.loadDepartments(),
+    if (controller.isTeacherView) requestReviewController.loadPendingCount(),
   ]);
+
+  void _openReviews(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ListReviewRequestScreen(
+          controller: requestReviewController,
+          viewerName: _viewerName,
+        ),
+      ),
+    );
+  }
 
   void _openTeachingSchedule(BuildContext context) {
     Navigator.of(context).push(
@@ -422,6 +447,8 @@ class _DashboardTab extends StatelessWidget {
             onSchedule: () => _openTeachingSchedule(context),
             onExams: () => _openTeachingExams(context),
             onSections: () => _openSections(context),
+            onReviews: () => _openReviews(context),
+            reviewController: requestReviewController,
           ),
         ],
       );
@@ -607,17 +634,20 @@ class _FeatureGrid extends StatelessWidget {
   }
 }
 
-/// Lưới chức năng của giáo viên. "Duyệt đơn" làm ở 10d-3; tới lúc đó hiện
-/// "Sắp có".
+/// Lưới chức năng của giáo viên; ô "Duyệt đơn" hiện số đơn chờ duyệt.
 class _TeacherGrid extends StatelessWidget {
   final VoidCallback onSchedule;
   final VoidCallback onExams;
   final VoidCallback onSections;
+  final VoidCallback onReviews;
+  final RequestReviewController reviewController;
 
   const _TeacherGrid({
     required this.onSchedule,
     required this.onExams,
     required this.onSections,
+    required this.onReviews,
+    required this.reviewController,
   });
 
   @override
@@ -645,9 +675,14 @@ class _TeacherGrid extends StatelessWidget {
           label: 'Lớp của tôi',
           onTap: onSections,
         ),
-        const FeatureTileWidget(
-          icon: Icons.fact_check_outlined,
-          label: 'Duyệt đơn',
+        ListenableBuilder(
+          listenable: reviewController,
+          builder: (context, _) => FeatureTileWidget(
+            icon: Icons.fact_check_outlined,
+            label: 'Duyệt đơn',
+            onTap: onReviews,
+            badgeCount: reviewController.pendingCount,
+          ),
         ),
       ],
     );

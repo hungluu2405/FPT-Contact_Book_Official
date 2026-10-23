@@ -160,7 +160,8 @@ class RequestReviewModel {
 
 /// Chi tiết đơn theo `GET .../requests/{id}` (RequestDetail).
 /// [reviewerName] null nghĩa là phòng quản trị duyệt; [canCancel] là người
-/// xem gửi đơn và đơn còn chờ duyệt.
+/// xem gửi đơn và đơn còn chờ duyệt; [canReview] là người xem duyệt được đơn
+/// (GV phụ trách, đơn còn chờ duyệt).
 class RequestDetailModel {
   int _id;
   String _type;
@@ -180,6 +181,7 @@ class RequestDetailModel {
   List<AttachmentModel> _files;
   List<RequestReviewModel> _reviews;
   bool _canCancel;
+  bool _canReview;
 
   RequestDetailModel({
     required this._id,
@@ -200,6 +202,7 @@ class RequestDetailModel {
     List<AttachmentModel> files = const [],
     List<RequestReviewModel> reviews = const [],
     this._canCancel = false,
+    this._canReview = false,
   }) : _files = List<AttachmentModel>.of(files),
        _reviews = List<RequestReviewModel>.of(reviews);
 
@@ -229,6 +232,7 @@ class RequestDetailModel {
           )
           .toList(),
       canCancel: json['canCancel'] as bool? ?? false,
+      canReview: json['canReview'] as bool? ?? false,
     );
   }
 
@@ -251,6 +255,7 @@ class RequestDetailModel {
     'files': [for (final file in _files) file.toJson()],
     'reviews': [for (final review in _reviews) review.toJson()],
     'canCancel': _canCancel,
+    'canReview': _canReview,
   };
 
   int get id => _id;
@@ -309,4 +314,42 @@ class RequestDetailModel {
 
   bool get canCancel => _canCancel;
   set canCancel(bool value) => _canCancel = value;
+
+  bool get canReview => _canReview;
+  set canReview(bool value) => _canReview = value;
+}
+
+/// Kết quả duyệt đơn của GV (`POST /teacher/requests/{id}/review`):
+/// [excusedSessions] là số buổi vắng không phép được chuyển thành vắng có
+/// phép; [request] là đơn sau khi duyệt.
+class ReviewResultModel {
+  String _decision;
+  int _excusedSessions;
+  RequestDetailModel _request;
+
+  ReviewResultModel({
+    required this._decision,
+    this._excusedSessions = 0,
+    required this._request,
+  });
+
+  factory ReviewResultModel.fromJson(Map<String, dynamic> json) {
+    return ReviewResultModel(
+      decision: json['decision'] as String? ?? RequestStatus.approved,
+      excusedSessions: (json['excusedSessions'] as num?)?.toInt() ?? 0,
+      request: RequestDetailModel.fromJson(
+        json['request'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  /// `APPROVED` hoặc `REJECTED`.
+  String get decision => _decision;
+  set decision(String value) => _decision = value;
+
+  int get excusedSessions => _excusedSessions;
+  set excusedSessions(int value) => _excusedSessions = value;
+
+  RequestDetailModel get request => _request;
+  set request(RequestDetailModel value) => _request = value;
 }

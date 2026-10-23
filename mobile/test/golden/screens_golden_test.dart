@@ -1027,6 +1027,39 @@ void main() {
     await expectScreen(tester, 'sent_notification_detail');
   });
 
+  /// Hai đơn chờ GV duyệt; đơn 1 do PH gửi thay, có tệp minh chứng.
+  void stubReviews(TestApp app) {
+    app.http.reply(
+      'GET',
+      '/teacher/requests',
+      FakeReply(
+        200,
+        pageJson([
+          requestJson(requesterName: 'Lê Văn Phụ'),
+          requestJson(
+            id: 2,
+            title: 'Xin nghỉ đi khám răng',
+            fromDate: '2026-10-26',
+            toDate: '2026-10-26',
+          ),
+        ]),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/teacher/requests/1',
+      FakeReply(
+        200,
+        requestDetailJson(
+          canCancel: false,
+          canReview: true,
+          sentByParent: true,
+          files: [attachmentJson(fileName: 'giay-kham-benh.pdf')],
+        ),
+      ),
+    );
+  }
+
   /// Giáo viên thường đã đăng nhập; hôm nay dạy ba buổi như [kGoldenToday].
   Future<TestApp> pumpTeacherHome(WidgetTester tester) async {
     usePhoneScreen(tester);
@@ -1040,6 +1073,7 @@ void main() {
       ),
     );
     app.stubHome(unread: 2, today: kGoldenToday);
+    stubReviews(app);
     await pumpApp(tester, app: app);
     return app;
   }
@@ -1162,5 +1196,22 @@ void main() {
     await tapVisible(tester, 'Buổi 2');
 
     await expectScreen(tester, 'attendance_sheet_locked');
+  });
+
+  testWidgets('review request list', (tester) async {
+    await pumpTeacherHome(tester);
+    await tapVisible(tester, 'Duyệt đơn');
+
+    await expectScreen(tester, 'review_request_list');
+  });
+
+  testWidgets('review request detail', (tester) async {
+    await pumpTeacherHome(tester);
+    await tapVisible(tester, 'Duyệt đơn');
+    await tapVisible(tester, 'Đơn xin nghỉ học từ 22/10/2026 đến 23/10/2026');
+    await tester.drag(find.byType(ListView).last, const Offset(0, -400));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'review_request_detail');
   });
 }

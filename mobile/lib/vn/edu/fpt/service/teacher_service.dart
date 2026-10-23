@@ -1,6 +1,7 @@
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/api_error_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/attendance_sheet_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/page_model.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/request_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/semester_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/teacher_section_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/service/api_client.dart';
@@ -42,6 +43,42 @@ class TeacherService {
       query: {'sessionPage': sessionPage, 'studentPage': studentPage},
     );
     return SectionAttendanceModel.fromJson(data as Map<String, dynamic>);
+  }
+
+  /// Đơn mình phụ trách duyệt; [status] null là đơn chờ duyệt, `ALL` là mọi
+  /// trạng thái.
+  Future<PageModel<RequestModel>> fetchReviewRequests({
+    String? status,
+    int page = 0,
+  }) async {
+    final data = await _apiClient.get(
+      '/teacher/requests',
+      query: {'status': ?status, 'page': page},
+    );
+    return PageModel.fromJson(
+      data as Map<String, dynamic>,
+      RequestModel.fromJson,
+    );
+  }
+
+  Future<RequestDetailModel> fetchReviewRequest(int id) async {
+    final data = await _apiClient.get('/teacher/requests/$id');
+    return RequestDetailModel.fromJson(data as Map<String, dynamic>);
+  }
+
+  /// Duyệt ([decision] `APPROVED`) hoặc từ chối (`REJECTED`, bắt buộc
+  /// [comment]); [comment] rỗng thì không gửi.
+  Future<ReviewResultModel> review(
+    int id, {
+    required String decision,
+    String? comment,
+  }) async {
+    final text = comment?.trim() ?? '';
+    final data = await _apiClient.post(
+      '/teacher/requests/$id/review',
+      data: {'decision': decision, 'comment': ?(text.isEmpty ? null : text)},
+    );
+    return ReviewResultModel.fromJson(data as Map<String, dynamic>);
   }
 
   static String _sheetPath(int sectionId, int sessionId) =>

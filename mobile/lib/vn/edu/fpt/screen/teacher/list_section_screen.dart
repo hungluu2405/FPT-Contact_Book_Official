@@ -193,7 +193,10 @@ class _SectionCard extends StatelessWidget {
                   color: AppColors.orangeLight,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.class_outlined, color: AppColors.orange),
+                child: const Icon(
+                  Icons.class_outlined,
+                  color: AppColors.orange,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(

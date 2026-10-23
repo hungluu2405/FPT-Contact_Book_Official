@@ -138,7 +138,7 @@ void main() {
     for (final label in ['Lịch dạy', 'Lịch thi', 'Lớp của tôi', 'Duyệt đơn']) {
       expect(find.widgetWithText(FeatureTileWidget, label), findsOneWidget);
     }
-    expect(find.text('Sắp có'), findsOneWidget);
+    expect(find.text('Sắp có'), findsNothing);
     expect(find.text('Tổ chuyên môn'), findsNothing);
     expect(app.http.count('GET', '/teacher/schedule/week'), 1);
   });

@@ -96,4 +96,49 @@ void main() {
       expect(result.firstTime, isFalse);
     },
   );
+
+  test('review queue, request and review use their paths and body', () async {
+    final app = TestApp(accessToken: 'a', refreshToken: 'r');
+    app.http.reply(
+      'GET',
+      '/teacher/requests',
+      FakeReply(200, pageJson([requestJson()], totalElements: 4)),
+    );
+    app.http.reply(
+      'GET',
+      '/teacher/requests/1',
+      FakeReply(200, requestDetailJson(canReview: true)),
+    );
+    app.http.reply(
+      'POST',
+      '/teacher/requests/1/review',
+      FakeReply(200, {
+        'decision': 'REJECTED',
+        'excusedSessions': 0,
+        'request': requestDetailJson(status: 'REJECTED'),
+      }),
+    );
+    final service = TeacherService(app.apiClient);
+
+    final queue = await service.fetchReviewRequests();
+    await service.fetchReviewRequests(status: 'ALL', page: 2);
+    final detail = await service.fetchReviewRequest(1);
+    final result = await service.review(
+      1,
+      decision: 'REJECTED',
+      comment: '  Thiếu giấy  ',
+    );
+
+    expect(queue.totalElements, 4);
+    expect(app.http.requests[0].queryParameters, {'page': 0});
+    expect(app.http.requests[1].queryParameters, {'status': 'ALL', 'page': 2});
+    expect(detail.canReview, isTrue);
+    expect(app.http.requests.last.data, {
+      'decision': 'REJECTED',
+      'comment': 'Thiếu giấy',
+    });
+    expect(result.decision, 'REJECTED');
+    expect(result.request.status, 'REJECTED');
+    expect(result.request.canReview, isFalse);
+  });
 }
