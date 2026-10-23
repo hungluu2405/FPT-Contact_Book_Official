@@ -14,6 +14,7 @@ class ExamController extends ChangeNotifier {
   final AppClock _clock;
 
   int? _studentId;
+  bool _teacher = false;
   SemesterModel? _semester;
   final List<ExamModel> _exams = [];
   int _page = -1;
@@ -30,6 +31,9 @@ class ExamController extends ChangeNotifier {
   SemesterModel? get semester => _semester;
 
   List<ExamModel> get exams => List<ExamModel>.unmodifiable(_exams);
+
+  /// Đang xem lịch thi các lớp giáo viên dạy.
+  bool get isTeacher => _teacher;
 
   /// Tổng số lịch thi của học kỳ (mọi trang).
   int get total => _total;
@@ -63,9 +67,11 @@ class ExamController extends ChangeNotifier {
         date.isBefore(DateTime(now.year, now.month, now.day));
   }
 
-  /// Mở lịch thi của [studentId] (null: SV xem của mình) từ trang đầu.
-  Future<void> open(int? studentId) {
+  /// Mở lịch thi của [studentId] (null: SV xem của mình) từ trang đầu;
+  /// [teacher] là GV xem lịch thi các lớp mình dạy.
+  Future<void> open(int? studentId, {bool teacher = false}) {
     _studentId = studentId;
+    _teacher = teacher;
     return reload();
   }
 
@@ -95,6 +101,7 @@ class ExamController extends ChangeNotifier {
       final result = await _studentService.fetchExams(
         _studentId,
         page: _page + 1,
+        teacher: _teacher,
       );
       if (generation != _generation) {
         return;

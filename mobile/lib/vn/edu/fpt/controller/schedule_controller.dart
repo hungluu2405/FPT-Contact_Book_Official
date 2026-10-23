@@ -17,6 +17,7 @@ class ScheduleController extends ChangeNotifier {
   final AppClock _clock;
 
   int? _studentId;
+  bool _teacher = false;
   SemesterModel? _semester;
   ScheduleWeekModel? _week;
   String? _selectedDate;
@@ -36,6 +37,9 @@ class ScheduleController extends ChangeNotifier {
   ScheduleController(this._studentService, {this._clock = vietnamNow});
 
   int? get studentId => _studentId;
+
+  /// Đang xem lịch dạy của giáo viên (thay vì lịch học).
+  bool get isTeacher => _teacher;
 
   SemesterModel? get semester => _semester;
 
@@ -73,9 +77,11 @@ class ScheduleController extends ChangeNotifier {
 
   bool get hasNoSemesterForSessions => _sessionsError?.code == notFound;
 
-  /// Mở lịch của [studentId] (null: SV xem của mình) ở tuần hiện tại.
-  Future<void> open(int? studentId) {
+  /// Mở lịch của [studentId] (null: SV xem của mình) ở tuần hiện tại;
+  /// [teacher] là GV xem lịch dạy của mình.
+  Future<void> open(int? studentId, {bool teacher = false}) {
     _studentId = studentId;
+    _teacher = teacher;
     _semester = null;
     _week = null;
     _selectedDate = null;
@@ -123,7 +129,11 @@ class ScheduleController extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      final result = await _studentService.fetchWeek(_studentId, date: date);
+      final result = await _studentService.fetchWeek(
+        _studentId,
+        date: date,
+        teacher: _teacher,
+      );
       if (generation != _weekGeneration) {
         return;
       }
@@ -181,6 +191,7 @@ class ScheduleController extends ChangeNotifier {
       final result = await _studentService.fetchSessions(
         _studentId,
         page: _sessionPage + 1,
+        teacher: _teacher,
       );
       if (generation != _sessionGeneration) {
         return;

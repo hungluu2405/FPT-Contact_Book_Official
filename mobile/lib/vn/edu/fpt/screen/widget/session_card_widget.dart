@@ -4,15 +4,20 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/status_badge_wi
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_colors.dart';
 
 /// Nội dung thẻ của một buổi học: nhãn trạng thái, mã môn (gạch ngang khi
-/// đã hủy), tên môn, giảng viên, phòng và ghi chú.
+/// đã hủy), tên môn, giảng viên (GV xem lịch dạy thì hiện mã lớp môn học),
+/// phòng và ghi chú.
 class SessionCardWidget extends StatelessWidget {
   final ScheduleItemModel item;
   final bool ongoing;
+
+  /// Lịch dạy của GV: hiện lớp môn học thay cho tên giáo viên.
+  final bool showSection;
 
   const SessionCardWidget({
     super.key,
     required this.item,
     this.ongoing = false,
+    this.showSection = false,
   });
 
   @override
@@ -51,7 +56,9 @@ class SessionCardWidget extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                item.teacherName ?? '',
+                showSection
+                    ? 'Lớp ${item.sectionCode}'
+                    : (item.teacherName ?? ''),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

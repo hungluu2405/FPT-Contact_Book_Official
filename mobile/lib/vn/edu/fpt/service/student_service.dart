@@ -22,6 +22,11 @@ class StudentService {
   static String rootPath(int? studentId) =>
       studentId == null ? '/student' : '/parent/children/$studentId';
 
+  /// Gốc đường dẫn lịch học, lịch thi: GV xem lịch dạy của mình ([teacher]),
+  /// HS xem của mình ([studentId] null) hoặc PH xem của con.
+  static String scheduleRoot(int? studentId, {bool teacher = false}) =>
+      teacher ? '/teacher' : rootPath(studentId);
+
   /// Các con đã liên kết của phụ huynh đang đăng nhập.
   Future<List<ChildModel>> fetchChildren() async {
     final data = await _apiClient.get('/parent/children');
@@ -35,9 +40,10 @@ class StudentService {
   Future<InSemesterModel<ScheduleWeekModel>> fetchWeek(
     int? studentId, {
     String? date,
+    bool teacher = false,
   }) async {
     final data = await _apiClient.get(
-      '${rootPath(studentId)}/schedule/week',
+      '${scheduleRoot(studentId, teacher: teacher)}/schedule/week',
       query: {'date': ?date},
     );
     return InSemesterModel.fromJson(
@@ -50,9 +56,10 @@ class StudentService {
   Future<InSemesterModel<PageModel<ScheduleItemModel>>> fetchSessions(
     int? studentId, {
     int page = 0,
+    bool teacher = false,
   }) async {
     final data = await _apiClient.get(
-      '${rootPath(studentId)}/schedule/sessions',
+      '${scheduleRoot(studentId, teacher: teacher)}/schedule/sessions',
       query: {'page': page},
     );
     return InSemesterModel.fromJson(
@@ -121,9 +128,10 @@ class StudentService {
   Future<InSemesterModel<PageModel<ExamModel>>> fetchExams(
     int? studentId, {
     int page = 0,
+    bool teacher = false,
   }) async {
     final data = await _apiClient.get(
-      '${rootPath(studentId)}/exams',
+      '${scheduleRoot(studentId, teacher: teacher)}/exams',
       query: {'page': page},
     );
     return InSemesterModel.fromJson(

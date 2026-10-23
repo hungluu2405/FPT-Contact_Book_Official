@@ -22,11 +22,15 @@ class ListExamScreen extends StatefulWidget {
   final int? studentId;
   final String viewerName;
 
+  /// GV xem lịch thi các lớp mình dạy (đường dẫn `/teacher`).
+  final bool teacher;
+
   const ListExamScreen({
     super.key,
     required this.controller,
     required this.studentId,
     required this.viewerName,
+    this.teacher = false,
   });
 
   @override
@@ -39,7 +43,7 @@ class _ListExamScreenState extends State<ListExamScreen> {
   @override
   void initState() {
     super.initState();
-    _controller.open(widget.studentId);
+    _controller.open(widget.studentId, teacher: widget.teacher);
   }
 
   bool _onScroll(ScrollNotification notification) {

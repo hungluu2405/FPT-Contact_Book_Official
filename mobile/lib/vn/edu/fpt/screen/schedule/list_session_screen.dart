@@ -64,7 +64,7 @@ class _ListSessionScreenState extends State<ListSessionScreen> {
                   if (index == 0) {
                     return PageHeaderWidget(
                       icon: Icons.calendar_month,
-                      title: 'Lịch học',
+                      title: _controller.isTeacher ? 'Lịch dạy' : 'Lịch học',
                       headline: 'Cả học kỳ',
                       subtitle: _controller.semester?.name,
                       viewerName: widget.viewerName,
@@ -112,7 +112,7 @@ class _ListSessionScreenState extends State<ListSessionScreen> {
       dimmed: item.isCancelled,
       isFirst: first,
       isLast: last,
-      child: SessionCardWidget(item: item),
+      child: SessionCardWidget(item: item, showSection: _controller.isTeacher),
     );
   }
 

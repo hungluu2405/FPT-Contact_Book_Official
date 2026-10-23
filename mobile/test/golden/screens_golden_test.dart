@@ -1026,4 +1026,43 @@ void main() {
 
     await expectScreen(tester, 'sent_notification_detail');
   });
+
+  /// Giáo viên thường đã đăng nhập; hôm nay dạy ba buổi như [kGoldenToday].
+  Future<TestApp> pumpTeacherHome(WidgetTester tester) async {
+    usePhoneScreen(tester);
+    final app = TestApp(accessToken: 'a', refreshToken: 'r');
+    app.http.reply(
+      'GET',
+      '/me',
+      FakeReply(
+        200,
+        userJson(id: 3, fullName: 'Nguyễn Thị Giáo', roles: ['TEACHER']),
+      ),
+    );
+    app.stubHome(unread: 2, today: kGoldenToday);
+    await pumpApp(tester, app: app);
+    return app;
+  }
+
+  testWidgets('teacher home', (tester) async {
+    await pumpTeacherHome(tester);
+    await tester.drag(
+      find.byType(SingleChildScrollView).first,
+      const Offset(0, -300),
+    );
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'home_teacher');
+  });
+
+  testWidgets('teaching schedule of today', (tester) async {
+    await pumpTeacherHome(tester);
+    final tile = find.text('Lịch dạy');
+    await tester.ensureVisible(tile);
+    await tester.pumpAndSettle();
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'teaching_schedule');
+  });
 }

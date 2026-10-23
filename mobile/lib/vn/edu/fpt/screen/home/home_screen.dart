@@ -289,6 +289,32 @@ class _DashboardTab extends StatelessWidget {
       departmentController.loadDepartments(),
   ]);
 
+  void _openTeachingSchedule(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ViewScheduleScreen(
+          controller: scheduleController,
+          studentId: null,
+          viewerName: _viewerName,
+          teacher: true,
+        ),
+      ),
+    );
+  }
+
+  void _openTeachingExams(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ListExamScreen(
+          controller: examController,
+          studentId: null,
+          viewerName: _viewerName,
+          teacher: true,
+        ),
+      ),
+    );
+  }
+
   void _openExams(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -357,6 +383,23 @@ class _DashboardTab extends StatelessWidget {
   /// Phần theo vai trò HS, PH, GV (tổ trưởng có thêm khối phía trên).
   Widget _roleBody(BuildContext context) {
     final user = controller.user!;
+    if (controller.isTeacherView) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _TodayCard(
+            controller: controller,
+            teacher: true,
+            onOpen: () => _openTeachingSchedule(context),
+          ),
+          const SizedBox(height: 20),
+          _TeacherGrid(
+            onSchedule: () => _openTeachingSchedule(context),
+            onExams: () => _openTeachingExams(context),
+          ),
+        ],
+      );
+    }
     if (!user.isStudent && !user.isParent) {
       return const _Message(
         'Chức năng giáo viên sẽ có trong bản cập nhật tới.',
@@ -538,6 +581,47 @@ class _FeatureGrid extends StatelessWidget {
   }
 }
 
+/// Lưới chức năng của giáo viên. "Lớp của tôi" (điểm danh) làm ở 10d-2,
+/// "Duyệt đơn" ở 10d-3; tới lúc đó hiện "Sắp có".
+class _TeacherGrid extends StatelessWidget {
+  final VoidCallback onSchedule;
+  final VoidCallback onExams;
+
+  const _TeacherGrid({required this.onSchedule, required this.onExams});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 1.25,
+      children: [
+        FeatureTileWidget(
+          icon: Icons.calendar_month,
+          label: 'Lịch dạy',
+          onTap: onSchedule,
+        ),
+        FeatureTileWidget(
+          icon: Icons.event_note,
+          label: 'Lịch thi',
+          onTap: onExams,
+        ),
+        const FeatureTileWidget(
+          icon: Icons.class_outlined,
+          label: 'Lớp của tôi',
+        ),
+        const FeatureTileWidget(
+          icon: Icons.fact_check_outlined,
+          label: 'Duyệt đơn',
+        ),
+      ],
+    );
+  }
+}
+
 /// Thẻ "Lịch học hôm nay": tối đa 3 buổi đầu, bấm để mở lịch học.
 class _TodayCard extends StatelessWidget {
   static const int _maxItems = 3;
@@ -545,7 +629,14 @@ class _TodayCard extends StatelessWidget {
   final HomeController controller;
   final VoidCallback onOpen;
 
-  const _TodayCard({required this.controller, required this.onOpen});
+  /// Thẻ "Lịch dạy hôm nay" của GV: hiện lớp môn học thay cho mã môn.
+  final bool teacher;
+
+  const _TodayCard({
+    required this.controller,
+    required this.onOpen,
+    this.teacher = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -582,8 +673,10 @@ class _TodayCard extends StatelessWidget {
         ],
       );
     } else if (items.isEmpty) {
-      content = const Text(
-        'Hôm nay không có buổi học nào.',
+      content = Text(
+        teacher
+            ? 'Hôm nay không có buổi dạy nào.'
+            : 'Hôm nay không có buổi học nào.',
         style: TextStyle(fontSize: 15, color: AppColors.textMuted),
       );
     } else {
@@ -655,13 +748,13 @@ class _TodayCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.today, color: AppColors.orange),
-                  SizedBox(width: 8),
+                  const Icon(Icons.today, color: AppColors.orange),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Lịch học hôm nay',
+                      teacher ? 'Lịch dạy hôm nay' : 'Lịch học hôm nay',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,

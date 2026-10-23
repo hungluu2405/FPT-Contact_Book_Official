@@ -833,7 +833,8 @@ class TestApp {
       );
 
   /// Trả lời các request của trang chủ: số chưa đọc, (PH) danh sách con và
-  /// lịch tuần (thẻ "Lịch học hôm nay") của SV và của từng con.
+  /// lịch tuần (thẻ "Lịch học hôm nay") của SV, của từng con và lịch dạy
+  /// của GV.
   void stubHome({
     int unread = 0,
     List<Map<String, dynamic>> children = const [],
@@ -847,6 +848,7 @@ class TestApp {
     http.reply('GET', '/parent/children', FakeReply(200, children));
     final week = FakeReply(200, weekJson(items: {'2026-10-21': today}));
     http.reply('GET', '/student/schedule/week', week);
+    http.reply('GET', '/teacher/schedule/week', week);
     for (final child in children) {
       http.reply('GET', '/parent/children/${child['id']}/schedule/week', week);
     }

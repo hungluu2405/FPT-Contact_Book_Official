@@ -19,11 +19,15 @@ class ViewScheduleScreen extends StatefulWidget {
   final int? studentId;
   final String viewerName;
 
+  /// GV xem lịch dạy của mình (đường dẫn `/teacher`).
+  final bool teacher;
+
   const ViewScheduleScreen({
     super.key,
     required this.controller,
     required this.studentId,
     required this.viewerName,
+    this.teacher = false,
   });
 
   @override
@@ -36,7 +40,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
   @override
   void initState() {
     super.initState();
-    _controller.open(widget.studentId);
+    _controller.open(widget.studentId, teacher: widget.teacher);
   }
 
   void _openSessions() {
@@ -72,7 +76,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
     final selected = parseApiDate(_controller.selectedDate);
     final day = _controller.selectedDay;
     final semesterName = _controller.semester?.name ?? '';
-    String headline = 'Lịch học';
+    String headline = _label;
     String? subtitle = semesterName.isEmpty ? null : semesterName;
     if (selected != null) {
       if (day?.today ?? false) {
@@ -87,7 +91,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
     }
     return PageHeaderWidget(
       icon: Icons.menu_book_outlined,
-      title: 'Lịch học',
+      title: _label,
       headline: headline,
       subtitle: subtitle,
       viewerName: widget.viewerName,
@@ -194,20 +198,27 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
       dimmed: item.isCancelled,
       isFirst: index == 0,
       isLast: index == day.items.length - 1,
-      child: SessionCardWidget(item: item, ongoing: ongoing),
+      child: SessionCardWidget(
+        item: item,
+        ongoing: ongoing,
+        showSection: widget.teacher,
+      ),
     );
   }
 
+  /// "Lịch dạy" của GV hoặc "Lịch học" của HS.
+  String get _label => widget.teacher ? 'Lịch dạy' : 'Lịch học';
+
   String _sectionTitle(ScheduleDayModel? day) {
     if (day == null) {
-      return 'Lịch học';
+      return _label;
     }
     if (day.today) {
-      return 'Lịch học hôm nay';
+      return '$_label hôm nay';
     }
     final date = parseApiDate(day.date);
     return date == null
-        ? 'Lịch học'
-        : 'Lịch học ${weekdayLong(date).toLowerCase()}, ${dayMonthShort(date)}';
+        ? _label
+        : '$_label ${weekdayLong(date).toLowerCase()}, ${dayMonthShort(date)}';
   }
 }

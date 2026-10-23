@@ -130,11 +130,17 @@ void main() {
     expect(find.byType(FeatureTileWidget), findsNWidgets(6));
   });
 
-  testWidgets('teacher-only account waits for phase 10d', (tester) async {
-    await pumpHome(tester, roles: ['TEACHER']);
+  testWidgets('a teacher gets the teacher home', (tester) async {
+    final app = await pumpHome(tester, roles: ['TEACHER']);
 
-    expect(find.textContaining('Chức năng giáo viên'), findsOneWidget);
-    expect(find.byType(FeatureTileWidget), findsNothing);
+    expect(find.textContaining('Chức năng giáo viên'), findsNothing);
+    expect(find.text('Lịch dạy hôm nay'), findsOneWidget);
+    for (final label in ['Lịch dạy', 'Lịch thi', 'Lớp của tôi', 'Duyệt đơn']) {
+      expect(find.widgetWithText(FeatureTileWidget, label), findsOneWidget);
+    }
+    expect(find.text('Sắp có'), findsNWidgets(2));
+    expect(find.text('Tổ chuyên môn'), findsNothing);
+    expect(app.http.count('GET', '/teacher/schedule/week'), 1);
   });
 
   testWidgets('account tab shows the profile', (tester) async {

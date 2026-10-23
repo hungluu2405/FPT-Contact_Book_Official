@@ -59,6 +59,13 @@ class HomeController extends ChangeNotifier {
 
   ApiErrorModel? get todayError => _todayError;
 
+  /// Trang chủ giáo viên: GV (kể cả tổ trưởng) không đồng thời là HS hay PH.
+  /// Người vừa là GV vừa là PH vẫn thấy trang chủ PH (giả định 182).
+  bool get isTeacherView {
+    final user = _user;
+    return user != null && user.isTeacher && !user.isStudent && !user.isParent;
+  }
+
   /// Có ai để xem dữ liệu học tập: bản thân là SV hoặc đã có con.
   bool get hasStudentData =>
       (_user?.isStudent ?? false) || _children.isNotEmpty;
@@ -105,10 +112,12 @@ class HomeController extends ChangeNotifier {
     ]);
   }
 
-  /// Tải lịch học hôm nay của người đang được xem (nút thử lại của thẻ).
+  /// Tải lịch học hôm nay của người đang được xem, hoặc lịch dạy hôm nay
+  /// của GV (nút thử lại của thẻ).
   Future<void> loadToday() async {
     final generation = ++_todayGeneration;
-    if (!hasStudentData) {
+    final teacher = isTeacherView;
+    if (!teacher && !hasStudentData) {
       _todayItems = const [];
       _loadingToday = false;
       notifyListeners();
@@ -118,7 +127,10 @@ class HomeController extends ChangeNotifier {
     _todayError = null;
     notifyListeners();
     try {
-      final result = await _studentService.fetchWeek(selectedStudentId);
+      final result = await _studentService.fetchWeek(
+        selectedStudentId,
+        teacher: teacher,
+      );
       if (generation == _todayGeneration) {
         _todayItems = result.data.todayDay?.items ?? const [];
       }
