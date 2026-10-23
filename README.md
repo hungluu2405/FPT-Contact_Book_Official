@@ -67,6 +67,12 @@ http://localhost:8080/
 
 ---
 
+### App Android
+App Flutter nằm trong `mobile/`. Cấu hình backend cho điện thoại, tạo khóa ký, build APK release (HTTPS) hoặc APK demo
+trong mạng LAN và cài lên máy: xem [`docs/INSTALL_MOBILE.md`](docs/INSTALL_MOBILE.md).
+
+---
+
 ## 5. Cấu trúc thư mục dự án
 
 ```text

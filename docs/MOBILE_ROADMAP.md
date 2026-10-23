@@ -70,7 +70,7 @@ Lập ngày 20/10/2026. Quy tắc làm việc cho app nằm ở `mobile/CLAUDE.m
   - 10e-1 (đã xong): API `/head/**` (tổ phụ trách, giáo viên trong tổ, gửi thông báo nội bộ) và thông báo đã gửi kèm thống kê đã đọc.
   - 10e-2 (đã xong, giả định 180): khối "Tổ chuyên môn" trên trang chủ của tổ trưởng, danh sách và chi tiết giáo viên.
   - 10e-3 (đã xong, giả định 181): gửi thông báo cho cả tổ hoặc riêng một giáo viên, thông báo đã gửi và thống kê đã đọc.
-- **11: kiểm thử tổng và đóng gói**: chạy trên máy ảo và máy thật; rà soát bảo mật; build APK release; viết hướng dẫn cài đặt và cấu hình địa chỉ server.
+- **11: kiểm thử tổng và đóng gói** (nhánh `feature/phase-11-release-packaging`, giả định 185–188): ký release bằng khóa riêng, chặn địa chỉ server sai lúc build, APK demo LAN, rà soát bảo mật và chất lượng (`docs/REVIEW_PHASE11.md`), hướng dẫn cài đặt (`docs/INSTALL_MOBILE.md`), chạy thử trên máy ảo.
 
 ## 4. Ngoài phạm vi
 Đăng ký, nhập/sửa điểm, lịch và danh mục trên mobile (quên mật khẩu qua email đã thêm, giả định 154–156); chế độ offline; push notification; tin nhắn trên mobile (CLB chỉ đọc đã duyệt ở 10b-4). Các mục này có thể thêm sau nếu duyệt.
