@@ -88,7 +88,7 @@ void main() {
         roles: [RoleCodes.teacher, RoleCodes.headOfDepartment],
       );
 
-      expect(roleLabelsOf(user), 'Giảng viên, Trưởng bộ môn');
+      expect(roleLabelsOf(user), 'Giáo viên, Tổ trưởng chuyên môn');
       expect(roleLabelsOf(null), '');
     });
   });

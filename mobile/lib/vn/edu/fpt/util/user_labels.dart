@@ -4,9 +4,9 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/user_model.dart';
 /// Tên vai trò, giống `role.*` trong messages.properties của web.
 const Map<String, String> kRoleLabels = {
   RoleCodes.admin: 'Quản trị viên',
-  RoleCodes.headOfDepartment: 'Trưởng bộ môn',
-  RoleCodes.teacher: 'Giảng viên',
-  RoleCodes.student: 'Sinh viên',
+  RoleCodes.headOfDepartment: 'Tổ trưởng chuyên môn',
+  RoleCodes.teacher: 'Giáo viên',
+  RoleCodes.student: 'Học sinh',
   RoleCodes.parent: 'Phụ huynh',
 };
 

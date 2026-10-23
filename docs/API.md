@@ -46,7 +46,7 @@ Phản hồi đăng nhập, làm mới và đổi mật khẩu:
 | GET | `/notifications/{id}/files/{fileId}` | Tải tệp đính kèm |
 | GET | `/requests/{id}/files/{fileId}` | Tải tệp đính kèm của đơn |
 
-### Sinh viên (`/student`, vai trò STUDENT) và phụ huynh (`/parent/children/{studentId}`, vai trò PARENT)
+### Học sinh (`/student`, vai trò STUDENT) và phụ huynh (`/parent/children/{studentId}`, vai trò PARENT)
 `GET /parent/children` trả các con đã liên kết `[{id, code, name}]` (`id` là `studentId`). Mọi đường dẫn dưới đây có ở cả hai gốc; phụ huynh xem con chưa liên kết bị 403 `FORBIDDEN`. `semesterId` bỏ trống: học kỳ hiện tại.
 
 | Method | Đường dẫn con | Trả về |
@@ -65,12 +65,12 @@ Phản hồi đăng nhập, làm mới và đổi mật khẩu:
 
 `ScheduleItem`: `{date, startTime, endTime, subjectCode, subjectName, sectionCode, roomCode, teacherName, status, note}`. `summary` (chuyên cần): `{present, absentExcused, absentUnexcused, totalSessions, attendanceRate, absentRate, warning}` (tỷ lệ là phần trăm, `warning` = vượt ngưỡng vắng).
 
-### Giảng viên (`/teacher`, vai trò TEACHER hoặc HEAD_OF_DEPARTMENT)
-Chỉ lớp mình dạy và đơn mình phụ trách duyệt; lớp hoặc đơn khác: 403 `FORBIDDEN`. Trưởng bộ môn dùng như giảng viên; quản lý cả bộ môn, nhập điểm, gửi thông báo làm trên web.
+### Giáo viên (`/teacher`, vai trò TEACHER hoặc HEAD_OF_DEPARTMENT)
+Chỉ lớp mình dạy và đơn mình phụ trách duyệt; lớp hoặc đơn khác: 403 `FORBIDDEN`. Tổ trưởng chuyên môn dùng như giáo viên; quản lý cả tổ chuyên môn, nhập điểm, gửi thông báo làm trên web.
 
 | Method | Đường dẫn | Trả về |
 |---|---|---|
-| GET | `/teacher/schedule/week?semesterId=&date=` | Lịch dạy một tuần, cùng dạng với sinh viên |
+| GET | `/teacher/schedule/week?semesterId=&date=` | Lịch dạy một tuần, cùng dạng với học sinh |
 | GET | `/teacher/schedule/sessions?semesterId=&page=` | `{semester, data: Page<ScheduleItem>}` |
 | GET | `/teacher/exams?semesterId=&page=` | Lịch thi các lớp mình dạy |
 | GET | `/teacher/sections?semesterId=&page=` | `{semester, data: Page<{id, code, subjectCode, subjectName, semesterCode, status}>}` |
@@ -83,7 +83,7 @@ Chỉ lớp mình dạy và đơn mình phụ trách duyệt; lớp hoặc đơn
 
 **Hạn 24 giờ:** giáo viên điểm danh lần đầu được tới giờ kết thúc buổi + 24 giờ, sửa được tới lần điểm danh đầu + 24 giờ; quá hạn thì lưu bị 400 `BUSINESS_ERROR` ("Đã hết hạn điểm danh, chỉnh sửa..."), chỉ quản trị viên sửa được trên web.
 
-Lỗi thường gặp khi điểm danh: buổi chưa diễn ra, buổi hoặc lớp đã hủy, thiếu sinh viên, thiếu lý do khi sửa, người khác vừa lưu cùng lúc (tải lại bảng rồi thử lại): đều là 400 `BUSINESS_ERROR` kèm câu tiếng Việt. Trạng thái không thuộc danh sách enum: 400 `VALIDATION_FAILED`. Buổi không thuộc lớp: 404 `NOT_FOUND`.
+Lỗi thường gặp khi điểm danh: buổi chưa diễn ra, buổi hoặc lớp đã hủy, thiếu học sinh, thiếu lý do khi sửa, người khác vừa lưu cùng lúc (tải lại bảng rồi thử lại): đều là 400 `BUSINESS_ERROR` kèm câu tiếng Việt. Trạng thái không thuộc danh sách enum: 400 `VALIDATION_FAILED`. Buổi không thuộc lớp: 404 `NOT_FOUND`.
 
 ## Giá trị enum
 Trả dạng mã; mobile hiển thị chữ tiếng Việt như web:
@@ -93,7 +93,7 @@ Trả dạng mã; mobile hiển thị chữ tiếng Việt như web:
 | `status` của buổi học, `sessionStatus` | `SCHEDULED` Đã lên lịch, `DONE` Đã học, `CANCELLED` Đã hủy, `MAKEUP` Học bù |
 | `status` điểm danh | `PRESENT` Có mặt (đi muộn cũng là có mặt, ghi trong `note`), `ABSENT_EXCUSED` Vắng có phép, `ABSENT_UNEXCUSED` Vắng không phép; null là chưa điểm danh. Không còn `LATE` |
 | `examType` | `MIDTERM` Giữa kỳ, `FINAL` Cuối kỳ, `RETAKE` Thi lại |
-| `type` của đơn | `LEAVE` Xin nghỉ học, `TRANSCRIPT` Xin bảng điểm, `CERTIFICATE` Xác nhận sinh viên, `OTHER` Đơn khác |
+| `type` của đơn | `LEAVE` Xin nghỉ học, `TRANSCRIPT` Xin bảng điểm, `CERTIFICATE` Xác nhận học sinh, `OTHER` Đơn khác |
 | `status` của đơn | `PENDING` Chờ duyệt, `APPROVED` Đã duyệt, `REJECTED` Từ chối, `CANCELLED` Đã hủy |
 | `decision` duyệt đơn | `APPROVED` Duyệt, `REJECTED` Từ chối |
 | `priority` thông báo | `NORMAL` Thường, `IMPORTANT` Quan trọng, `URGENT` Khẩn |

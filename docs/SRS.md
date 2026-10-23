@@ -1,6 +1,6 @@
 # Tài liệu đặc tả yêu cầu phần mềm (SRS)
 
-**Hệ thống Sổ liên lạc điện tử – Đại học FPT (phân hệ Web)**
+**Hệ thống Sổ liên lạc điện tử – My FPT School (phân hệ Web)**
 
 Phiên bản 0.2 (bản nháp) · Spring MVC + Thymeleaf + SQL Server · Mobile sẽ gọi Web API ở giai đoạn sau
 
@@ -34,13 +34,29 @@ Lưu ý: `pom.xml` hiện còn H2 và chưa có driver SQL Server, cần thêm `
 | Viết tắt | Ý nghĩa |
 | --- | --- |
 | AD | Quản trị viên (ADMIN) |
-| TBM | Trưởng bộ môn (HEAD\_OF\_DEPARTMENT) |
-| GV | Giảng viên (TEACHER) |
-| SV | Sinh viên (STUDENT) |
+| TTCM | Tổ trưởng chuyên môn (HEAD\_OF\_DEPARTMENT) |
+| GV | Giáo viên (TEACHER) |
+| HS | Học sinh (STUDENT) |
 | PH | Phụ huynh (PARENT) |
 | CLB | Câu lạc bộ |
 | RBAC | Phân quyền theo vai trò |
 | FR / NFR | Yêu cầu chức năng / phi chức năng |
+
+### 1.5 Mô hình trường THCS–THPT
+
+Hệ thống dùng cho trường My FPT School gồm cấp THCS (khối 6–9) và THPT (khối 10–12). Cơ sở dữ liệu giữ tên bảng ban đầu; nghiệp vụ hiểu các bảng như sau:
+
+| Bảng | Trong nghiệp vụ | Ghi chú |
+| --- | --- | --- |
+| `faculties` | Cấp học (THCS, THPT) | |
+| `majors` | Khối (6 đến 12) | Lớp và học sinh gắn với khối |
+| `departments` | Tổ chuyên môn (Toán – Tin học, Ngữ văn…) | Vai trò HEAD_OF_DEPARTMENT là tổ trưởng chuyên môn |
+| `subjects.credits` | Số tiết/tuần | |
+| `classes` | Lớp chủ nhiệm (10A1, 8A1); `intake_year` là năm vào trường | |
+| `class_sections` | Lớp môn học: một lớp học một môn với một giáo viên trong một học kỳ | Ghi danh cả lớp qua `enrollments` |
+| `semesters` | Học kỳ I, II của năm học | |
+
+Điểm trung bình môn tính theo trọng số của các đầu điểm (thường xuyên, giữa kỳ, cuối kỳ…), không áp công thức hệ số của Thông tư 22.
 
 ## 2. Mô tả tổng quan
 
@@ -55,20 +71,20 @@ Lưu ý: `pom.xml` hiện còn H2 và chưa có driver SQL Server, cần thêm `
 | Vai trò | Mã | Mô tả |
 | --- | --- | --- |
 | Quản trị viên | ADMIN | Quản lý tài khoản, vai trò, danh mục, lịch, CLB; đặt lại mật khẩu; xem nhật ký |
-| Trưởng bộ môn | HEAD\_OF\_DEPARTMENT | Quản lý giảng viên, môn học, lớp học phần của bộ môn mình; công bố điểm |
-| Giảng viên | TEACHER | Điểm danh, nhập điểm, gửi thông báo cho lớp học phần mình dạy; duyệt đơn nghỉ |
-| Sinh viên | STUDENT | Xem lịch học, điểm, điểm danh; gửi đơn; tham gia CLB; nhắn tin |
-| Phụ huynh | PARENT | Theo dõi lịch học, điểm, điểm danh của con; gửi đơn thay con; nhắn tin với giảng viên |
+| Tổ trưởng chuyên môn | HEAD\_OF\_DEPARTMENT | Quản lý giáo viên, môn học, lớp môn học của tổ chuyên môn mình; công bố điểm |
+| Giáo viên | TEACHER | Điểm danh, nhập điểm, gửi thông báo cho lớp môn học mình dạy; duyệt đơn nghỉ |
+| Học sinh | STUDENT | Xem lịch học, điểm, điểm danh; gửi đơn; tham gia CLB; nhắn tin |
+| Phụ huynh | PARENT | Theo dõi lịch học, điểm, điểm danh của con; gửi đơn thay con; nhắn tin với giáo viên |
 
 ### 2.3 Quan hệ người dùng và vai trò
 
 - Một người dùng có thể có nhiều vai trò và một vai trò có nhiều người dùng (nhiều–nhiều, bảng `user_roles`).
-- Mỗi lần gán vai trò có thể kèm phạm vi bộ môn. Ví dụ: một giảng viên vừa là TEACHER vừa là HEAD\_OF\_DEPARTMENT của bộ môn Kỹ thuật phần mềm.
+- Mỗi lần gán vai trò có thể kèm phạm vi tổ chuyên môn. Ví dụ: một giáo viên vừa là TEACHER vừa là HEAD\_OF\_DEPARTMENT của tổ chuyên môn Kỹ thuật phần mềm.
 - Quyền của người dùng là hợp quyền của mọi vai trò được gán; không có chế độ chọn đang đăng nhập với vai trò nào.
 - Phân quyền kiểm tra theo tên vai trò trong code, không có bảng quyền chi tiết.
-- TBM quản lý giảng viên và môn học thuộc bộ môn mình được gán.
-- SV và PH quan hệ nhiều–nhiều: một PH có nhiều con, một SV có nhiều PH. PH chỉ xem dữ liệu của con đã được liên kết.
-- ADMIN không cần hồ sơ riêng; SV, GV, PH có hồ sơ riêng (`students`, `teachers`, `parents`).
+- TTCM quản lý giáo viên và môn học thuộc tổ chuyên môn mình được gán.
+- HS và PH quan hệ nhiều–nhiều: một PH có nhiều con, một HS có nhiều PH. PH chỉ xem dữ liệu của con đã được liên kết.
+- ADMIN không cần hồ sơ riêng; HS, GV, PH có hồ sơ riêng (`students`, `teachers`, `parents`).
 
 ### 2.4 Đăng nhập và mật khẩu
 
@@ -85,7 +101,7 @@ Lưu ý: `pom.xml` hiện còn H2 và chưa có driver SQL Server, cần thêm `
 - Giao diện tiếng Việt, lưu Unicode (NVARCHAR, collation Vietnamese\_CI\_AS).
 - Chỉ có một học kỳ hiện tại tại một thời điểm (ràng buộc ở cơ sở dữ liệu).
 - Học phí và thanh toán nằm ngoài phạm vi đợt này.
-- Bộ môn được hiểu là đơn vị thuộc một khoa, chứa nhiều môn học và nhiều giảng viên.
+- Tổ chuyên môn được hiểu là đơn vị thuộc một cấp học, chứa nhiều môn học và nhiều giáo viên.
 
 ## 3. Yêu cầu chức năng (Web)
 
@@ -98,7 +114,7 @@ Cột **Ưu tiên**: **C** = cao (bản đầu tiên), **TB** = trung bình, **T
 | FR-AUTH-01 | Đăng nhập | Đăng nhập bằng số điện thoại và mật khẩu; báo lỗi rõ khi sai hoặc tài khoản bị khóa | Tất cả | C |
 | FR-AUTH-02 | Đăng xuất | Kết thúc phiên, về trang đăng nhập | Tất cả | C |
 | FR-AUTH-03 | Đổi mật khẩu | Tự đổi khi đã đăng nhập; bắt buộc đổi ở lần đầu hoặc sau khi AD đặt lại | Tất cả | C |
-| FR-AUTH-04 | Phân quyền | Gộp quyền từ mọi vai trò; giới hạn dữ liệu theo bộ môn, lớp, con đã liên kết | Tất cả | C |
+| FR-AUTH-04 | Phân quyền | Gộp quyền từ mọi vai trò; giới hạn dữ liệu theo tổ chuyên môn, lớp, con đã liên kết | Tất cả | C |
 | FR-AUTH-05 | Hồ sơ cá nhân | Xem thông tin; sửa email, địa chỉ, ảnh đại diện (số điện thoại do AD quản lý) | Tất cả | TB |
 | FR-AUTH-06 | Ghi nhớ đăng nhập | Giữ phiên trên thiết bị tin cậy | Tất cả | T |
 | FR-AUTH-07 | Quên mật khẩu | Nhận mã 6 chữ số qua email (hiệu lực khoảng 10 phút, dùng một lần) rồi tự đặt mật khẩu mới; luôn báo cùng một câu dù số điện thoại có tồn tại hay không; giới hạn gửi mã và khóa 15 phút sau 5 lần nhập sai mã; ghi nhật ký; có trên Web và Mobile | Tất cả (có email) | C |
@@ -107,15 +123,15 @@ Cột **Ưu tiên**: **C** = cao (bản đầu tiên), **TB** = trung bình, **T
 
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
-| FR-USER-01 | Thêm người dùng | Nhập số điện thoại, họ tên, ít nhất một vai trò và hồ sơ theo vai trò (mã SV/GV, bộ môn, lớp); hệ thống sinh mật khẩu tạm | AD | C |
-| FR-USER-02 | Danh sách người dùng | Tìm theo số điện thoại, tên, mã; lọc theo vai trò, lớp, bộ môn, trạng thái; phân trang. TBM chỉ thấy giảng viên bộ môn mình | AD, TBM | C |
-| FR-USER-03 | Xem chi tiết | Xem thông tin đầy đủ, vai trò và phạm vi, phụ huynh hoặc con liên quan | AD, TBM | C |
+| FR-USER-01 | Thêm người dùng | Nhập số điện thoại, họ tên, ít nhất một vai trò và hồ sơ theo vai trò (mã HS/GV, tổ chuyên môn, lớp); hệ thống sinh mật khẩu tạm | AD | C |
+| FR-USER-02 | Danh sách người dùng | Tìm theo số điện thoại, tên, mã; lọc theo vai trò, lớp, tổ chuyên môn, trạng thái; phân trang. TTCM chỉ thấy giáo viên tổ chuyên môn mình | AD, TTCM | C |
+| FR-USER-03 | Xem chi tiết | Xem thông tin đầy đủ, vai trò và phạm vi, phụ huynh hoặc con liên quan | AD, TTCM | C |
 | FR-USER-04 | Sửa người dùng | Cập nhật thông tin cá nhân và hồ sơ | AD | C |
-| FR-USER-05 | Gán và gỡ vai trò | Gán nhiều vai trò cho một người, kèm bộ môn nếu cần | AD | C |
+| FR-USER-05 | Gán và gỡ vai trò | Gán nhiều vai trò cho một người, kèm tổ chuyên môn nếu cần | AD | C |
 | FR-USER-06 | Khóa / mở khóa | Khóa tài khoản vi phạm hoặc thôi học, không xóa dữ liệu | AD | C |
 | FR-USER-07 | Đặt lại mật khẩu | Tạo mật khẩu tạm (hiện một lần), bắt đổi ở lần đăng nhập kế tiếp, ghi nhật ký | AD | C |
-| FR-USER-08 | Liên kết phụ huynh – sinh viên | Gán một hoặc nhiều PH cho SV, ghi quan hệ (cha, mẹ, người giám hộ) | AD | C |
-| FR-USER-09 | Nhập từ Excel | Nhập hàng loạt SV, GV; báo lỗi theo từng dòng | AD | TB |
+| FR-USER-08 | Liên kết phụ huynh – học sinh | Gán một hoặc nhiều PH cho HS, ghi quan hệ (cha, mẹ, người giám hộ) | AD | C |
+| FR-USER-09 | Nhập từ Excel | Nhập hàng loạt HS, GV; báo lỗi theo từng dòng | AD | TB |
 
 Nhóm FR-USER-01 đến 04 tương ứng 4 màn hình CRUD: add, list, edit, view, dùng chung một `user_controller`.
 
@@ -123,22 +139,22 @@ Nhóm FR-USER-01 đến 04 tương ứng 4 màn hình CRUD: add, list, edit, vie
 
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
-| FR-ORG-01 | Khoa, bộ môn, ngành | Thêm, sửa danh mục; bộ môn thuộc khoa | AD | C |
-| FR-ORG-02 | Lớp hành chính | Mã lớp, ngành, niên khóa, giảng viên chủ nhiệm (tùy chọn) | AD | C |
-| FR-ORG-03 | Môn học | Mã môn, tên, số tín chỉ, bộ môn quản lý | AD, TBM (bộ môn mình) | C |
+| FR-ORG-01 | Cấp học, tổ chuyên môn, khối | Thêm, sửa danh mục; tổ chuyên môn thuộc cấp học | AD | C |
+| FR-ORG-02 | Lớp hành chính | Mã lớp, khối, năm vào trường, giáo viên chủ nhiệm (tùy chọn) | AD | C |
+| FR-ORG-03 | Môn học | Mã môn, tên, số tiết/tuần, tổ chuyên môn quản lý | AD, TTCM (tổ chuyên môn mình) | C |
 | FR-ORG-04 | Học kỳ | Khai báo thời gian; chỉ một học kỳ hiện tại | AD | C |
-| FR-ORG-05 | Lớp học phần | Gắn môn, học kỳ, giảng viên, sĩ số tối đa | AD, TBM (bộ môn mình) | C |
-| FR-ORG-06 | Ghi danh sinh viên | Đưa SV vào lớp học phần, không trùng, kiểm tra sĩ số | AD | C |
+| FR-ORG-05 | Lớp môn học | Gắn môn, học kỳ, giáo viên, sĩ số tối đa | AD, TTCM (tổ chuyên môn mình) | C |
+| FR-ORG-06 | Ghi danh học sinh | Đưa HS vào lớp môn học, không trùng, kiểm tra sĩ số | AD | C |
 | FR-ORG-07 | Phòng học | Mã phòng, tòa nhà, sức chứa | AD | TB |
 
 ### 3.4 Thời khóa biểu và lịch thi (FR-SCHEDULE)
 
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
-| FR-SCHEDULE-01 | Quản lý buổi học | Tạo, sửa, hủy từng buổi (ngày, giờ, phòng); cảnh báo trùng phòng và trùng giờ | AD, TBM | C |
-| FR-SCHEDULE-02 | Quản lý lịch thi | Giữa kỳ, cuối kỳ, thi lại; phòng, giờ thi | AD, TBM | C |
-| FR-SCHEDULE-03 | Xem thời khóa biểu | Theo ngày, tuần, học kỳ; hiển thị môn, phòng, giờ, giảng viên | GV, SV, PH | C |
-| FR-SCHEDULE-04 | Xem lịch thi | Ngày, giờ, phòng thi | GV, SV, PH | C |
+| FR-SCHEDULE-01 | Quản lý buổi học | Tạo, sửa, hủy từng buổi (ngày, giờ, phòng); cảnh báo trùng phòng và trùng giờ | AD, TTCM | C |
+| FR-SCHEDULE-02 | Quản lý lịch thi | Giữa kỳ, cuối kỳ, thi lại; phòng, giờ thi | AD, TTCM | C |
+| FR-SCHEDULE-03 | Xem thời khóa biểu | Theo ngày, tuần, học kỳ; hiển thị môn, phòng, giờ, giáo viên | GV, HS, PH | C |
+| FR-SCHEDULE-04 | Xem lịch thi | Ngày, giờ, phòng thi | GV, HS, PH | C |
 | FR-SCHEDULE-05 | Báo thay đổi lịch | Tự gửi thông báo khi đổi phòng, hủy, dạy bù | Hệ thống | TB |
 
 ### 3.5 Điểm danh (FR-ATT)
@@ -146,26 +162,26 @@ Nhóm FR-USER-01 đến 04 tương ứng 4 màn hình CRUD: add, list, edit, vie
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
 | FR-ATT-01 | Điểm danh theo buổi | Đánh dấu có mặt, vắng có phép, vắng không phép; mỗi học sinh có ghi chú (đi muộn ghi là có mặt kèm ghi chú). Điểm danh lần đầu trong 24 giờ sau khi buổi học kết thúc | GV (lớp mình) | C |
-| FR-ATT-02 | Xem điểm danh | Lịch sử theo môn, tỷ lệ chuyên cần | SV, PH (con), GV, TBM | C |
+| FR-ATT-02 | Xem điểm danh | Lịch sử theo môn, tỷ lệ chuyên cần | HS, PH (con), GV, TTCM | C |
 | FR-ATT-03 | Điều chỉnh điểm danh | Sửa khi có minh chứng, lưu người sửa và thời điểm sửa. GV chỉ sửa trong 24 giờ kể từ lần điểm danh đầu; quá hạn chỉ AD sửa (bắt buộc lý do) | GV, AD | TB |
-| FR-ATT-04 | Cảnh báo vắng quá ngưỡng | Báo SV và PH khi số buổi vắng vượt ngưỡng | Hệ thống | TB |
+| FR-ATT-04 | Cảnh báo vắng quá ngưỡng | Báo HS và PH khi số buổi vắng vượt ngưỡng | Hệ thống | TB |
 
 ### 3.6 Điểm số (FR-GRADE)
 
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
-| FR-GRADE-01 | Khai báo đầu điểm | Đầu điểm và trọng số của môn (ví dụ Assignment 20%, Midterm 30%, Final 50%); tổng trọng số bằng 100% | AD, TBM (bộ môn mình) | C |
-| FR-GRADE-02 | Nhập điểm | Nhập điểm thang 0–10 cho SV trong lớp học phần mình dạy | GV | C |
+| FR-GRADE-01 | Khai báo đầu điểm | Đầu điểm và trọng số của môn (ví dụ Assignment 20%, Midterm 30%, Final 50%); tổng trọng số bằng 100% | AD, TTCM (tổ chuyên môn mình) | C |
+| FR-GRADE-02 | Nhập điểm | Nhập điểm thang 0–10 cho HS trong lớp môn học mình dạy | GV | C |
 | FR-GRADE-03 | Nhập điểm từ Excel | Kiểm tra hợp lệ trước khi lưu, báo lỗi theo từng dòng | GV | TB |
-| FR-GRADE-04 | Công bố điểm | Kiểm tra rồi công bố; điểm chưa công bố thì SV và PH không thấy; lưu người công bố và thời điểm | TBM, AD | C |
-| FR-GRADE-05 | Xem điểm | Điểm từng đầu điểm, điểm trung bình môn theo trọng số | SV, PH (con), GV, TBM | C |
-| FR-GRADE-06 | Điều chỉnh điểm sau công bố | Chỉ khi có lý do, ghi nhật ký | TBM, AD | TB |
+| FR-GRADE-04 | Công bố điểm | Kiểm tra rồi công bố; điểm chưa công bố thì HS và PH không thấy; lưu người công bố và thời điểm | TTCM, AD | C |
+| FR-GRADE-05 | Xem điểm | Điểm từng đầu điểm, điểm trung bình môn theo trọng số | HS, PH (con), GV, TTCM | C |
+| FR-GRADE-06 | Điều chỉnh điểm sau công bố | Chỉ khi có lý do, ghi nhật ký | TTCM, AD | TB |
 
 ### 3.7 Thông báo (FR-NOTI)
 
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
-| FR-NOTI-01 | Gửi thông báo | Phạm vi: toàn trường, theo vai trò, bộ môn, lớp, lớp học phần hoặc cá nhân; mức thường, quan trọng, khẩn. AD gửi mọi phạm vi, TBM gửi trong bộ môn, GV gửi cho lớp học phần của mình | AD, TBM, GV | C |
+| FR-NOTI-01 | Gửi thông báo | Phạm vi: toàn trường, theo vai trò, tổ chuyên môn, lớp, lớp môn học hoặc cá nhân; mức thường, quan trọng, khẩn. AD gửi mọi phạm vi, TTCM gửi trong tổ chuyên môn, GV gửi cho lớp môn học của mình | AD, TTCM, GV | C |
 | FR-NOTI-02 | Xem thông báo | Danh sách, đánh dấu đã đọc, đếm số chưa đọc | Tất cả | C |
 | FR-NOTI-03 | Đính kèm tệp | Tài liệu, hình ảnh | Người gửi | TB |
 | FR-NOTI-04 | Thống kê đã đọc | Biết bao nhiêu người nhận đã đọc | Người gửi | TB |
@@ -174,20 +190,20 @@ Nhóm FR-USER-01 đến 04 tương ứng 4 màn hình CRUD: add, list, edit, vie
 
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
-| FR-MSG-01 | Nhắn tin 1–1 | Giữa PH, SV với GV; lưu lịch sử | SV, PH, GV, TBM | C |
+| FR-MSG-01 | Nhắn tin 1–1 | Giữa PH, HS với GV; lưu lịch sử | HS, PH, GV, TTCM | C |
 | FR-MSG-02 | Danh sách hội thoại | Tin chưa đọc, thời điểm đọc gần nhất | Tất cả | TB |
-| FR-MSG-03 | Nhóm hội thoại | Kênh chung của lớp học phần | GV, SV | T |
+| FR-MSG-03 | Nhóm hội thoại | Kênh chung của lớp môn học | GV, HS | T |
 | FR-MSG-04 | Xóa tin nhắn | Đánh dấu đã xóa, không xóa khỏi cơ sở dữ liệu | Người gửi | T |
 
 ### 3.9 Đơn từ (FR-REQ)
 
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
-| FR-REQ-01 | Gửi đơn xin nghỉ | Chọn lớp học phần (tùy chọn), khoảng ngày, lý do, đính kèm minh chứng; PH có thể gửi thay con | SV, PH | C |
-| FR-REQ-02 | Duyệt hoặc từ chối đơn | Kèm ghi chú, lưu lịch sử duyệt, người gửi nhận thông báo; đơn nghỉ do GV lớp học phần duyệt | GV | C |
-| FR-REQ-03 | Theo dõi trạng thái | Chờ duyệt, đã duyệt, từ chối, đã hủy | SV, PH | C |
-| FR-REQ-04 | Hủy đơn | Chỉ khi còn chờ duyệt | SV, PH | TB |
-| FR-REQ-05 | Đơn khác | Xin bảng điểm, xác nhận sinh viên, phúc khảo; AD xử lý | SV (gửi), AD (duyệt) | TB |
+| FR-REQ-01 | Gửi đơn xin nghỉ | Chọn lớp môn học (tùy chọn), khoảng ngày, lý do, đính kèm minh chứng; PH có thể gửi thay con | HS, PH | C |
+| FR-REQ-02 | Duyệt hoặc từ chối đơn | Kèm ghi chú, lưu lịch sử duyệt, người gửi nhận thông báo; đơn nghỉ do GV lớp môn học duyệt | GV | C |
+| FR-REQ-03 | Theo dõi trạng thái | Chờ duyệt, đã duyệt, từ chối, đã hủy | HS, PH | C |
+| FR-REQ-04 | Hủy đơn | Chỉ khi còn chờ duyệt | HS, PH | TB |
+| FR-REQ-05 | Đơn khác | Xin bảng điểm, xác nhận học sinh, phúc khảo; AD xử lý | HS (gửi), AD (duyệt) | TB |
 
 Khi đơn nghỉ được duyệt, các buổi vắng trong khoảng ngày xin nghỉ tự chuyển thành vắng có phép.
 
@@ -195,9 +211,9 @@ Khi đơn nghỉ được duyệt, các buổi vắng trong khoảng ngày xin n
 
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
-| FR-CLUB-01 | Quản lý CLB | Thêm, sửa, ngừng hoạt động; mã, tên, mô tả, logo, giảng viên phụ trách | AD | C |
+| FR-CLUB-01 | Quản lý CLB | Thêm, sửa, ngừng hoạt động; mã, tên, mô tả, logo, giáo viên phụ trách | AD | C |
 | FR-CLUB-02 | Xem CLB | Danh sách, chi tiết, thành viên, hoạt động sắp tới | Tất cả | C |
-| FR-CLUB-03 | Đăng ký tham gia CLB | Gửi yêu cầu, trạng thái chờ duyệt | SV | C |
+| FR-CLUB-03 | Đăng ký tham gia CLB | Gửi yêu cầu, trạng thái chờ duyệt | HS | C |
 | FR-CLUB-04 | Duyệt thành viên | Duyệt hoặc từ chối yêu cầu tham gia | Chủ nhiệm CLB, AD | C |
 | FR-CLUB-05 | Quản lý hoạt động | Tạo, sửa, hủy hoạt động (thời gian, địa điểm, số lượng tối đa) | Chủ nhiệm, phó chủ nhiệm CLB, AD | C |
 | FR-CLUB-06 | Đăng ký tham gia hoạt động | Đăng ký, hủy đăng ký, kiểm tra số lượng tối đa | Thành viên CLB | TB |
@@ -210,10 +226,10 @@ Vai trò trong CLB (chủ nhiệm, phó chủ nhiệm, thành viên) tách biệ
 
 | Mã | Chức năng | Mô tả | Vai trò | Ưu tiên |
 | --- | --- | --- | --- | --- |
-| FR-REPORT-01 | Thống kê điểm danh | Tỷ lệ chuyên cần theo lớp học phần và theo sinh viên | GV, TBM | TB |
-| FR-REPORT-02 | Thống kê điểm | Phổ điểm, tỷ lệ đạt theo lớp học phần, môn | GV, TBM, AD | TB |
+| FR-REPORT-01 | Thống kê điểm danh | Tỷ lệ chuyên cần theo lớp môn học và theo học sinh | GV, TTCM | TB |
+| FR-REPORT-02 | Thống kê điểm | Phổ điểm, tỷ lệ đạt theo lớp môn học, môn | GV, TTCM, AD | TB |
 | FR-REPORT-03 | Thống kê CLB | Số thành viên, số hoạt động | AD | T |
-| FR-REPORT-04 | Xuất báo cáo | Xuất Excel hoặc PDF | GV, TBM, AD | TB |
+| FR-REPORT-04 | Xuất báo cáo | Xuất Excel hoặc PDF | GV, TTCM, AD | TB |
 
 ### 3.12 Quản trị hệ thống (FR-SYS)
 
@@ -224,18 +240,18 @@ Vai trò trong CLB (chủ nhiệm, phó chủ nhiệm, thành viên) tách biệ
 
 ### 3.13 Ma trận phân quyền tóm tắt
 
-| Nhóm chức năng | AD | TBM | GV | SV | PH |
+| Nhóm chức năng | AD | TTCM | GV | HS | PH |
 | --- | --- | --- | --- | --- | --- |
-| Tài khoản, vai trò | Toàn quyền | Xem giảng viên bộ môn mình | Hồ sơ của mình | Hồ sơ của mình | Hồ sơ của mình |
-| Danh mục đào tạo | Toàn quyền | Môn học, lớp học phần bộ môn mình | Xem | Xem | Xem |
-| Thời khóa biểu, lịch thi | Quản lý | Quản lý bộ môn mình | Xem lịch dạy | Xem lịch học | Xem lịch của con |
-| Điểm danh | Xem, điều chỉnh | Xem bộ môn mình | Điểm danh lớp mình | Xem của mình | Xem của con |
-| Điểm số | Công bố, điều chỉnh | Công bố bộ môn mình | Nhập điểm lớp mình | Xem của mình | Xem của con |
-| Thông báo | Gửi mọi phạm vi | Gửi trong bộ môn | Gửi lớp học phần mình | Nhận | Nhận |
+| Tài khoản, vai trò | Toàn quyền | Xem giáo viên tổ chuyên môn mình | Hồ sơ của mình | Hồ sơ của mình | Hồ sơ của mình |
+| Danh mục đào tạo | Toàn quyền | Môn học, lớp môn học tổ chuyên môn mình | Xem | Xem | Xem |
+| Thời khóa biểu, lịch thi | Quản lý | Quản lý tổ chuyên môn mình | Xem lịch dạy | Xem lịch học | Xem lịch của con |
+| Điểm danh | Xem, điều chỉnh | Xem tổ chuyên môn mình | Điểm danh lớp mình | Xem của mình | Xem của con |
+| Điểm số | Công bố, điều chỉnh | Công bố tổ chuyên môn mình | Nhập điểm lớp mình | Xem của mình | Xem của con |
+| Thông báo | Gửi mọi phạm vi | Gửi trong tổ chuyên môn | Gửi lớp môn học mình | Nhận | Nhận |
 | Tin nhắn | Không | Nhắn tin | Nhắn tin | Nhắn tin | Nhắn tin |
 | Đơn từ | Xử lý đơn khác | Không | Duyệt đơn nghỉ lớp mình | Gửi đơn | Gửi đơn thay con |
 | Câu lạc bộ | Quản lý | Xem | Xem (hoặc phụ trách nếu được giao) | Tham gia; quản lý nếu là chủ nhiệm | Xem |
-| Báo cáo, nhật ký | Toàn bộ | Báo cáo bộ môn mình | Báo cáo lớp mình | Không | Không |
+| Báo cáo, nhật ký | Toàn bộ | Báo cáo tổ chuyên môn mình | Báo cáo lớp mình | Không | Không |
 
 ## 4. Yêu cầu phi chức năng
 
@@ -244,7 +260,7 @@ Vai trò trong CLB (chủ nhiệm, phó chủ nhiệm, thành viên) tách biệ
 | NFR-01 | Bảo mật | Mật khẩu băm BCrypt, không lưu bản rõ; dùng HTTPS; bật CSRF cho các form Thymeleaf |
 | NFR-02 | Bảo mật | Khóa tạm khi nhập sai nhiều lần; phiên hết hạn khi không hoạt động; thông báo lỗi đăng nhập chung chung, không tiết lộ số điện thoại có tồn tại hay không |
 | NFR-03 | Phân quyền | Kiểm tra quyền ở backend cho mọi yêu cầu, không chỉ ẩn nút trên giao diện |
-| NFR-04 | Riêng tư | PH chỉ xem con đã liên kết; SV chỉ xem dữ liệu của mình; GV chỉ xem lớp học phần mình dạy; TBM chỉ xem bộ môn mình |
+| NFR-04 | Riêng tư | PH chỉ xem con đã liên kết; HS chỉ xem dữ liệu của mình; GV chỉ xem lớp môn học mình dạy; TTCM chỉ xem tổ chuyên môn mình |
 | NFR-05 | Hiệu năng | Trang thông dụng phản hồi trong khoảng 2–3 giây; danh sách dài phải phân trang |
 | NFR-06 | Khả dụng | Giao diện tiếng Việt, responsive trên điện thoại và máy tính, chữ rõ cho phụ huynh lớn tuổi |
 | NFR-07 | Tương thích | Chạy trên các trình duyệt phổ biến bản mới (Chrome, Edge, Firefox, Safari) |
@@ -271,11 +287,11 @@ Cơ sở dữ liệu được định nghĩa trong script `fpt_contact_book.sql`
 
 **Quan hệ chính**
 
-- `users` – `roles`: nhiều–nhiều qua `user_roles`, có `department_id` để giới hạn phạm vi bộ môn.
+- `users` – `roles`: nhiều–nhiều qua `user_roles`, có `department_id` để giới hạn phạm vi tổ chuyên môn.
 - `users` – `students` / `teachers` / `parents`: một–một. `parents` – `students`: nhiều–nhiều qua `parent_student`.
-- Khoa → bộ môn → môn học; khoa → ngành → lớp hành chính.
-- Lớp học phần nối môn học, học kỳ và giảng viên; sinh viên vào lớp học phần qua `enrollments`.
-- Mỗi lớp học phần có nhiều buổi (`class_sessions`); điểm danh gắn với từng buổi và từng sinh viên.
+- Cấp học → tổ chuyên môn → môn học; cấp học → khối → lớp hành chính.
+- Lớp môn học nối môn học, học kỳ và giáo viên; học sinh vào lớp môn học qua `enrollments`.
+- Mỗi lớp môn học có nhiều buổi (`class_sessions`); điểm danh gắn với từng buổi và từng học sinh.
 - Điểm gắn với một lần ghi danh (`enrollments`) và một đầu điểm (`grade_components`).
 - Thông báo có danh sách người nhận kèm trạng thái đã đọc; đơn từ có lịch sử duyệt.
 
@@ -283,29 +299,29 @@ Cơ sở dữ liệu được định nghĩa trong script `fpt_contact_book.sql`
 
 **UC-01 Đăng nhập.** Người dùng nhập số điện thoại và mật khẩu. Hệ thống tra theo số điện thoại, so khớp mật khẩu băm và kiểm tra tài khoản chưa bị khóa. Nếu đúng thì tạo phiên, nạp các vai trò và mở trang chủ; nếu mật khẩu là mật khẩu tạm thì chuyển sang màn hình đổi mật khẩu; nếu sai thì báo lỗi chung và cho nhập lại.
 
-**UC-02 Admin tạo người dùng nhiều vai trò.** AD nhập số điện thoại, họ tên, chọn các vai trò (ví dụ TEACHER và HEAD\_OF\_DEPARTMENT kèm bộ môn) và hồ sơ giảng viên. Hệ thống sinh mật khẩu tạm, hiện một lần cho AD để báo lại người dùng.
+**UC-02 Admin tạo người dùng nhiều vai trò.** AD nhập số điện thoại, họ tên, chọn các vai trò (ví dụ TEACHER và HEAD\_OF\_DEPARTMENT kèm tổ chuyên môn) và hồ sơ giáo viên. Hệ thống sinh mật khẩu tạm, hiện một lần cho AD để báo lại người dùng.
 
 **UC-03 Admin đặt lại mật khẩu.** Người dùng liên hệ AD. AD chọn tài khoản, hệ thống tạo mật khẩu tạm, đặt cờ bắt buộc đổi mật khẩu và ghi nhật ký. Ở lần đăng nhập kế tiếp người dùng phải tự đặt mật khẩu mới.
 
 **UC-03b Người dùng tự đặt lại mật khẩu qua email.** Ở trang đăng nhập (web hoặc app), người dùng bấm Quên mật khẩu và nhập số điện thoại. Nếu tài khoản đang hoạt động và có email, hệ thống gửi mã 6 chữ số tới email; dù có hay không, màn hình luôn báo cùng một câu. Người dùng nhập mã và mật khẩu mới (cùng quy tắc với đổi mật khẩu). Mã đúng thì hệ thống đổi mật khẩu, bỏ cờ bắt buộc đổi mật khẩu, làm mất hiệu lực các phiên đăng nhập mobile cũ và ghi nhật ký. Gửi mã tối đa 1 lần mỗi phút, 5 lần mỗi giờ; nhập sai mã 5 lần thì khóa 15 phút.
 
-**UC-04 Giảng viên điểm danh.** GV mở buổi học hôm nay của lớp học phần mình, đánh dấu trạng thái từng sinh viên và lưu. Hệ thống ghi người điểm danh, thời điểm điểm danh, và cảnh báo nếu có sinh viên vắng vượt ngưỡng.
+**UC-04 Giáo viên điểm danh.** GV mở buổi học hôm nay của lớp môn học mình, đánh dấu trạng thái từng học sinh và lưu. Hệ thống ghi người điểm danh, thời điểm điểm danh, và cảnh báo nếu có học sinh vắng vượt ngưỡng.
 
-**UC-05 Gửi và duyệt đơn nghỉ.** SV (hoặc PH) tạo đơn kèm minh chứng. GV lớp học phần nhận thông báo, duyệt hoặc từ chối kèm ghi chú. Người gửi nhận kết quả; nếu duyệt thì các buổi vắng trong khoảng ngày được chuyển thành vắng có phép.
+**UC-05 Gửi và duyệt đơn nghỉ.** HS (hoặc PH) tạo đơn kèm minh chứng. GV lớp môn học nhận thông báo, duyệt hoặc từ chối kèm ghi chú. Người gửi nhận kết quả; nếu duyệt thì các buổi vắng trong khoảng ngày được chuyển thành vắng có phép.
 
-**UC-06 Công bố điểm.** GV nhập điểm các đầu điểm. TBM kiểm tra rồi công bố. Từ lúc đó SV và PH mới xem được điểm; hệ thống ghi người công bố và thời điểm công bố.
+**UC-06 Công bố điểm.** GV nhập điểm các đầu điểm. TTCM kiểm tra rồi công bố. Từ lúc đó HS và PH mới xem được điểm; hệ thống ghi người công bố và thời điểm công bố.
 
-**UC-07 Phụ huynh xem điểm của con.** PH đăng nhập, chọn một trong các con đã được liên kết, xem điểm và điểm danh. Hệ thống từ chối truy cập dữ liệu của sinh viên chưa liên kết.
+**UC-07 Phụ huynh xem điểm của con.** PH đăng nhập, chọn một trong các con đã được liên kết, xem điểm và điểm danh. Hệ thống từ chối truy cập dữ liệu của học sinh chưa liên kết.
 
-**UC-08 Sinh viên tham gia câu lạc bộ.** SV gửi yêu cầu tham gia, chủ nhiệm CLB duyệt. Sau khi được duyệt, SV đăng ký tham gia các hoạt động của CLB.
+**UC-08 Học sinh tham gia câu lạc bộ.** HS gửi yêu cầu tham gia, chủ nhiệm CLB duyệt. Sau khi được duyệt, HS đăng ký tham gia các hoạt động của CLB.
 
 ## 7. Đề xuất lộ trình triển khai (Web trước)
 
 | Giai đoạn | Nội dung | Ghi chú |
 | --- | --- | --- |
 | 1 | Nền tảng: dự án Spring Boot, kết nối SQL Server, đăng nhập bằng số điện thoại, phân quyền theo vai trò, trang chủ theo vai trò | Làm trước |
-| 2 | Quản lý người dùng (4 màn hình CRUD), gán vai trò, đặt lại mật khẩu, liên kết PH – SV | Cần cho mọi module |
-| 3 | Danh mục đào tạo, lớp học phần, ghi danh | Dữ liệu nền |
+| 2 | Quản lý người dùng (4 màn hình CRUD), gán vai trò, đặt lại mật khẩu, liên kết PH – HS | Cần cho mọi module |
+| 3 | Danh mục đào tạo, lớp môn học, ghi danh | Dữ liệu nền |
 | 4 | Thời khóa biểu, lịch thi, điểm danh, điểm số | Chức năng cốt lõi |
 | 5 | Thông báo, tin nhắn, đơn từ | Tăng tương tác |
 | 6 | Câu lạc bộ, báo cáo, nhật ký | Hoàn thiện |
@@ -324,10 +340,10 @@ Với đồ án môn học, nên chốt trước các mục ưu tiên **C** làm
 
 ## 9. Điểm cần xác nhận
 
-1. Trưởng bộ môn quản lý theo bộ môn (đơn vị chứa nhiều môn học) hay theo từng môn học? Tài liệu đang giả định theo bộ môn.
-2. Ai công bố điểm: trưởng bộ môn, admin, hay cả hai? Tài liệu đang giả định cả hai.
-3. Mỗi số điện thoại chỉ gắn với một tài khoản. Nếu hai phụ huynh hoặc phụ huynh và sinh viên dùng chung một số thì xử lý thế nào?
-4. Đơn nghỉ do giảng viên lớp học phần duyệt, hay cần giáo vụ hoặc trưởng bộ môn duyệt thêm?
+1. Tổ trưởng chuyên môn quản lý theo tổ chuyên môn (đơn vị chứa nhiều môn học) hay theo từng môn học? Tài liệu đang giả định theo tổ chuyên môn.
+2. Ai công bố điểm: tổ trưởng chuyên môn, admin, hay cả hai? Tài liệu đang giả định cả hai.
+3. Mỗi số điện thoại chỉ gắn với một tài khoản. Nếu hai phụ huynh hoặc phụ huynh và học sinh dùng chung một số thì xử lý thế nào?
+4. Đơn nghỉ do giáo viên lớp môn học duyệt, hay cần giáo vụ hoặc tổ trưởng chuyên môn duyệt thêm?
 5. Có yêu cầu nộp kèm sơ đồ (use case, ERD, kiến trúc) cùng bản SRS này không?
 
 ---

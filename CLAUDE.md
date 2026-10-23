@@ -1,4 +1,4 @@
-# Sổ liên lạc điện tử Đại học FPT (Web)
+# Sổ liên lạc điện tử My FPT School (Web)
 
 Ứng dụng web xây dựng theo từng giai đoạn. Mỗi lượt chỉ làm đúng giai đoạn được giao, xong thì báo cáo và DỪNG.
 
@@ -66,8 +66,8 @@ Tài nguyên: `templates/{layout,fragments,auth,admin,teacher,student,parent,com
 - Một người dùng có nhiều vai trò (`user_roles`); quyền là hợp của mọi vai trò, không có chế độ chọn vai trò đang dùng.
 - Phân quyền theo tên vai trò (`hasRole` / `@PreAuthorize`).
 - Phạm vi dữ liệu BẮT BUỘC kiểm tra ở tầng service:
-  - TEACHER chỉ thao tác lớp học phần mình dạy.
-  - HEAD_OF_DEPARTMENT chỉ trong bộ môn gắn với vai trò (`user_roles.department_id`).
+  - TEACHER chỉ thao tác lớp môn học mình dạy.
+  - HEAD_OF_DEPARTMENT chỉ trong tổ chuyên môn gắn với vai trò (`user_roles.department_id`).
   - STUDENT chỉ xem dữ liệu của chính mình.
   - PARENT chỉ xem dữ liệu con đã liên kết (`parent_student`).
 - CSRF bật cho mọi form, Thymeleaf tự chèn token. Không tắt CSRF. Ngoại lệ duy nhất: `SecurityFilterChain` riêng cho `/api/**`, stateless, xác thực bằng JWT (không dùng cookie phiên).

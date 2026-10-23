@@ -1,6 +1,6 @@
-# Sổ liên lạc điện tử Đại học FPT (Mobile, Flutter)
+# Sổ liên lạc điện tử My FPT School (Mobile, Flutter)
 
-App Android cho sinh viên (SV), phụ huynh (PH) và giảng viên (GV). File này áp dụng cho mọi file trong `mobile/` và bổ sung `~/.claude/CLAUDE.md`. Các mục 0 (ghi đè rule global), 1 (nguồn sự thật) và 9 (quy trình mỗi giai đoạn) của `CLAUDE.md` gốc vẫn áp dụng. Lộ trình: `docs/MOBILE_ROADMAP.md`.
+App Android cho học sinh (HS), phụ huynh (PH) và giáo viên (GV). File này áp dụng cho mọi file trong `mobile/` và bổ sung `~/.claude/CLAUDE.md`. Các mục 0 (ghi đè rule global), 1 (nguồn sự thật) và 9 (quy trình mỗi giai đoạn) của `CLAUDE.md` gốc vẫn áp dụng. Lộ trình: `docs/MOBILE_ROADMAP.md`.
 
 ## 1. DỮ LIỆU
 - App **không có database riêng**: không SQLite, không Hive, không chế độ offline. Mọi dữ liệu nghiệp vụ đọc và ghi qua REST API của backend (`/api/v1/**`). Backend lưu vào database SQL Server `FptContactBook`, chung với web.
@@ -26,8 +26,8 @@ Package Dart `fpt_contact_book_mobile`, applicationId `vn.edu.fpt.contactbook`. 
 - Test đặt trong `test/` theo cùng tầng (`model/`, `service/`, `controller/`, widget test); giả lập ở ranh giới HTTP bằng `test/support/fakes.dart`.
 
 ## 4. NGHIỆP VỤ (theo SRS mục 8)
-- SV: thời khóa biểu, lịch thi, điểm (chỉ cột đã công bố), điểm danh, thông báo, đơn nghỉ.
-- PH: như SV, cho từng con đã liên kết; có chọn con.
+- HS: thời khóa biểu, lịch thi, điểm (chỉ cột đã công bố), điểm danh, thông báo, đơn nghỉ.
+- PH: như HS, cho từng con đã liên kết; có chọn con.
 - GV: lịch dạy, điểm danh một buổi, duyệt đơn nghỉ.
 - Quên mật khẩu: nhận mã qua email rồi đặt mật khẩu mới (`/auth/password-reset/*`, SRS FR-AUTH-07); tài khoản không có email vẫn liên hệ quản trị viên.
 - Ngoài phạm vi: đăng ký, nhập hoặc sửa điểm, lịch, danh mục, offline. Push notification, tin nhắn, CLB chỉ làm khi được duyệt.

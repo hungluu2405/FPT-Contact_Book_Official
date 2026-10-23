@@ -124,7 +124,7 @@ void main() {
   testWidgets('teacher-only account waits for phase 10d', (tester) async {
     await pumpHome(tester, roles: ['TEACHER']);
 
-    expect(find.textContaining('Chức năng giảng viên'), findsOneWidget);
+    expect(find.textContaining('Chức năng giáo viên'), findsOneWidget);
     expect(find.byType(FeatureTileWidget), findsNothing);
   });
 
