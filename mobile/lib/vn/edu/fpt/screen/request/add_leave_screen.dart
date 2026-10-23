@@ -6,6 +6,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/attachment_pick
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/error_retry_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/page_header_widget.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/unsaved_changes_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_colors.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_theme.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/date_format.dart';
@@ -143,32 +144,45 @@ class _AddLeaveScreenState extends State<AddLeaveScreen> {
     );
   }
 
+  /// Đã chọn ngày, lớp, gõ tiêu đề, lý do hoặc đính tệp: rời trang phải hỏi.
+  bool get _hasContent =>
+      _fromDate != null ||
+      _toDate != null ||
+      _sectionId != null ||
+      _titleCtrl.text.trim().isNotEmpty ||
+      _reasonCtrl.text.trim().isNotEmpty ||
+      _controller.files.isNotEmpty;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListenableBuilder(
-        listenable: _controller,
-        builder: (context, _) {
-          final options = _controller.options;
-          return ListView(
-            controller: _scrollCtrl,
-            padding: EdgeInsets.zero,
-            children: [
-              PageHeaderWidget(
-                icon: Icons.edit_note,
-                title: 'Đơn từ',
-                headline: 'Gửi đơn nghỉ',
-                subtitle: options == null
-                    ? null
-                    : 'Học sinh: ${options.studentName} '
-                          '(${options.studentCode})',
-                viewerName: widget.viewerName,
-              ),
-              ..._body(options),
-            ],
-          );
-        },
-      ),
+    return ListenableBuilder(
+      listenable: Listenable.merge([_titleCtrl, _reasonCtrl, _controller]),
+      builder: (context, _) {
+        final options = _controller.options;
+        return UnsavedChangesScopeWidget(
+          hasChanges: _hasContent,
+          message: 'Đơn nghỉ chưa được gửi. Nội dung đã nhập sẽ mất.',
+          child: Scaffold(
+            body: ListView(
+              controller: _scrollCtrl,
+              padding: EdgeInsets.zero,
+              children: [
+                PageHeaderWidget(
+                  icon: Icons.edit_note,
+                  title: 'Đơn từ',
+                  headline: 'Gửi đơn nghỉ',
+                  subtitle: options == null
+                      ? null
+                      : 'Học sinh: ${options.studentName} '
+                            '(${options.studentCode})',
+                  viewerName: widget.viewerName,
+                ),
+                ..._body(options),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

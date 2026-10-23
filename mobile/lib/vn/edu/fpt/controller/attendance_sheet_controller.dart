@@ -82,6 +82,20 @@ class AttendanceSheetController extends ChangeNotifier {
     );
   }
 
+  /// Có lựa chọn chưa lưu: trạng thái hoặc ghi chú (sau khi bỏ khoảng trắng)
+  /// khác bảng vừa tải. Lựa chọn sẵn của buổi chưa điểm danh không tính.
+  bool get hasChanges {
+    final sheet = _sheet;
+    if (sheet == null || !canEdit) {
+      return false;
+    }
+    return sheet.rows.any(
+      (row) =>
+          statusOf(row.studentId) != (row.status ?? _defaultStatus(row)) ||
+          noteOf(row.studentId).trim() != (row.note ?? ''),
+    );
+  }
+
   /// Mở bảng điểm danh của buổi [sessionId] thuộc lớp [sectionId].
   Future<void> open(int sectionId, int sessionId) async {
     final generation = ++_generation;

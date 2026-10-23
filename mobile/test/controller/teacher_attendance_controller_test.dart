@@ -233,6 +233,66 @@ void main() {
       expect((app.http.requests.last.data as Map)['notes'], {'2': ''});
     });
 
+    test('hasChanges compares the choices with the loaded sheet', () async {
+      final app = TestApp(accessToken: 'a', refreshToken: 'r');
+      app.http.reply(
+        'GET',
+        kSheetPath,
+        FakeReply(200, sheetJson(marked: true)),
+      );
+      app.http.reply(
+        'POST',
+        kSheetPath,
+        FakeReply(200, {
+          'firstTime': false,
+          'changed': 0,
+          'sheet': sheetJson(marked: true),
+        }),
+      );
+      final controller = app.attendanceSheetController;
+      await controller.open(1, 2);
+      expect(controller.hasChanges, isFalse);
+
+      controller.setStatus(2, AttendanceStatus.absentExcused);
+      expect(controller.hasChanges, isTrue);
+      controller.setStatus(2, AttendanceStatus.absentUnexcused);
+      expect(controller.hasChanges, isFalse);
+
+      controller.setNote(1, '  ');
+      expect(controller.hasChanges, isFalse);
+      controller.setNote(1, 'Phát biểu tốt');
+      expect(controller.hasChanges, isTrue);
+
+      await controller.save();
+      expect(controller.hasChanges, isFalse);
+    });
+
+    test('an unmarked sheet with the preset choices has no changes', () async {
+      final app = TestApp(accessToken: 'a', refreshToken: 'r');
+      app.http.reply('GET', kSheetPath, FakeReply(200, sheetJson()));
+      final controller = app.attendanceSheetController;
+      await controller.open(1, 2);
+
+      expect(controller.hasChanges, isFalse);
+      controller.setStatus(1, AttendanceStatus.absentUnexcused);
+      expect(controller.hasChanges, isTrue);
+    });
+
+    test('a locked sheet never has changes', () async {
+      final app = TestApp(accessToken: 'a', refreshToken: 'r');
+      app.http.reply(
+        'GET',
+        kSheetPath,
+        FakeReply(200, sheetJson(marked: true, locked: true)),
+      );
+      final controller = app.attendanceSheetController;
+      await controller.open(1, 2);
+
+      controller.setStatus(1, AttendanceStatus.absentUnexcused);
+
+      expect(controller.hasChanges, isFalse);
+    });
+
     test('mark all present keeps approved leave as excused', () async {
       final app = TestApp(accessToken: 'a', refreshToken: 'r');
       app.http.reply('GET', kSheetPath, FakeReply(200, sheetJson()));

@@ -6,6 +6,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/department/view_sent_n
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/attachment_picker_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/page_header_widget.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/unsaved_changes_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_colors.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_theme.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/user_labels.dart';
@@ -114,8 +115,27 @@ class _AddDepartmentNotificationScreenState
     return label.isEmpty ? '' : label[0].toLowerCase() + label.substring(1);
   }
 
+  /// Đã gõ tiêu đề, nội dung hoặc đính tệp: rời trang phải hỏi. Chỉ đổi mức
+  /// độ thì không tính.
+  bool get _hasContent =>
+      _titleCtrl.text.trim().isNotEmpty ||
+      _contentCtrl.text.trim().isNotEmpty ||
+      _controller.files.isNotEmpty;
+
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([_titleCtrl, _contentCtrl, _controller]),
+      builder: (context, child) => UnsavedChangesScopeWidget(
+        hasChanges: _hasContent,
+        message: 'Thông báo chưa được gửi. Nội dung đã nhập sẽ mất.',
+        child: child!,
+      ),
+      child: _form(),
+    );
+  }
+
+  Widget _form() {
     return Scaffold(
       body: ListenableBuilder(
         listenable: _controller,

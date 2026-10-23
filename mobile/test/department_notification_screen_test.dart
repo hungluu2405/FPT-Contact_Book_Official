@@ -106,6 +106,36 @@ void main() {
     expect(app.http.count('POST', '/head/notifications'), 0);
   });
 
+  testWidgets('a typed notification asks before it is thrown away', (
+    tester,
+  ) async {
+    await pumpHead(tester);
+    await tapText(tester, 'Gửi thông báo tổ');
+    await enter(tester, 'Tiêu đề', 'Họp tổ chuyên môn tháng 11');
+    await tester.pump();
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Bỏ nội dung đang soạn?'), findsOneWidget);
+    await tester.tap(find.text('Bỏ nội dung'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gửi tới: cả Tổ Toán – Tin học'), findsNothing);
+    expect(find.text('Gửi thông báo tổ'), findsOneWidget);
+  });
+
+  testWidgets('only a changed priority closes without asking', (tester) async {
+    await pumpHead(tester);
+    await tapText(tester, 'Gửi thông báo tổ');
+    await tapText(tester, 'Khẩn');
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bỏ nội dung đang soạn?'), findsNothing);
+    expect(find.text('Gửi tới: cả Tổ Toán – Tin học'), findsNothing);
+  });
+
   testWidgets('the department is sent to after confirming', (tester) async {
     final app = await pumpHead(tester);
     await tapText(tester, 'Gửi thông báo tổ');

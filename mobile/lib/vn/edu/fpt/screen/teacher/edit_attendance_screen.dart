@@ -6,6 +6,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dar
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/error_retry_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/page_header_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/status_badge_widget.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/unsaved_changes_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_colors.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_theme.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/date_format.dart';
@@ -88,8 +89,34 @@ class _EditAttendanceScreenState extends State<EditAttendanceScreen> {
     );
   }
 
+  /// Kéo xuống và nút "Tải lại bảng" hỏi trước nếu còn lựa chọn chưa lưu.
+  Future<void> _reload() async {
+    if (_controller.hasChanges &&
+        !await confirmDiscardChanges(
+          context,
+          title: 'Tải lại bảng điểm danh?',
+          message: 'Các lựa chọn và ghi chú chưa lưu sẽ mất.',
+          confirmLabel: 'Tải lại',
+        )) {
+      return;
+    }
+    await _controller.reload();
+  }
+
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, child) => UnsavedChangesScopeWidget(
+        hasChanges: _controller.hasChanges,
+        message: 'Điểm danh chưa được lưu. Các lựa chọn và ghi chú sẽ mất.',
+        child: child!,
+      ),
+      child: _sheetView(),
+    );
+  }
+
+  Widget _sheetView() {
     return Scaffold(
       body: ListenableBuilder(
         listenable: _controller,
@@ -97,7 +124,7 @@ class _EditAttendanceScreenState extends State<EditAttendanceScreen> {
           final sheet = _controller.sheet;
           return RefreshIndicator(
             color: AppColors.orange,
-            onRefresh: _controller.reload,
+            onRefresh: _reload,
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
@@ -222,7 +249,7 @@ class _EditAttendanceScreenState extends State<EditAttendanceScreen> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
-                  onPressed: _controller.reload,
+                  onPressed: _reload,
                   icon: const Icon(Icons.refresh),
                   label: const Text('Tải lại bảng điểm danh'),
                 ),

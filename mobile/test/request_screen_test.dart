@@ -209,6 +209,63 @@ void main() {
     expect(find.text('Đã hủy'), findsOneWidget);
   });
 
+  group('leaving the leave form', () {
+    const discardTitle = 'Bỏ nội dung đang soạn?';
+
+    testWidgets('an empty form closes without asking', (tester) async {
+      await openRequests(tester);
+      await openLeaveForm(tester);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.text(discardTitle), findsNothing);
+      expect(find.text('Đơn của tôi'), findsOneWidget);
+    });
+
+    testWidgets('a typed reason asks before it is thrown away', (tester) async {
+      await openRequests(tester);
+      await openLeaveForm(tester);
+      await enter(tester, 'Lý do', 'Con bị sốt, xin nghỉ hai ngày');
+      await tester.pump();
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text(discardTitle), findsOneWidget);
+      await tester.tap(find.text('Ở lại'));
+      await tester.pumpAndSettle();
+      expect(find.text('Con bị sốt, xin nghỉ hai ngày'), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bỏ nội dung'));
+      await tester.pumpAndSettle();
+      expect(find.text('Đơn của tôi'), findsOneWidget);
+    });
+
+    testWidgets('tapping the current tab asks, then closes only the form', (
+      tester,
+    ) async {
+      await openRequests(tester);
+      await openLeaveForm(tester);
+      await pickDay(tester, 'Từ ngày', 22);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Trang chủ'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(discardTitle), findsOneWidget);
+      await tester.tap(find.text('Bỏ nội dung'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Đơn của tôi'), findsOneWidget);
+      expect(find.text('Gửi đơn nghỉ'), findsOneWidget);
+    });
+  });
+
   testWidgets('an empty leave form shows errors next to the fields', (
     tester,
   ) async {

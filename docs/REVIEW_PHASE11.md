@@ -47,8 +47,8 @@ Không có lỗi phải sửa gấp (không crash, không lộ dữ liệu sang 
 |---|---|---|
 | Q1 | Hàng đợi "Chờ duyệt" tải trang theo vị trí. Duyệt một đơn rồi cuộn tải thêm thì đơn đứng ngay sau ranh giới trang bị bỏ sót (ví dụ 21 đơn: duyệt một đơn ở trang đầu thì đơn thứ 21 không bao giờ hiện cho tới khi kéo tải lại). | **Đã sửa** (`request_review_controller.dart`): đơn rời hàng đợi khi còn trang sau thì lần tải thêm kế tiếp tải lại từ trang đầu. Test `loading more after an approval skips no pending request` |
 | Q2 | Màn hình CLB của phụ huynh đổi sang con khác (hoặc tài khoản khác đăng nhập trên cùng máy) vẫn hiện "CLB của con" của người trước trong lúc chờ phản hồi. | **Đã sửa** (`club_controller.dart`): `open()` xóa danh sách cũ. Test `switching child hides the clubs of the previous one` |
-| Q3 | Kéo xuống trên bảng điểm danh đang sửa (hoặc nút "Tải lại bảng") tải lại bảng và mất các lựa chọn chưa lưu, không hỏi. | Chưa sửa: cần thêm hộp xác nhận (thay đổi giao diện), đề xuất làm ở đợt sau |
-| Q4 | Bấm lại tab đang mở hoặc nút back trên form đơn nghỉ, form gửi thông báo tổ, bảng điểm danh làm mất nội dung đang soạn mà không hỏi. | Chưa sửa: cần một hộp "Bỏ nội dung đang soạn?" dùng chung, đề xuất làm cùng Q3 |
+| Q3 | Kéo xuống trên bảng điểm danh đang sửa (hoặc nút "Tải lại bảng") tải lại bảng và mất các lựa chọn chưa lưu, không hỏi. | **Đã sửa** (`edit_attendance_screen.dart`, `AttendanceSheetController.hasChanges`): có thay đổi chưa lưu thì hỏi "Tải lại bảng điểm danh?" (giả định 189) |
+| Q4 | Bấm lại tab đang mở hoặc nút back trên form đơn nghỉ, form gửi thông báo tổ, bảng điểm danh làm mất nội dung đang soạn mà không hỏi. | **Đã sửa**: hộp "Bỏ nội dung đang soạn?" dùng chung (`unsaved_changes_widget.dart`); app shell dùng `maybePop` và dừng ở màn hình đang soạn khi bấm lại tab (giả định 189) |
 | Q5 | Lưu điểm danh chậm, giáo viên kịp mở buổi khác thì màn hình buổi mới có thể hiện bảng của buổi vừa lưu (`save()` không kiểm tra lượt mở như `open()`). | Chưa sửa, hiếm gặp |
 | Q6 | Chuyển tuần lỗi mạng rồi bấm "Thử lại" thì về tuần cũ thay vì tuần định xem. | Chưa sửa, ảnh hưởng nhỏ |
 | Q7 | Hàm tải và mở tệp đính kèm chép ở 4 controller; tách lỗi theo ô của backend chép ở 2 controller. | Chưa sửa: gom thành helper chung là refactor, ngoài phạm vi |
@@ -68,7 +68,7 @@ Không có lỗi phải sửa gấp (không crash, không lộ dữ liệu sang 
 |---|---|
 | `mvn clean verify` (gốc, SQL Server localhost, `FptContactBook_test`) | PASSED: 1398 run / 1398 passed / 0 failed / 0 skipped |
 | `flutter analyze` (`mobile/`) | PASSED: không có vấn đề |
-| `flutter test` (`mobile/`, gồm golden test) | PASSED: 395 run / 395 passed / 0 failed / 0 skipped |
+| `flutter test` (`mobile/`, gồm golden test) | PASSED: 395 run / 395 passed / 0 failed / 0 skipped; sau khi sửa Q3, Q4: 406 run / 406 passed / 0 failed / 0 skipped |
 | `flutter test test_contract` (backend chạy trên localhost:8080) | PASSED: 49 run / 49 passed / 0 failed / 0 skipped |
 | `flutter build apk --debug` | PASSED; manifest đã gộp trỏ `@xml/network_security_config`, bản debug lấy cấu hình cho phép HTTP của `src/debug` |
 | Backend với `SPRINGDOC_APIDOCS_ENABLED=false`, `SPRINGDOC_SWAGGERUI_ENABLED=false` | `/v3/api-docs`, `/swagger-ui.html` trả 404 |
