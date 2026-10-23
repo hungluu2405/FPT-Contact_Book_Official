@@ -12,6 +12,20 @@
     --color-border: #E5E7EB;
     --color-muted: #6B7280;
 
+    /* Thang chữ và khoảng cách dùng chung (rem theo cỡ chữ gốc 16px của trình duyệt). */
+    --fs-sm: 0.875rem;
+    --fs-base: 1rem;
+    --fs-lg: 1.125rem;
+    --fs-xl: 1.375rem;
+    --fs-2xl: 1.75rem;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.5rem;
+    --space-6: 2rem;
+    --radius: 0.75rem;
+
     /* Màu chủ đạo của Bootstrap là cam (đồng bộ với app mobile): nút, link, ô đang nhập, phân trang... */
     --bs-primary: #F97316;
     --bs-primary-rgb: 249, 115, 22;
@@ -86,9 +100,65 @@
     --bs-nav-pills-link-active-bg: var(--color-orange);
 }
 
-/* Nhãn nhỏ nền primary: cam đậm để chữ trắng đủ tương phản. */
-.text-bg-primary {
-    background-color: var(--color-orange-dark) !important;
+/* Nhãn trạng thái: nền nhạt, chữ đậm cùng tông (đọc dễ hơn nền đặc chữ trắng), cỡ chữ không dưới 13px. */
+.badge {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    padding: 0.3em 0.6em;
+    border-radius: 0.375rem;
+}
+
+.badge.text-bg-primary { background-color: var(--color-orange-light) !important; color: #9A3412 !important; }
+.badge.text-bg-success { background-color: #DCFCE7 !important; color: #166534 !important; }
+.badge.text-bg-danger { background-color: #FEE2E2 !important; color: #991B1B !important; }
+.badge.text-bg-warning { background-color: #FEF3C7 !important; color: #92400E !important; }
+.badge.text-bg-info { background-color: #E0F2FE !important; color: #075985 !important; }
+.badge.text-bg-secondary { background-color: #F3F4F6 !important; color: #374151 !important; }
+
+/* Số đếm trên chuông và menu vẫn nền đỏ đặc để dễ thấy. */
+.app-bell .badge,
+.app-sidebar .badge {
+    background-color: #DC2626 !important;
+    color: var(--color-white) !important;
+    border-radius: 9999px;
+}
+
+/* Nút cao tối thiểu 44px (người lớn tuổi dùng), nút nhỏ 36px; chữ đậm vừa. */
+.app-body .btn:not(.btn-link) {
+    font-weight: 600;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+.app-body .btn.btn-sm {
+    min-height: 36px;
+}
+
+/* Ô nhập cùng chiều cao với nút để thẳng hàng trong thanh lọc. */
+.app-body .form-control:not(textarea):not(.form-control-sm),
+.app-body .form-select:not(.form-select-sm) {
+    min-height: 44px;
+}
+
+/* Bảng: tiêu đề cột chữ phụ, tên trong bảng là link không gạch chân (gạch khi rê chuột). */
+.table > thead th {
+    color: var(--color-muted);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+}
+
+.table td a:not(.btn) {
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.table td a:not(.btn):hover,
+.table td a:not(.btn):focus-visible {
+    text-decoration: underline;
 }
 
 .nav-tabs .nav-link,
@@ -163,8 +233,7 @@ body {
 .card-custom {
     background-color: var(--color-white);
     border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border-radius: var(--radius);
 }
 
 .badge-status {
@@ -190,17 +259,10 @@ body {
     color: var(--color-white);
 }
 
-/* ---------- Trang đăng nhập, trang lỗi: nền trắng, mảng cong cam nhạt ở góc trên và đáy ---------- */
+/* ---------- Trang đăng nhập, trang lỗi: nền trắng, không trang trí ---------- */
 .login-body,
 .error-body {
     background-color: var(--color-white);
-    background-image:
-        radial-gradient(circle at 100% 0, var(--color-orange-light) 0, var(--color-orange-light) min(260px, 45vw), transparent calc(min(260px, 45vw) + 1px)),
-        radial-gradient(circle at 0 6%, rgba(249, 115, 22, 0.06) 0, rgba(249, 115, 22, 0.06) 90px, transparent 91px),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 200' preserveAspectRatio='none'%3E%3Cpath d='M0 60 Q 430 0 860 60 T 1440 50 V200 H0Z' fill='%23F97316' fill-opacity='0.07'/%3E%3Cpath d='M0 120 Q 500 60 940 125 T 1440 115 V200 H0Z' fill='%23F97316' fill-opacity='0.12'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: 0 0, 0 0, bottom center;
-    background-size: auto, auto, 100% 160px;
     min-height: 100vh;
 }
 
@@ -292,7 +354,6 @@ body {
 .login-submit {
     min-height: 54px;
     font-size: 1.1rem;
-    box-shadow: 0 6px 16px rgba(249, 115, 22, 0.3);
 }
 
 .login-forgot {
@@ -313,7 +374,8 @@ body {
 
 /* ---------- Bố cục chung ---------- */
 .app-body {
-    font-size: 1.05rem;
+    font-size: var(--fs-base);
+    line-height: 1.55;
 }
 
 .app-topbar {
@@ -366,6 +428,17 @@ body {
     padding: 0 0.25rem;
 }
 
+/* Vùng bấm trên thanh trên tối thiểu 44x44px: nút menu, chuông, nút đăng xuất. */
+.app-menu-toggle,
+.app-bell,
+.app-user form .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+}
+
 .app-user {
     margin-left: auto;
     display: flex;
@@ -376,7 +449,42 @@ body {
 .app-user-name {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: var(--space-2);
+    font-weight: 500;
+}
+
+/* Vòng tròn chữ cái đầu của tên (thanh trên, thẻ con trên trang phụ huynh). */
+.avatar-initial {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--color-orange-light);
+    color: var(--color-orange-dark);
+    font-weight: 700;
+}
+
+/* Điện thoại: thanh trên một dòng (chỉ chữ cái đầu, nút đăng xuất chỉ biểu tượng). */
+@media (max-width: 575.98px) {
+    .app-topbar {
+        padding: var(--space-2) var(--space-3);
+        gap: var(--space-2);
+    }
+
+    .app-brand .brand-logo {
+        height: 34px;
+    }
+
+    .app-user {
+        gap: var(--space-2);
+    }
+
+    .app-user-name .app-user-full {
+        display: none;
+    }
 }
 
 .app-shell {
@@ -414,12 +522,10 @@ body {
 
 /* Tiêu đề nhóm menu (ví dụ "Danh mục"). */
 .app-sidebar .nav-heading {
-    color: var(--color-navy);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    font-size: var(--fs-sm);
+    font-weight: 600;
     padding: 0.9rem 0.9rem 0.3rem;
-    text-transform: uppercase;
 }
 
 .app-content {
@@ -447,9 +553,11 @@ body {
 }
 
 .page-title {
-    font-size: 1.6rem;
+    color: var(--color-navy);
+    font-size: var(--fs-2xl);
     font-weight: 700;
-    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+    margin-bottom: var(--space-4);
 }
 
 .form-narrow {
@@ -467,8 +575,372 @@ body {
     margin-right: 0.5rem;
 }
 
-.coming-soon {
-    border-style: dashed;
+/* ---------- Trang chủ theo vai trò ---------- */
+.home-header {
+    margin-bottom: var(--space-5);
+}
+
+.home-header .page-title {
+    margin-bottom: var(--space-1);
+}
+
+.home-meta {
+    color: var(--color-muted);
+    margin-bottom: var(--space-2);
+}
+
+.home-meta-sep {
+    margin: 0 var(--space-2);
+}
+
+.home-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: var(--fs-sm);
+}
+
+.home-roles li {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 9999px;
+    padding: 0.15rem 0.7rem;
+}
+
+.home-grid {
+    display: grid;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+}
+
+@media (min-width: 992px) {
+    .home-grid {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .home-side {
+        grid-row: span 2;
+    }
+}
+
+.home-side {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.panel {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+}
+
+.panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
+
+.panel-title {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    margin: 0;
+}
+
+.panel-link {
+    color: var(--color-orange-dark);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.panel-link:hover,
+.panel-link:focus-visible {
+    text-decoration: underline;
+}
+
+.empty-line {
+    color: var(--color-muted);
+    margin: 0;
+}
+
+/* Danh sách buổi học / lịch thi: giờ bên trái, môn và chi tiết bên phải. */
+.session-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.session-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--color-border);
+}
+
+.session-row:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.session-row.is-cancelled .session-subject {
+    text-decoration: line-through;
+    color: var(--color-muted);
+}
+
+.session-time {
+    display: flex;
+    flex-direction: column;
+    min-width: 3.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.session-time-end {
+    color: var(--color-muted);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+}
+
+.session-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.session-subject {
+    font-weight: 600;
+}
+
+.session-detail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    color: var(--color-muted);
+    font-size: var(--fs-sm);
+}
+
+/* Ô số liệu có link: số lớn, nhãn, gợi ý; cần xử lý thì có vạch cam bên trái. */
+.stat-row {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    margin-bottom: var(--space-5);
+}
+
+.stat-tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.stat-tile:hover,
+.stat-tile:focus-visible {
+    border-color: var(--color-orange);
+    color: var(--color-text);
+}
+
+.stat-tile.has-attention {
+    box-shadow: inset 4px 0 0 var(--color-orange);
+}
+
+.stat-value {
+    color: var(--color-navy);
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+    font-weight: 600;
+}
+
+.stat-hint {
+    color: var(--color-muted);
+    font-size: var(--fs-sm);
+}
+
+/* Danh sách lối tắt: mỗi dòng một link lớn có biểu tượng. */
+.link-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.link-list a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 44px;
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.link-list li:first-child a {
+    border-top: 0;
+}
+
+.link-list a:hover,
+.link-list a:focus-visible {
+    color: var(--color-orange-dark);
+}
+
+.link-list .bi {
+    color: var(--color-orange-dark);
+}
+
+/* Thông báo mới: chưa đọc in đậm, chấm cam bên trái. */
+.notice-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.notice-list a {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-3) 0 var(--space-3) var(--space-4);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text);
+    text-decoration: none;
+    position: relative;
+}
+
+.notice-list li:first-child a {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.notice-list a:hover .notice-title,
+.notice-list a:focus-visible .notice-title {
+    color: var(--color-orange-dark);
+}
+
+.notice-list .is-unread .notice-title {
+    font-weight: 700;
+}
+
+.notice-list .is-unread a::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-orange);
+}
+
+.notice-list li:first-child.is-unread a::before {
+    top: 0.45em;
+}
+
+.notice-meta {
+    color: var(--color-muted);
+    font-size: var(--fs-sm);
+}
+
+.attention-note {
+    color: #991B1B;
+}
+
+.attention-note ul {
+    margin: var(--space-2) 0 0;
+    padding-left: 1.2rem;
+}
+
+/* Trang phụ huynh: mỗi con một thẻ. */
+.child-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    margin-bottom: var(--space-5);
+}
+
+.child-card.has-attention {
+    box-shadow: inset 4px 0 0 #DC2626;
+}
+
+.child-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.child-head .avatar-initial {
+    width: 44px;
+    height: 44px;
+    font-size: var(--fs-lg);
+}
+
+.child-code {
+    color: var(--color-muted);
+    font-size: var(--fs-sm);
+}
+
+.child-facts {
+    list-style: none;
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+}
+
+.child-facts li {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.child-facts .bi {
+    color: var(--color-muted);
+}
+
+.child-facts .is-attention,
+.child-facts .is-attention .bi {
+    color: #991B1B;
+    font-weight: 600;
+}
+
+.child-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+}
+
+.child-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    color: var(--color-text);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.child-links a:hover,
+.child-links a:focus-visible {
+    border-color: var(--color-orange);
+    color: var(--color-orange-dark);
 }
 
 /* ---------- Hồ sơ ---------- */
@@ -558,14 +1030,13 @@ body {
     position: relative;
     color: var(--color-text);
     font-size: 1.25rem;
-    margin-right: 0.75rem;
     text-decoration: none;
 }
 
 .app-bell .badge {
     position: absolute;
-    top: -0.4rem;
-    right: -0.7rem;
+    top: 0.1rem;
+    right: 0;
     font-size: 0.7rem;
 }
 

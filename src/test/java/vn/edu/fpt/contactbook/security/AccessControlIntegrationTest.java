@@ -89,7 +89,7 @@ class AccessControlIntegrationTest {
                         containsString("Giáo viên"),
                         containsString("Tổ trưởng chuyên môn"),
                         containsString("Tổ Toán – Tin học (TT)"),
-                        containsString("Sắp có"),
+                        containsString("Lịch dạy hôm nay"),
                         not(containsString("href=\"/admin\"")))))
                 .andReturn().getResponse().getContentAsString();
 

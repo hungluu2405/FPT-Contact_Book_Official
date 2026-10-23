@@ -36,6 +36,9 @@ public interface ClassSectionRepository extends JpaRepository<ClassSection, Long
 
     boolean existsBySubjectId(Long subjectId);
 
+    /** Số lớp môn học của một học kỳ (trang chủ quản trị). */
+    long countBySemesterId(Long semesterId);
+
     /** Các lớp học phần của học kỳ do một giảng viên dạy (lịch dạy, lịch thi của giảng viên). */
     @Query("SELECT c.id FROM ClassSection c WHERE c.teacher.id = :teacherId AND c.semester.id = :semesterId")
     List<Long> findIdsByTeacherAndSemester(@Param("teacherId") Long teacherId, @Param("semesterId") Long semesterId);

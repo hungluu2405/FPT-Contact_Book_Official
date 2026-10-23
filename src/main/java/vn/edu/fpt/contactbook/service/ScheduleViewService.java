@@ -2,6 +2,7 @@ package vn.edu.fpt.contactbook.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -101,6 +103,22 @@ public class ScheduleViewService {
         return new InSemester<>(toView(semester), examRepository.findPageForSections(
                 sections(actor, audience, studentId, semester), CatalogSupport.page(page))
                 .map(exam -> ExamService.toView(exam, exam.getClassSection())));
+    }
+
+    /** Tối đa limit kỳ thi từ hôm nay trở đi của học kỳ hiện tại, sớm nhất trước (trang chủ). */
+    public List<ExamView> upcomingExams(AppUserPrincipal actor, Audience audience, Long studentId, int limit) {
+        Semester semester = resolveSemester(null);
+        return examRepository.findUpcomingForSections(sections(actor, audience, studentId, semester),
+                        AppTime.today(), PageRequest.of(0, limit)).stream()
+                .map(exam -> ExamService.toView(exam, exam.getClassSection()))
+                .toList();
+    }
+
+    /** Học kỳ hiện tại (không có thì học kỳ mới nhất); rỗng khi chưa có học kỳ nào. */
+    public Optional<SemesterView> currentSemester() {
+        return semesterRepository.findByCurrentTrue()
+                .or(() -> semesterRepository.findAllByOrderByStartDateDesc().stream().findFirst())
+                .map(ScheduleViewService::toView);
     }
 
     /** Các con đã liên kết của phụ huynh đang đăng nhập (bộ chọn con): id là students.id. */

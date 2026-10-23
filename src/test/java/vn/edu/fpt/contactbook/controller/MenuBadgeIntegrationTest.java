@@ -64,6 +64,16 @@ class MenuBadgeIntegrationTest {
     }
 
     @Test
+    @DisplayName("Trang chủ hiện số đơn chờ bằng số đếm của menu, không đếm lần thứ hai")
+    void homePagesReuseMenuCounts() throws Exception {
+        mockMvc.perform(get("/teacher").with(as(TestAccounts.TEACHER_HEAD))).andExpect(status().isOk());
+        verify(requestService, times(1)).pendingForTeacher(any());
+
+        mockMvc.perform(get("/admin").with(as(TestAccounts.ADMIN))).andExpect(status().isOk());
+        verify(requestService, times(1)).pendingForAdmin();
+    }
+
+    @Test
     @DisplayName("Ảnh đại diện, xuất Excel, POST chuyển hướng: không đếm")
     void nonPageResponses() throws Exception {
         mockMvc.perform(get("/avatars/00000000-0000-0000-0000-000000000000.png").with(as(TestAccounts.STUDENT)))

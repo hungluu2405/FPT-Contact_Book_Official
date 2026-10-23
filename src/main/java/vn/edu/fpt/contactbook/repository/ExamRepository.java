@@ -45,4 +45,13 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
             """,
             countQuery = "SELECT COUNT(x) FROM Exam x WHERE x.classSection.id IN :sectionIds")
     Page<Exam> findPageForSections(@Param("sectionIds") Collection<Long> sectionIds, Pageable pageable);
+
+    /** Lịch thi từ ngày fromDate trở đi của các lớp, sớm nhất trước (trang chủ); pageable giới hạn số dòng. */
+    @EntityGraph(attributePaths = {"classSection", "classSection.subject", "room"})
+    @Query("""
+            SELECT x FROM Exam x WHERE x.classSection.id IN :sectionIds AND x.examDate >= :fromDate
+            ORDER BY x.examDate, x.startTime
+            """)
+    List<Exam> findUpcomingForSections(@Param("sectionIds") Collection<Long> sectionIds,
+                                       @Param("fromDate") LocalDate fromDate, Pageable pageable);
 }

@@ -43,6 +43,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByPhone(String phone);
 
+    /** Số tài khoản đang hoạt động (trang chủ quản trị). */
+    long countByActiveTrue();
+
     /** Khóa dòng người dùng; tin nhắn dùng để hai yêu cầu "tìm hoặc tạo" hội thoại của cùng một cặp chạy lần lượt. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT u FROM User u WHERE u.id = :id")

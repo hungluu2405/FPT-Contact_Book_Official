@@ -18,14 +18,16 @@
             <span th:if="${unreadNotifications != null and unreadNotifications > 0}" class="badge rounded-pill text-bg-danger"
                   th:text="${unreadNotifications > 99} ? '99+' : ${unreadNotifications}">3</span>
         </a>
-        <span class="app-user-name">
-            <i class="bi bi-person-circle"></i>
-            <span sec:authentication="principal.fullName">Họ tên</span>
+        <!--/* Điện thoại chỉ hiện chữ cái đầu của tên (app.css); nút đăng xuất chỉ còn biểu tượng, có aria-label. */-->
+        <span class="app-user-name" th:with="name=${#authentication.principal.fullName}">
+            <span class="avatar-initial" aria-hidden="true"
+                  th:text="${#strings.substring(name, name.lastIndexOf(' ') + 1, name.lastIndexOf(' ') + 2)}">A</span>
+            <span class="app-user-full" th:text="${name}">Họ tên</span>
         </span>
         <form th:action="@{/logout}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-primary btn-sm">
-                <i class="bi bi-box-arrow-right"></i>
-                <span th:text="#{auth.logout}">Đăng xuất</span>
+            <button type="submit" class="btn btn-outline-primary" th:attr="aria-label=#{auth.logout}">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                <span class="d-none d-sm-inline" th:text="#{auth.logout}">Đăng xuất</span>
             </button>
         </form>
     </div>

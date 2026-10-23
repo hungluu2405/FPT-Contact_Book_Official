@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{home.admin} + ' - ' + #{app.title}">Trang quản trị</title>
+</head>
+<body>
+<section class="home">
+    <header th:replace="~{fragments/home :: header(${home.semester()})}"></header>
+
+    <div class="stat-row">
+        <a class="stat-tile" th:href="@{/admin/requests}"
+           th:classappend="${pendingAdminRequests != null and pendingAdminRequests > 0} ? 'has-attention'">
+            <span class="stat-value" th:text="${pendingAdminRequests} ?: 0">1</span>
+            <span class="stat-label" th:text="#{home.requests.admin}">Đơn chờ xử lý</span>
+            <span class="stat-hint" th:text="#{home.requests.admin.hint}">Đơn xin bảng điểm, xác nhận</span>
+        </a>
+        <a class="stat-tile" th:href="@{/admin/users}">
+            <span class="stat-value" th:text="${home.activeUsers()}">128</span>
+            <span class="stat-label" th:text="#{home.admin.users}">Tài khoản đang hoạt động</span>
+        </a>
+        <a class="stat-tile" th:href="@{/admin/users(role='STUDENT')}">
+            <span class="stat-value" th:text="${home.students()}">48</span>
+            <span class="stat-label" th:text="#{home.admin.students}">Học sinh</span>
+        </a>
+        <a class="stat-tile" th:href="@{/admin/sections}">
+            <span class="stat-value" th:text="${home.sectionCount()}">42</span>
+            <span class="stat-label" th:text="#{home.admin.sections}">Lớp môn học trong học kỳ</span>
+        </a>
+    </div>
+
+    <div class="home-grid">
+        <section class="panel">
+            <div class="panel-head">
+                <h2 class="panel-title" th:text="#{home.shortcuts}">Việc thường làm</h2>
+            </div>
+            <ul class="link-list">
+                <li><a th:href="@{/admin/users/new}"><i class="bi bi-person-plus" aria-hidden="true"></i>
+                    <span th:text="#{home.shortcut.add-user}">Thêm người dùng</span></a></li>
+                <li><a th:href="@{/admin/users/import}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i>
+                    <span th:text="#{home.shortcut.import}">Nhập người dùng từ Excel</span></a></li>
+                <li><a th:href="@{/admin/sections}"><i class="bi bi-collection" aria-hidden="true"></i>
+                    <span th:text="#{home.shortcut.sections}">Quản lý lớp môn học</span></a></li>
+                <li><a th:href="@{/notifications/new}"><i class="bi bi-send" aria-hidden="true"></i>
+                    <span th:text="#{home.shortcut.notify}">Gửi thông báo</span></a></li>
+                <li><a th:href="@{/reports/attendance}"><i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+                    <span th:text="#{home.shortcut.reports}">Xem báo cáo</span></a></li>
+            </ul>
+        </section>
+
+        <section th:replace="~{fragments/home :: notifications(${home.notifications()})}"></section>
+    </div>
+</section>
+</body>
+</html>

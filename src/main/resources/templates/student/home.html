@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{home.student} + ' - ' + #{app.title}">Trang học sinh</title>
+</head>
+<body>
+<section class="home">
+    <header th:replace="~{fragments/home :: header(${home.semester()})}"></header>
+
+    <div class="home-grid">
+        <section class="panel home-main">
+            <div class="panel-head">
+                <h2 class="panel-title" th:text="#{home.today.student}">Lịch học hôm nay</h2>
+                <a class="panel-link" th:href="@{/student/schedule}" th:text="#{home.today.week.student}">Xem thời khóa biểu cả tuần</a>
+            </div>
+            <ul th:replace="~{fragments/home :: sessions(${home.today()}, 'home.today.empty.student', true)}"></ul>
+        </section>
+
+        <div class="home-side">
+            <section class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title" th:text="#{home.attendance}">Chuyên cần</h2>
+                    <a class="panel-link" th:href="@{/student/attendance}" th:text="#{home.links.attendance}">Điểm danh</a>
+                </div>
+                <p th:if="${#lists.isEmpty(home.attendanceWarnings())}" class="empty-line"
+                   th:text="#{home.attendance.ok}">Chưa có môn nào vượt ngưỡng vắng.</p>
+                <div th:unless="${#lists.isEmpty(home.attendanceWarnings())}" class="attention-note">
+                    <strong th:text="#{home.attendance.warning(${#lists.size(home.attendanceWarnings())})}">Vượt ngưỡng vắng ở 1 môn</strong>
+                    <ul>
+                        <li th:each="w : ${home.attendanceWarnings()}"
+                            th:text="${w.subjectName()} + ' – ' + ${#numbers.formatDecimal(w.summary().absentRate(), 1, 1, 'COMMA')} + '%'">Ngữ văn 10 – 23,1%</li>
+                    </ul>
+                </div>
+            </section>
+            <section class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title" th:text="#{home.exams}">Lịch thi sắp tới</h2>
+                    <a class="panel-link" th:href="@{/student/exams}" th:text="#{home.links.exams}">Lịch thi</a>
+                </div>
+                <ul th:replace="~{fragments/home :: exams(${home.upcomingExams()})}"></ul>
+            </section>
+        </div>
+
+        <section th:replace="~{fragments/home :: notifications(${home.notifications()})}"></section>
+    </div>
+</section>
+</body>
+</html>

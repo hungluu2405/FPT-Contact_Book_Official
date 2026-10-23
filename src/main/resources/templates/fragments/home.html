@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Phần dùng chung của các trang chủ theo vai trò (admin/teacher/student/parent home.html). */-->
+
+<!--/* Lời chào, ngày hôm nay, học kỳ và vai trò của người đang đăng nhập. semester có thể null. */-->
+<header th:fragment="header(semester)" class="home-header">
+    <h1 class="page-title" th:text="#{home.greeting(${fullName})}">Xin chào</h1>
+    <p class="home-meta">
+        <span th:text="#{home.date(#{'weekday.' + ${today.dayOfWeek}}, ${#temporals.format(today, 'dd/MM/yyyy')})}">Thứ Sáu, 24/10/2026</span>
+        <span class="home-meta-sep" aria-hidden="true">·</span>
+        <span th:text="${semester != null} ? ${semester.name()} : #{home.semester.none}">Học kỳ I</span>
+    </p>
+    <ul class="home-roles" th:attr="aria-label=#{home.roles}">
+        <li th:each="role : ${roles}">
+            <span th:text="#{'role.' + ${role.roleCode}}">Giáo viên</span><span th:if="${role.departmentName}"
+                  th:text="' · ' + ${role.departmentName} + ' (' + ${role.departmentCode} + ')'"> · Tổ</span>
+        </li>
+    </ul>
+</header>
+
+<!--/* Các buổi hôm nay theo giờ; showTeacher: hiện tên giáo viên (lịch của học sinh, phụ huynh). */-->
+<ul th:fragment="sessions(items, emptyKey, showTeacher)" class="session-list">
+    <li th:each="s : ${items}" class="session-row" th:classappend="${s.cancelled()} ? 'is-cancelled'">
+        <div class="session-time">
+            <span th:text="${#temporals.format(s.startTime, 'HH:mm')}">07:30</span>
+            <span class="session-time-end" th:text="${#temporals.format(s.endTime, 'HH:mm')}">09:00</span>
+        </div>
+        <div class="session-body">
+            <div class="session-subject" th:text="${s.subjectName}">Ngữ văn 10</div>
+            <div class="session-detail">
+                <span th:text="${s.sectionCode}">VAN10-HK1-2627-02</span>
+                <span><i class="bi bi-geo-alt" aria-hidden="true"></i>
+                    <span th:text="${s.roomCode} ?: #{schedule.no-room}">R102</span></span>
+                <span th:if="${showTeacher}"><i class="bi bi-person" aria-hidden="true"></i>
+                    <span th:text="${s.teacherName}">Giáo viên</span></span>
+            </div>
+        </div>
+        <span th:if="${s.cancelled()}" class="badge text-bg-danger" th:text="#{'session-status.CANCELLED'}">Đã hủy</span>
+        <span th:if="${s.makeup()}" class="badge text-bg-info" th:text="#{'session-status.MAKEUP'}">Học bù</span>
+    </li>
+    <li th:if="${#lists.isEmpty(items)}" class="empty-line" th:text="#{${emptyKey}}">Hôm nay không có buổi học.</li>
+</ul>
+
+<!--/* Lịch thi sắp tới (đã giới hạn số dòng ở service). */-->
+<ul th:fragment="exams(items)" class="session-list">
+    <li th:each="e : ${items}" class="session-row">
+        <div class="session-time">
+            <span th:text="${#temporals.format(e.date, 'dd/MM')}">02/11</span>
+            <span class="session-time-end" th:text="${#temporals.format(e.startTime, 'HH:mm')}">07:30</span>
+        </div>
+        <div class="session-body">
+            <div class="session-subject" th:text="${e.subjectName}">Toán 10</div>
+            <div class="session-detail">
+                <span th:text="#{'exam-type.' + ${e.examType}}">Giữa kỳ</span>
+                <span><i class="bi bi-geo-alt" aria-hidden="true"></i>
+                    <span th:text="${e.roomCode} ?: #{schedule.no-room}">R101</span></span>
+            </div>
+        </div>
+    </li>
+    <li th:if="${#lists.isEmpty(items)}" class="empty-line" th:text="#{home.exams.empty}">Chưa có lịch thi sắp tới.</li>
+</ul>
+
+<!--/* Thông báo mới nhất; thông báo chưa đọc in đậm, có chấm cam. */-->
+<section th:fragment="notifications(items)" class="panel">
+    <div class="panel-head">
+        <h2 class="panel-title" th:text="#{home.notifications}">Thông báo mới</h2>
+        <a class="panel-link" th:href="@{/notifications}" th:text="#{home.notifications.all}">Xem tất cả thông báo</a>
+    </div>
+    <ul class="notice-list">
+        <li th:each="n : ${items}" th:classappend="${n.read()} ? '' : 'is-unread'">
+            <a th:href="@{/notifications/{id}(id=${n.id()})}">
+                <span class="notice-title">
+                    <span th:replace="~{fragments/notifications :: priority(${n.priority()})}"></span>
+                    <span th:text="${n.title()}">Lịch thi giữa kỳ</span>
+                </span>
+                <span class="notice-meta"
+                      th:text="${n.senderName()} + ' · ' + ${#temporals.format(n.createdAt(), 'dd/MM/yyyy HH:mm')}">Nhà trường</span>
+            </a>
+        </li>
+        <li th:if="${#lists.isEmpty(items)}" class="empty-line" th:text="#{home.notifications.empty}">Chưa có thông báo nào.</li>
+    </ul>
+</section>
+</body>
+</html>

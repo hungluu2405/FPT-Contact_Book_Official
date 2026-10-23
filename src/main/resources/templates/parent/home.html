@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{home.parent} + ' - ' + #{app.title}">Trang phụ huynh</title>
+</head>
+<body>
+<section class="home">
+    <header th:replace="~{fragments/home :: header(${home.semester()})}"></header>
+
+    <p th:if="${#lists.isEmpty(home.children())}" class="panel empty-line" th:text="#{home.children.empty}">
+        Tài khoản chưa được liên kết với học sinh nào.</p>
+
+    <div class="child-grid">
+        <article th:each="c : ${home.children()}" class="panel child-card"
+                 th:classappend="${#lists.isEmpty(c.attendanceWarnings())} ? '' : 'has-attention'">
+            <div class="child-head">
+                <span class="avatar-initial" aria-hidden="true"
+                      th:text="${#strings.substring(c.fullName(), c.fullName().lastIndexOf(' ') + 1, c.fullName().lastIndexOf(' ') + 2)}">L</span>
+                <div>
+                    <h2 class="panel-title" th:text="${c.fullName()}">Lê Minh Sinh</h2>
+                    <span class="child-code" th:text="${c.studentCode()}">HS260001</span>
+                </div>
+            </div>
+            <ul class="child-facts">
+                <li>
+                    <i class="bi bi-calendar-day" aria-hidden="true"></i>
+                    <span th:text="${#lists.isEmpty(c.today())} ? #{home.child.today.none} : #{home.child.today(${#lists.size(c.today())})}">Hôm nay có 2 buổi học</span>
+                </li>
+                <li th:unless="${#lists.isEmpty(c.upcomingExams())}" th:with="e=${c.upcomingExams()[0]}">
+                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                    <span th:text="#{home.child.exam(${e.subjectName()}, ${#temporals.format(e.date(), 'dd/MM/yyyy')})}">Thi gần nhất</span>
+                </li>
+                <li th:if="${#lists.isEmpty(c.attendanceWarnings())}">
+                    <i class="bi bi-check-circle" aria-hidden="true"></i>
+                    <span th:text="#{home.child.ok}">Chuyên cần ổn định</span>
+                </li>
+                <li th:unless="${#lists.isEmpty(c.attendanceWarnings())}" class="is-attention">
+                    <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                    <span th:text="#{home.attendance.warning(${#lists.size(c.attendanceWarnings())})}">Vượt ngưỡng vắng ở 1 môn</span>
+                </li>
+            </ul>
+            <nav class="child-links" th:attr="aria-label=${c.fullName()}">
+                <a th:href="@{/parent/children/{id}/schedule(id=${c.studentId()})}" th:text="#{home.links.schedule}">Thời khóa biểu</a>
+                <a th:href="@{/parent/children/{id}/grades(id=${c.studentId()})}" th:text="#{home.links.grades}">Điểm</a>
+                <a th:href="@{/parent/children/{id}/attendance(id=${c.studentId()})}" th:text="#{home.links.attendance}">Điểm danh</a>
+                <a th:href="@{/parent/children/{id}/requests(id=${c.studentId()})}" th:text="#{home.links.requests}">Đơn từ</a>
+            </nav>
+        </article>
+    </div>
+
+    <section th:replace="~{fragments/home :: notifications(${home.notifications()})}"></section>
+</section>
+</body>
+</html>

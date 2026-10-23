@@ -9,15 +9,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
 import vn.edu.fpt.contactbook.security.RoleHomeResolver;
 import vn.edu.fpt.contactbook.service.AccountService;
+import vn.edu.fpt.contactbook.service.HomeDashboardService;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 /**
- * "/" chuyển tới trang chủ theo vai trò; 4 trang chủ dùng chung một template.
+ * "/" chuyển tới trang chủ theo vai trò; mỗi trang chủ có template riêng, dữ liệu từ HomeDashboardService.
  */
 @Controller
 @RequiredArgsConstructor
 public class HomeController {
 
     private final AccountService accountService;
+    private final HomeDashboardService homeDashboardService;
 
     @GetMapping("/")
     public String root(@AuthenticationPrincipal AppUserPrincipal principal) {
@@ -28,29 +31,35 @@ public class HomeController {
 
     @GetMapping("/admin")
     public String admin(@AuthenticationPrincipal AppUserPrincipal principal, Model model) {
+        model.addAttribute("home", homeDashboardService.admin(principal));
         return home(principal, model, "admin");
     }
 
     @GetMapping("/teacher")
     public String teacher(@AuthenticationPrincipal AppUserPrincipal principal, Model model) {
+        model.addAttribute("home", homeDashboardService.teacher(principal));
         return home(principal, model, "teacher");
     }
 
     @GetMapping("/student")
     public String student(@AuthenticationPrincipal AppUserPrincipal principal, Model model) {
+        model.addAttribute("home", homeDashboardService.student(principal));
         return home(principal, model, "student");
     }
 
     @GetMapping("/parent")
     public String parent(@AuthenticationPrincipal AppUserPrincipal principal, Model model) {
+        model.addAttribute("home", homeDashboardService.parent(principal));
         return home(principal, model, "parent");
     }
 
+    /** Mỗi vai trò một template: {area}/home.html. */
     private String home(AppUserPrincipal principal, Model model, String area) {
         model.addAttribute("area", area);
         model.addAttribute("activeMenu", area);
         model.addAttribute("fullName", principal.getFullName());
         model.addAttribute("roles", accountService.roleAssignments(principal.getUserId()));
-        return "common/home";
+        model.addAttribute("today", AppTime.today());
+        return area + "/home";
     }
 }

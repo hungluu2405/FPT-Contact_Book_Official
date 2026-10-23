@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="#{home.teacher} + ' - ' + #{app.title}">Trang giáo viên</title>
+</head>
+<body>
+<section class="home">
+    <header th:replace="~{fragments/home :: header(${home.semester()})}"></header>
+
+    <div class="home-grid">
+        <section class="panel home-main">
+            <div class="panel-head">
+                <h2 class="panel-title" th:text="#{home.today.teacher}">Lịch dạy hôm nay</h2>
+                <a class="panel-link" th:href="@{/teacher/schedule}" th:text="#{home.today.week.teacher}">Xem lịch dạy cả tuần</a>
+            </div>
+            <ul th:replace="~{fragments/home :: sessions(${home.today()}, 'home.today.empty.teacher', false)}"></ul>
+        </section>
+
+        <div class="home-side">
+            <a class="stat-tile" th:href="@{/teacher/requests}"
+               th:classappend="${pendingTeacherRequests != null and pendingTeacherRequests > 0} ? 'has-attention'">
+                <span class="stat-value" th:text="${pendingTeacherRequests} ?: 0">1</span>
+                <span class="stat-label" th:text="#{home.requests.teacher}">Đơn chờ duyệt</span>
+                <span class="stat-hint" th:text="#{home.requests.teacher.hint}">Đơn nghỉ học thầy cô phụ trách</span>
+            </a>
+            <a class="stat-tile" th:href="@{/teacher/sections}">
+                <span class="stat-value" th:text="${home.sectionCount()}">2</span>
+                <span class="stat-label" th:text="#{home.sections}">Lớp giảng dạy</span>
+                <span class="stat-hint" th:text="#{home.sections.hint}">Lớp môn học trong học kỳ</span>
+            </a>
+        </div>
+
+        <section class="panel" sec:authorize="hasRole('HEAD_OF_DEPARTMENT')">
+            <div class="panel-head">
+                <h2 class="panel-title" th:text="#{home.head}">Quản lý tổ chuyên môn</h2>
+            </div>
+            <ul class="link-list">
+                <li><a th:href="@{/admin/users}"><i class="bi bi-person-video3" aria-hidden="true"></i>
+                    <span th:text="#{menu.department-teachers}">Giáo viên tổ chuyên môn</span></a></li>
+                <li><a th:href="@{/admin/subjects}"><i class="bi bi-journal-bookmark" aria-hidden="true"></i>
+                    <span th:text="#{menu.catalog.subjects}">Môn học</span></a></li>
+                <li><a th:href="@{/admin/sections}"><i class="bi bi-collection" aria-hidden="true"></i>
+                    <span th:text="#{menu.catalog.sections}">Lớp môn học</span></a></li>
+            </ul>
+        </section>
+
+        <section th:replace="~{fragments/home :: notifications(${home.notifications()})}"></section>
+    </div>
+</section>
+</body>
+</html>

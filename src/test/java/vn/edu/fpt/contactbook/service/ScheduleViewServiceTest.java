@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import vn.edu.fpt.contactbook.dto.ScheduleWeek;
 import vn.edu.fpt.contactbook.model.Parent;
@@ -26,6 +27,7 @@ import vn.edu.fpt.contactbook.repository.StudentRepository;
 import vn.edu.fpt.contactbook.repository.TeacherRepository;
 import vn.edu.fpt.contactbook.security.AppUserPrincipal;
 import vn.edu.fpt.contactbook.service.ScheduleViewService.Audience;
+import vn.edu.fpt.contactbook.util.AppTime;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -124,5 +126,35 @@ class ScheduleViewServiceTest {
         service.week(STUDENT, Audience.STUDENT, null, null, LocalDate.of(2026, 9, 10));
 
         verify(classSessionRepository).findForSections(eq(List.of(-1L)), any(), any());
+    }
+
+    @Test
+    @DisplayName("Lịch thi sắp tới: chỉ từ hôm nay, tối đa limit kỳ thi, trong lớp con đang học")
+    void upcomingExamsFromToday() {
+        when(enrollmentRepository.findEnrolledSectionIds(1L, 1L)).thenReturn(List.of(1L, 2L));
+        when(examRepository.findUpcomingForSections(anyCollection(), any(), any())).thenReturn(List.of());
+
+        assertThat(service.upcomingExams(PARENT, Audience.PARENT, 1L, 3)).isEmpty();
+
+        verify(examRepository).findUpcomingForSections(eq(List.of(1L, 2L)), eq(AppTime.today()),
+                eq(PageRequest.of(0, 3)));
+    }
+
+    @Test
+    @DisplayName("Lịch thi sắp tới của con chưa liên kết → 403")
+    void upcomingExamsOfUnlinkedChild() {
+        assertThatThrownBy(() -> service.upcomingExams(PARENT, Audience.PARENT, 2L, 3))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    @DisplayName("Học kỳ hiện tại: có thì trả về, chưa có học kỳ nào thì rỗng")
+    void currentSemester() {
+        assertThat(service.currentSemester()).hasValueSatisfying(s -> assertThat(s.code()).isEqualTo("HK1-2627"));
+
+        when(semesterRepository.findByCurrentTrue()).thenReturn(Optional.empty());
+        when(semesterRepository.findAllByOrderByStartDateDesc()).thenReturn(List.of());
+
+        assertThat(service.currentSemester()).isEmpty();
     }
 }
