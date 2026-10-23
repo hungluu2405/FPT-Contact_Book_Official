@@ -3,8 +3,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
@@ -173,10 +175,14 @@ Map<String, dynamic> profileJson({
 /// "Bây giờ" của test: thứ Tư 21/10/2026 lúc 09:45 (giờ Việt Nam).
 final DateTime kTestNow = DateTime(2026, 10, 21, 9, 45);
 
-Map<String, dynamic> semesterJson() => {
-  'id': 3,
-  'code': 'HK1-2627',
-  'name': 'Học kỳ I năm học 2026–2027',
+Map<String, dynamic> semesterJson({
+  int id = 1,
+  String code = 'HK1-2627',
+  String name = 'Học kỳ I năm học 2026–2027',
+}) => {
+  'id': id,
+  'code': code,
+  'name': name,
   'startDate': '2026-09-07',
   'endDate': '2026-12-27',
   'current': true,
@@ -269,6 +275,129 @@ Map<String, dynamic> pagedJson(
   },
 };
 
+/// Ô chọn học kỳ: mới nhất trước, học kỳ hiện tại có id 1.
+List<Map<String, dynamic>> semestersJson() => [
+  {
+    'id': 38,
+    'code': 'HK2-2627',
+    'name': 'Học kỳ II năm học 2026–2027',
+    'groupId': null,
+  },
+  {
+    'id': 1,
+    'code': 'HK1-2627',
+    'name': 'Học kỳ I năm học 2026–2027',
+    'groupId': null,
+  },
+  {'id': 37, 'code': 'HE-2026', 'name': 'Học kỳ hè 2026', 'groupId': null},
+];
+
+Map<String, dynamic> gradeRowJson({
+  String subjectCode = 'TOAN10',
+  String subjectName = 'Toán 10',
+  List<double?> scores = const [8, 7.5, 9],
+  double? average = 8.3,
+}) => {
+  'sectionCode': '$subjectCode-HK1-2627-01',
+  'subjectCode': subjectCode,
+  'subjectName': subjectName,
+  'cells': [
+    for (var i = 0; i < scores.length; i++)
+      {
+        'componentName': [
+          'Kiểm tra thường xuyên',
+          'Giữa kỳ',
+          'Cuối kỳ',
+          'Thực hành',
+        ][i % 4],
+        'weight': [20, 30, 50, 10][i % 4],
+        'maxScore': 10,
+        'score': scores[i],
+      },
+  ],
+  'average': average,
+};
+
+/// `{semester, data: [...]}` của GET .../grades.
+Map<String, dynamic> gradesJson(
+  List<Map<String, dynamic>> rows, {
+  int semesterId = 1,
+}) => {'semester': semesterJson(id: semesterId), 'data': rows};
+
+Map<String, dynamic> summaryJson({
+  int present = 8,
+  int excused = 1,
+  int unexcused = 1,
+  int total = 15,
+  double? rate = 80,
+  double absentRate = 13.3,
+  bool warning = false,
+}) => {
+  'present': present,
+  'absentExcused': excused,
+  'absentUnexcused': unexcused,
+  'totalSessions': total,
+  'attendanceRate': rate,
+  'absentRate': absentRate,
+  'warning': warning,
+};
+
+Map<String, dynamic> attendanceRowJson({
+  int sectionId = 1,
+  String subjectCode = 'TOAN10',
+  String subjectName = 'Toán 10',
+  Map<String, dynamic>? summary,
+}) => {
+  'sectionId': sectionId,
+  'sectionCode': '$subjectCode-HK1-2627-01',
+  'subjectCode': subjectCode,
+  'subjectName': subjectName,
+  'summary': summary ?? summaryJson(),
+};
+
+Map<String, dynamic> attendanceJson(
+  List<Map<String, dynamic>> rows, {
+  int semesterId = 1,
+}) => {
+  'semester': semesterJson(id: semesterId),
+  'thresholdPercent': 20,
+  'sections': rows,
+};
+
+Map<String, dynamic> attendanceSessionJson({
+  int no = 1,
+  String date = '2026-10-05',
+  String? status = 'PRESENT',
+  String sessionStatus = 'DONE',
+  String? note,
+}) => {
+  'sessionNo': no,
+  'date': date,
+  'startTime': '07:30:00',
+  'endTime': '09:00:00',
+  'roomCode': 'BE-301',
+  'sessionStatus': sessionStatus,
+  'status': status,
+  'note': note,
+};
+
+Map<String, dynamic> attendanceHistoryJson(
+  List<Map<String, dynamic>> sessions, {
+  int page = 0,
+  int totalPages = 1,
+  Map<String, dynamic>? row,
+}) => {
+  'summary': row ?? attendanceRowJson(),
+  'thresholdPercent': 20,
+  'sessions': {
+    'items': sessions,
+    'page': page,
+    'size': 20,
+    'totalElements': sessions.length,
+    'totalPages': totalPages,
+  },
+};
+
 /// Bộ đối tượng thật nối với tầng HTTP giả.
 class TestApp {
   final FakeHttpAdapter http = FakeHttpAdapter();
@@ -297,6 +426,12 @@ class TestApp {
   late final ExamController examController = ExamController(
     StudentService(apiClient),
     clock: () => kTestNow,
+  );
+  late final GradeController gradeController = GradeController(
+    StudentService(apiClient),
+  );
+  late final AttendanceController attendanceController = AttendanceController(
+    StudentService(apiClient),
   );
 
   TestApp({String? accessToken, String? refreshToken})

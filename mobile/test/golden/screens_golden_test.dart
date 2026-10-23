@@ -462,4 +462,132 @@ void main() {
 
     await expectScreen(tester, 'exam_list');
   });
+
+  void stubGradesAndAttendance(TestApp app) {
+    app.http.reply('GET', '/semesters', FakeReply(200, semestersJson()));
+    app.http.reply(
+      'GET',
+      '/student/grades',
+      FakeReply(
+        200,
+        gradesJson([
+          gradeRowJson(),
+          gradeRowJson(
+            subjectCode: 'TIN11',
+            subjectName: 'Tin học 11',
+            scores: [9, 8.5, null],
+            average: null,
+          ),
+          gradeRowJson(
+            subjectCode: 'ANH10',
+            subjectName: 'Tiếng Anh 10',
+            scores: [7, 6.5, 8],
+            average: 7.3,
+          ),
+        ]),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/student/attendance',
+      FakeReply(
+        200,
+        attendanceJson([
+          attendanceRowJson(
+            summary: summaryJson(
+              present: 9,
+              excused: 1,
+              unexcused: 0,
+              rate: 90,
+              absentRate: 6.7,
+            ),
+          ),
+          attendanceRowJson(
+            sectionId: 27,
+            subjectCode: 'TIN11',
+            subjectName: 'Tin học 11',
+            summary: summaryJson(
+              present: 6,
+              excused: 1,
+              unexcused: 3,
+              rate: 60,
+              absentRate: 26.7,
+              warning: true,
+            ),
+          ),
+        ]),
+      ),
+    );
+    app.http.reply(
+      'GET',
+      '/student/attendance/1',
+      FakeReply(
+        200,
+        attendanceHistoryJson(
+          [
+            attendanceSessionJson(),
+            attendanceSessionJson(
+              no: 2,
+              date: '2026-10-07',
+              note: 'Muộn 10 phút do xe hỏng',
+            ),
+            attendanceSessionJson(
+              no: 3,
+              date: '2026-10-12',
+              status: 'ABSENT_EXCUSED',
+            ),
+            attendanceSessionJson(
+              no: 4,
+              date: '2026-10-14',
+              sessionStatus: 'CANCELLED',
+              status: null,
+            ),
+            attendanceSessionJson(
+              no: 5,
+              date: '2026-10-19',
+              status: null,
+              sessionStatus: 'SCHEDULED',
+            ),
+          ],
+          row: attendanceRowJson(
+            summary: summaryJson(
+              present: 9,
+              excused: 1,
+              unexcused: 0,
+              rate: 90,
+              absentRate: 6.7,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('grades', (tester) async {
+    await openFromHome(tester, 'Điểm', stub: stubGradesAndAttendance);
+
+    await expectScreen(tester, 'grades');
+  });
+
+  testWidgets('grades with a subject opened', (tester) async {
+    await openFromHome(tester, 'Điểm', stub: stubGradesAndAttendance);
+    await tester.tap(find.text('Tin học 11'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'grades_expanded');
+  });
+
+  testWidgets('attendance list', (tester) async {
+    await openFromHome(tester, 'Điểm danh', stub: stubGradesAndAttendance);
+
+    await expectScreen(tester, 'attendance_list');
+  });
+
+  testWidgets('attendance of one subject', (tester) async {
+    await openFromHome(tester, 'Điểm danh', stub: stubGradesAndAttendance);
+    await tester.tap(find.text('Toán 10'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'attendance_detail');
+  });
 }

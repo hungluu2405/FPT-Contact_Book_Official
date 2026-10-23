@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_colors.dart';
 
 /// Kiểu màu của nhãn trạng thái.
-enum BadgeTone { orange, muted, info }
+enum BadgeTone { orange, muted, info, success, danger }
 
 /// Nhãn bo tròn nhỏ: "Đang diễn ra", "Đã hủy", "Cuối kỳ"... [dot] thêm chấm
 /// tròn phía trước cho trạng thái đang diễn ra.
@@ -24,6 +24,8 @@ class StatusBadgeWidget extends StatelessWidget {
       BadgeTone.orange => (AppColors.orangeLight, AppColors.orangeDark),
       BadgeTone.muted => (const Color(0xFFF3F4F6), AppColors.textMuted),
       BadgeTone.info => (const Color(0xFFEFF6FF), AppColors.fptBlue),
+      BadgeTone.success => (const Color(0xFFECFDF5), AppColors.success),
+      BadgeTone.danger => (AppColors.errorLight, AppColors.error),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

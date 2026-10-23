@@ -24,6 +24,9 @@ class AppColors {
   static const Color error = Color(0xFFDC2626);
   static const Color errorLight = Color(0xFFFEF2F2);
 
+  /// Trạng thái tốt (có mặt); không dùng cho nút.
+  static const Color success = Color(0xFF047857);
+
   /// Xanh FPT và xanh lá chỉ dùng ở logo và dải ba màu.
   static const Color fptBlue = Color(0xFF0066B3);
   static const Color fptGreen = Color(0xFF00A651);

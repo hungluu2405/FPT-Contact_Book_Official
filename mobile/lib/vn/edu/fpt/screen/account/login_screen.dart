@@ -56,8 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return AuthScaffold(
       title: 'Đăng nhập',
-      subtitle:
-          'Sổ liên lạc điện tử dành cho học sinh, phụ huynh và giáo viên',
+      subtitle: 'Sổ liên lạc điện tử dành cho học sinh, phụ huynh và giáo viên',
       child: ListenableBuilder(
         listenable: _controller,
         builder: (context, _) {

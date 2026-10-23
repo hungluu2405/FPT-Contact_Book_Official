@@ -1,5 +1,8 @@
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/api_error_model.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/attendance_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/child_model.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/grade_row_model.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/semester_option_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/exam_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/page_model.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/model/schedule_item_model.dart';
@@ -59,6 +62,59 @@ class StudentService {
         ScheduleItemModel.fromJson,
       ),
     );
+  }
+
+  /// Mọi học kỳ cho ô chọn học kỳ, mới nhất trước.
+  Future<List<SemesterOptionModel>> fetchSemesters() async {
+    final data = await _apiClient.get('/semesters');
+    return (data as List<dynamic>)
+        .map(
+          (item) => SemesterOptionModel.fromJson(item as Map<String, dynamic>),
+        )
+        .toList();
+  }
+
+  /// Điểm các môn của [semesterId] (null: học kỳ hiện tại); chỉ đầu điểm
+  /// đã công bố có điểm.
+  Future<InSemesterModel<List<GradeRowModel>>> fetchGrades(
+    int? studentId, {
+    int? semesterId,
+  }) async {
+    final data = await _apiClient.get(
+      '${rootPath(studentId)}/grades',
+      query: {'semesterId': ?semesterId},
+    );
+    return InSemesterModel.fromJson(
+      data as Map<String, dynamic>,
+      (rows) => (rows as List<dynamic>)
+          .map((row) => GradeRowModel.fromJson(row as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  /// Chuyên cần các môn của [semesterId] (null: học kỳ hiện tại).
+  Future<AttendanceOverviewModel> fetchAttendance(
+    int? studentId, {
+    int? semesterId,
+  }) async {
+    final data = await _apiClient.get(
+      '${rootPath(studentId)}/attendance',
+      query: {'semesterId': ?semesterId},
+    );
+    return AttendanceOverviewModel.fromJson(data as Map<String, dynamic>);
+  }
+
+  /// Lịch sử điểm danh của lớp môn học [sectionId], [page] đếm từ 0.
+  Future<AttendanceHistoryModel> fetchAttendanceHistory(
+    int? studentId,
+    int sectionId, {
+    int page = 0,
+  }) async {
+    final data = await _apiClient.get(
+      '${rootPath(studentId)}/attendance/$sectionId',
+      query: {'page': page},
+    );
+    return AttendanceHistoryModel.fromJson(data as Map<String, dynamic>);
   }
 
   /// Lịch thi của học kỳ hiện tại theo ngày giờ, [page] đếm từ 0.

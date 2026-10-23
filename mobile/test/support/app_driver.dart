@@ -20,6 +20,8 @@ Future<TestApp> pumpApp(WidgetTester tester, {TestApp? app}) async {
       profileController: testApp.profileController,
       scheduleController: testApp.scheduleController,
       examController: testApp.examController,
+      gradeController: testApp.gradeController,
+      attendanceController: testApp.attendanceController,
     ),
   );
   await tester.pumpAndSettle();

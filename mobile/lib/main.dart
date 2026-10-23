@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/attendance_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/password_reset_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
@@ -39,6 +41,8 @@ void main() {
       profileController: ProfileController(ProfileService(apiClient)),
       scheduleController: ScheduleController(studentService),
       examController: ExamController(studentService),
+      gradeController: GradeController(studentService),
+      attendanceController: AttendanceController(studentService),
     ),
   );
 }
@@ -50,6 +54,8 @@ class MyApp extends StatelessWidget {
   final ProfileController profileController;
   final ScheduleController scheduleController;
   final ExamController examController;
+  final GradeController gradeController;
+  final AttendanceController attendanceController;
 
   const MyApp({
     super.key,
@@ -59,6 +65,8 @@ class MyApp extends StatelessWidget {
     required this.profileController,
     required this.scheduleController,
     required this.examController,
+    required this.gradeController,
+    required this.attendanceController,
   });
 
   @override
@@ -85,6 +93,8 @@ class MyApp extends StatelessWidget {
             profileController: profileController,
             scheduleController: scheduleController,
             examController: examController,
+            gradeController: gradeController,
+            attendanceController: attendanceController,
           ),
         },
       ),
