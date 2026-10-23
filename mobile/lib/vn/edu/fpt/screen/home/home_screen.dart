@@ -7,6 +7,7 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controlle
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/view_profile_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/list_exam_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/view_schedule_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/app_shell_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/child_selector_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/error_retry_widget.dart';
@@ -41,11 +42,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   static const int _accountTab = 2;
 
-  int _tab = 0;
-
-  /// Tab chỉ được dựng khi mở lần đầu, để tab chưa xem không tải dữ liệu.
-  final Set<int> _opened = {0};
-
   @override
   void initState() {
     super.initState();
@@ -56,11 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _selectTab(int index) {
-    setState(() {
-      _tab = index;
-      _opened.add(index);
-    });
+  void _onTabOpened(int index) {
     if (index == _accountTab) {
       widget.profileController.load();
     }
@@ -68,66 +60,37 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _tab,
-        children: [
-          _DashboardTab(
+    return AppShellWidget(
+      badgeListenable: widget.homeController,
+      onTabOpened: _onTabOpened,
+      tabs: [
+        AppShellTab(
+          icon: Icons.home_outlined,
+          selectedIcon: Icons.home,
+          label: 'Trang chủ',
+          rootBuilder: (_) => _DashboardTab(
             controller: widget.homeController,
             scheduleController: widget.scheduleController,
             examController: widget.examController,
           ),
-          const _NotificationTab(),
-          if (_opened.contains(_accountTab))
-            ViewProfileScreen(
-              controller: widget.profileController,
-              authController: widget.controller,
-            )
-          else
-            const SizedBox.shrink(),
-        ],
-      ),
-      bottomNavigationBar: ListenableBuilder(
-        listenable: widget.homeController,
-        builder: (context, _) {
-          final unread = widget.homeController.unreadCount ?? 0;
-          return NavigationBar(
-            selectedIndex: _tab,
-            onDestinationSelected: _selectTab,
-            backgroundColor: Colors.white,
-            indicatorColor: AppColors.orangeLight,
-            surfaceTintColor: Colors.transparent,
-            destinations: [
-              const NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home, color: AppColors.orange),
-                label: 'Trang chủ',
-              ),
-              NavigationDestination(
-                icon: Badge(
-                  isLabelVisible: unread > 0,
-                  label: Text(unread > 99 ? '99+' : '$unread'),
-                  child: const Icon(Icons.notifications_outlined),
-                ),
-                selectedIcon: Badge(
-                  isLabelVisible: unread > 0,
-                  label: Text(unread > 99 ? '99+' : '$unread'),
-                  child: const Icon(
-                    Icons.notifications,
-                    color: AppColors.orange,
-                  ),
-                ),
-                label: 'Thông báo',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person, color: AppColors.orange),
-                label: 'Tài khoản',
-              ),
-            ],
-          );
-        },
-      ),
+        ),
+        AppShellTab(
+          icon: Icons.notifications_outlined,
+          selectedIcon: Icons.notifications,
+          label: 'Thông báo',
+          rootBuilder: (_) => const _NotificationTab(),
+          badgeCount: () => widget.homeController.unreadCount,
+        ),
+        AppShellTab(
+          icon: Icons.person_outline,
+          selectedIcon: Icons.person,
+          label: 'Tài khoản',
+          rootBuilder: (_) => ViewProfileScreen(
+            controller: widget.profileController,
+            authController: widget.controller,
+          ),
+        ),
+      ],
     );
   }
 }
