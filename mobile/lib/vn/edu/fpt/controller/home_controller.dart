@@ -189,6 +189,13 @@ class HomeController extends ChangeNotifier {
     return children.first;
   }
 
+  /// Tải lại số chưa đọc sau khi đọc thông báo trong tab Thông báo.
+  Future<void> reloadUnreadCount() async {
+    if (_user?.canUseMobile ?? false) {
+      await _loadUnreadCount(_generation);
+    }
+  }
+
   Future<void> _loadUnreadCount(int generation) async {
     try {
       final count = await _notificationService.fetchUnreadCount();

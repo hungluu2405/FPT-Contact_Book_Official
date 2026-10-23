@@ -41,3 +41,26 @@ const Map<String, String> kClubStatusLabels = {
   'REJECTED': 'Bị từ chối',
   'LEFT': 'Đã rời',
 };
+
+/// Mức độ thông báo (giống `notification-priority.*` của web).
+const Map<String, String> kNotificationPriorityLabels = {
+  'NORMAL': 'Thường',
+  'IMPORTANT': 'Quan trọng',
+  'URGENT': 'Khẩn',
+};
+
+/// Loại đơn (giống `request-type.*` của web).
+const Map<String, String> kRequestTypeLabels = {
+  'LEAVE': 'Xin nghỉ học',
+  'TRANSCRIPT': 'Xin bảng điểm',
+  'CERTIFICATE': 'Xác nhận học sinh',
+  'OTHER': 'Đơn khác',
+};
+
+/// Trạng thái đơn và quyết định duyệt (giống `request-status.*` của web).
+const Map<String, String> kRequestStatusLabels = {
+  'PENDING': 'Chờ duyệt',
+  'APPROVED': 'Đã duyệt',
+  'REJECTED': 'Từ chối',
+  'CANCELLED': 'Đã hủy',
+};

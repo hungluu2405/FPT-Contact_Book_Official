@@ -263,6 +263,10 @@ class AuthTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final TextInputAction? textInputAction;
 
+  /// Ô nhiều dòng (ví dụ lý do): [minLines] dòng, giãn tới [maxLines].
+  final int minLines;
+  final int maxLines;
+
   const AuthTextField({
     super.key,
     required this.label,
@@ -277,6 +281,8 @@ class AuthTextField extends StatelessWidget {
     this.errorText,
     this.onChanged,
     this.textInputAction,
+    this.minLines = 1,
+    this.maxLines = 1,
   });
 
   OutlineInputBorder _border(Color color, [double width = 1]) =>
@@ -308,6 +314,8 @@ class AuthTextField extends StatelessWidget {
           inputFormatters: inputFormatters,
           onChanged: onChanged,
           textInputAction: textInputAction,
+          minLines: minLines,
+          maxLines: maxLines,
           style: const TextStyle(fontSize: 16, color: AppColors.text),
           decoration: InputDecoration(
             counterText: '',

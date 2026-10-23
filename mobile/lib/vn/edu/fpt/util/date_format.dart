@@ -11,6 +11,26 @@ String formatApiDate(String? value) {
   return '${parts[2]}/${parts[1]}/${parts[0]}';
 }
 
+/// Thời điểm `yyyy-MM-ddTHH:mm[:ss]` của API thành `dd/MM/yyyy HH:mm`.
+/// Thiếu phần giờ thì chỉ trả ngày.
+String formatApiDateTime(String? value) {
+  final parts = (value ?? '').split('T');
+  final date = formatApiDate(parts[0]);
+  return parts.length < 2 ? date : '$date ${formatApiTime(parts[1])}';
+}
+
+/// Khoảng ngày `yyyy-MM-dd` thành "22/10/2026 – 23/10/2026"; cùng ngày
+/// hoặc thiếu ngày cuối thì một ngày; thiếu ngày đầu thì rỗng.
+String formatApiDateRange(String? from, String? to) {
+  if (from == null || from.isEmpty) {
+    return '';
+  }
+  if (to == null || to.isEmpty || to == from) {
+    return formatApiDate(from);
+  }
+  return '${formatApiDate(from)} – ${formatApiDate(to)}';
+}
+
 /// Đọc ngày `yyyy-MM-dd` của API (không có giờ, không có múi giờ).
 /// Sai dạng thì trả null.
 DateTime? parseApiDate(String? value) {

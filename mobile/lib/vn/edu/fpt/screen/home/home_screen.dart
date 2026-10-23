@@ -5,12 +5,16 @@ import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/club_controller.da
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/grade_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/notification_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/request_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/view_profile_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/attendance/list_attendance_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/club/list_club_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/grade/view_grade_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/notification/list_notification_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/request/list_request_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/list_exam_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/view_schedule_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/app_shell_widget.dart';
@@ -34,6 +38,8 @@ class HomeScreen extends StatefulWidget {
   final GradeController gradeController;
   final AttendanceController attendanceController;
   final ClubController clubController;
+  final NotificationController notificationController;
+  final RequestController requestController;
 
   const HomeScreen({
     super.key,
@@ -45,6 +51,8 @@ class HomeScreen extends StatefulWidget {
     required this.gradeController,
     required this.attendanceController,
     required this.clubController,
+    required this.notificationController,
+    required this.requestController,
   });
 
   @override
@@ -52,20 +60,37 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  static const int _notificationTab = 1;
   static const int _accountTab = 2;
 
   @override
   void initState() {
     super.initState();
     widget.profileController.reset();
+    widget.notificationController
+      ..reset()
+      ..onUnreadChanged = widget.homeController.reloadUnreadCount;
+    widget.requestController.reset();
     final user = widget.controller.currentUser;
     if (user != null) {
       widget.homeController.start(user);
     }
   }
 
+  @override
+  void dispose() {
+    // Rời khung app (đăng xuất): xóa tệp đính kèm đã tải và đơn đang soạn.
+    widget.notificationController
+      ..onUnreadChanged = null
+      ..reset();
+    widget.requestController.reset();
+    super.dispose();
+  }
+
   void _onTabOpened(int index) {
-    if (index == _accountTab) {
+    if (index == _notificationTab) {
+      widget.notificationController.open();
+    } else if (index == _accountTab) {
       widget.profileController.load();
     }
   }
@@ -87,13 +112,17 @@ class _HomeScreenState extends State<HomeScreen> {
             gradeController: widget.gradeController,
             attendanceController: widget.attendanceController,
             clubController: widget.clubController,
+            requestController: widget.requestController,
           ),
         ),
         AppShellTab(
           icon: Icons.notifications_outlined,
           selectedIcon: Icons.notifications,
           label: 'Thông báo',
-          rootBuilder: (_) => const _NotificationTab(),
+          rootBuilder: (_) => ListNotificationScreen(
+            controller: widget.notificationController,
+            homeController: widget.homeController,
+          ),
           badgeCount: () => widget.homeController.unreadCount,
         ),
         AppShellTab(
@@ -118,6 +147,7 @@ class _DashboardTab extends StatelessWidget {
   final GradeController gradeController;
   final AttendanceController attendanceController;
   final ClubController clubController;
+  final RequestController requestController;
 
   const _DashboardTab({
     required this.controller,
@@ -126,6 +156,7 @@ class _DashboardTab extends StatelessWidget {
     required this.gradeController,
     required this.attendanceController,
     required this.clubController,
+    required this.requestController,
   });
 
   /// Tên người đang được xem: con đang chọn, hoặc chính SV.
@@ -173,6 +204,18 @@ class _DashboardTab extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (_) => ListClubScreen(
           controller: clubController,
+          studentId: controller.selectedStudentId,
+          viewerName: _viewerName,
+        ),
+      ),
+    );
+  }
+
+  void _openRequests(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ListRequestScreen(
+          controller: requestController,
           studentId: controller.selectedStudentId,
           viewerName: _viewerName,
         ),
@@ -269,6 +312,7 @@ class _DashboardTab extends StatelessWidget {
           onGrades: () => _openGrades(context),
           onAttendance: () => _openAttendance(context),
           onClubs: () => _openClubs(context),
+          onRequests: () => _openRequests(context),
         ),
       ],
     );
@@ -344,13 +388,14 @@ class _Greeting extends StatelessWidget {
   }
 }
 
-/// Lưới chức năng. Ô chưa có màn hình hiện "Sắp có": đơn từ ở 10c.
+/// Lưới chức năng của HS và PH.
 class _FeatureGrid extends StatelessWidget {
   final VoidCallback onSchedule;
   final VoidCallback onExams;
   final VoidCallback onGrades;
   final VoidCallback onAttendance;
   final VoidCallback onClubs;
+  final VoidCallback onRequests;
 
   const _FeatureGrid({
     required this.onSchedule,
@@ -358,6 +403,7 @@ class _FeatureGrid extends StatelessWidget {
     required this.onGrades,
     required this.onAttendance,
     required this.onClubs,
+    required this.onRequests,
   });
 
   @override
@@ -395,7 +441,11 @@ class _FeatureGrid extends StatelessWidget {
           label: 'Câu lạc bộ',
           onTap: onClubs,
         ),
-        const FeatureTileWidget(icon: Icons.mail_outline, label: 'Đơn từ'),
+        FeatureTileWidget(
+          icon: Icons.mail_outline,
+          label: 'Đơn từ',
+          onTap: onRequests,
+        ),
       ],
     );
   }
@@ -565,38 +615,6 @@ class _Message extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(fontSize: 16, color: AppColors.textMuted),
-      ),
-    );
-  }
-}
-
-/// Danh sách thông báo làm ở giai đoạn 10c.
-class _NotificationTab extends StatelessWidget {
-  const _NotificationTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SafeArea(
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.notifications_none,
-                size: 56,
-                color: AppColors.textMuted,
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Danh sách thông báo sẽ có trong bản cập nhật tới.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: AppColors.textMuted),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

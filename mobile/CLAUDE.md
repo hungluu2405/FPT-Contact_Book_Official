@@ -11,7 +11,7 @@ App Android cho học sinh (HS), phụ huynh (PH) và giáo viên (GV). File nà
 ## 2. CÔNG NGHỆ
 - Flutter stable, Dart theo `pubspec.yaml`. Chỉ phát triển và kiểm thử **Android**. Các thư mục ios, web, windows, macos, linux giữ nguyên, không sửa.
 - Quản lý trạng thái: controller kế thừa `ChangeNotifier` (có sẵn trong Flutter), màn hình nghe bằng `ListenableBuilder`. Không dùng Riverpod. Điều hướng bằng `Navigator` sẵn có.
-- Đã thêm (10a): `dio` (HTTP), `flutter_secure_storage` (lưu token). Chưa thêm: `go_router`, `intl`, chỉ thêm khi cần và được duyệt. Mọi package khác (kể cả dev) phải hỏi, kèm lý do, license và tình trạng bảo trì.
+- Đã thêm (10a): `dio` (HTTP), `flutter_secure_storage` (lưu token). Đã thêm (10c): `path_provider`, `open_filex` (tải và mở tệp đính kèm), `file_picker`, `image_picker` (chọn tệp, chụp ảnh minh chứng), `flutter_localizations` (lịch tiếng Việt). Chưa thêm: `go_router`, `intl`, chỉ thêm khi cần và được duyệt. Mọi package khác (kể cả dev) phải hỏi, kèm lý do, license và tình trạng bảo trì.
 - Địa chỉ server truyền qua `--dart-define=API_BASE_URL=...`, không viết cứng trong code. Máy ảo Android gọi backend local qua `http://10.0.2.2:8080`.
 - HTTP thường (cleartext) chỉ bật cho bản debug. Bản release dùng HTTPS. Quyền `INTERNET` phải có trong manifest `src/main`.
 
