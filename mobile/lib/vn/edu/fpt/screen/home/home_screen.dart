@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/auth_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/exam_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/home_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/profile_controller.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/controller/schedule_controller.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/account/view_profile_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/list_exam_screen.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/schedule/view_schedule_screen.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/auth_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/child_selector_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/error_retry_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/feature_tile_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/screen/widget/home_banner_widget.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/app_colors.dart';
+import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/date_format.dart';
 import 'package:fpt_contact_book_mobile/vn/edu/fpt/util/user_labels.dart';
 
 /// Khung app sau đăng nhập: thanh điều hướng dưới gồm Trang chủ, Thông báo
@@ -17,12 +22,16 @@ class HomeScreen extends StatefulWidget {
   final AuthController controller;
   final HomeController homeController;
   final ProfileController profileController;
+  final ScheduleController scheduleController;
+  final ExamController examController;
 
   const HomeScreen({
     super.key,
     required this.controller,
     required this.homeController,
     required this.profileController,
+    required this.scheduleController,
+    required this.examController,
   });
 
   @override
@@ -63,7 +72,11 @@ class _HomeScreenState extends State<HomeScreen> {
       body: IndexedStack(
         index: _tab,
         children: [
-          _DashboardTab(controller: widget.homeController),
+          _DashboardTab(
+            controller: widget.homeController,
+            scheduleController: widget.scheduleController,
+            examController: widget.examController,
+          ),
           const _NotificationTab(),
           if (_opened.contains(_accountTab))
             ViewProfileScreen(
@@ -122,8 +135,42 @@ class _HomeScreenState extends State<HomeScreen> {
 /// Tab Trang chủ: lời chào, chọn con (PH), ảnh trường, lưới chức năng.
 class _DashboardTab extends StatelessWidget {
   final HomeController controller;
+  final ScheduleController scheduleController;
+  final ExamController examController;
 
-  const _DashboardTab({required this.controller});
+  const _DashboardTab({
+    required this.controller,
+    required this.scheduleController,
+    required this.examController,
+  });
+
+  /// Tên người đang được xem: con đang chọn, hoặc chính SV.
+  String get _viewerName =>
+      controller.selectedChild?.name ?? controller.user?.fullName ?? '';
+
+  void _openSchedule(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ViewScheduleScreen(
+          controller: scheduleController,
+          studentId: controller.selectedStudentId,
+          viewerName: _viewerName,
+        ),
+      ),
+    );
+  }
+
+  void _openExams(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ListExamScreen(
+          controller: examController,
+          studentId: controller.selectedStudentId,
+          viewerName: _viewerName,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +191,7 @@ class _DashboardTab extends StatelessWidget {
                 const SizedBox(height: 16),
                 const HomeBannerWidget(),
                 const SizedBox(height: 20),
-                _body(),
+                _body(context),
               ],
             ),
           ),
@@ -153,7 +200,7 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
-  Widget _body() {
+  Widget _body(BuildContext context) {
     final user = controller.user;
     if (user == null || !user.canUseMobile) {
       return const _Message(
@@ -188,7 +235,20 @@ class _DashboardTab extends StatelessWidget {
         'Vui lòng liên hệ nhà trường để được liên kết.',
       );
     }
-    return const _FeatureGrid();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _TodayCard(
+          controller: controller,
+          onOpen: () => _openSchedule(context),
+        ),
+        const SizedBox(height: 20),
+        _FeatureGrid(
+          onSchedule: () => _openSchedule(context),
+          onExams: () => _openExams(context),
+        ),
+      ],
+    );
   }
 }
 
@@ -261,10 +321,13 @@ class _Greeting extends StatelessWidget {
   }
 }
 
-/// Lưới chức năng. Các ô chưa có màn hình hiện "Sắp có"; lịch học và lịch
-/// thi mở ở 10b-2, điểm và điểm danh ở 10b-3, CLB ở 10b-4, đơn từ ở 10c.
+/// Lưới chức năng. Các ô chưa có màn hình hiện "Sắp có": điểm và điểm danh
+/// mở ở 10b-3, CLB ở 10b-4, đơn từ ở 10c.
 class _FeatureGrid extends StatelessWidget {
-  const _FeatureGrid();
+  final VoidCallback onSchedule;
+  final VoidCallback onExams;
+
+  const _FeatureGrid({required this.onSchedule, required this.onExams});
 
   @override
   Widget build(BuildContext context) {
@@ -275,14 +338,174 @@ class _FeatureGrid extends StatelessWidget {
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
       childAspectRatio: 1.25,
-      children: const [
-        FeatureTileWidget(icon: Icons.calendar_month, label: 'Lịch học'),
-        FeatureTileWidget(icon: Icons.event_note, label: 'Lịch thi'),
-        FeatureTileWidget(icon: Icons.workspace_premium, label: 'Điểm'),
-        FeatureTileWidget(icon: Icons.fact_check, label: 'Điểm danh'),
-        FeatureTileWidget(icon: Icons.groups, label: 'Câu lạc bộ'),
-        FeatureTileWidget(icon: Icons.mail_outline, label: 'Đơn từ'),
+      children: [
+        FeatureTileWidget(
+          icon: Icons.calendar_month,
+          label: 'Lịch học',
+          onTap: onSchedule,
+        ),
+        FeatureTileWidget(
+          icon: Icons.event_note,
+          label: 'Lịch thi',
+          onTap: onExams,
+        ),
+        const FeatureTileWidget(icon: Icons.workspace_premium, label: 'Điểm'),
+        const FeatureTileWidget(icon: Icons.fact_check, label: 'Điểm danh'),
+        const FeatureTileWidget(icon: Icons.groups, label: 'Câu lạc bộ'),
+        const FeatureTileWidget(icon: Icons.mail_outline, label: 'Đơn từ'),
       ],
+    );
+  }
+}
+
+/// Thẻ "Lịch học hôm nay": tối đa 3 buổi đầu, bấm để mở lịch học.
+class _TodayCard extends StatelessWidget {
+  static const int _maxItems = 3;
+
+  final HomeController controller;
+  final VoidCallback onOpen;
+
+  const _TodayCard({required this.controller, required this.onOpen});
+
+  @override
+  Widget build(BuildContext context) {
+    final items = controller.todayItems;
+    final error = controller.todayError;
+    final Widget content;
+    if (controller.isLoadingToday && items.isEmpty) {
+      content = const Padding(
+        padding: EdgeInsets.all(12),
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              color: AppColors.orange,
+            ),
+          ),
+        ),
+      );
+    } else if (error != null) {
+      content = Row(
+        children: [
+          Expanded(
+            child: Text(
+              error.message,
+              style: const TextStyle(fontSize: 14, color: AppColors.error),
+            ),
+          ),
+          TextButton(
+            onPressed: controller.loadToday,
+            child: const Text('Thử lại'),
+          ),
+        ],
+      );
+    } else if (items.isEmpty) {
+      content = const Text(
+        'Hôm nay không có buổi học nào.',
+        style: TextStyle(fontSize: 15, color: AppColors.textMuted),
+      );
+    } else {
+      content = Column(
+        children: [
+          for (final item in items.take(_maxItems))
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 104,
+                    child: Text(
+                      '${formatApiTime(item.startTime)}–'
+                      '${formatApiTime(item.endTime)}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.navy,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      item.subjectCode,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.text,
+                        decoration: item.isCancelled
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    item.roomCode ?? '',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (items.length > _maxItems)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'và ${items.length - _maxItems} buổi khác',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
+    return Material(
+      color: AppColors.orangeLight,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onOpen,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.today, color: AppColors.orange),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Lịch học hôm nay',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.navy,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Xem lịch',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.orangeDark,
+                    ),
+                  ),
+                  Icon(Icons.chevron_right, color: AppColors.orangeDark),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Padding(padding: const EdgeInsets.only(right: 8), child: content),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

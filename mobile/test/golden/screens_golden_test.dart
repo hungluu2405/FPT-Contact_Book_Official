@@ -36,6 +36,51 @@ Future<void> expectScreen(WidgetTester tester, String name) async {
   );
 }
 
+/// Ba buổi của thứ Tư 21/10/2026 như mockup; lúc 09:45 buổi PRM393 đang
+/// diễn ra.
+final List<Map<String, dynamic>> kGoldenToday = [
+  sessionJson(),
+  sessionJson(
+    start: '09:30:00',
+    end: '11:00:00',
+    subjectCode: 'PRM393',
+    subjectName: 'Lập trình di động',
+    room: 'BE202',
+    teacher: 'TungVQ',
+  ),
+  sessionJson(
+    start: '13:00:00',
+    end: '14:30:00',
+    subjectCode: 'JPD113',
+    subjectName: 'Tiếng Nhật sơ cấp 1',
+    room: 'BE205',
+    teacher: 'HaTH',
+  ),
+];
+
+/// SV đã đăng nhập, mở màn hình qua ô [tile] trên trang chủ.
+Future<TestApp> openFromHome(
+  WidgetTester tester,
+  String tile, {
+  void Function(TestApp app)? stub,
+}) async {
+  usePhoneScreen(tester);
+  final app = TestApp(accessToken: 'a', refreshToken: 'r');
+  app.http.reply(
+    'GET',
+    '/me',
+    FakeReply(200, userJson(fullName: 'Lưu Khánh Hưng')),
+  );
+  app.stubHome(today: kGoldenToday);
+  stub?.call(app);
+  await pumpApp(tester, app: app);
+  final target = find.text(tile).last;
+  await tester.ensureVisible(target);
+  await tester.tap(target);
+  await tester.pumpAndSettle();
+  return app;
+}
+
 void main() {
   testWidgets('login screen', (tester) async {
     usePhoneScreen(tester);
@@ -119,7 +164,7 @@ void main() {
       '/me',
       FakeReply(200, userJson(fullName: 'Lê Minh Sinh')),
     );
-    app.stubHome(unread: 3);
+    app.stubHome(unread: 3, today: kGoldenToday);
     await pumpApp(tester, app: app);
 
     await expectScreen(tester, 'home_student');
@@ -295,5 +340,126 @@ void main() {
     await pumpApp(tester, app: app);
 
     await expectScreen(tester, 'startup_network_error');
+  });
+
+  testWidgets('schedule today with an ongoing session', (tester) async {
+    await openFromHome(tester, 'Lịch học');
+
+    await expectScreen(tester, 'schedule_today');
+  });
+
+  testWidgets('schedule of a day without sessions', (tester) async {
+    await openFromHome(tester, 'Lịch học');
+    await tester.tap(find.text('22'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'schedule_empty_day');
+  });
+
+  testWidgets('schedule of next week', (tester) async {
+    final app = await openFromHome(tester, 'Lịch học');
+    app.http.reply(
+      'GET',
+      '/student/schedule/week',
+      FakeReply(
+        200,
+        weekJson(
+          weekStart: '2026-10-26',
+          today: null,
+          items: {
+            '2026-10-27': [
+              sessionJson(
+                date: '2026-10-27',
+                subjectCode: 'SWE201',
+                subjectName: 'Nhập môn kỹ thuật phần mềm',
+                status: 'MAKEUP',
+                note: 'Học bù cho buổi 13/10',
+              ),
+            ],
+          },
+        ),
+      ),
+    );
+    await tester.tap(find.byTooltip('Tuần sau'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'schedule_other_week');
+  });
+
+  testWidgets('schedule network error', (tester) async {
+    await openFromHome(
+      tester,
+      'Lịch học',
+      stub: (app) => app.http.offline('GET', '/student/schedule/week'),
+    );
+
+    await expectScreen(tester, 'schedule_error');
+  });
+
+  testWidgets('semester session list', (tester) async {
+    await openFromHome(
+      tester,
+      'Lịch học',
+      stub: (app) => app.http.reply(
+        'GET',
+        '/student/schedule/sessions',
+        FakeReply(
+          200,
+          pagedJson([
+            ...kGoldenToday,
+            sessionJson(
+              date: '2026-10-22',
+              subjectCode: 'SWE201',
+              subjectName: 'Nhập môn kỹ thuật phần mềm',
+              status: 'CANCELLED',
+            ),
+          ]),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Xem lịch'));
+    await tester.pumpAndSettle();
+
+    await expectScreen(tester, 'session_list');
+  });
+
+  testWidgets('exam list', (tester) async {
+    await openFromHome(
+      tester,
+      'Lịch thi',
+      stub: (app) => app.http.reply(
+        'GET',
+        '/student/exams',
+        FakeReply(
+          200,
+          pagedJson([
+            examJson(
+              id: 1,
+              date: '2026-10-12',
+              subjectCode: 'MAD101',
+              subjectName: 'Toán rời rạc',
+              room: 'DE205',
+            ),
+            examJson(id: 2, date: '2026-10-30'),
+            examJson(
+              id: 3,
+              date: '2026-12-15',
+              type: 'FINAL',
+              subjectCode: 'JPD113',
+              subjectName: 'Tiếng Nhật sơ cấp 1',
+            ),
+            examJson(
+              id: 4,
+              date: '2026-12-28',
+              type: 'RETAKE',
+              subjectCode: 'MAD101',
+              subjectName: 'Toán rời rạc',
+            ),
+          ]),
+        ),
+      ),
+    );
+
+    await expectScreen(tester, 'exam_list');
   });
 }
